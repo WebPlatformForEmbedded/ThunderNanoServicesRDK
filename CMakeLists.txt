@@ -17,7 +17,7 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-project(ThunderNanoServicesRDK)
+project(WPEFramework)
 
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
@@ -33,6 +33,9 @@ if (BUILD_REFERENCE)
 endif()
 
 find_package(WPEFramework)
+
+# Library installation location
+string(TOLOWER ${NAMESPACE} STORAGE_DIRECTORY)
 
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
