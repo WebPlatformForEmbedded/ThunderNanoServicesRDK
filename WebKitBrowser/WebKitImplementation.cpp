@@ -707,6 +707,7 @@ static GSourceFuncs _handlerIntervention =
 #else
             , _view()
             , _page()
+            , _wkContext()
             , _automationSession(nullptr)
             , _notificationManager()
             , _httpCookieAcceptPolicy(kWKHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain)
@@ -767,6 +768,7 @@ static GSourceFuncs _handlerIntervention =
         uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeEvent(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
+        uint32_t CollectGarbage() override { return Core::ERROR_UNAVAILABLE; }
 #else
         uint32_t Headers(string& headers) const override
         {
@@ -1041,6 +1043,12 @@ static GSourceFuncs _handlerIntervention =
         uint32_t BridgeEvent(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectEvent, payload);
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t CollectGarbage() override
+        {
+            WKContextGarbageCollectJavaScriptObjects(_wkContext);
             return Core::ERROR_NONE;
         }
 
@@ -2055,8 +2063,8 @@ static GSourceFuncs _handlerIntervention =
             g_free(wpeDiskCachePath);
             WKContextConfigurationSetDiskCacheDirectory(contextConfiguration, diskCacheDirectory);
 
-            WKContextRef context = WKContextCreateWithConfiguration(contextConfiguration);
-            WKSoupSessionSetIgnoreTLSErrors(context, !_config.CertificateCheck);
+            _wkContext = WKContextCreateWithConfiguration(contextConfiguration);
+            WKSoupSessionSetIgnoreTLSErrors(_wkContext, !_config.CertificateCheck);
 
             if (_config.Languages.IsSet()) {
                 WKMutableArrayRef languages = WKMutableArrayCreate();
@@ -2068,16 +2076,16 @@ static GSourceFuncs _handlerIntervention =
                     WKRelease(itemString);
                 }
 
-                WKSoupSessionSetPreferredLanguages(context, languages);
+                WKSoupSessionSetPreferredLanguages(_wkContext, languages);
                 WKRelease(languages);
             }
 
             WKRelease(contextConfiguration);
 
-            WKGeolocationManagerRef geolocationManager = WKContextGetGeolocationManager(context);
+            WKGeolocationManagerRef geolocationManager = WKContextGetGeolocationManager(_wkContext);
             WKGeolocationManagerSetProvider(geolocationManager, &_handlerGeolocationProvider.base);
 
-            _notificationManager = WKContextGetNotificationManager(context);
+            _notificationManager = WKContextGetNotificationManager(_wkContext);
             _handlerNotificationProvider.base.clientInfo = static_cast<void*>(this);
             WKNotificationManagerSetProvider(_notificationManager, &_handlerNotificationProvider.base);
 
@@ -2128,7 +2136,7 @@ static GSourceFuncs _handlerIntervention =
             WKPageGroupSetPreferences(pageGroup, preferences);
 
             auto pageConfiguration = WKPageConfigurationCreate();
-            WKPageConfigurationSetContext(pageConfiguration, context);
+            WKPageConfigurationSetContext(pageConfiguration, _wkContext);
             WKPageConfigurationSetPageGroup(pageConfiguration, pageGroup);
 
             gchar* cookieDatabasePath;
@@ -2140,7 +2148,7 @@ static GSourceFuncs _handlerIntervention =
 
             auto path = WKStringCreateWithUTF8CString(cookieDatabasePath);
             g_free(cookieDatabasePath);
-            auto cookieManager = WKContextGetCookieManager(context);
+            auto cookieManager = WKContextGetCookieManager(_wkContext);
             WKCookieManagerSetCookiePersistentStorage(cookieManager, path, kWKCookieStorageTypeSQLite);
             WKCookieManagerSetHTTPCookieAcceptPolicy(cookieManager, _httpCookieAcceptPolicy);
 
@@ -2165,7 +2173,7 @@ static GSourceFuncs _handlerIntervention =
             WKPageSetPageNavigationClient(_page, &_handlerWebKit.base);
 
             _handlerInjectedBundle.base.clientInfo = static_cast<void*>(this);
-            WKContextSetInjectedBundleClient(context, &_handlerInjectedBundle.base);
+            WKContextSetInjectedBundleClient(_wkContext, &_handlerInjectedBundle.base);
 
             WKPageSetProxies(_page, nullptr);
 
@@ -2173,7 +2181,7 @@ static GSourceFuncs _handlerIntervention =
 
             if (_config.Automation.Value()) {
                 _handlerAutomation.base.clientInfo = static_cast<void*>(this);
-                WKContextSetAutomationClient(context, &_handlerAutomation.base);
+                WKContextSetAutomationClient(_wkContext, &_handlerAutomation.base);
             }
 
             WKPageSetPageUIClient(_page, &_handlerPageUI.base);
@@ -2225,7 +2233,7 @@ static GSourceFuncs _handlerIntervention =
             WKRelease(_view);
             WKRelease(pageConfiguration);
             WKRelease(pageGroup);
-            WKRelease(context);
+            WKRelease(_wkContext);
             WKRelease(preferences);
 
             g_main_context_pop_thread_default(_context);
@@ -2332,6 +2340,7 @@ static GSourceFuncs _handlerIntervention =
 #else
         WKViewRef _view;
         WKPageRef _page;
+        WKContextRef _wkContext;
         WKWebAutomationSessionRef _automationSession;
         WKNotificationManagerRef _notificationManager;
         WKHTTPCookieAcceptPolicy _httpCookieAcceptPolicy;
