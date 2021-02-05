@@ -741,11 +741,11 @@ namespace Plugin {
                 _service->Release();
                 _service = nullptr;
             }
-            virtual void StateChange(PluginHost::IShell* service)
+            virtual void StateChange(PluginHost::IShell* service, const string& callsign)
             {
                 _adminLock.Lock();
 
-                std::map<string, MonitorObject>::iterator index(_monitor.find(service->Callsign()));
+                std::map<string, MonitorObject>::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
 
@@ -781,15 +781,15 @@ namespace Plugin {
                         index->second.Active(false);
                         if ((index->second.HasRestartAllowed() == true) && ((service->Reason() == PluginHost::IShell::MEMORY_EXCEEDED) || (service->Reason() == PluginHost::IShell::FAILURE))) {
                             if (index->second.RegisterRestart(service->Reason()) == false) {
-                                TRACE(Trace::Fatal, (_T("Giving up restarting of %s: Failed more than %d times within %d seconds."), service->Callsign().c_str(), index->second.RestartLimit(), index->second.RestartWindow()));
-                                const string message("{\"callsign\": \"" + service->Callsign() + "\", \"action\": \"Restart\", \"reason\":\"" + (std::to_string(index->second.RestartLimit())).c_str() + " Attempts Failed within the restart window\"}");
+                                TRACE(Trace::Fatal, (_T("Giving up restarting of %s: Failed more than %d times within %d seconds."), callsign.c_str(), index->second.RestartLimit(), index->second.RestartWindow()));
+                                const string message("{\"callsign\": \"" + callsign + "\", \"action\": \"Restart\", \"reason\":\"" + (std::to_string(index->second.RestartLimit())).c_str() + " Attempts Failed within the restart window\"}");
                                 _service->Notify(message);
-                                _parent.event_action(service->Callsign(), "StoppedRestaring", std::to_string(index->second.RestartLimit()) + " attempts failed within the restart window");
+                                _parent.event_action(callsign, "StoppedRestaring", std::to_string(index->second.RestartLimit()) + " attempts failed within the restart window");
                             } else {
-                                const string message("{\"callsign\": \"" + service->Callsign() + "\", \"action\": \"Activate\", \"reason\": \"Automatic\" }");
+                                const string message("{\"callsign\": \"" + callsign + "\", \"action\": \"Activate\", \"reason\": \"Automatic\" }");
                                 _service->Notify(message);
-                                _parent.event_action(service->Callsign(), "Activate", "Automatic");
-                                TRACE(Trace::Error, (_T("Restarting %s again because we detected it misbehaved."), service->Callsign().c_str()));
+                                _parent.event_action(callsign, "Activate", "Automatic");
+                                TRACE(Trace::Error, (_T("Restarting %s again because we detected it misbehaved."), callsign.c_str()));
                                 Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::AUTOMATIC));
                             }
                         }
