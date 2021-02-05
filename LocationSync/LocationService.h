@@ -86,21 +86,29 @@ namespace Plugin {
        * ISubSystem::ILocation methods
        * ------------------------------------------------------------------------------------------------------------
        */
-        virtual string TimeZone() const
+        string TimeZone() const override
         {
             return (_timeZone);
         }
-        virtual string Country() const
+        string Country() const override
         {
             return (_country);
         }
-        virtual string Region() const
+        string Region() const override
         {
             return (_region);
         }
-        virtual string City() const
+        string City() const override
         {
             return (_city);
+        }
+        int32_t Latitude() const override
+        {
+            return (_latitude);
+        }
+        int32_t Longitude() const override
+        {
+            return (_longitude);
         }
 
     private:
@@ -128,6 +136,8 @@ namespace Plugin {
         string _country;
         string _region;
         string _city;
+        int32_t _latitude;
+        int32_t _longitude;
         Core::WorkerPool::JobType<LocationService&> _activity;
         Core::ProxyType<IGeography> _infoCarrier;
         Core::ProxyType<Web::Request> _request;
