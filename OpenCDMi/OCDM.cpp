@@ -27,12 +27,11 @@ namespace OCDM {
     Exchange::IMemory* MemoryObserver(const RPC::IRemoteConnection* connection)
     {
         class MemoryObserverImpl : public Exchange::IMemory {
-        private:
-            MemoryObserverImpl();
-            MemoryObserverImpl(const MemoryObserverImpl&);
-            MemoryObserverImpl& operator=(const MemoryObserverImpl&);
-
         public:
+            MemoryObserverImpl() = delete;
+            MemoryObserverImpl(const MemoryObserverImpl&) = delete;
+            MemoryObserverImpl& operator=(const MemoryObserverImpl&) = delete;
+
             MemoryObserverImpl(const RPC::IRemoteConnection* connection)
                 : _main(connection  == 0 ? Core::ProcessInfo().Id() : connection->RemoteId())
             {
