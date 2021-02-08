@@ -16,9 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef __TESTTRACE_H
-#define __TESTTRACE_H
+#pragma once
 
 #ifdef WEBKIT_GLIB_API
 
@@ -26,31 +24,12 @@
 
 namespace WPEFramework {
 namespace JavaScript {
-namespace Milestone {
+namespace SecurityAgent {
 
 void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
 
-}  // Milestone
+}  // SecurityAgent
 }  // JavaScript
 }  // WPEFramework
 
-#else
-
-#include "JavaScriptFunctionType.h"
-
-namespace WPEFramework {
-namespace JavaScript {
-    namespace Functions {
-        class Milestone {
-        public:
-            Milestone();
-
-            JSValueRef HandleMessage(JSContextRef context, JSObjectRef,
-                JSObjectRef, size_t argumentCount, const JSValueRef arguments[], JSValueRef*);
-        };
-    }
-}
-}
-
 #endif // WEBKIT_GLIB_API
-#endif // __TESTTRACE_H

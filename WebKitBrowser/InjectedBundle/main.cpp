@@ -28,6 +28,11 @@
 #include <wpe/webkit-web-extension.h>
 #include "../BrowserConsoleLog.h"
 
+#include "Milestone.h"
+#ifdef ENABLE_SECURITY_AGENT
+#include "SecurityAgent.h"
+#endif
+
 using namespace WPEFramework;
 
 #else
@@ -125,10 +130,16 @@ public:
         gboolean logToSystemConsoleEnabled;
         g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &logToSystemConsoleEnabled);
 
+        /*
+         * Note: It doesn't work and needs to be resolved.
         _scriptWorld = webkit_script_world_new_with_name(uid);
-
         g_signal_connect(_scriptWorld, "window-object-cleared",
                 G_CALLBACK(windowObjectClearedCallback), nullptr);
+        */
+
+        g_signal_connect(webkit_script_world_get_default(),
+                "window-object-cleared", G_CALLBACK(windowObjectClearedCallback),
+                nullptr);
 
         if (logToSystemConsoleEnabled == TRUE) {
             g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
@@ -152,7 +163,9 @@ public:
             _comClient.Release();
         }
 #ifdef WEBKIT_GLIB_API
+        /*
         g_object_unref(_scriptWorld);
+        */
         g_object_unref(_bundle);
 #endif
         Core::Singleton::Dispose();
@@ -169,39 +182,14 @@ public:
 #ifdef WEBKIT_GLIB_API
 
 private:
-    static void automationMilestone(const char* arg1, const char* arg2, const char* arg3)
-    {
-        g_printerr("TEST TRACE: \"%s\" \"%s\" \"%s\"\n", arg1, arg2, arg3);
-        TRACE_GLOBAL(Trace::Information, (_T("TEST TRACE: \"%s\" \"%s\" \"%s\""), arg1, arg2, arg3));
-    }
-
     static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage*, WebKitFrame* frame)
     {
-        if (webkit_frame_is_main_frame(frame) == false)
-            return;
+        JavaScript::Milestone::InjectJS(world, frame);
 
-        JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
+#ifdef  ENABLE_SECURITY_AGENT
+        JavaScript::SecurityAgent::InjectJS(world, frame);
+#endif
 
-        JSCValue* automation = jsc_value_new_object(jsContext, nullptr, nullptr);
-        JSCValue* function = jsc_value_new_function(jsContext, nullptr, reinterpret_cast<GCallback>(automationMilestone),
-            nullptr, nullptr, G_TYPE_NONE, 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-        jsc_value_object_set_property(automation, "Milestone", function);
-        g_object_unref(function);
-        jsc_context_set_value(jsContext, "automation", automation);
-        g_object_unref(automation);
-
-        static const char wpeNotifyWPEFramework[] = "var wpe = {};\n"
-            "wpe.NotifyWPEFramework = function() {\n"
-            "  let retval = new Array;\n"
-            "  for (let i = 0; i < arguments.length; i++) {\n"
-            "    retval[i] = arguments[i];\n"
-            "  }\n"
-            "  window.webkit.messageHandlers.wpeNotifyWPEFramework.postMessage(retval);\n"
-            "}";
-        JSCValue* result = jsc_context_evaluate(jsContext, wpeNotifyWPEFramework, -1);
-        g_object_unref(result);
-
-        g_object_unref(jsContext);
     }
     static void pageCreatedCallback(WebKitWebExtension*, WebKitWebPage* page, PluginHost* host)
     {

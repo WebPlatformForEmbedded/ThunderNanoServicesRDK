@@ -32,6 +32,7 @@ option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 set(SOURCE_LIST
     main.cpp
     WhiteListedOriginDomainsList.cpp
+    Milestone.cpp
 )
 
 if(NOT DEFINED WEBKIT_GLIB_API)
@@ -41,7 +42,6 @@ if(NOT DEFINED WEBKIT_GLIB_API)
         Utils.cpp
         JavaScriptFunction.cpp
         NotifyWPEFramework.cpp
-        Milestone.cpp
        ClassDefinition.cpp
        Tags.cpp
     )
@@ -57,6 +57,7 @@ endif()
 
 if(securityagent_FOUND)
     target_sources(${MODULE_NAME} PRIVATE SecurityAgent.cpp)
+    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_SECURITY_AGENT)
     target_link_libraries(${MODULE_NAME}
         PRIVATE 
             securityagent::securityagent)

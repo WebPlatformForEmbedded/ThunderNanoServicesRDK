@@ -17,6 +17,45 @@
  * limitations under the License.
  */
  
+#ifdef WEBKIT_GLIB_API
+
+#include "Module.h"
+#include "Milestone.h"
+
+namespace WPEFramework {
+namespace JavaScript {
+namespace Milestone {
+
+static void automationMilestone(const char* arg1, const char* arg2, const char* arg3)
+{
+    g_printerr("TEST TRACE: \"%s\" \"%s\" \"%s\"\n", arg1, arg2, arg3);
+    TRACE_GLOBAL(Trace::Information, (_T("TEST TRACE: \"%s\" \"%s\" \"%s\""), arg1, arg2, arg3));
+}
+
+void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
+{
+    if (webkit_frame_is_main_frame(frame) == false)
+        return;
+
+    JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
+
+    JSCValue* jsObject = jsc_value_new_object(jsContext, nullptr, nullptr);
+    JSCValue* jsFunction = jsc_value_new_function(jsContext, nullptr, reinterpret_cast<GCallback>(automationMilestone),
+        nullptr, nullptr, G_TYPE_NONE, 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    jsc_value_object_set_property(jsObject, "Milestone", jsFunction);
+    g_object_unref(jsFunction);
+    jsc_context_set_value(jsContext, "automation", jsObject);
+    g_object_unref(jsObject);
+
+    g_object_unref(jsContext);
+}
+
+}  // Milestone
+}  // JavaScript
+}  // WPEFramework
+
+#else
+
 #include "Milestone.h"
 
 #include "Utils.h"
@@ -85,3 +124,5 @@ namespace JavaScript {
     }
 }
 }
+
+#endif // WEBKIT_GLIB_API

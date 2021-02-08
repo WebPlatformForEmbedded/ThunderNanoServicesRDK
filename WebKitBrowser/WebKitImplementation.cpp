@@ -1974,7 +1974,11 @@ static GSourceFuncs _handlerIntervention =
             }
 
             auto* userContentManager = webkit_web_view_get_user_content_manager(_view);
+            /*
+             * Note: It gives TypeError and needs to be resolved.
             webkit_user_content_manager_register_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
+            */
+            webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
             g_signal_connect(userContentManager, "script-message-received::wpeNotifyWPEFramework",
                 reinterpret_cast<GCallback>(wpeNotifyWPEFrameworkMessageReceivedCallback), this);
 
