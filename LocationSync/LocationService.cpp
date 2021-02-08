@@ -543,7 +543,7 @@ namespace Plugin {
     {
         uint32_t result = Core::infinite;
 
-        if ((IsClosed() == false) || (Close(100) != Core::ERROR_NONE)) {
+        if ((Close(100) != Core::ERROR_NONE) || (IsClosed() == false)) {
 
             result = 500; // ms...Check again..
         } else {
