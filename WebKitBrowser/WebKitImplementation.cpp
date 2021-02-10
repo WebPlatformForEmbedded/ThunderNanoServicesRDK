@@ -1978,9 +1978,9 @@ static GSourceFuncs _handlerIntervention =
              * Note: It gives TypeError and needs to be resolved.
             webkit_user_content_manager_register_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
             */
-            webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
             g_signal_connect(userContentManager, "script-message-received::wpeNotifyWPEFramework",
                 reinterpret_cast<GCallback>(wpeNotifyWPEFrameworkMessageReceivedCallback), this);
+            webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
 
             g_signal_connect(_view, "decide-policy", reinterpret_cast<GCallback>(decidePolicyCallback), nullptr);
             g_signal_connect(_view, "notify::uri", reinterpret_cast<GCallback>(uriChangedCallback), this);
@@ -2012,7 +2012,10 @@ static GSourceFuncs _handlerIntervention =
 
             if (frameDisplayedCallbackID)
                 webkit_web_view_remove_frame_displayed_callback(_view, frameDisplayedCallbackID);
+            /*
             webkit_user_content_manager_unregister_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
+            */
+            webkit_user_content_manager_unregister_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
 
             g_clear_object(&_view);
             g_main_context_pop_thread_default(_context);
