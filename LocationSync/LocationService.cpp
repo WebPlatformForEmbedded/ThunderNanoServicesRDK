@@ -90,7 +90,7 @@ namespace Plugin {
         };
 
     public:
-	IPAPI(const IPAPI&) = delete;
+        IPAPI(const IPAPI&) = delete;
         IPAPI& operator= (const IPAPI&) = delete;
 
         IPAPI() = default;
@@ -445,7 +445,7 @@ namespace Plugin {
     }
 
     // Methods to extract and insert data into the socket buffers
-    /* virtual */ void LocationService::LinkBody(Core::ProxyType<Web::Response>& element)
+    void LocationService::LinkBody(Core::ProxyType<Web::Response>& element) /* override */
     {
         if (element->ErrorCode == Web::STATUS_OK) {
 
@@ -455,7 +455,7 @@ namespace Plugin {
         }
     }
 
-    /* virtual */ void LocationService::Received(Core::ProxyType<Web::Response>& element)
+    void LocationService::Received(Core::ProxyType<Web::Response>& element) /* override */
     {
         Core::ProxyType<Web::TextBody> textInfo = element->Body<Web::TextBody>();
 
@@ -516,14 +516,14 @@ namespace Plugin {
         _activity.Submit();
     }
 
-    /* virtual */ void LocationService::Send(const Core::ProxyType<Web::Request>& element)
+    void LocationService::Send(const Core::ProxyType<Web::Request>& element) /* override */
     {
         // Not much to do, just so we know we are done...
         ASSERT(element == _request);
     }
 
     // Signal a state change, Opened, Closed or Accepted
-    /* virtual */ void LocationService::StateChange()
+    void LocationService::StateChange() /* override */
     {
         if (Link().IsOpen() == true) {
 

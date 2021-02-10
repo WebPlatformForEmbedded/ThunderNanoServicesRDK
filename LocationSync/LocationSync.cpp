@@ -42,12 +42,12 @@ namespace Plugin {
 #pragma warning(default : 4355)
 #endif
 
-    /* virtual */ LocationSync::~LocationSync()
+    LocationSync::~LocationSync() /* override */
     {
         UnregisterAll();
     }
 
-    /* virtual */ const string LocationSync::Initialize(PluginHost::IShell* service)
+    const string LocationSync::Initialize(PluginHost::IShell* service) /* override */
     {
         string result;
         Config config;
@@ -68,25 +68,25 @@ namespace Plugin {
         return (result);
     }
 
-    /* virtual */ void LocationSync::Deinitialize(PluginHost::IShell* service)
+    void LocationSync::Deinitialize(PluginHost::IShell* service) /* override */
     {
         ASSERT(_service == service);
 
         _sink.Deinitialize();
     }
 
-    /* virtual */ string LocationSync::Information() const
+    string LocationSync::Information() const /* override */
     {
         // No additional info to report.
         return (string());
     }
 
-    /* virtual */ void LocationSync::Inbound(Web::Request& /* request */)
+    void LocationSync::Inbound(Web::Request& /* request */) /* override */
     {
     }
 
-    /* virtual */ Core::ProxyType<Web::Response>
-    LocationSync::Process(const Web::Request& request)
+    Core::ProxyType<Web::Response>
+    LocationSync::Process(const Web::Request& request) /* override */
     {
         Core::ProxyType<Web::Response> result(PluginHost::IFactories::Instance().Response());
         Core::TextSegmentIterator index(
