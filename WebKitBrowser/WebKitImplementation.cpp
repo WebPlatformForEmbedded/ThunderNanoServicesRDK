@@ -758,10 +758,6 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
         uint32_t Headers(string& headers) const override { return Core::ERROR_UNAVAILABLE; }
         uint32_t Headers(const string& headers) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t UserAgent(string& ua) const override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t UserAgent(const string& ua) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t Languages(string& langs) const override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t Languages(const string& langs) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t LocalStorageEnabled(bool& enabled) const override { return Core::ERROR_UNAVAILABLE; }
         uint32_t LocalStorageEnabled(const bool enabled) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override { return Core::ERROR_UNAVAILABLE; }
@@ -814,7 +810,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-
+#endif
         uint32_t UserAgent(string& ua) const override
         {
             _adminLock.Lock();
@@ -845,10 +841,14 @@ static GSourceFuncs _handlerIntervention =
                     object->_adminLock.Lock();
                     object->_config.UserAgent = useragent;
                     object->_adminLock.Unlock();
-
+#ifdef WEBKIT_GLIB_API
+                    WebKitSettings* settings = webkit_web_view_get_settings(object->_view);
+                    webkit_settings_set_user_agent(settings, useragent.c_str());
+#else
                     auto ua = WKStringCreateWithUTF8CString(useragent.c_str());
                     WKPageSetCustomUserAgent(object->_page, ua);
                     WKRelease(ua);
+#endif
                     return G_SOURCE_REMOVE;
                 },
                 data,
@@ -858,7 +858,6 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-
         uint32_t Languages(string& langs) const override
         {
             _adminLock.Lock();
@@ -898,6 +897,17 @@ static GSourceFuncs _handlerIntervention =
                     object->_config.Languages = array;
                     object->_adminLock.Unlock();
 
+#ifdef WEBKIT_GLIB_API
+                    auto* languages = static_cast<char**>(g_new0(char*, array.Length() + 1));
+                    Core::JSON::ArrayType<Core::JSON::String>::Iterator index(array.Elements());
+
+                    for (unsigned i = 0; index.Next(); ++i)
+                        languages[i] = g_strdup(index.Current().Value().c_str());
+
+                    WebKitWebContext* context = webkit_web_view_get_context(object->_view);
+                    webkit_web_context_set_preferred_languages(context, languages);
+                    g_strfreev(languages);
+#else
                     auto languages = WKMutableArrayCreate();
                     for (auto it = array.Elements(); it.Next();) {
                         if (!it.IsValid())
@@ -910,6 +920,7 @@ static GSourceFuncs _handlerIntervention =
                     auto context = WKPageGetContext(object->_page);
                     WKSoupSessionSetPreferredLanguages(context, languages);
                     WKRelease(languages);
+#endif
                     return G_SOURCE_REMOVE;
                 },
                 data,
@@ -919,7 +930,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-
+#ifndef WEBKIT_GLIB_API
         uint32_t LocalStorageEnabled(bool& enabled) const override
         {
             _adminLock.Lock();
