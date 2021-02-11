@@ -758,8 +758,6 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
         uint32_t Headers(string& headers) const override { return Core::ERROR_UNAVAILABLE; }
         uint32_t Headers(const string& headers) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t LocalStorageEnabled(bool& enabled) const override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t LocalStorageEnabled(const bool enabled) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override { return Core::ERROR_UNAVAILABLE; }
         uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
@@ -930,7 +928,6 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-#ifndef WEBKIT_GLIB_API
         uint32_t LocalStorageEnabled(bool& enabled) const override
         {
             _adminLock.Lock();
@@ -959,9 +956,14 @@ static GSourceFuncs _handlerIntervention =
                     object->_localStorageEnabled = enabled;
                     object->_adminLock.Unlock();
 
+#ifdef WEBKIT_GLIB_API
+                    WebKitSettings* settings = webkit_web_view_get_settings(object->_view);
+                    webkit_settings_set_enable_html5_local_storage(settings, enabled);
+#else
                     auto group = WKPageGetPageGroup(object->_page);
                     auto preferences = WKPageGroupGetPreferences(group);
                     WKPreferencesSetLocalStorageEnabled(preferences, enabled);
+#endif
                     return G_SOURCE_REMOVE;
                 },
                 data,
@@ -971,7 +973,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-
+#ifndef WEBKIT_GLIB_API
         uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override
         {
             auto translatePolicy =
