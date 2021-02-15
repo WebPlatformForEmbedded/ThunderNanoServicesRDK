@@ -704,6 +704,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
             , _view(nullptr)
             , _guid(Core::Time::Now().Ticks())
+            , _httpCookieAcceptPolicy(WEBKIT_COOKIE_POLICY_ACCEPT_NO_THIRD_PARTY)
 #else
             , _view()
             , _page()
@@ -758,8 +759,6 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
         uint32_t Headers(string& headers) const override { return Core::ERROR_UNAVAILABLE; }
         uint32_t Headers(const string& headers) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeEvent(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t CollectGarbage() override { return Core::ERROR_UNAVAILABLE; }
@@ -973,9 +972,23 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-#ifndef WEBKIT_GLIB_API
         uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override
         {
+#ifdef WEBKIT_GLIB_API
+            auto translatePolicy =
+                [](WebKitCookieAcceptPolicy policy) {
+                    switch(policy) {
+                        case WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS:
+                            return Exchange::IWebBrowser::ALWAYS;
+                        case WEBKIT_COOKIE_POLICY_ACCEPT_NEVER:
+                            return Exchange::IWebBrowser::NEVER;
+                        case WEBKIT_COOKIE_POLICY_ACCEPT_NO_THIRD_PARTY:
+                            return Exchange::IWebBrowser::ONLY_FROM_MAIN_DOCUMENT_DOMAIN;
+                    }
+                    ASSERT(false);
+                    return Exchange::IWebBrowser::ONLY_FROM_MAIN_DOCUMENT_DOMAIN;
+                };
+#else
             auto translatePolicy =
                 [](WKHTTPCookieAcceptPolicy policy) {
                     switch(policy) {
@@ -991,18 +1004,34 @@ static GSourceFuncs _handlerIntervention =
                     ASSERT(false);
                     return Exchange::IWebBrowser::ONLY_FROM_MAIN_DOCUMENT_DOMAIN;
                 };
-
+#endif
             _adminLock.Lock();
             policy = translatePolicy(_httpCookieAcceptPolicy);
             _adminLock.Unlock();
             return Core::ERROR_NONE;
         }
-
         uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override
         {
             if (_context == nullptr)
                 return Core::ERROR_GENERAL;
 
+#ifdef WEBKIT_GLIB_API
+            auto translatePolicy =
+                [](Exchange::IWebBrowser::HTTPCookieAcceptPolicyType policy) {
+                    switch(policy) {
+                        case Exchange::IWebBrowser::ALWAYS:
+                            return WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS;
+                        case Exchange::IWebBrowser::NEVER:
+                            return WEBKIT_COOKIE_POLICY_ACCEPT_NEVER;
+                        case Exchange::IWebBrowser::ONLY_FROM_MAIN_DOCUMENT_DOMAIN:
+                        case Exchange::IWebBrowser::EXCLUSIVELY_FROM_MAIN_DOCUMENT_DOMAIN:
+                            return WEBKIT_COOKIE_POLICY_ACCEPT_NO_THIRD_PARTY;
+                    }
+                    ASSERT(false);
+                    return WEBKIT_COOKIE_POLICY_ACCEPT_NO_THIRD_PARTY;
+                };
+            using SetHTTPCookieAcceptPolicyData = std::tuple<WebKitImplementation*, WebKitCookieAcceptPolicy>;
+#else
             auto translatePolicy =
                 [](Exchange::IWebBrowser::HTTPCookieAcceptPolicyType policy) {
                     switch(policy) {
@@ -1018,8 +1047,8 @@ static GSourceFuncs _handlerIntervention =
                     ASSERT(false);
                     return kWKHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain;
                 };
-
             using SetHTTPCookieAcceptPolicyData = std::tuple<WebKitImplementation*, WKHTTPCookieAcceptPolicy>;
+#endif
             auto* data = new SetHTTPCookieAcceptPolicyData(this, translatePolicy(policy));
 
             g_main_context_invoke_full(
@@ -1028,6 +1057,17 @@ static GSourceFuncs _handlerIntervention =
                 [](gpointer customdata) -> gboolean {
                     auto& data = *static_cast<SetHTTPCookieAcceptPolicyData*>(customdata);
                     WebKitImplementation* object = std::get<0>(data);
+#ifdef WEBKIT_GLIB_API
+                    WebKitCookieAcceptPolicy policy =  std::get<1>(data);
+
+                    object->_adminLock.Lock();
+                    object->_httpCookieAcceptPolicy = policy;
+                    object->_adminLock.Unlock();
+
+                    WebKitWebContext* context = webkit_web_view_get_context(object->_view);
+                    WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+                    webkit_cookie_manager_set_accept_policy(manager, policy);
+#else
                     WKHTTPCookieAcceptPolicy policy =  std::get<1>(data);
 
                     object->_adminLock.Lock();
@@ -1037,6 +1077,7 @@ static GSourceFuncs _handlerIntervention =
                     auto context = WKPageGetContext(object->_page);
                     auto manager = WKContextGetCookieManager(context);
                     WKCookieManagerSetHTTPCookieAcceptPolicy(manager, policy);
+#endif
                     return G_SOURCE_REMOVE;
                 },
                 data,
@@ -1046,7 +1087,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-
+#ifndef WEBKIT_GLIB_API
         uint32_t BridgeReply(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectReply, payload);
@@ -1935,6 +1976,7 @@ static GSourceFuncs _handlerIntervention =
 
                 auto* cookieManager = webkit_web_context_get_cookie_manager(context);
                 webkit_cookie_manager_set_persistent_storage(cookieManager, cookieDatabasePath, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
+                webkit_cookie_manager_set_accept_policy(cookieManager, _httpCookieAcceptPolicy);
             }
 
             if (!_config.CertificateCheck)
@@ -2357,6 +2399,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
         WebKitWebView* _view;
         uint64_t _guid;
+        WebKitCookieAcceptPolicy _httpCookieAcceptPolicy;
 #else
         WKViewRef _view;
         WKPageRef _page;
