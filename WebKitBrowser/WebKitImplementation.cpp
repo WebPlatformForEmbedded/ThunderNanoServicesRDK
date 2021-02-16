@@ -757,12 +757,10 @@ static GSourceFuncs _handlerIntervention =
 
     public:
 #ifdef WEBKIT_GLIB_API
-        uint32_t Headers(string& headers) const override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t Headers(const string& headers) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeEvent(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t CollectGarbage() override { return Core::ERROR_UNAVAILABLE; }
-#else
+#endif
         uint32_t Headers(string& headers) const override
         {
             _adminLock.Lock();
@@ -788,7 +786,11 @@ static GSourceFuncs _handlerIntervention =
                         object->_adminLock.Lock();
                         object->_headers = headers;
                         object->_adminLock.Unlock();
-
+#ifdef WEBKIT_GLIB_API
+                        WebKitWebContext* context = webkit_web_view_get_context(object->_view);
+                        webkit_web_context_send_message_to_all_extensions(context,
+                                webkit_user_message_new("Headers", g_variant_new("s", headers.c_str())));
+#else
                         auto messageName = WKStringCreateWithUTF8CString(Tags::Headers);
                         auto messageBody = WKStringCreateWithUTF8CString(headers.c_str());
 
@@ -796,7 +798,7 @@ static GSourceFuncs _handlerIntervention =
 
                         WKRelease(messageBody);
                         WKRelease(messageName);
-
+#endif
                         return G_SOURCE_REMOVE;
                     },
                     data,
@@ -807,7 +809,6 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-#endif
         uint32_t UserAgent(string& ua) const override
         {
             _adminLock.Lock();

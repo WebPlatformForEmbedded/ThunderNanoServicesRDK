@@ -140,6 +140,8 @@ public:
         g_signal_connect(webkit_script_world_get_default(),
                 "window-object-cleared", G_CALLBACK(windowObjectClearedCallback),
                 nullptr);
+        g_signal_connect(_bundle, "user-message-received",
+                G_CALLBACK(userMessageReceivedCallback), nullptr);
 
         if (logToSystemConsoleEnabled == TRUE) {
             g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
@@ -202,6 +204,22 @@ private:
         uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
 
         TRACE_GLOBAL(BrowserConsoleLog, (messageString, line, 0));
+    }
+    static void userMessageReceivedCallback(WebKitWebExtension*, WebKitUserMessage* message)
+    {
+        const char* name = webkit_user_message_get_name(message);
+        if (g_strcmp0(name, "Headers") == 0) {
+
+            GVariant* parameters;
+            const char* headers;
+
+            parameters = webkit_user_message_get_parameters(message);
+            if (!parameters)
+                return;
+            g_variant_get(parameters, "&s", &headers);
+
+            // TODO: Set and apply the headers
+        }
     }
 
     WKBundleRef _bundle;
