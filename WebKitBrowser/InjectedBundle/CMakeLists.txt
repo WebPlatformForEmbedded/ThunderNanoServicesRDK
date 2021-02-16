@@ -32,16 +32,21 @@ option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 set(SOURCE_LIST
     main.cpp
     WhiteListedOriginDomainsList.cpp
-    Milestone.cpp
 )
 
-if(NOT DEFINED WEBKIT_GLIB_API)
+if(DEFINED WEBKIT_GLIB_API)
+    set(SOURCE_LIST
+        ${SOURCE_LIST}
+        MilestoneGLib.cpp
+    )
+else()
     set(SOURCE_LIST
         ${SOURCE_LIST}
         RequestHeaders.cpp
         Utils.cpp
         JavaScriptFunction.cpp
         NotifyWPEFramework.cpp
+        Milestone.cpp
        ClassDefinition.cpp
        Tags.cpp
     )
@@ -56,7 +61,11 @@ if(PLUGIN_AMAZON_HYBRID)
 endif()
 
 if(securityagent_FOUND)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE SecurityAgentGLib.cpp)
+else()
     target_sources(${MODULE_NAME} PRIVATE SecurityAgent.cpp)
+endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_SECURITY_AGENT)
     target_link_libraries(${MODULE_NAME}
         PRIVATE 

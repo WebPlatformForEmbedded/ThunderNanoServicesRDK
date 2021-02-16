@@ -16,20 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#ifdef WEBKIT_GLIB_API
+#pragma once
 
 #include <wpe/webkit-web-extension.h>
 
 namespace WPEFramework {
 namespace JavaScript {
-namespace SecurityAgent {
+namespace Milestone {
 
 void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
 
-}  // SecurityAgent
+}  // Milestone
 }  // JavaScript
 }  // WPEFramework
-
-#endif // WEBKIT_GLIB_API

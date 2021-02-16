@@ -28,9 +28,9 @@
 #include <wpe/webkit-web-extension.h>
 #include "../BrowserConsoleLog.h"
 
-#include "Milestone.h"
+#include "MilestoneGLib.h"
 #ifdef ENABLE_SECURITY_AGENT
-#include "SecurityAgent.h"
+#include "SecurityAgentGLib.h"
 #endif
 
 using namespace WPEFramework;

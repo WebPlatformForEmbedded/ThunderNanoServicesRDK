@@ -17,59 +17,6 @@
  * limitations under the License.
  */
 
-#ifdef WEBKIT_GLIB_API
-
-#include "Module.h"
-#include "SecurityAgent.h"
-
-#include <securityagent/securityagent.h>
-
-namespace WPEFramework {
-namespace JavaScript {
-namespace SecurityAgent {
-
-static char* thunderToken(gpointer userData)
-{
-    uint8_t buffer[2 * 1024];
-    std::string url((char*) userData);
-
-    std::string tokenAsString;
-    if (url.length() < sizeof(buffer)) {
-        ::memset (buffer, 0, sizeof(buffer));
-        ::memcpy (buffer, url.c_str(), url.length());
-
-        int length = GetToken(static_cast<uint16_t>(sizeof(buffer)), url.length(), buffer);
-        if (length > 0) {
-           tokenAsString = std::string(reinterpret_cast<const char*>(buffer), length);
-        }
-    }
-    return g_strdup(tokenAsString.c_str());
-}
-
-void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
-{
-    if (webkit_frame_is_main_frame(frame) == false)
-        return;
-
-    JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
-
-    JSCValue* jsObject = jsc_value_new_object(jsContext, nullptr, nullptr);
-    JSCValue* jsFunction = jsc_value_new_function(jsContext, nullptr, reinterpret_cast<GCallback>(thunderToken),
-            (gpointer)webkit_frame_get_uri(frame), nullptr, G_TYPE_STRING, 0, G_TYPE_NONE);
-    jsc_value_object_set_property(jsObject, "Token", jsFunction);
-    g_object_unref(jsFunction);
-    jsc_context_set_value(jsContext, "thunder", jsObject);
-    g_object_unref(jsObject);
-
-    g_object_unref(jsContext);
-}
-
-}  // SecurityAgent
-}  // JavaScript
-}  // WPEFramework
-
-#else
-
 #include "JavaScriptFunctionType.h"
 #include "Utils.h"
 #include "Tags.h"
@@ -125,5 +72,3 @@ namespace JavaScript {
     }
 }
 }
-
-#endif // WEBKIT_GLIB_API

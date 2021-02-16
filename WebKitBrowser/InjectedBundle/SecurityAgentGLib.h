@@ -16,24 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef __TESTTRACE_H
-#define __TESTTRACE_H
+#pragma once
 
-#include "JavaScriptFunctionType.h"
+#include <wpe/webkit-web-extension.h>
 
 namespace WPEFramework {
 namespace JavaScript {
-    namespace Functions {
-        class Milestone {
-        public:
-            Milestone();
+namespace SecurityAgent {
 
-            JSValueRef HandleMessage(JSContextRef context, JSObjectRef,
-                JSObjectRef, size_t argumentCount, const JSValueRef arguments[], JSValueRef*);
-        };
-    }
-}
-}
+void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
 
-#endif // __TESTTRACE_H
+}  // SecurityAgent
+}  // JavaScript
+}  // WPEFramework
