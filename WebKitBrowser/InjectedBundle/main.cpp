@@ -28,6 +28,7 @@
 #include <wpe/webkit-web-extension.h>
 #include "../BrowserConsoleLog.h"
 
+#include "Tags.h"
 #include "MilestoneGLib.h"
 #include "RequestHeadersGLib.h"
 #ifdef ENABLE_SECURITY_AGENT
@@ -211,7 +212,7 @@ private:
     static gboolean userMessageReceivedCallback(WebKitWebPage* page, WebKitUserMessage* message)
     {
         const char* name = webkit_user_message_get_name(message);
-        if (g_strcmp0(name, "Headers") == 0) {
+        if (g_strcmp0(name, Tags::Headers) == 0) {
             WebKit::SetRequestHeaders(page, message);
         }
         return true;

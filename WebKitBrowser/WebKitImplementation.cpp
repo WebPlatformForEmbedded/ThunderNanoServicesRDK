@@ -28,6 +28,7 @@
 
 #ifdef WEBKIT_GLIB_API
 #include <wpe/webkit.h>
+#include "InjectedBundle/Tags.h"
 #else
 #include <WPE/WebKit.h>
 #include <WPE/WebKit/WKCookieManagerSoup.h>
@@ -788,7 +789,7 @@ static GSourceFuncs _handlerIntervention =
                         object->_adminLock.Unlock();
 #ifdef WEBKIT_GLIB_API
                         webkit_web_view_send_message_to_page(object->_view,
-                                webkit_user_message_new("Headers", g_variant_new("s", headers.c_str())),
+                                webkit_user_message_new(Tags::Headers, g_variant_new("s", headers.c_str())),
                                 nullptr, nullptr, nullptr);
 #else
                         auto messageName = WKStringCreateWithUTF8CString(Tags::Headers);

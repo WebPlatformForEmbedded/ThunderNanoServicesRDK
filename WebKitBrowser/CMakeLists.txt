@@ -123,12 +123,12 @@ set(SOURCE_LIST
     WebKitBrowser.cpp
     WebKitBrowserJsonRpc.cpp
     WebKitImplementation.cpp
+    InjectedBundle/Tags.cpp
 )
 
 if(NOT DEFINED WEBKIT_GLIB_API)
     set(SOURCE_LIST
         ${SOURCE_LIST}
-        InjectedBundle/Tags.cpp
         InjectedBundle/Utils.cpp
 )
 endif()
