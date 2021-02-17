@@ -757,11 +757,6 @@ static GSourceFuncs _handlerIntervention =
         }
 
     public:
-#ifdef WEBKIT_GLIB_API
-        uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t BridgeEvent(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t CollectGarbage() override { return Core::ERROR_UNAVAILABLE; }
-#endif
         uint32_t Headers(string& headers) const override
         {
             _adminLock.Lock();
@@ -1089,25 +1084,16 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
-#ifndef WEBKIT_GLIB_API
         uint32_t BridgeReply(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectReply, payload);
             return Core::ERROR_NONE;
         }
-
         uint32_t BridgeEvent(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectEvent, payload);
             return Core::ERROR_NONE;
         }
-
-        uint32_t CollectGarbage() override
-        {
-            WKContextGarbageCollectJavaScriptObjects(_wkContext);
-            return Core::ERROR_NONE;
-        }
-
         void SendToBridge(const string& name, const string& payload)
         {
             if (_context == nullptr)
@@ -1123,6 +1109,14 @@ static GSourceFuncs _handlerIntervention =
                     BridgeMessageData& data = *static_cast<BridgeMessageData*>(customdata);
                     WebKitImplementation* object = std::get<0>(data);
 
+#ifdef WEBKIT_GLIB_API
+                    auto messageName = std::get<1>(data).c_str();
+                    auto messageBody = std::get<2>(data).c_str();
+
+                    webkit_web_view_send_message_to_page(object->_view,
+                            webkit_user_message_new(messageName, g_variant_new("s", messageBody)),
+                            nullptr, nullptr, nullptr);
+#else
                     auto messageName = WKStringCreateWithUTF8CString(std::get<1>(data).c_str());
                     auto messageBody = WKStringCreateWithUTF8CString(std::get<2>(data).c_str());
 
@@ -1130,13 +1124,22 @@ static GSourceFuncs _handlerIntervention =
 
                     WKRelease(messageBody);
                     WKRelease(messageName);
-
+#endif
                     return G_SOURCE_REMOVE;
                 },
                 data,
                 [](gpointer customdata) {
                     delete static_cast<BridgeMessageData*>(customdata);
                 });
+        }
+
+#ifdef WEBKIT_GLIB_API
+        uint32_t CollectGarbage() override { return Core::ERROR_UNAVAILABLE; }
+#else
+        uint32_t CollectGarbage() override
+        {
+            WKContextGarbageCollectJavaScriptObjects(_wkContext);
+            return Core::ERROR_NONE;
         }
 #endif
         uint32_t Visible(bool& visible) const override

@@ -215,6 +215,12 @@ private:
         if (g_strcmp0(name, Tags::Headers) == 0) {
             WebKit::SetRequestHeaders(page, message);
         }
+        else if (g_strcmp0(name, Tags::BridgeObjectReply) == 0) {
+            // TODO: Handle Tags::BridgeObjectReply message
+        }
+        else if (g_strcmp0(name, Tags::BridgeObjectEvent) == 0) {
+            // TODO: Handle Tags::BridgeObjectEvent message
+        }
         return true;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
