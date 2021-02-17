@@ -38,6 +38,7 @@ if(DEFINED WEBKIT_GLIB_API)
     set(SOURCE_LIST
         ${SOURCE_LIST}
         MilestoneGLib.cpp
+        RequestHeadersGLib.cpp
     )
 else()
     set(SOURCE_LIST

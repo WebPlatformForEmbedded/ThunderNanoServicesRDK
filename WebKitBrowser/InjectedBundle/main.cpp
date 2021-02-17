@@ -29,6 +29,7 @@
 #include "../BrowserConsoleLog.h"
 
 #include "MilestoneGLib.h"
+#include "RequestHeadersGLib.h"
 #ifdef ENABLE_SECURITY_AGENT
 #include "SecurityAgentGLib.h"
 #endif
@@ -140,8 +141,6 @@ public:
         g_signal_connect(webkit_script_world_get_default(),
                 "window-object-cleared", G_CALLBACK(windowObjectClearedCallback),
                 nullptr);
-        g_signal_connect(_bundle, "user-message-received",
-                G_CALLBACK(userMessageReceivedCallback), nullptr);
 
         if (logToSystemConsoleEnabled == TRUE) {
             g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
@@ -197,6 +196,10 @@ private:
     {
         g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), nullptr);
+        g_signal_connect(page, "user-message-received",
+                G_CALLBACK(userMessageReceivedCallback), nullptr);
+        g_signal_connect(page, "send-request",
+                G_CALLBACK(sendRequestCallback), nullptr);
     }
     static void consoleMessageSentCallback(WebKitWebPage* page, WebKitConsoleMessage* message)
     {
@@ -205,21 +208,18 @@ private:
 
         TRACE_GLOBAL(BrowserConsoleLog, (messageString, line, 0));
     }
-    static void userMessageReceivedCallback(WebKitWebExtension*, WebKitUserMessage* message)
+    static gboolean userMessageReceivedCallback(WebKitWebPage* page, WebKitUserMessage* message)
     {
         const char* name = webkit_user_message_get_name(message);
         if (g_strcmp0(name, "Headers") == 0) {
-
-            GVariant* parameters;
-            const char* headers;
-
-            parameters = webkit_user_message_get_parameters(message);
-            if (!parameters)
-                return;
-            g_variant_get(parameters, "&s", &headers);
-
-            // TODO: Set and apply the headers
+            WebKit::SetRequestHeaders(page, message);
         }
+        return true;
+    }
+    static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
+    {
+        WebKit::ApplyRequestHeaders(page, request);
+        return false;
     }
 
     WKBundleRef _bundle;

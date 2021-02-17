@@ -787,9 +787,9 @@ static GSourceFuncs _handlerIntervention =
                         object->_headers = headers;
                         object->_adminLock.Unlock();
 #ifdef WEBKIT_GLIB_API
-                        WebKitWebContext* context = webkit_web_view_get_context(object->_view);
-                        webkit_web_context_send_message_to_all_extensions(context,
-                                webkit_user_message_new("Headers", g_variant_new("s", headers.c_str())));
+                        webkit_web_view_send_message_to_page(object->_view,
+                                webkit_user_message_new("Headers", g_variant_new("s", headers.c_str())),
+                                nullptr, nullptr, nullptr);
 #else
                         auto messageName = WKStringCreateWithUTF8CString(Tags::Headers);
                         auto messageBody = WKStringCreateWithUTF8CString(headers.c_str());
