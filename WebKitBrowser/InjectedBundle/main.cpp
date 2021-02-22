@@ -35,6 +35,9 @@
 #ifdef ENABLE_SECURITY_AGENT
 #include "SecurityAgentGLib.h"
 #endif
+#if defined(ENABLE_BADGER_BRIDGE)
+#include "BridgeObjectGLib.h"
+#endif
 
 using namespace WPEFramework;
 
@@ -217,12 +220,12 @@ private:
         if (g_strcmp0(name, Tags::Headers) == 0) {
             WebKit::SetRequestHeaders(page, message);
         }
-        else if (g_strcmp0(name, Tags::BridgeObjectReply) == 0) {
-            // TODO: Handle Tags::BridgeObjectReply message
+#if defined(ENABLE_BADGER_BRIDGE)
+        else if ((g_strcmp0(name, Tags::BridgeObjectReply) == 0)
+                || (g_strcmp0(name, Tags::BridgeObjectEvent) == 0)) {
+            JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
         }
-        else if (g_strcmp0(name, Tags::BridgeObjectEvent) == 0) {
-            // TODO: Handle Tags::BridgeObjectEvent message
-        }
+#endif
         return true;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)

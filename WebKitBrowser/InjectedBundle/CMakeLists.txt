@@ -84,7 +84,11 @@ if(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS)
 endif()
 
 if(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE BridgeObjectGLib.cpp)
+else()
     target_sources(${MODULE_NAME} PRIVATE BridgeObject.cpp)
+endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_BADGER_BRIDGE)
 endif()
 
