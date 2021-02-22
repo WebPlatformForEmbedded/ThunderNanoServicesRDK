@@ -30,6 +30,7 @@
 
 #include "Tags.h"
 #include "MilestoneGLib.h"
+#include "NotifyWPEFrameworkGLib.h"
 #include "RequestHeadersGLib.h"
 #ifdef ENABLE_SECURITY_AGENT
 #include "SecurityAgentGLib.h"
@@ -187,6 +188,7 @@ private:
     static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage*, WebKitFrame* frame)
     {
         JavaScript::Milestone::InjectJS(world, frame);
+        JavaScript::NotifyWPEFramework::InjectJS(world, frame);
 
 #ifdef  ENABLE_SECURITY_AGENT
         JavaScript::SecurityAgent::InjectJS(world, frame);

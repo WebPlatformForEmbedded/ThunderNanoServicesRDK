@@ -39,6 +39,7 @@ if(DEFINED WEBKIT_GLIB_API)
     set(SOURCE_LIST
         ${SOURCE_LIST}
         MilestoneGLib.cpp
+        NotifyWPEFrameworkGLib.cpp
         RequestHeadersGLib.cpp
     )
 else()
