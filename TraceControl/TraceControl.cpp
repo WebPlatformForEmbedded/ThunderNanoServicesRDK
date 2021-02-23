@@ -24,8 +24,6 @@
 
 namespace {
 
-    class 
-
     WPEFramework::Core::ProxyPoolType<WPEFramework::Web::JSONBodyType<WPEFramework::Plugin::TraceControl::Data>> jsonBodyDataFactory(4);
     WPEFramework::Core::ProxyPoolType<WPEFramework::Plugin::TraceJSONOutput::Data> jsonExportDataFactory(2);
 
