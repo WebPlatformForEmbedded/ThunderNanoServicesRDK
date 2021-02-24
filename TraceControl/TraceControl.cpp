@@ -77,18 +77,16 @@ namespace {
 
         bool Activate(WPEFramework::PluginHost::Channel& channel) {
 
-            bool accepted = false;
-
             _lock.Lock();
 
             ASSERT(_exportChannel == nullptr);
 
             _exportChannel = &channel;
-            accepted = true;
+            _paused = false;
 
             _lock.Unlock();
 
-            return accepted;
+            return true;
         }
 
         bool Deactivate(WPEFramework::PluginHost::Channel& channel) {

@@ -153,7 +153,7 @@ namespace Plugin {
             ALL             = 31
         };
 
-        explicit TraceJSONOutput(const ExtraOutputOptions outputoptions = ExtraOutputOptions::ALL /* ExtraOutputOptions::ABREVIATED */) 
+        explicit TraceJSONOutput(const ExtraOutputOptions outputoptions = ExtraOutputOptions::ALL) 
             : _outputoptions(outputoptions)
         {
         }
@@ -179,7 +179,7 @@ namespace Plugin {
 
         void Output(const char fileName[], const uint32_t lineNumber, const char className[], const Trace::ITrace* information) override {
             ExtraOutputOptions options = _outputoptions;
-            
+
             Core::ProxyType<Data> data = GetDataContainer();
             data->Clear();
             if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE) ) != 0 ) { 
