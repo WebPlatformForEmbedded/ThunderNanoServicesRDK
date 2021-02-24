@@ -169,7 +169,7 @@ namespace Plugin {
             _outputoptions = outputoptions;
         }
 
-        // todo -> perhaps move
+        // just because I'm lazy :)
         template<typename E>
         static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type {
             return static_cast<typename std::underlying_type<E>::type>(t);
@@ -179,32 +179,7 @@ namespace Plugin {
 
         void Output(const char fileName[], const uint32_t lineNumber, const char className[], const Trace::ITrace* information) override {
             ExtraOutputOptions options = _outputoptions;
-/* todo remove
-            std::stringstream ouput(R"({ "time":")");
-
-            if( ( options & ExtraOutputOptions::INCLUDINGDATE ) != 0 ) { 
-                output << Core::Time::Now().ToRFC1123(true) << '\"';
-            } else {
-                output << Core::Time::Now().ToTimeOnly(true) << '\"';
-            }
-
-            if( ( options & ExtraOutputOptions::FILENAME ) != 0 ) { 
-                output << R"(, "filename":")" << filename << '\"';
-                if( ( options & ExtraOutputOptions::LINENUMBER ) != 0 ) { 
-                    output << R"(, "linenumber":)" << lineNumber;
-                }
-            } 
-
-            if( ( options & ExtraOutputOptions::CLASSNAME ) != 0 ) { 
-                output << R"(, "classname":")" << className << '\"';
-            }
-
-            if( ( options & ExtraOutputOptions::CATEGORY ) != 0 ) { 
-                output << R"(, "category":")" << information->Category() << '\"';
-            }
-
-            output << R"(, "data":")" << information->Data() << R"(" })";
-*/
+            
             Core::ProxyType<Data> data = GetDataContainer();
             data->Clear();
             if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE) ) != 0 ) { 

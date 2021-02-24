@@ -150,7 +150,6 @@ namespace {
             _lock.Lock();
 
             if( ( _exportChannel != nullptr ) && ( _paused == false ) ) {
-                // todo: check if this cannot blow up if the other side is not reading fast enough...
                 _exportChannel->Submit(WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsondata));
             }
 
