@@ -37,6 +37,8 @@ namespace Plugin {
         while (resolutionIterator.Next()) {
             _resolution.push_back(resolutionIterator.Current().Value());
         }
+
+        return (Core::ERROR_NONE);
     }
 
     uint32_t DeviceInfoImplementation::AudioOutputs(IAudioOutputIterator*& res) const
