@@ -703,12 +703,10 @@ static GSourceFuncs _handlerIntervention =
             , _httpStatusCode(-1)
 #ifdef WEBKIT_GLIB_API
             , _view(nullptr)
-            , _wkContext()
             , _guid(Core::Time::Now().Ticks())
 #else
             , _view()
             , _page()
-            , _wkContext()
             , _automationSession(nullptr)
             , _notificationManager()
             , _httpCookieAcceptPolicy(kWKHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain)
@@ -769,10 +767,6 @@ static GSourceFuncs _handlerIntervention =
         uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeReply(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
         uint32_t BridgeEvent(const string& payload) override { return Core::ERROR_UNAVAILABLE; }
-        uint32_t CollectGarbage() override {
-            webkit_web_context_garbage_collect_javascript_objects(_wkContext);
-            return Core::ERROR_NONE;
-        }
 #else
         uint32_t Headers(string& headers) const override
         {
@@ -1050,12 +1044,6 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t CollectGarbage() override
-        {
-            WKContextGarbageCollectJavaScriptObjects(_wkContext);
-            return Core::ERROR_NONE;
-        }
-
         void SendToBridge(const string& name, const string& payload)
         {
             if (_context == nullptr)
@@ -1087,6 +1075,27 @@ static GSourceFuncs _handlerIntervention =
                 });
         }
 #endif
+        uint32_t CollectGarbage() override {
+            g_main_context_invoke_full(
+                _context,
+                G_PRIORITY_DEFAULT,
+                [](gpointer customdata) -> gboolean {
+                WebKitImplementation* object = static_cast<WebKitImplementation*>(customdata);
+#ifdef WEBKIT_GLIB_API
+                WebKitWebContext* context = webkit_web_view_get_context(object->_view);
+                webkit_web_context_garbage_collect_javascript_objects(context);
+#else
+                auto context = WKPageGetContext(object->_page);
+                WKContextGarbageCollectJavaScriptObjects(context);
+#endif
+                return G_SOURCE_REMOVE;
+            },
+            this,
+            [](gpointer customdata) {
+            });
+            return Core::ERROR_NONE;
+        }
+
         uint32_t Visible(bool& visible) const override
         {
             _adminLock.Lock();
@@ -1884,10 +1893,11 @@ static GSourceFuncs _handlerIntervention =
 
             bool automationEnabled = _config.Automation.Value();
 
+            WebKitWebContext* wkContext;
             if (automationEnabled) {
-                _wkContext = webkit_web_context_new_ephemeral();
-                webkit_web_context_set_automation_allowed(_wkContext, TRUE);
-                g_signal_connect(_wkContext, "automation-started", reinterpret_cast<GCallback>(automationStartedCallback), this);
+                wkContext = webkit_web_context_new_ephemeral();
+                webkit_web_context_set_automation_allowed(wkContext, TRUE);
+                g_signal_connect(wkContext, "automation-started", reinterpret_cast<GCallback>(automationStartedCallback), this);
             } else {
                 gchar* wpeStoragePath;
                 if (_config.LocalStorage.IsSet() == true && _config.LocalStorage.Value().empty() == false)
@@ -1907,28 +1917,28 @@ static GSourceFuncs _handlerIntervention =
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
 
-                _wkContext = webkit_web_context_new_with_website_data_manager(websiteDataManager);
+                wkContext = webkit_web_context_new_with_website_data_manager(websiteDataManager);
                 g_object_unref(websiteDataManager);
             }
 
             if (_config.InjectedBundle.Value().empty() == false) {
                 // Set up injected bundle. Will be loaded once WPEWebProcess is started.
-                g_signal_connect(_wkContext, "initialize-web-extensions", G_CALLBACK(initializeWebExtensionsCallback), this);
+                g_signal_connect(wkContext, "initialize-web-extensions", G_CALLBACK(initializeWebExtensionsCallback), this);
             }
 
-            if (!webkit_web_context_is_ephemeral(_wkContext)) {
+            if (!webkit_web_context_is_ephemeral(wkContext)) {
                 gchar* cookieDatabasePath;
                 if (_config.CookieStorage.IsSet() == true && _config.CookieStorage.Value().empty() == false)
                     cookieDatabasePath = g_build_filename(_config.CookieStorage.Value().c_str(), "cookies.db", nullptr);
                 else
                     cookieDatabasePath = g_build_filename(g_get_user_cache_dir(), "cookies.db", nullptr);
 
-                auto* cookieManager = webkit_web_context_get_cookie_manager(_wkContext);
+                auto* cookieManager = webkit_web_context_get_cookie_manager(wkContext);
                 webkit_cookie_manager_set_persistent_storage(cookieManager, cookieDatabasePath, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
             }
 
             if (!_config.CertificateCheck)
-                webkit_web_context_set_tls_errors_policy(_wkContext, WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+                webkit_web_context_set_tls_errors_policy(wkContext, WEBKIT_TLS_ERRORS_POLICY_IGNORE);
 
             auto* languages = static_cast<char**>(g_new0(char*, _config.Languages.Length() + 1));
             Core::JSON::ArrayType<Core::JSON::String>::Iterator index(_config.Languages.Elements());
@@ -1936,7 +1946,7 @@ static GSourceFuncs _handlerIntervention =
             for (unsigned i = 0; index.Next(); ++i)
                 languages[i] = g_strdup(index.Current().Value().c_str());
 
-            webkit_web_context_set_preferred_languages(_wkContext, languages);
+            webkit_web_context_set_preferred_languages(wkContext, languages);
             g_strfreev(languages);
 
             auto* preferences = webkit_settings_new();
@@ -1961,11 +1971,11 @@ static GSourceFuncs _handlerIntervention =
 
             _view = WEBKIT_WEB_VIEW(g_object_new(WEBKIT_TYPE_WEB_VIEW,
                 "backend", webkit_web_view_backend_new(wpe_view_backend_create(), nullptr, nullptr),
-                "web-context", _wkContext,
+                "web-context", wkContext,
                 "settings", preferences,
                 "is-controlled-by-automation", automationEnabled,
                 nullptr));
-            g_object_unref(_wkContext);
+            g_object_unref(wkContext);
             g_object_unref(preferences);
 
             unsigned frameDisplayedCallbackID = 0;
@@ -2066,8 +2076,8 @@ static GSourceFuncs _handlerIntervention =
             g_free(wpeDiskCachePath);
             WKContextConfigurationSetDiskCacheDirectory(contextConfiguration, diskCacheDirectory);
 
-            _wkContext = WKContextCreateWithConfiguration(contextConfiguration);
-            WKSoupSessionSetIgnoreTLSErrors(_wkContext, !_config.CertificateCheck);
+            WKContextRef wkContext = WKContextCreateWithConfiguration(contextConfiguration);
+            WKSoupSessionSetIgnoreTLSErrors(wkContext, !_config.CertificateCheck);
 
             if (_config.Languages.IsSet()) {
                 WKMutableArrayRef languages = WKMutableArrayCreate();
@@ -2079,16 +2089,16 @@ static GSourceFuncs _handlerIntervention =
                     WKRelease(itemString);
                 }
 
-                WKSoupSessionSetPreferredLanguages(_wkContext, languages);
+                WKSoupSessionSetPreferredLanguages(wkContext, languages);
                 WKRelease(languages);
             }
 
             WKRelease(contextConfiguration);
 
-            WKGeolocationManagerRef geolocationManager = WKContextGetGeolocationManager(_wkContext);
+            WKGeolocationManagerRef geolocationManager = WKContextGetGeolocationManager(wkContext);
             WKGeolocationManagerSetProvider(geolocationManager, &_handlerGeolocationProvider.base);
 
-            _notificationManager = WKContextGetNotificationManager(_wkContext);
+            _notificationManager = WKContextGetNotificationManager(wkContext);
             _handlerNotificationProvider.base.clientInfo = static_cast<void*>(this);
             WKNotificationManagerSetProvider(_notificationManager, &_handlerNotificationProvider.base);
 
@@ -2139,7 +2149,7 @@ static GSourceFuncs _handlerIntervention =
             WKPageGroupSetPreferences(pageGroup, preferences);
 
             auto pageConfiguration = WKPageConfigurationCreate();
-            WKPageConfigurationSetContext(pageConfiguration, _wkContext);
+            WKPageConfigurationSetContext(pageConfiguration, wkContext);
             WKPageConfigurationSetPageGroup(pageConfiguration, pageGroup);
 
             gchar* cookieDatabasePath;
@@ -2151,7 +2161,7 @@ static GSourceFuncs _handlerIntervention =
 
             auto path = WKStringCreateWithUTF8CString(cookieDatabasePath);
             g_free(cookieDatabasePath);
-            auto cookieManager = WKContextGetCookieManager(_wkContext);
+            auto cookieManager = WKContextGetCookieManager(wkContext);
             WKCookieManagerSetCookiePersistentStorage(cookieManager, path, kWKCookieStorageTypeSQLite);
             WKCookieManagerSetHTTPCookieAcceptPolicy(cookieManager, _httpCookieAcceptPolicy);
 
@@ -2176,7 +2186,7 @@ static GSourceFuncs _handlerIntervention =
             WKPageSetPageNavigationClient(_page, &_handlerWebKit.base);
 
             _handlerInjectedBundle.base.clientInfo = static_cast<void*>(this);
-            WKContextSetInjectedBundleClient(_wkContext, &_handlerInjectedBundle.base);
+            WKContextSetInjectedBundleClient(wkContext, &_handlerInjectedBundle.base);
 
             WKPageSetProxies(_page, nullptr);
 
@@ -2184,7 +2194,7 @@ static GSourceFuncs _handlerIntervention =
 
             if (_config.Automation.Value()) {
                 _handlerAutomation.base.clientInfo = static_cast<void*>(this);
-                WKContextSetAutomationClient(_wkContext, &_handlerAutomation.base);
+                WKContextSetAutomationClient(wkContext, &_handlerAutomation.base);
             }
 
             WKPageSetPageUIClient(_page, &_handlerPageUI.base);
@@ -2236,7 +2246,7 @@ static GSourceFuncs _handlerIntervention =
             WKRelease(_view);
             WKRelease(pageConfiguration);
             WKRelease(pageGroup);
-            WKRelease(_wkContext);
+            WKRelease(wkContext);
             WKRelease(preferences);
 
             g_main_context_pop_thread_default(_context);
@@ -2339,12 +2349,10 @@ static GSourceFuncs _handlerIntervention =
 
 #ifdef WEBKIT_GLIB_API
         WebKitWebView* _view;
-        WebKitWebContext* _wkContext;
         uint64_t _guid;
 #else
         WKViewRef _view;
         WKPageRef _page;
-        WKContextRef _wkContext;
         WKWebAutomationSessionRef _automationSession;
         WKNotificationManagerRef _notificationManager;
         WKHTTPCookieAcceptPolicy _httpCookieAcceptPolicy;
