@@ -172,11 +172,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeviceInfo.cpp" />
+    <ClCompile Include="DeviceInfoImplementation.cpp" />
     <ClCompile Include="DeviceInfoJsonRpc.cpp" />
     <ClCompile Include="Module.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceInfo.h" />
+    <ClInclude Include="DeviceInfoImplementation.h" />
     <ClInclude Include="Module.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
