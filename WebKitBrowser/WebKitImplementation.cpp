@@ -1931,6 +1931,23 @@ static GSourceFuncs _handlerIntervention =
 
             g_signal_connect(session, "create-web-view", reinterpret_cast<GCallback>(createWebViewForAutomationCallback), browser);
         }
+        static gboolean userMessageReceivedCallback(WebKitWebView*, WebKitUserMessage* message, WebKitImplementation* browser)
+        {
+            const char* name = webkit_user_message_get_name(message);
+            if (g_strcmp0(name, Tags::BridgeObjectQuery) == 0) {
+                GVariant* payload;
+                const char* payloadPtr;
+
+                payload = webkit_user_message_get_parameters(message);
+                if (!payload) {
+                    return false;
+                }
+                g_variant_get(payload, "&s", &payloadPtr);
+                string payloadStr(payloadPtr);
+                browser->OnBridgeQuery(payloadStr);
+            }
+            return true;
+        }
         uint32_t Worker() override
         {
             _context = g_main_context_new();
@@ -2049,6 +2066,7 @@ static GSourceFuncs _handlerIntervention =
             g_signal_connect(_view, "close", reinterpret_cast<GCallback>(closeCallback), this);
             g_signal_connect(_view, "permission-request", reinterpret_cast<GCallback>(decidePermissionCallback), nullptr);
             g_signal_connect(_view, "show-notification", reinterpret_cast<GCallback>(showNotificationCallback), this);
+            g_signal_connect(_view, "user-message-received", reinterpret_cast<GCallback>(userMessageReceivedCallback), this);
 
             _configurationCompleted.SetState(true);
 

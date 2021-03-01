@@ -188,13 +188,17 @@ public:
 #ifdef WEBKIT_GLIB_API
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage*, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page, WebKitFrame* frame)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
 
 #ifdef  ENABLE_SECURITY_AGENT
         JavaScript::SecurityAgent::InjectJS(world, frame);
+#endif
+
+#ifdef  ENABLE_BADGER_BRIDGE
+        JavaScript::BridgeObject::InjectJS(world, page, frame);
 #endif
 
     }

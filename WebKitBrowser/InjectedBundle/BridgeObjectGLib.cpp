@@ -25,6 +25,18 @@ namespace WPEFramework {
 namespace JavaScript {
 namespace BridgeObject {
 
+const char kServiceManagerSrc[] = R"jssrc(
+window.ServiceManager = {
+  version: 2.1,
+  getServiceForJavaScript: function(name,readyCb) {
+    if (name === 'com.comcast.BridgeObject_1')
+      readyCb({ JSMessageChanged: (msg) => window.ServiceManager.BridgeQuery(btoa(msg)) })
+    else
+      console.error('Requested service not supported')
+  }
+}
+)jssrc";
+
 const char kBadgerReplySrc[] = R"jssrc(
   var obj = JSON.parse(atob(payload))
   window.$badger.callback(obj.pid, obj.success, obj.json)
@@ -59,9 +71,33 @@ static void CallBridge(WebKitWebPage* page, const char* scriptSrc, WebKitUserMes
     g_object_unref(jsContext);
 }
 
-void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
+static void OnBridgeQuery(const char* arg, gpointer userData)
 {
-    // TODO : Add implementation
+    WebKitWebPage* page = reinterpret_cast<WebKitWebPage*>(userData);
+    webkit_web_page_send_message_to_view(page,
+            webkit_user_message_new(Tags::BridgeObjectQuery,
+                    g_variant_new("s", arg)), nullptr, nullptr, nullptr);
+}
+
+void InjectJS(WebKitScriptWorld* world, WebKitWebPage* page, WebKitFrame* frame)
+{
+    if (webkit_frame_is_main_frame(frame) == false)
+        return;
+
+    JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
+
+    JSCValue* script = jsc_context_evaluate(jsContext, kServiceManagerSrc, -1);
+    g_object_unref(script);
+
+    JSCValue* jsObject = jsc_context_get_value(jsContext, "ServiceManager");
+    JSCValue* jsFunction = jsc_value_new_function(jsContext, nullptr,
+            reinterpret_cast<GCallback>(OnBridgeQuery), (gpointer) page,
+            nullptr, G_TYPE_NONE, 1, G_TYPE_STRING);
+    jsc_value_object_set_property(jsObject, "BridgeQuery", jsFunction);
+    g_object_unref(jsFunction);
+    g_object_unref(jsObject);
+
+    g_object_unref(jsContext);
 }
 
 bool HandleMessageToPage(WebKitWebPage* page, const char* messageName, WebKitUserMessage* message)

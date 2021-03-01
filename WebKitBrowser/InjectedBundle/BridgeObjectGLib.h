@@ -26,7 +26,7 @@ namespace JavaScript {
 namespace BridgeObject {
 
 bool HandleMessageToPage(WebKitWebPage*, const char*, WebKitUserMessage*);
-void InjectJS(WebKitScriptWorld*, WebKitFrame*);
+void InjectJS(WebKitScriptWorld*, WebKitWebPage*, WebKitFrame*);
 
 }  // BridgeObject
 }  // JavaScript
