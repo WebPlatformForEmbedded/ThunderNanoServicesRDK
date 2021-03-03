@@ -76,7 +76,11 @@ endif()
 
 if(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS)
     find_package(AampJSBindings REQUIRED)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE AAMPJSBindingsGLib.cpp)
+else()
     target_sources(${MODULE_NAME} PRIVATE AAMPJSBindings.cpp)
+endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_AAMP_JSBINDINGS)
     target_link_libraries(${MODULE_NAME}
         PRIVATE

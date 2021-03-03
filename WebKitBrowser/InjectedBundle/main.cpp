@@ -38,6 +38,9 @@
 #if defined(ENABLE_BADGER_BRIDGE)
 #include "BridgeObjectGLib.h"
 #endif
+#if defined(ENABLE_AAMP_JSBINDINGS)
+#include "AAMPJSBindingsGLib.h"
+#endif
 
 using namespace WPEFramework;
 
@@ -199,6 +202,10 @@ private:
 
 #ifdef  ENABLE_BADGER_BRIDGE
         JavaScript::BridgeObject::InjectJS(world, page, frame);
+#endif
+
+#ifdef  ENABLE_AAMP_JSBINDINGS
+        JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
     }
