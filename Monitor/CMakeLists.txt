@@ -15,8 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(PLUGIN_NAME Monitor)
-set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
+project(Monitor VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.3)
+
+find_package(WPEFramework)
+
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
+
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 # Plugins built from this repository that can be autmatically enabled or enabled manually when built externally
 set(PLUGIN_MONITOR_WEBKITBROWSER "${PLUGIN_WEBKITBROWSER}" CACHE BOOL "Enable monitor for the WebKitBrowser plugin")

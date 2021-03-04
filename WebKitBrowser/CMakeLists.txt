@@ -15,23 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+project(WebKitBrowser VERSION 1.0.0)
 cmake_minimum_required(VERSION 3.3)
 
 find_package(WPEFramework)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../cmake/")
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
-include(CmakeHelperFunctions)
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-# Library installation section
-string(TOLOWER ${NAMESPACE} STORAGE_DIRECTORY)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(BUILD_REFERENCE)
     add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
 endif()
-
-set(PLUGIN_NAME WebKitBrowser)
-set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
 
 option(PLUGIN_WEBKITBROWSER_YOUTUBE "Include YouTube in seperate plugin." OFF)
 option(PLUGIN_WEBKITBROWSER_APPS "Include Apps instance in seperate plugin." OFF)
@@ -172,7 +169,7 @@ endif()
 install(
     TARGETS ${MODULE_NAME}
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
-    COMPONENT ${MODULE_NAME})
+    COMPONENT ${PROJECT_NAME})
 
 # also build injected bundle
 add_subdirectory(InjectedBundle)
@@ -232,4 +229,13 @@ endif()
 # Lightning App configuration
 if(PLUGIN_WEBKITBROWSER_LIGHTNING_APP)
     write_config( LightningApp )
+endif()
+
+if(PLUGINS_CREATE_IPKG_TARGETS)
+include(CreatePackage)
+CreateDebPackage(
+    NAME ${MODULE_NAME}
+    DESCRIPTION "WPEWebkit plugin"
+    COMPONENTS ${PROJECT_NAME}
+)
 endif()
