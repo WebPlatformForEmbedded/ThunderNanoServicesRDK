@@ -189,46 +189,46 @@ elseif(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "auto")
     set(PLUGIN_WEBKITBROWSER_WIDTH "")
 endif()
 
-write_config( ${PLUGIN_NAME} )
+write_config()
 
 # youtube configuration
 if(PLUGIN_WEBKITBROWSER_YOUTUBE)
-    write_config( YouTube )
+    write_config( PLUGINS YouTube )
 endif()
 
 # amazon configuration
 if(PLUGIN_AMAZON_HYBRID)
-    write_config( Amazon )
+    write_config( PLUGINS Amazon )
 endif()
 
 # Applications instance configuration
 if(PLUGIN_WEBKITBROWSER_APPS)
-    write_config( Apps )
+    write_config( PLUGINS Apps )
 endif()
 
 # UX configuration
 if(PLUGIN_WEBKITBROWSER_UX)
-    write_config( UX )
+    write_config( PLUGINS UX )
 endif()
 
 # Resident App configuration
 if(PLUGIN_WEBKITBROWSER_RESIDENT_APP)
-    write_config( ResidentApp )
+    write_config( PLUGINS ResidentApp )
 endif()
 
 # Search&Discovery configuration
 if(PLUGIN_WEBKITBROWSER_SEARCH_AND_DISCOVERY_APP)
-    write_config( SearchAndDiscoveryApp )
+    write_config( PLUGINS SearchAndDiscoveryApp )
 endif()
 
 # Html App configuration
 if(PLUGIN_WEBKITBROWSER_HTML_APP)
-    write_config( HtmlApp )
+    write_config( PLUGINS HtmlApp )
 endif()
 
 # Lightning App configuration
 if(PLUGIN_WEBKITBROWSER_LIGHTNING_APP)
-    write_config( LightningApp )
+    write_config( PLUGINS LightningApp )
 endif()
 
 if(PLUGINS_CREATE_IPKG_TARGETS)

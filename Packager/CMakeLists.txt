@@ -123,7 +123,7 @@ if (BUILD_WITH_PACKAGER_EX)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/opkg.conf
             DESTINATION "/usr/share/${NAMESPACE}/${PLUGIN_NAME}")
 
-    write_config(${PROJECT_NAME})
+    write_config()
 
 ######################################################################################################
 ######################################################################################################
@@ -184,7 +184,7 @@ else (BUILD_WITH_PACKAGER_EX)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/opkg.conf
             DESTINATION "/usr/share/${NAMESPACE}/${PLUGIN_NAME}")
 
-    write_config(${PROJECT_NAME})
+    write_config()
 
 endif (BUILD_WITH_PACKAGER_EX)
 
