@@ -15,8 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(PLUGIN_NAME OCDM)
-set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
+project(OCDM)
+
+cmake_minimum_required(VERSION 3.3)
+
+find_package(WPEFramework)
+
+project_version(1.0.0)
+
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
+
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 find_package(ocdm REQUIRED)
 find_package(${NAMESPACE}Plugins REQUIRED)
@@ -58,4 +67,4 @@ endif()
 string(TOLOWER ${NAMESPACE} STORAGENAME)
 install(TARGETS ${MODULE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGENAME}/plugins)
 
-write_config(${PLUGIN_NAME})
+write_config()

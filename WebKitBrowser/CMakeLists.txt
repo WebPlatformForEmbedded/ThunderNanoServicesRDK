@@ -15,23 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+project(WebKitBrowser)
+
 cmake_minimum_required(VERSION 3.3)
 
 find_package(WPEFramework)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../cmake/")
+project_version(1.0.0)
 
-include(CmakeHelperFunctions)
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
-# Library installation section
-string(TOLOWER ${NAMESPACE} STORAGE_DIRECTORY)
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(BUILD_REFERENCE)
     add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
 endif()
-
-set(PLUGIN_NAME WebKitBrowser)
-set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
 
 option(PLUGIN_WEBKITBROWSER_YOUTUBE "Include YouTube in seperate plugin." OFF)
 option(PLUGIN_WEBKITBROWSER_APPS "Include Apps instance in seperate plugin." OFF)
@@ -172,7 +172,7 @@ endif()
 install(
     TARGETS ${MODULE_NAME}
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
-    COMPONENT ${MODULE_NAME})
+    COMPONENT ${PROJECT_NAME})
 
 # also build injected bundle
 add_subdirectory(InjectedBundle)
@@ -192,44 +192,53 @@ elseif(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "auto")
     set(PLUGIN_WEBKITBROWSER_WIDTH "")
 endif()
 
-write_config( ${PLUGIN_NAME} )
+write_config()
 
 # youtube configuration
 if(PLUGIN_WEBKITBROWSER_YOUTUBE)
-    write_config( YouTube )
+    write_config( PLUGINS YouTube )
 endif()
 
 # amazon configuration
 if(PLUGIN_AMAZON_HYBRID)
-    write_config( Amazon )
+    write_config( PLUGINS Amazon )
 endif()
 
 # Applications instance configuration
 if(PLUGIN_WEBKITBROWSER_APPS)
-    write_config( Apps )
+    write_config( PLUGINS Apps )
 endif()
 
 # UX configuration
 if(PLUGIN_WEBKITBROWSER_UX)
-    write_config( UX )
+    write_config( PLUGINS UX )
 endif()
 
 # Resident App configuration
 if(PLUGIN_WEBKITBROWSER_RESIDENT_APP)
-    write_config( ResidentApp )
+    write_config( PLUGINS ResidentApp )
 endif()
 
 # Search&Discovery configuration
 if(PLUGIN_WEBKITBROWSER_SEARCH_AND_DISCOVERY_APP)
-    write_config( SearchAndDiscoveryApp )
+    write_config( PLUGINS SearchAndDiscoveryApp )
 endif()
 
 # Html App configuration
 if(PLUGIN_WEBKITBROWSER_HTML_APP)
-    write_config( HtmlApp )
+    write_config( PLUGINS HtmlApp )
 endif()
 
 # Lightning App configuration
 if(PLUGIN_WEBKITBROWSER_LIGHTNING_APP)
-    write_config( LightningApp )
+    write_config( PLUGINS LightningApp )
+endif()
+
+if(PLUGINS_CREATE_IPKG_TARGETS)
+include(CreatePackage)
+CreateDebPackage(
+    NAME ${MODULE_NAME}
+    DESCRIPTION "WPEWebkit plugin"
+    COMPONENTS ${PROJECT_NAME}
+)
 endif()

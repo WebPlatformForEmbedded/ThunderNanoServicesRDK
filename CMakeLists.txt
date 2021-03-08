@@ -18,12 +18,6 @@
 cmake_minimum_required(VERSION 3.3)
 project(NanoServicesRDK)
 
-find_package(WPEFramework)
-
-# All packages that did not deliver a CMake Find script (and some deprecated scripts that need to be removed)
-# are located in the cmake directory. Include it in the search.
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
-
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
 option(PLUGIN_LOCATIONSYNC "Include LocationSync plugin" OFF)
@@ -36,9 +30,6 @@ option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
-
-# Library installation location
-string(TOLOWER ${NAMESPACE} STORAGE_DIRECTORY)
 
 if(PLUGIN_DEVICEIDENTIFICATION)
     add_subdirectory(DeviceIdentification)
@@ -78,25 +69,4 @@ endif()
 
 if(PLUGIN_WEBKITBROWSER)
     add_subdirectory(WebKitBrowser)
-endif()
-
-if(PLUGINS_CREATE_IPKG_TARGETS)
-    set(CPACK_GENERATOR "DEB")
-    set(CPACK_DEB_COMPONENT_INSTALL ON)
-    set(CPACK_COMPONENTS_GROUPING IGNORE)
-
-    set(CPACK_DEBIAN_PACKAGE_NAME "${PLUGINS_RDKSERVICES_OPKG_NAME}")
-    set(CPACK_DEBIAN_PACKAGE_VERSION "${PLUGINS_RDKSERVICES_OPKG_VERSION}")
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${PLUGINS_RDKSERVICES_OPKG_ARCHITECTURE}")
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PLUGINS_RDKSERVICES_OPKG_MAINTAINER}")
-    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${PLUGINS_RDKSERVICES_OPKG_DESCRIPTION}")
-    set(CPACK_PACKAGE_FILE_NAME "${PLUGINS_RDKSERVICES_OPKG_FILE_NAME}")
-
-    # list of components from which packages will be generated
-    set(CPACK_COMPONENTS_ALL
-        ${NAMESPACE}WebKitBrowser
-        WPEInjectedBundle
-    )
-
-    include(CPack)
 endif()

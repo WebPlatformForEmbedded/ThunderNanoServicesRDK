@@ -15,10 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(PLUGIN_NAME Packager)
-set(MODULE_NAME WPEFramework${PLUGIN_NAME})
+project(Packager)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../cmake/")
+cmake_minimum_required(VERSION 3.3)
+
+find_package(WPEFramework)
+
+project_version(1.0.0)
+
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
+
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(libprovision QUIET)
@@ -117,7 +126,7 @@ if (BUILD_WITH_PACKAGER_EX)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/opkg.conf
             DESTINATION "/usr/share/${NAMESPACE}/${PLUGIN_NAME}")
 
-    write_config(${PLUGIN_NAME})
+    write_config()
 
 ######################################################################################################
 ######################################################################################################
@@ -178,7 +187,7 @@ else (BUILD_WITH_PACKAGER_EX)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/opkg.conf
             DESTINATION "/usr/share/${NAMESPACE}/${PLUGIN_NAME}")
 
-    write_config(${PLUGIN_NAME})
+    write_config()
 
 endif (BUILD_WITH_PACKAGER_EX)
 

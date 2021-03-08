@@ -15,8 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(PLUGIN_NAME DeviceIdentification)
-set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
+project(DeviceIdentification)
+
+cmake_minimum_required(VERSION 3.3)
+
+find_package(WPEFramework)
+
+project_version(1.0.0)
+
+set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 option(PLUGIN_DEVICEIDENTIFICATION_USE_MFR "Get device identification details using MFR library" OFF)
 
@@ -97,4 +108,4 @@ target_include_directories(${MODULE_NAME}
 install(TARGETS ${MODULE_NAME} 
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
 
-write_config(${PLUGIN_NAME})
+write_config()
