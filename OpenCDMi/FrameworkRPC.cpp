@@ -687,7 +687,7 @@ namespace Plugin {
                 const std::string& mimeType) const override
             {
 
-                return (_parent.IsTypeSupported(keySystem, mimeType) ? 0 : 1);
+                return (_parent.IsTypeSupported(keySystem, mimeType) ? true : false);
             }
 
             virtual OCDM::OCDM_RESULT Metadata(

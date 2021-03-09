@@ -21,6 +21,7 @@
 #define DEVICEINFO_DEVICEINFO_H
 
 #include "Module.h"
+#include <interfaces/IDeviceInfo.h>
 #include <interfaces/json/JsonData_DeviceInfo.h>
 
 namespace WPEFramework {
@@ -77,6 +78,8 @@ namespace Plugin {
             , _subSystem(nullptr)
             , _systemId()
             , _deviceId()
+            , _implementation(nullptr)
+            , _connectionId(0)
         {
             RegisterAll();
         }
@@ -90,6 +93,7 @@ namespace Plugin {
         INTERFACE_ENTRY(PluginHost::IPlugin)
         INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_AGGREGATE(Exchange::IDeviceCapabilities, _implementation)
         END_INTERFACE_MAP
 
     public:
@@ -111,10 +115,12 @@ namespace Plugin {
         uint32_t get_systeminfo(JsonData::DeviceInfo::SysteminfoData& response) const;
         uint32_t get_addresses(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response) const;
         uint32_t get_socketinfo(JsonData::DeviceInfo::SocketinfoData& response) const;
+        uint32_t get_capabilities(JsonData::DeviceInfo::CapabilitiesData& response) const;
 
         void SysInfo(JsonData::DeviceInfo::SysteminfoData& systemInfo) const;
         void AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const;
         void SocketPortInfo(JsonData::DeviceInfo::SocketinfoData& socketPortInfo) const;
+        void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
         string GetDeviceId() const;
 
     private:
@@ -123,6 +129,9 @@ namespace Plugin {
         PluginHost::ISubSystem* _subSystem;
         string _systemId;
         mutable string _deviceId;
+        Exchange::IDeviceCapabilities* _implementation;
+        uint32_t _connectionId;
+
     };
 
 } // namespace Plugin

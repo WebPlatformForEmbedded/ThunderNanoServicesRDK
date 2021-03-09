@@ -49,7 +49,7 @@ namespace Plugin {
                 Add(_T("city"), &Region);
             }
 
-            virtual ~Data()
+            ~Data() override
             {
             }
 
@@ -128,7 +128,7 @@ namespace Plugin {
                 return (_locator != nullptr ? _locator->Probe(_source, _retries, _interval) : Core::ERROR_UNAVAILABLE);
             }
 
-            virtual void Dispatch()
+            void Dispatch() override
             {
                 _parent.SyncedLocation();
             }
@@ -172,7 +172,7 @@ namespace Plugin {
 
     public:
         LocationSync();
-        virtual ~LocationSync();
+        ~LocationSync() override;
 
         // Build QueryInterface implementation, specifying all possible interfaces to be returned.
         BEGIN_INTERFACE_MAP(LocationSync)
@@ -184,14 +184,14 @@ namespace Plugin {
     public:
         //   IPlugin methods
         // -------------------------------------------------------------------------------------------------------
-        virtual const string Initialize(PluginHost::IShell* service) override;
-        virtual void Deinitialize(PluginHost::IShell* service) override;
-        virtual string Information() const override;
+        const string Initialize(PluginHost::IShell* service) override;
+        void Deinitialize(PluginHost::IShell* service) override;
+        string Information() const override;
 
         //   IWeb methods
         // -------------------------------------------------------------------------------------------------------
-        virtual void Inbound(Web::Request& request) override;
-        virtual Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
+        void Inbound(Web::Request& request) override;
+        Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
 
     private:
         void RegisterAll();
