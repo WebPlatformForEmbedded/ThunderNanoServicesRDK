@@ -88,6 +88,10 @@ elseif (BUILD_REALTEK)
 	target_sources(${MODULE_NAME}
         PRIVATE
             Implementation/Realtek/Realtek.cpp)
+elseif(UNIX AND NOT APPLE)
+    target_sources(${MODULE_NAME}
+        PRIVATE
+            Implementation/Linux/Linux.cpp)
 else ()
     message(FATAL_ERROR "There is no platform backend for device identifier plugin")
 endif()
