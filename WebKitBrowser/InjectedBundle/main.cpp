@@ -151,6 +151,10 @@ public:
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
+        if (_engine.IsValid() == true) {
+            _engine.Release();
+        }
+
 #ifdef WEBKIT_GLIB_API
         g_object_unref(_scriptWorld);
         g_object_unref(_bundle);
