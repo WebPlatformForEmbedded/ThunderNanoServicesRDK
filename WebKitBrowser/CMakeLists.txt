@@ -23,7 +23,7 @@ set(WEBKITBROWSERIMPLEMENTATION "webkitBrowserImplementation")
 set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION_LIB "lib${WEBKITBROWSERIMPLEMENTATION}.so" CACHE STRING "Specify a library with a webkit implentation." )
 
 find_package(WPEFramework)
-
+project_version(1.0.0)
 
 set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
@@ -111,7 +111,7 @@ set(PLUGIN_AMAZON_LOCALSTORAGE_ENABLE true CACHE STRING "Enable LocalStorage of 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 
-set (NAMESPACE WPEFramework)
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
