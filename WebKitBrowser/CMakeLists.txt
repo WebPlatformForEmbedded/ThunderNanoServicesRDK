@@ -19,9 +19,11 @@ project(WebKitBrowser)
 
 cmake_minimum_required(VERSION 3.3)
 
+set(WEBKITBROWSERIMPLEMENTATION "webkitBrowserImplementation")
+set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION_LIB "lib${WEBKITBROWSERIMPLEMENTATION}.so" CACHE STRING "Specify a library with a webkit implentation." )
+
 find_package(WPEFramework)
 
-project_version(1.0.0)
 
 set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
@@ -108,30 +110,20 @@ set(PLUGIN_AMAZON_LOCALSTORAGE_ENABLE true CACHE STRING "Enable LocalStorage of 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+
+set (NAMESPACE WPEFramework)
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
-find_package(GLIB REQUIRED)
-find_package(WPEWebKit REQUIRED)
-find_package(WPEBackend REQUIRED)
-if(DEFINED WEBKIT_GLIB_API)
-find_package(LibSoup REQUIRED)
-endif()
+
 
 set(SOURCE_LIST
     Module.cpp
     WebKitBrowser.cpp
     WebKitBrowserJsonRpc.cpp
-    WebKitImplementation.cpp
 )
 
-if(NOT DEFINED WEBKIT_GLIB_API)
-    set(SOURCE_LIST
-        ${SOURCE_LIST}
-        InjectedBundle/Tags.cpp
-        InjectedBundle/Utils.cpp
-)
-endif()
+
 
 add_library(${MODULE_NAME} SHARED
     ${SOURCE_LIST}
@@ -145,29 +137,14 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-        ${NAMESPACE}Definitions::${NAMESPACE}Definitions
-        ${WPE_BACKEND_LIBRARIES}
-        ${LIBSOUP_LIBRARIES}
-        ${GLIB_LIBRARIES}
-        ${WPE_WEBKIT_LIBRARIES}
         ${SECURITY_TOKEN_LIBRARY})
 
-target_include_directories(${MODULE_NAME}
-    PRIVATE
-        ${WPE_BACKEND_INCLUDE_DIRS}
-        ${WPE_WEBKIT_INCLUDE_DIRS}
-        ${WPE_WEBKIT_INCLUDE_DIRS}/WPE
-        ${GLIB_INCLUDE_DIRS}
-        ${LIBSOUP_INCLUDE_DIRS}
-)
 
 if(WPE_WEBKIT_DEPRECATED_API)
     target_compile_definitions(${MODULE_NAME} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
 endif()
 
-if(WEBKIT_GLIB_API)
-    target_compile_definitions(${MODULE_NAME} PRIVATE WEBKIT_GLIB_API=${WEBKIT_GLIB_API})
-endif()
+
 
 install(
     TARGETS ${MODULE_NAME}
@@ -241,4 +218,59 @@ CreateDebPackage(
     DESCRIPTION "WPEWebkit plugin"
     COMPONENTS ${PROJECT_NAME}
 )
+
 endif()
+
+
+# libWPEFrameworkwebkitBrowserImplementation.so
+set(TARGET ${NAMESPACE}${WEBKITBROWSERIMPLEMENTATION})
+
+
+find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Definitions REQUIRED)
+find_package(CompileSettingsDebug CONFIG REQUIRED)
+find_package(GLIB REQUIRED)
+find_package(WPEWebKit REQUIRED)
+find_package(WPEBackend REQUIRED)
+if(DEFINED WEBKIT_GLIB_API)
+find_package(LibSoup REQUIRED)
+endif()
+
+add_library(${TARGET}
+lib/WebKitImplementation.cpp)
+
+target_link_libraries(${TARGET}
+    PRIVATE
+        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Definitions::${NAMESPACE}Definitions
+        ${WPE_BACKEND_LIBRARIES}
+        ${GLIB_LIBRARIES}
+        ${WPE_WEBKIT_LIBRARIES}
+        ${SECURITY_TOKEN_LIBRARY})
+
+target_include_directories(${TARGET}
+        PRIVATE
+            ${WPE_BACKEND_INCLUDE_DIRS}
+            ${WPE_WEBKIT_INCLUDE_DIRS}
+            ${WPE_WEBKIT_INCLUDE_DIRS}/WPE
+            ${GLIB_INCLUDE_DIRS}
+            ${LIBSOUP_INCLUDE_DIRS}
+    )
+
+if(DEFINED WEBKIT_GLIB_API)
+target_link_libraries(${TARGET}
+PRIVATE
+${LIBSOUP_LIBRARIES})
+endif()
+
+    
+
+set_target_properties(${TARGET} PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES
+        FRAMEWORK FALSE)
+
+install(
+    TARGETS ${TARGET}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
+    COMPONENT ${PROJECT_NAME})
