@@ -20,6 +20,7 @@ set(MODULE_NAME WPE${PLUGIN_NAME})
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(securityagent QUIET)
+find_package(WPEWebKit REQUIRED)
 if(DEFINED WEBKIT_GLIB_API)
 find_package(LibSoup REQUIRED)
 endif()
