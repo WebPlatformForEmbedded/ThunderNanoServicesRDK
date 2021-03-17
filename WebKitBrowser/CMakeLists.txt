@@ -121,22 +121,9 @@ set(SOURCE_LIST
     Module.cpp
     WebKitBrowser.cpp
     WebKitBrowserJsonRpc.cpp
-<<<<<<< HEAD
 )
 
 
-=======
-    WebKitImplementation.cpp
-    InjectedBundle/Tags.cpp
-)
-
-if(NOT DEFINED WEBKIT_GLIB_API)
-    set(SOURCE_LIST
-        ${SOURCE_LIST}
-        InjectedBundle/Utils.cpp
-)
-endif()
->>>>>>> master
 
 add_library(${MODULE_NAME} SHARED
     ${SOURCE_LIST}
