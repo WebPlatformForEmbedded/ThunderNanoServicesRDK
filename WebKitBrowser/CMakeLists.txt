@@ -20,7 +20,7 @@ project(WebKitBrowser)
 cmake_minimum_required(VERSION 3.3)
 
 set(WEBKITBROWSERIMPLEMENTATION "webkitBrowserImplementation")
-set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION_LIB "lib$${NAMESPACE}{WEBKITBROWSERIMPLEMENTATION}.so" CACHE STRING "Specify a library with a webkit implentation." )
+set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION_LIB "lib${NAMESPACE}${WEBKITBROWSERIMPLEMENTATION}.so" CACHE STRING "Specify a library with a webkit implentation." )
 
 find_package(WPEFramework)
 project_version(1.0.0)
