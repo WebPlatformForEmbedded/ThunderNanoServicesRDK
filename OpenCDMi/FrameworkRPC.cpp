@@ -109,7 +109,7 @@ namespace Plugin {
         public:
             ExternalAccess(
                 const Core::NodeId& source, 
-                ::OCDM::IAccessorOCDM* parentInterface, 
+                ::OCDM::IAccessorOCDM* parentInterface,
                 const Core::ProxyType<RPC::InvokeServer> & engine)
                 : RPC::Communicator(source, _T(""), Core::ProxyType<Core::IIPCServer>(engine))
                 , _parentInterface(parentInterface)
@@ -1076,6 +1076,7 @@ namespace Plugin {
     public:
         OCDMImplementation()
             : _entryPoint(nullptr)
+            , _engine()
             , _service(nullptr)
             , _compliant(false)
             , _systemToFactory()
@@ -1093,6 +1094,9 @@ namespace Plugin {
                 _entryPoint->Release();
             }
 
+            if (_engine.IsValid()) {
+                _engine.Release();
+            }
             _systemLibraries.clear();
 
             TRACE(Trace::Information, (_T("Destructed OCDMImplementation Service: %p"), this));
@@ -1186,14 +1190,15 @@ namespace Plugin {
             }
 
             _entryPoint = Core::Service<AccessorOCDM>::Create<::OCDM::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
-            Core::ProxyType<RPC::InvokeServer> server = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
-            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, server);
+            _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
+            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _engine);
 
             if (_service != nullptr) {
 
                 if (_service->IsListening() == false) {
                     delete _service;
                     _entryPoint->Release();
+                    _engine.Release();
                     _service = nullptr;
                     _entryPoint = nullptr;
                 } else {
@@ -1379,6 +1384,7 @@ namespace Plugin {
         }
 
         ::OCDM::IAccessorOCDM* _entryPoint;
+        Core::ProxyType<RPC::InvokeServer> _engine;
         ExternalAccess* _service;
         bool _compliant;
         std::map<const std::string, SystemFactory> _systemToFactory;

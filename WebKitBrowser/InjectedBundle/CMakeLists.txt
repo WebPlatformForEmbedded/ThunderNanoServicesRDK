@@ -33,9 +33,17 @@ option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 set(SOURCE_LIST
     main.cpp
     WhiteListedOriginDomainsList.cpp
+    Tags.cpp
 )
 
-if(NOT DEFINED WEBKIT_GLIB_API)
+if(DEFINED WEBKIT_GLIB_API)
+    set(SOURCE_LIST
+        ${SOURCE_LIST}
+        MilestoneGLib.cpp
+        NotifyWPEFrameworkGLib.cpp
+        RequestHeadersGLib.cpp
+    )
+else()
     set(SOURCE_LIST
         ${SOURCE_LIST}
         RequestHeaders.cpp
@@ -43,8 +51,7 @@ if(NOT DEFINED WEBKIT_GLIB_API)
         JavaScriptFunction.cpp
         NotifyWPEFramework.cpp
         Milestone.cpp
-       ClassDefinition.cpp
-       Tags.cpp
+        ClassDefinition.cpp
     )
 endif()
 
@@ -57,7 +64,12 @@ if(PLUGIN_AMAZON_HYBRID)
 endif()
 
 if(securityagent_FOUND)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE SecurityAgentGLib.cpp)
+    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_SECURITY_AGENT)
+else()
     target_sources(${MODULE_NAME} PRIVATE SecurityAgent.cpp)
+endif()
     target_link_libraries(${MODULE_NAME}
         PRIVATE 
             securityagent::securityagent)
@@ -65,7 +77,11 @@ endif()
 
 if(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS)
     find_package(AampJSBindings REQUIRED)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE AAMPJSBindingsGLib.cpp)
+else()
     target_sources(${MODULE_NAME} PRIVATE AAMPJSBindings.cpp)
+endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_AAMP_JSBINDINGS)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
@@ -73,7 +89,11 @@ if(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS)
 endif()
 
 if(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE)
+if(DEFINED WEBKIT_GLIB_API)
+    target_sources(${MODULE_NAME} PRIVATE BridgeObjectGLib.cpp)
+else()
     target_sources(${MODULE_NAME} PRIVATE BridgeObject.cpp)
+endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_BADGER_BRIDGE)
 endif()
 
