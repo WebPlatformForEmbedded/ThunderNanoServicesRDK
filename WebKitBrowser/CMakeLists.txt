@@ -125,6 +125,7 @@ set(SOURCE_LIST
     WebKitBrowserJsonRpc.cpp
 )
 
+
 add_library(${MODULE_NAME} SHARED
     ${SOURCE_LIST}
 )
@@ -140,7 +141,10 @@ target_link_libraries(${MODULE_NAME}
         ${SECURITY_TOKEN_LIBRARY})
 
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
-    WebKitImplementation.cpp)
+    Module.cpp
+    WebKitImplementation.cpp
+    InjectedBundle/Tags.cpp
+    )
 
 target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
