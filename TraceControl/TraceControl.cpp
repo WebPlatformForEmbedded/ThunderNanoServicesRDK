@@ -333,7 +333,7 @@ namespace Plugin {
             ASSERT( dynamic_cast<WebSocketExporter*>(media) != nullptr );
 
             if( static_cast<WebSocketExporter*>(media)->IsActive() == false ) {
-                TRACE(Trace::Information, (Trace::Format(_T("Opened export connection channel ID [%d]"), channel.Id()).c_str()));
+                TRACE(Trace::Information, (Core::Format(_T("Opened export connection channel ID [%d]"), channel.Id()).c_str()));
                 accepted = static_cast<WebSocketExporter*>(media)->Activate(channel);
             }
         }
@@ -349,7 +349,7 @@ namespace Plugin {
             ASSERT( dynamic_cast<WebSocketExporter*>(media) != nullptr );
 
             if( static_cast<WebSocketExporter*>(media)->Deactivate(channel) == true) {
-                TRACE(Trace::Information, (Trace::Format(_T("Closed export connection channel ID [%d]"), channel.Id()).c_str()));
+                TRACE(Trace::Information, (Core::Format(_T("Closed export connection channel ID [%d]"), channel.Id()).c_str()));
             }
         }
     }
