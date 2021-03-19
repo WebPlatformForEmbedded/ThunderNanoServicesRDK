@@ -20,7 +20,6 @@ project(WebKitBrowser)
 cmake_minimum_required(VERSION 3.3)
 
 find_package(WPEFramework)
-
 project_version(1.0.0)
 
 set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
@@ -43,6 +42,8 @@ option(PLUGIN_WEBKITBROWSER_LIGHTNING_APP "Include Lightning App in seperate plu
 
 option(PLUGIN_WEBKITBROWSER_ENABLE_JIT "Enable the use of JIT javascript optimalization" ON)
 option(PLUGIN_WEBKITBROWSER_ENABLE_DFG "Enable the use of DFG javascript optimalization" ON)
+
+set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implentation." )
 
 set(PLUGIN_WEBKITBROWSER_AUTOSTART false CACHE STRING "Automatically start WebKitBrowser plugin")
 set(PLUGIN_WEBKITBROWSER_TRANSPARENT false CACHE STRING "Set transparency")
@@ -122,16 +123,8 @@ set(SOURCE_LIST
     Module.cpp
     WebKitBrowser.cpp
     WebKitBrowserJsonRpc.cpp
-    WebKitImplementation.cpp
-    InjectedBundle/Tags.cpp
 )
 
-if(NOT DEFINED WEBKIT_GLIB_API)
-    set(SOURCE_LIST
-        ${SOURCE_LIST}
-        InjectedBundle/Utils.cpp
-)
-endif()
 
 add_library(${MODULE_NAME} SHARED
     ${SOURCE_LIST}
@@ -145,32 +138,51 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${SECURITY_TOKEN_LIBRARY})
+
+add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
+    Module.cpp
+    WebKitImplementation.cpp
+    InjectedBundle/Tags.cpp
+    )
+
+target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
+    PRIVATE
+        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${WPE_BACKEND_LIBRARIES}
-        ${LIBSOUP_LIBRARIES}
         ${GLIB_LIBRARIES}
         ${WPE_WEBKIT_LIBRARIES}
         ${SECURITY_TOKEN_LIBRARY})
 
-target_include_directories(${MODULE_NAME}
-    PRIVATE
-        ${WPE_BACKEND_INCLUDE_DIRS}
-        ${WPE_WEBKIT_INCLUDE_DIRS}
-        ${WPE_WEBKIT_INCLUDE_DIRS}/WPE
-        ${GLIB_INCLUDE_DIRS}
-        ${LIBSOUP_INCLUDE_DIRS}
-)
+target_include_directories(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
+        PRIVATE
+            ${WPE_BACKEND_INCLUDE_DIRS}
+            ${WPE_WEBKIT_INCLUDE_DIRS}
+            ${WPE_WEBKIT_INCLUDE_DIRS}/WPE
+            ${GLIB_INCLUDE_DIRS}
+            ${LIBSOUP_INCLUDE_DIRS}
+    )
 
-if(WPE_WEBKIT_DEPRECATED_API)
-    target_compile_definitions(${MODULE_NAME} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
+if(DEFINED WEBKIT_GLIB_API)
+    target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
+        PRIVATE
+        ${LIBSOUP_LIBRARIES})
+    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
 endif()
 
-if(WEBKIT_GLIB_API)
-    target_compile_definitions(${MODULE_NAME} PRIVATE WEBKIT_GLIB_API=${WEBKIT_GLIB_API})
-endif()
+set_target_properties(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED YES
+        FRAMEWORK FALSE)
 
 install(
     TARGETS ${MODULE_NAME}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
+    COMPONENT ${PROJECT_NAME})
+
+install(
+    TARGETS ${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
