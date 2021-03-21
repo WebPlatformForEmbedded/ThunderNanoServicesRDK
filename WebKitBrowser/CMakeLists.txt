@@ -140,7 +140,9 @@ target_link_libraries(${MODULE_NAME}
         ${SECURITY_TOKEN_LIBRARY})
 
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
-    WebKitImplementation.cpp)
+	Module.cpp
+	InjectedBundle/Tags.cpp
+	WebKitImplementation.cpp)
 
 target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
