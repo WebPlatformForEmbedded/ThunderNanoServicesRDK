@@ -80,9 +80,9 @@ namespace Plugin {
     private:
         void HandleTraceMessage(const string& message) override {
 #ifndef __WINDOWS__
-            syslog(LOG_NOTICE, message.c_str());
+            syslog(LOG_NOTICE, _T("%s"), message.c_str());
 #else
-            printf(message.c_str());
+            printf(_T("%s"), message.c_str());
 #endif
         }
     };
@@ -100,7 +100,7 @@ namespace Plugin {
 
     private:
         void HandleTraceMessage(const string& message) override {
-            printf(message.c_str());
+            printf(_T("%s"), message.c_str());
         }
     };
     class TraceJSONOutput : public Trace::ITraceMedia {
