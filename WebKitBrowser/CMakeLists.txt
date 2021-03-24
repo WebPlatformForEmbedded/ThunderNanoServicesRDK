@@ -107,27 +107,16 @@ set(PLUGIN_AMAZON_USERAGENT ${PLUGIN_WEBKITBROWSER_USERAGENT} CACHE STRING "User
 set(PLUGIN_AMAZON_WEBINSPECTOR_ADDRESS 0.0.0.0:9999 CACHE STRING "IP:Port for WebInspector of Amazon")
 set(PLUGIN_AMAZON_LOCALSTORAGE_ENABLE true CACHE STRING "Enable LocalStorage of Amazon")
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
-find_package(GLIB REQUIRED)
 find_package(WPEWebKit REQUIRED)
 find_package(WPEBackend REQUIRED)
-if(DEFINED WEBKIT_GLIB_API)
-find_package(LibSoup REQUIRED)
-endif()
 
-set(SOURCE_LIST
+add_library(${MODULE_NAME} SHARED
     Module.cpp
     WebKitBrowser.cpp
     WebKitBrowserJsonRpc.cpp
-)
-
-
-add_library(${MODULE_NAME} SHARED
-    ${SOURCE_LIST}
 )
 
 set_target_properties(${MODULE_NAME} PROPERTIES
@@ -151,29 +140,16 @@ target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
-        ${WPE_BACKEND_LIBRARIES}
-        ${GLIB_LIBRARIES}
-        ${WPE_WEBKIT_LIBRARIES}
+        WPEBackend::WPEBackend
+        WPEWebKit::WPEWebKit
         ${SECURITY_TOKEN_LIBRARY})
 
-target_include_directories(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
-        PRIVATE
-            ${WPE_BACKEND_INCLUDE_DIRS}
-            ${WPE_WEBKIT_INCLUDE_DIRS}
-            ${WPE_WEBKIT_INCLUDE_DIRS}/WPE
-            ${GLIB_INCLUDE_DIRS}
-            ${LIBSOUP_INCLUDE_DIRS}
-    )
-
 if(WPE_WEBKIT_DEPRECATED_API)
-    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
+    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WPE_WEBKIT_DEPRECATED_API)
 endif()
 
-if(DEFINED WEBKIT_GLIB_API)
-    target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
-        PRIVATE
-        ${LIBSOUP_LIBRARIES})
-    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WEBKIT_GLIB_API=${WEBKIT_GLIB_API})
+if(WEBKIT_GLIB_API)
+    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WEBKIT_GLIB_API)
 endif()
 
 set_target_properties(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PROPERTIES
