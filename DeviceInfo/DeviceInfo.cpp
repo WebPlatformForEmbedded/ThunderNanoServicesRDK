@@ -44,7 +44,7 @@ namespace Plugin {
 
         if (_implementation == nullptr) {
             _service = nullptr;
-            TRACE_L1(_T("DeviceInfo could not be instantiated"));
+            SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
         } else {
             _implementation->Configure(_service);
         }

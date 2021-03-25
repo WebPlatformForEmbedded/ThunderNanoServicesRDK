@@ -59,7 +59,7 @@ namespace Plugin {
             _source = config.Source.Value();
             _service = service;
 
-            _sink.Initialize(service, config.Source.Value(), config.Interval.Value(), config.Retries.Value());
+            _sink.Initialize(config.Source.Value(), config.Interval.Value(), config.Retries.Value());
         } else {
             result = _T("URL for retrieving location is incorrect !!!");
         }

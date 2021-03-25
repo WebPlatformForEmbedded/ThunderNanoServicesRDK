@@ -43,9 +43,7 @@ namespace Plugin {
         ~TraceTextOutput() override = default;
 
     public:
-
-
-        void Output(const char fileName[], const uint32_t lineNumber, const char className[], const Trace::ITrace* information) override
+        void Output(const char fileName[], const uint32_t lineNumber, const char /* className */ [], const Trace::ITrace* information) override
         {
             std::stringstream output;
             if( _abbreviated == true ) {

@@ -167,7 +167,7 @@ namespace {
 
     WPEFramework::Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
 
-    WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand> WebSocketExporter::HandleExportCommand(const uint32_t ID, const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element) {
+    WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand> WebSocketExporter::HandleExportCommand(const uint32_t, const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element) {
         WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand> inbound(WPEFramework::Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
 
         ASSERT(inbound.IsValid() == true);
@@ -354,7 +354,7 @@ namespace Plugin {
         }
     }
 
-    Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string& identifier) {
+    Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string&) {
 
         return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element());
     }

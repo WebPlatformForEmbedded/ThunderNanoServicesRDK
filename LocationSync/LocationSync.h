@@ -90,7 +90,7 @@ namespace Plugin {
             }
 
         public:
-            inline void Initialize(PluginHost::IShell* service, const string& source, const uint16_t interval, const uint8_t retries)
+            inline void Initialize(const string& source, const uint16_t interval, const uint8_t retries)
             {
                 _source = source;
                 _interval = interval;
@@ -125,7 +125,7 @@ namespace Plugin {
 
                 ASSERT(_locator != nullptr);
 
-                return (_locator != nullptr ? _locator->Probe(_source, _retries, _interval) : Core::ERROR_UNAVAILABLE);
+                return (_locator != nullptr ? _locator->Probe(_source, _retries, _interval) : static_cast<uint32_t>(Core::ERROR_UNAVAILABLE));
             }
 
             void Dispatch() override

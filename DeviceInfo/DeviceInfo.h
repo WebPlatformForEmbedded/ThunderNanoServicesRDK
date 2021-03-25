@@ -55,17 +55,17 @@ namespace Plugin {
         DeviceInfo(const DeviceInfo&) = delete;
         DeviceInfo& operator=(const DeviceInfo&) = delete;
 
-        uint32_t addresses(const Core::JSON::String& parameters, Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response)
+        uint32_t addresses(const Core::JSON::String&, Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response)
         {
             AddressInfo(response);
             return (Core::ERROR_NONE);
         }
-        uint32_t system(const Core::JSON::String& parameters, JsonData::DeviceInfo::SysteminfoData& response)
+        uint32_t system(const Core::JSON::String&, JsonData::DeviceInfo::SysteminfoData& response)
         {
             SysInfo(response);
             return (Core::ERROR_NONE);
         }
-        uint32_t sockets(const Core::JSON::String& parameters, JsonData::DeviceInfo::SocketinfoData& response)
+        uint32_t sockets(const Core::JSON::String&, JsonData::DeviceInfo::SocketinfoData& response)
         {
             SocketPortInfo(response);
             return (Core::ERROR_NONE);

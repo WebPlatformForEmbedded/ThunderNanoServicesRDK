@@ -84,6 +84,17 @@ namespace Plugin {
             {
             }
 
+            MetaData& operator= (const MetaData& rhs)
+            {
+                _resident = rhs._resident;
+                _allocated = rhs._allocated;
+                _shared = rhs._shared;
+                _process = rhs._process;
+                _operational = rhs._operational;
+
+                return (*this);
+            }
+ 
         public:
             void Measure(Exchange::IMemory* memInterface)
             {
