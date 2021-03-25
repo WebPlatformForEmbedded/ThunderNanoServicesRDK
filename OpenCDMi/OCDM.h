@@ -80,14 +80,16 @@ namespace Plugin {
 
             public:
                 System()
-                    : Name()
+                    : Core::JSON::Container()
+                    , Name()
                     , Designators()
                 {
                     Add(_T("name"), &Name);
                     Add(_T("designators"), &Designators);
                 }
                 System(const string& name, RPC::IStringIterator* entries)
-                    : Name()
+                    : Core::JSON::Container()
+                    , Name()
                     , Designators()
                 {
                     Add(_T("name"), &Name);
@@ -99,7 +101,8 @@ namespace Plugin {
                     Load(entries);
                 }
                 System(const System& copy)
-                    : Name(copy.Name)
+                    : Core::JSON::Container()
+                    , Name(copy.Name)
                     , Designators(copy.Designators)
                 {
                     Add(_T("name"), &Name);
