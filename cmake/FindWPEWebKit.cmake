@@ -26,81 +26,84 @@
 # So here we purposely left one underscore away
 
 find_package(PkgConfig)
-pkg_check_modules(PC_WPE_WEBKIT wpe-webkit)
 
-if(PC_WPE_WEBKIT_FOUND)
-    if(WPE_WEBKIT_FIND_VERSION AND PC_WPE_WEBKIT_VERSION)
-        if ("${WPE_WEBKIT_FIND_VERSION}" VERSION_GREATER "${PC_WPE_WEBKIT_VERSION}")
-            message(WARNING "Incorrect version, found ${PC_WPE_WEBKIT_VERSION}, need at least ${WPEFRAMEWORK_FIND_VERSION}, please install correct version ${WPE_WEBKIT_FIND_VERSION}")
-            set(WPE_WEBKIT_FOUND_TEXT "Found incorrect version")
-            unset(PC_WPE_WEBKIT_FOUND)
-        endif()
-    endif()
-else()
-    pkg_search_module(PC_WPE_WEBKIT wpe-webkit-deprecated-0.1 wpe-webkit-1.0)
-    if(NOT PC_WPE_WEBKIT_FOUND)
-        set(WPE_WEBKIT_FOUND_TEXT "Not found")
-    endif()
+if (NOT PC_WPE_WEBKIT_FOUND)
+pkg_check_modules(PC_WPE_WEBKIT wpe-webkit-1.0)
 endif()
 
-if(PC_WPE_WEBKIT_FOUND)
-    if("${PC_WPE_WEBKIT_VERSION}" STREQUAL "0.0.20170728")
-        set(WPE_WEBKIT_DEPRECATED_API TRUE)
-    endif()
-    if("${PC_WPE_WEBKIT_VERSION}" VERSION_GREATER "2.28")
-        set(WEBKIT_GLIB_API TRUE)
-    endif()
-    find_path(
-        WPE_WEBKIT_INCLUDE_DIRS
-        NAMES WPE/WebKit.h wpe/webkit.h
-        HINTS ${PC_WPE_WEBKIT_INCLUDEDIR} ${PC_WPE_WEBKIT_INCLUDE_DIRS})
-
-    set(WPE_WEBKIT_LIBRARIES )
-    foreach(LIB ${PC_WPE_WEBKIT_LIBRARIES})
-        find_library(WPE_WEBKIT_LIBRARY_${LIB} NAMES ${LIB}
-            HINTS ${PC_WPE_WEBKIT_LIBRARY_DIRS} ${PC_WPE_WEBKIT_LIBDIR})
-        list(APPEND WPE_WEBKIT_LIBRARIES ${WPE_WEBKIT_LIBRARY_${LIB}})
-    endforeach()
-
-    if("${WPE_WEBKIT_INCLUDE_DIRS}" STREQUAL "" OR "${WPE_WEBKIT_LIBRARIES}" STREQUAL "")
-        set(WPE_WEBKIT_FOUND_TEXT "Not found")
-    else()
-        set(WPE_WEBKIT_FOUND_TEXT "Found")
-    endif()
-else()
-    set(WPE_WEBKIT_FOUND_TEXT "Not found")
+if (NOT PC_WPE_WEBKIT_FOUND)
+pkg_check_modules(PC_WPE_WEBKIT wpe-webkit-0.1)
 endif()
 
-file(WRITE ${CMAKE_BINARY_DIR}/test_atomic.cpp
-        "#include <atomic>\n"
-        "int main() { std::atomic<int64_t> i(0); i++; return 0; }\n")
-try_compile(ATOMIC_BUILD_SUCCEEDED ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/test_atomic.cpp)
-if (NOT ATOMIC_BUILD_SUCCEEDED)
-    list(APPEND WPE_WEBKIT_LIBRARIES atomic)
+if (PC_WPE_WEBKIT_FOUND)
+    set(WPE_WEBKIT_FOUND TRUE)
+    set(WPE_WEBKIT_VERSION ${PC_WPE_WEBKIT_VERSION})
+
+    list(GET PC_WPE_WEBKIT_LIBRARIES 0 WPE_WEBKIT_LIBRARY_SHORT)
+    list(REMOVE_AT PC_WPE_WEBKIT_LIBRARIES 0)
+    find_library(WPE_WEBKIT_LIBRARY ${WPE_WEBKIT_LIBRARY_SHORT}
+        HINTS ${PC_WPE_WEBKIT_LIBDIR} ${PC_WPE_WEBKIT_LIBRARY_DIRS}
+    )
+    
+    set(WPE_WEBKIT_CFLAGS ${PC_WPE_WEBKIT_CFLAGS})
+    list(APPEND WPE_WEBKIT_CFLAGS ${PC_WPE_WEBKIT_CFLAGS_OTHER})
+
+    set(WPE_WEBKIT_NAMES ${PC_WPE_WEBKIT_LIBRARIES})
+    foreach (_library ${WPE_WEBKIT_NAMES})
+        find_library(WPE_WEBKIT_LIBRARIES_${_library} ${_library}
+	        HINTS ${PC_WPE_WEBKIT_LIBDIR} ${PC_WPE_WEBKIT_LIBRARY_DIRS}
+        )
+        list(APPEND WPE_WEBKIT_LINK_LIBRARIES ${WPE_WEBKIT_LIBRARIES_${_library}})
+    endforeach ()
+
+    set(WPE_WEBKIT_INCLUDE_DIRS ${PC_WPE_WEBKIT_INCLUDE_DIRS})
+
+    file(WRITE ${CMAKE_BINARY_DIR}/test_atomic.cpp
+            "#include <atomic>\n"
+            "int main() { std::atomic<int64_t> i(0); i++; return 0; }\n")
+    try_compile(ATOMIC_BUILD_SUCCEEDED ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/test_atomic.cpp)
+    if (NOT ATOMIC_BUILD_SUCCEEDED)
+        list(APPEND WPE_WEBKIT_LINK_LIBRARIES atomic)
+    endif ()
+    file(REMOVE ${CMAKE_BINARY_DIR}/test_atomic.cpp)
+
+    pkg_check_modules(PC_WPE_WEBKIT_DEPRECATED_API wpe-webkit-deprecated-0.1)
+    if(PC_WPE_WEBKIT_DEPRECATED_API_FOUND)
+        find_path( PC_WPE_WEBKIT_DEPRECATED_API_INCLUDE_DIR
+            NAMES WebKit.h
+            PATH_SUFFIX WPE
+            HINTS ${PC_WPE_WEBKIT_DEPRECATED_API_INCLUDEDIR} ${PC_WPE_WEBKIT_DEPRECATED_API_INCLUDE_DIRS})
+        list(APPEND WPE_WEBKIT_INCLUDE_DIRS "${PC_WPE_WEBKIT_DEPRECATED_API_INCLUDE_DIR}" "${PC_WPE_WEBKIT_DEPRECATED_API_INCLUDE_DIR}/WPE")
+    endif()
+
+    list(REMOVE_DUPLICATES WPE_WEBKIT_INCLUDE_DIRS)
+    list(REMOVE_DUPLICATES WPE_WEBKIT_LINK_LIBRARIES)
 endif ()
-file(REMOVE ${CMAKE_BINARY_DIR}/test_atomic.cpp)
 
-message(STATUS "WPEWebKit      : ${WPE_WEBKIT_FOUND_TEXT}")
-message(STATUS "  version      : ${PC_WPE_WEBKIT_VERSION}")
-message(STATUS "  cflags       : ${PC_WPE_WEBKIT_CFLAGS}")
-message(STATUS "  cflags other : ${PC_WPE_WEBKIT_CFLAGS_OTHER}")
-message(STATUS "  include dirs : ${PC_WPE_WEBKIT_INCLUDE_DIRS} ${PC_WPE_WEBKIT_INCLUDEDIR}")
-message(STATUS "  lib dirs     : ${PC_WPE_WEBKIT_LIBRARY_DIRS} ${PC_WPE_WEBKIT_LIBDIR}")
-message(STATUS "  include dirs : ${WPE_WEBKIT_INCLUDE_DIRS}")
-message(STATUS "  libs         : ${WPE_WEBKIT_LIBRARIES}")
-
-set(WPE_WEBKIT_DEFINITIONS ${PC_WPE_WEBKIT_PLUGINS_CFLAGS_OTHER})
-set(WPE_WEBKIT_INCLUDE_DIR ${WPE_WEBKIT_INCLUDE_DIRS})
-set(WPE_WEBKIT_LIBRARY ${WPE_WEBKIT_LIBRARIES})
-set(WPE_WEBKIT_LIBRARY_DIRS ${PC_WPE_WEBKIT_LIBRARY_DIRS})
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(WPE_WEBKIT DEFAULT_MSG
-    WPE_WEBKIT_LIBRARIES  WPE_WEBKIT_INCLUDE_DIRS)
-
-if(WPE_WEBKIT_FOUND)
+if(WPE_WEBKIT_VERSION STREQUAL "0.0.20170728")
+    set(WPE_WEBKIT_DEPRECATED_API TRUE CACHE INTERNAL "" FORCE)
 else()
-    message(WARNING "Could not find WPEFrameworkPlugins")
+    set(WPE_WEBKIT_DEPRECATED_API FALSE CACHE INTERNAL "" FORCE)
 endif()
 
-mark_as_advanced(WPE_WEBKIT_DEFINITIONS WPE_WEBKIT_INCLUDE_DIRS WPE_WEBKIT_LIBRARIES)
+if(WPE_WEBKIT_VERSION VERSION_GREATER 2.28.0)
+    set(WEBKIT_GLIB_API TRUE CACHE INTERNAL "" FORCE)
+else()
+    set(WEBKIT_GLIB_API FALSE CACHE INTERNAL "" FORCE)
+endif()
+
+find_package_handle_standard_args(WPEWebKit 
+    VERSION_VAR WPE_WEBKIT_VERSION
+    REQUIRED_VARS WPE_WEBKIT_LIBRARY WPE_WEBKIT_LINK_LIBRARIES WPE_WEBKIT_INCLUDE_DIRS)
+
+if(WPE_WEBKIT_FOUND AND NOT TARGET WPEWebKit::WPEWebKit)
+    add_library(WPEWebKit::WPEWebKit SHARED IMPORTED)
+    set_target_properties(WPEWebKit::WPEWebKit PROPERTIES
+            IMPORTED_LOCATION "${WPE_WEBKIT_LIBRARY}"
+            INTERFACE_LINK_LIBRARIES "${WPE_WEBKIT_LINK_LIBRARIES}"
+            INTERFACE_COMPILE_OPTIONS "${WPE_WEBKIT_CFLAGS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${WPE_WEBKIT_INCLUDE_DIRS}"
+    )
+endif()
+
+mark_as_advanced(WPE_WEBKIT_LINK_LIBRARIES WPE_WEBKIT_CFLAGS WPE_WEBKIT_INCLUDE_DIRS)
