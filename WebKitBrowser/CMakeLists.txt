@@ -43,7 +43,7 @@ option(PLUGIN_WEBKITBROWSER_LIGHTNING_APP "Include Lightning App in seperate plu
 option(PLUGIN_WEBKITBROWSER_ENABLE_JIT "Enable the use of JIT javascript optimalization" ON)
 option(PLUGIN_WEBKITBROWSER_ENABLE_DFG "Enable the use of DFG javascript optimalization" ON)
 
-set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implentation." )
+set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implementation." )
 
 set(PLUGIN_WEBKITBROWSER_AUTOSTART false CACHE STRING "Automatically start WebKitBrowser plugin")
 set(PLUGIN_WEBKITBROWSER_TRANSPARENT false CACHE STRING "Set transparency")
@@ -138,6 +138,7 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${SECURITY_TOKEN_LIBRARY})
 
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
@@ -164,11 +165,15 @@ target_include_directories(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
             ${LIBSOUP_INCLUDE_DIRS}
     )
 
+if(WPE_WEBKIT_DEPRECATED_API)
+    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
+endif()
+
 if(DEFINED WEBKIT_GLIB_API)
     target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
         PRIVATE
         ${LIBSOUP_LIBRARIES})
-    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WPE_WEBKIT_DEPRECATED_API=${WPE_WEBKIT_DEPRECATED_API})
+    target_compile_definitions(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE WEBKIT_GLIB_API=${WEBKIT_GLIB_API})
 endif()
 
 set_target_properties(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PROPERTIES
