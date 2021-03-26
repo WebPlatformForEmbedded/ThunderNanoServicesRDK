@@ -303,7 +303,7 @@ namespace Plugin {
         return (_T(""));
     }
 
-    void TraceControl::Deinitialize(PluginHost::IShell* service)
+    void TraceControl::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         ASSERT(service == _service);
 

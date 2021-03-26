@@ -516,7 +516,7 @@ namespace Plugin {
         _activity.Submit();
     }
 
-    void LocationService::Send(const Core::ProxyType<Web::Request>& element) /* override */
+    void LocationService::Send(const Core::ProxyType<Web::Request>& element VARIABLE_IS_NOT_USED) /* override */
     {
         // Not much to do, just so we know we are done...
         ASSERT(element == _request);

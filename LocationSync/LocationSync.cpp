@@ -68,7 +68,7 @@ namespace Plugin {
         return (result);
     }
 
-    void LocationSync::Deinitialize(PluginHost::IShell* service) /* override */
+    void LocationSync::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED) /* override */
     {
         ASSERT(_service == service);
 

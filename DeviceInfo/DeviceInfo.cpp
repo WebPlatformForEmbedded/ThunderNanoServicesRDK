@@ -55,7 +55,7 @@ namespace Plugin {
         return (_subSystem != nullptr) ? EMPTY_STRING : _T("Could not retrieve System Information.");
     }
 
-    /* virtual */ void DeviceInfo::Deinitialize(PluginHost::IShell* service)
+    /* virtual */ void DeviceInfo::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);

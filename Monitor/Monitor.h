@@ -523,7 +523,7 @@ namespace Plugin {
                 }
 
             public:
-                inline bool RegisterRestart(PluginHost::IShell::reason why)
+                inline bool RegisterRestart(PluginHost::IShell::reason why VARIABLE_IS_NOT_USED)
                 {
                     ASSERT(why == PluginHost::IShell::MEMORY_EXCEEDED || why == PluginHost::IShell::FAILURE);
                     ASSERT(HasRestartAllowed());
