@@ -137,7 +137,7 @@ add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
     )
 
 if(NOT WEBKIT_GLIB_API)
-    target_sources(${MODULE_NAME} PRIVATE InjectedBundle/Utils.cpp)
+    target_sources(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE InjectedBundle/Utils.cpp)
 endif()
 
 target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
