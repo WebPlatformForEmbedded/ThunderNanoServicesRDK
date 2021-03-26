@@ -134,6 +134,7 @@ add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
     Module.cpp
     WebKitImplementation.cpp
     InjectedBundle/Tags.cpp
+    InjectedBundle/Utils.cpp
     )
 
 target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
