@@ -47,7 +47,8 @@ namespace Plugin {
                 Add(_T("limit"), &Limit);
             }
             RestartInfo(const RestartInfo& copy)
-                : Window(copy.Window)
+                : Core::JSON::Container()
+                , Window(copy.Window)
                 , Limit(copy.Limit)
             {
                 Add(_T("window"), &Window);
