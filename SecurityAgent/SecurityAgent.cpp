@@ -95,7 +95,7 @@ namespace Plugin {
         string version = service->Version();
 
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
-        Core::File aclFile(service->PersistentPath() + config.ACL.Value(), true);
+        Core::File aclFile(service->PersistentPath() + config.ACL.Value());
 
         if (aclFile.Exists() == false) {
             aclFile = service->DataPath() + config.ACL.Value();
