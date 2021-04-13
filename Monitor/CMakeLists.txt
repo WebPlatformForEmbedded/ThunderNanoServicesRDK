@@ -36,6 +36,7 @@ set(PLUGIN_MONITOR_WEBKITBROWSER_UX "${PLUGIN_WEBKITBROWSER_UX}" CACHE BOOL "Ena
 set(PLUGIN_MONITOR_WEBKITBROWSER_YOUTUBE "${PLUGIN_WEBKITBROWSER_YOUTUBE}" CACHE BOOL "Enable monitor for the WebKitBrowser Youtube plugin")
 
 # Plugins built from outside of this repository have to be enabled manually
+set(PLUGIN_MONITOR_AMAZON OFF CACHE BOOL "Enable monitor for the Amazon plugin")
 set(PLUGIN_MONITOR_COBALT OFF CACHE BOOL "Enable monitor for the Cobalt plugin")
 set(PLUGIN_MONITOR_NETFLIX OFF CACHE BOOL "Enable monitor for the Netflix plugin")
 set(PLUGIN_MONITOR_OUTOFPROCESS OFF CACHE BOOL "Enable monitor for the OutOfProcess plugin")
