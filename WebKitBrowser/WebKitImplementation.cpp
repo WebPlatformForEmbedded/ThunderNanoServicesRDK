@@ -346,7 +346,11 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
-    class WebKitImplementation : public Core::Thread, public Exchange::IBrowser, public Exchange::IWebBrowser, public PluginHost::IStateControl {
+    class WebKitImplementation : public Core::Thread, 
+                                 public Exchange::IBrowser, 
+                                 public Exchange::IWebBrowser, 
+                                 public Exchange::IApplication,
+                                 public PluginHost::IStateControl {
     public:
         class BundleConfig : public Core::JSON::Container {
         private:
@@ -721,6 +725,7 @@ static GSourceFuncs _handlerIntervention =
             , _notificationClients()
             , _notificationBrowserClients()
             , _stateControlClients()
+            , _applicationClients()
             , _state(PluginHost::IStateControl::UNINITIALIZED)
             , _hidden(false)
             , _time(0)
@@ -756,19 +761,19 @@ static GSourceFuncs _handlerIntervention =
         }
 
     public:
-        uint32_t Headers(string& headers) const override
+        uint32_t HeaderList(string& headerlist) const override
         {
             _adminLock.Lock();
-            headers = _headers;
+            headerlist = _headers;
             _adminLock.Unlock();
             return Core::ERROR_NONE;
         }
 
-        uint32_t Headers(const string& headers) override
+        uint32_t HeaderList(const string& headerlist) override
         {
             if (_context != nullptr) {
                 using SetHeadersData = std::tuple<WebKitImplementation*, string>;
-                auto* data = new SetHeadersData(this, headers);
+                auto* data = new SetHeadersData(this, headerlist);
 
                 g_main_context_invoke_full(
                     _context,
@@ -847,78 +852,6 @@ static GSourceFuncs _handlerIntervention =
                 data,
                 [](gpointer customdata) {
                     delete static_cast<SetUserAgentData*>(customdata);
-                });
-
-            return Core::ERROR_NONE;
-        }
-        uint32_t Languages(string& langs) const override
-        {
-            _adminLock.Lock();
-            Core::JSON::ArrayType<Core::JSON::String> langsArray = _config.Languages;
-            _adminLock.Unlock();
-
-            langsArray.ToString(langs);
-            return Core::ERROR_NONE;
-        }
-
-        uint32_t Languages(const string& langs) override
-        {
-            if (_context == nullptr)
-                return Core::ERROR_GENERAL;
-
-            Core::OptionalType<Core::JSON::Error> error;
-            Core::JSON::ArrayType<Core::JSON::String> array;
-
-            if (!array.FromString(langs, error)) {
-                TRACE(Trace::Error,
-                     (_T("Failed to parse languages array, error='%s', array='%s'\n"),
-                      (error.IsSet() ? error.Value().Message().c_str() : "unknown"), langs.c_str()));
-                return Core::ERROR_GENERAL;
-            }
-
-            using SetLanguagesData = std::tuple<WebKitImplementation*, Core::JSON::ArrayType<Core::JSON::String> >;
-            auto* data = new SetLanguagesData(this, array);
-            g_main_context_invoke_full(
-                _context,
-                G_PRIORITY_DEFAULT,
-                [](gpointer customdata) -> gboolean {
-                    auto& data = *static_cast<SetLanguagesData*>(customdata);
-                    WebKitImplementation* object = std::get<0>(data);
-                    Core::JSON::ArrayType<Core::JSON::String> array = std::get<1>(data);
-
-                    object->_adminLock.Lock();
-                    object->_config.Languages = array;
-                    object->_adminLock.Unlock();
-
-#ifdef WEBKIT_GLIB_API
-                    auto* languages = static_cast<char**>(g_new0(char*, array.Length() + 1));
-                    Core::JSON::ArrayType<Core::JSON::String>::Iterator index(array.Elements());
-
-                    for (unsigned i = 0; index.Next(); ++i)
-                        languages[i] = g_strdup(index.Current().Value().c_str());
-
-                    WebKitWebContext* context = webkit_web_view_get_context(object->_view);
-                    webkit_web_context_set_preferred_languages(context, languages);
-                    g_strfreev(languages);
-#else
-                    auto languages = WKMutableArrayCreate();
-                    for (auto it = array.Elements(); it.Next();) {
-                        if (!it.IsValid())
-                            continue;
-                        auto itemString = WKStringCreateWithUTF8CString(it.Current().Value().c_str());
-                        WKArrayAppendItem(languages, itemString);
-                        WKRelease(itemString);
-                    }
-
-                    auto context = WKPageGetContext(object->_page);
-                    WKSoupSessionSetPreferredLanguages(context, languages);
-                    WKRelease(languages);
-#endif
-                    return G_SOURCE_REMOVE;
-                },
-                data,
-                [](gpointer customdata) {
-                    delete static_cast<SetLanguagesData*>(customdata);
                 });
 
             return Core::ERROR_NONE;
@@ -1153,17 +1086,17 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t Visible(bool& visible) const override
+        uint32_t Visibility(VisibilityType& visible) const override
         {
             _adminLock.Lock();
-            visible = !_hidden;
+            visible = (_hidden == true ? VisibilityType::HIDDEN : VisibilityType::VISIBLE);
             _adminLock.Unlock();
             return 0;
         }
 
-        uint32_t Visible(const bool visible) override
+        uint32_t Visibility(const VisibilityType visible) override
         {
-            Hide(!visible);
+            Hide(visible == VisibilityType::HIDDEN);
             return 0;
         }
 
@@ -1373,6 +1306,157 @@ static GSourceFuncs _handlerIntervention =
             _adminLock.Unlock();
         }
 
+        // IApplication implementation
+
+        void Register(Exchange::IApplication::INotification* sink) override {
+            _adminLock.Lock();
+
+            // Make sure a sink is not registered multiple times.
+            ASSERT(std::find(_applicationClients.begin(), _applicationClients.end(), sink) == _applicationClients.end());
+
+            _applicationClients.push_back(sink);
+            sink->AddRef();
+
+            _adminLock.Unlock();
+
+            TRACE(Trace::Information, (_T("Registered an IApplication sink on the browser %p"), sink));
+        }
+
+        void Unregister(Exchange::IApplication::INotification* sink) override {
+            _adminLock.Lock();
+
+            std::list<Exchange::IApplication::INotification*>::iterator index(std::find(_applicationClients.begin(), _applicationClients.end(), sink));
+
+            // Make sure you do not unregister something you did not register !!!
+            ASSERT(index != _applicationClients.end());
+
+            if (index != _applicationClients.end()) {
+                (*index)->Release();
+                _applicationClients.erase(index);
+                TRACE(Trace::Information, (_T("Unregistered an IApplication sink from the browser %p"), sink));
+            }
+
+            _adminLock.Unlock();
+        }
+
+        uint32_t Reset(const resettype type) override {
+            return Core::ERROR_UNAVAILABLE;
+        }
+
+        uint32_t Identifier(string& id) const override {
+
+            const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
+            if (identifier != nullptr) {
+                uint8_t buffer[64];
+
+                buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
+                            ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
+
+                if (buffer[0] != 0) {
+                    id = Core::SystemInfo::Instance().Id(buffer, ~0);
+                }
+
+                identifier->Release();
+            }
+
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t ContentLink(const string& link) override {
+            return Core::ERROR_UNAVAILABLE;
+        }
+
+        uint32_t LaunchPoint(launchpointtype& point) const override {
+            return Core::ERROR_UNAVAILABLE;
+        }
+
+        uint32_t LaunchPoint(const launchpointtype&) override {
+            return Core::ERROR_UNAVAILABLE;
+        }
+
+        uint32_t Visible(bool& visiblity) const override {
+            _adminLock.Lock();
+            visiblity = (_hidden == false);
+            _adminLock.Unlock();
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t Visible(const bool& visiblity) override {
+            Hide(!visiblity);
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t Language(string& language) const override {
+            _adminLock.Lock();
+            Core::JSON::ArrayType<Core::JSON::String> langsArray = _config.Languages;
+            _adminLock.Unlock();
+
+            langsArray.ToString(language);
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t Language(const string& language) override {
+            if (_context == nullptr)
+                return Core::ERROR_GENERAL;
+
+            Core::OptionalType<Core::JSON::Error> error;
+            Core::JSON::ArrayType<Core::JSON::String> array;
+
+            if (!array.FromString(language, error)) {
+                TRACE(Trace::Error,
+                     (_T("Failed to parse languages array, error='%s', array='%s'\n"),
+                      (error.IsSet() ? error.Value().Message().c_str() : "unknown"), language.c_str()));
+                return Core::ERROR_GENERAL;
+            }
+
+            using SetLanguagesData = std::tuple<WebKitImplementation*, Core::JSON::ArrayType<Core::JSON::String> >;
+            auto* data = new SetLanguagesData(this, array);
+            g_main_context_invoke_full(
+                _context,
+                G_PRIORITY_DEFAULT,
+                [](gpointer customdata) -> gboolean {
+                    auto& data = *static_cast<SetLanguagesData*>(customdata);
+                    WebKitImplementation* object = std::get<0>(data);
+                    Core::JSON::ArrayType<Core::JSON::String> array = std::get<1>(data);
+
+                    object->_adminLock.Lock();
+                    object->_config.Languages = array;
+                    object->_adminLock.Unlock();
+
+#ifdef WEBKIT_GLIB_API
+                    auto* languages = static_cast<char**>(g_new0(char*, array.Length() + 1));
+                    Core::JSON::ArrayType<Core::JSON::String>::Iterator index(array.Elements());
+
+                    for (unsigned i = 0; index.Next(); ++i)
+                        languages[i] = g_strdup(index.Current().Value().c_str());
+
+                    WebKitWebContext* context = webkit_web_view_get_context(object->_view);
+                    webkit_web_context_set_preferred_languages(context, languages);
+                    g_strfreev(languages);
+#else
+                    auto languages = WKMutableArrayCreate();
+                    for (auto it = array.Elements(); it.Next();) {
+                        if (!it.IsValid())
+                            continue;
+                        auto itemString = WKStringCreateWithUTF8CString(it.Current().Value().c_str());
+                        WKArrayAppendItem(languages, itemString);
+                        WKRelease(itemString);
+                    }
+
+                    auto context = WKPageGetContext(object->_page);
+                    WKSoupSessionSetPreferredLanguages(context, languages);
+                    WKRelease(languages);
+#endif
+                    return G_SOURCE_REMOVE;
+                },
+                data,
+                [](gpointer customdata) {
+                    delete static_cast<SetLanguagesData*>(customdata);
+                });
+
+            return Core::ERROR_NONE;
+        }
+
         void OnURLChanged(const string& URL)
         {
             _adminLock.Lock();
@@ -1486,6 +1570,13 @@ static GSourceFuncs _handlerIntervention =
                         index++;
                     }
                 }
+                {
+                    std::list<Exchange::IApplication::INotification*>::iterator index(_applicationClients.begin());
+                    while (index != _applicationClients.end()) {
+                        (*index)->VisibilityChange(hidden);
+                        index++;
+                    }
+                }
             }
 
             _adminLock.Unlock();
@@ -1503,7 +1594,7 @@ static GSourceFuncs _handlerIntervention =
             std::list<Exchange::IWebBrowser::INotification*>::iterator index(_notificationClients.begin());
 
             while (index != _notificationClients.end()) {
-                (*index)->BridgeQuery(text);
+                (*index)->BridgeQueryResponse(text);
                 index++;
             }
 
@@ -1768,6 +1859,7 @@ static GSourceFuncs _handlerIntervention =
         BEGIN_INTERFACE_MAP(WebKitImplementation)
         INTERFACE_ENTRY(Exchange::IWebBrowser)
         INTERFACE_ENTRY(Exchange::IBrowser)
+        INTERFACE_ENTRY (Exchange::IApplication)
         INTERFACE_ENTRY(PluginHost::IStateControl)
         END_INTERFACE_MAP
 
@@ -2458,6 +2550,7 @@ static GSourceFuncs _handlerIntervention =
         std::list<Exchange::IWebBrowser::INotification*> _notificationClients;
         std::list<Exchange::IBrowser::INotification*> _notificationBrowserClients;
         std::list<PluginHost::IStateControl::INotification*> _stateControlClients;
+        std::list<Exchange::IApplication::INotification*> _applicationClients;
         PluginHost::IStateControl::state _state;
         bool _hidden;
         uint64_t _time;
