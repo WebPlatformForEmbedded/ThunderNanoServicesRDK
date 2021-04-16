@@ -720,7 +720,7 @@ namespace Plugin {
                         } else if (timeStamp != static_cast<uint64_t>(~0)) {
                             // Looks like we are waiting for a message to be completed.
                             // Give up our slice, so the producer, can produce.
-                            ::SleepMs(0);
+			    std::this_thread::yield();
                         }
 
                         _adminLock.Unlock();
