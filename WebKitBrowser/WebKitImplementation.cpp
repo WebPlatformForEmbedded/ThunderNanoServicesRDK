@@ -596,8 +596,6 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::Boolean LoadBlankPageOnSuspendEnabled;
         };
 
-#ifndef WEBKIT_GLIB_API
-
         class HangDetector
         {
         private:
@@ -685,8 +683,6 @@ static GSourceFuncs _handlerIntervention =
             HangDetector(const HangDetector&) = delete;
             HangDetector& operator=(const HangDetector&) = delete;
         };
-
-#endif //WEBKIT_GLIB_API
 
     private:
         WebKitImplementation(const WebKitImplementation&) = delete;
@@ -1974,6 +1970,8 @@ static GSourceFuncs _handlerIntervention =
             _loop = g_main_loop_new(_context, FALSE);
             g_main_context_push_thread_default(_context);
 
+            HangDetector hangdetector(*this);
+
             bool automationEnabled = _config.Automation.Value();
 
             WebKitWebContext* wkContext;
@@ -2087,6 +2085,7 @@ static GSourceFuncs _handlerIntervention =
             g_signal_connect(_view, "permission-request", reinterpret_cast<GCallback>(decidePermissionCallback), nullptr);
             g_signal_connect(_view, "show-notification", reinterpret_cast<GCallback>(showNotificationCallback), this);
             g_signal_connect(_view, "user-message-received", reinterpret_cast<GCallback>(userMessageReceivedCallback), this);
+            g_signal_connect(_view, "notify::is-web-process-responsive", reinterpret_cast<GCallback>(isWebProcessResponsiveCallback), this);
 
             _configurationCompleted.SetState(true);
 
@@ -2347,6 +2346,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::infinite;
         }
+#endif // WEBKIT_GLIB_API
 
         void CheckWebProcess()
         {
@@ -2354,6 +2354,9 @@ static GSourceFuncs _handlerIntervention =
                 return;
             _webProcessCheckInProgress = true;
 
+#ifdef WEBKIT_GLIB_API
+            DidReceiveWebProcessResponsivenessReply(webkit_web_view_get_is_web_process_responsive(_view));
+#else
             WKPageIsWebProcessResponsive(
                 _page,
                 this,
@@ -2361,6 +2364,7 @@ static GSourceFuncs _handlerIntervention =
                     WebKitImplementation* object = static_cast<WebKitImplementation*>(customdata);
                     object->DidReceiveWebProcessResponsivenessReply(isWebProcessResponsive);
                 });
+#endif
         }
 
         void DidReceiveWebProcessResponsivenessReply(bool isWebProcessResponsive)
@@ -2379,8 +2383,13 @@ static GSourceFuncs _handlerIntervention =
             if (isWebProcessResponsive && _unresponsiveReplyNum == 0)
                 return;
 
+#ifdef WEBKIT_GLIB_API
+            std::string activeURL(webkit_web_view_get_uri(_view));
+            pid_t webprocessPID = webkit_web_view_get_page_id(_view);
+#else
             std::string activeURL = GetPageActiveURL(GetPage());
             pid_t webprocessPID = WKPageGetProcessIdentifier(GetPage());
+#endif
 
             if (isWebProcessResponsive)
             {
@@ -2411,6 +2420,21 @@ static GSourceFuncs _handlerIntervention =
             }
         }
 
+#ifdef WEBKIT_GLIB_API
+        static void isWebProcessResponsiveCallback(WebKitWebView*, GParamSpec*, WebKitImplementation* self)
+        {
+            if (webkit_web_view_get_is_web_process_responsive(self->_view) == true) {
+                if (self->_unresponsiveReplyNum > 0)
+                {
+                    std::string activeURL(webkit_web_view_get_uri(self->_view));
+                    pid_t webprocessPID = webkit_web_view_get_page_id(self->_view);
+                    SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, pid=%u, url=%s\n"),
+                                                self->_unresponsiveReplyNum, webprocessPID, activeURL.c_str()));
+                    self->_unresponsiveReplyNum = 0;
+                }
+            }
+        }
+#else
         static void WebProcessDidBecomeResponsive(WKPageRef page, const void* clientInfo)
         {
             auto &self = *const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(clientInfo));
