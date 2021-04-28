@@ -27,6 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
+set(PLUGIN_MONITOR_AUTOSTART true CACHE STRING "Automatically start Monitor plugin")
 # Plugins built from this repository that can be autmatically enabled or enabled manually when built externally
 set(PLUGIN_MONITOR_OPENCDMI "${PLUGIN_OPENCDMI}" CACHE BOOL "Enable monitor for the OpenCDMI plugin")
 set(PLUGIN_MONITOR_WEBKITBROWSER "${PLUGIN_WEBKITBROWSER}" CACHE BOOL "Enable monitor for the WebKitBrowser plugin")
