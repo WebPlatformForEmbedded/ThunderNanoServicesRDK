@@ -46,6 +46,7 @@ option(PLUGIN_WEBKITBROWSER_ENABLE_DFG "Enable the use of DFG javascript optimal
 set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implementation." )
 
 set(PLUGIN_WEBKITBROWSER_AUTOSTART false CACHE STRING "Automatically start WebKitBrowser plugin")
+set(PLUGIN_WEBKITBROWSER_RESUMED true CACHE STRING "Set WebKitBrowser plugin resume state")
 set(PLUGIN_WEBKITBROWSER_TRANSPARENT false CACHE STRING "Set transparency")
 set(PLUGIN_WEBKITBROWSER_STARTURL "about:blank" CACHE STRING "Initial URL for WebKitBrowser plugin")
 set(PLUGIN_WEBKITBROWSER_USERAGENT "" CACHE STRING "User agent string")
