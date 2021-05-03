@@ -27,6 +27,9 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
+set(PLUGIN_OPENCDMI_AUTOSTART true CACHE STRING "Automatically start OpenCDMi plugin")
+set(PLUGIN_OPENCDMI_OOP true CACHE BOOL "Controls if the plugin should run in its own process")
+
 find_package(ocdm REQUIRED)
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
