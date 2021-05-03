@@ -27,6 +27,9 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
+set(PLUGIN_MESSENGER_AUTOSTART true CACHE STRING "Automatically start Messenger plugin")
+set(PLUGIN_MESSENGER_OUTOFPROCESS false CACHE STRING "Controls if the plugin should run in its own process")
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
