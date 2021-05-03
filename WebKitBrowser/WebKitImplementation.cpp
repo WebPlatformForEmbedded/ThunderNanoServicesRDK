@@ -1916,6 +1916,9 @@ static GSourceFuncs _handlerIntervention =
             case WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT:
                 SYSLOG(Trace::Fatal, (_T("CRASH: WebProcess terminated due to memory limit: exiting ...")));
                 break;
+            case WEBKIT_WEB_PROCESS_TERMINATED_BY_API:
+                SYSLOG(Trace::Fatal, (_T("CRASH: WebProcess terminated by API")));
+                break;
             }
             exit(1);
         }
@@ -2385,11 +2388,29 @@ static GSourceFuncs _handlerIntervention =
 
 #ifdef WEBKIT_GLIB_API
             std::string activeURL(webkit_web_view_get_uri(_view));
-            pid_t webprocessPID = webkit_web_view_get_page_id(_view);
+
+            if (isWebProcessResponsive)
+            {
+                SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, url=%s\n"),
+                                            _unresponsiveReplyNum, activeURL.c_str()));
+                _unresponsiveReplyNum = 0;
+            }
+            else
+            {
+                ++_unresponsiveReplyNum;
+                SYSLOG(Logging::Notification, (_T("WebProcess is unresponsive, reply num=%d(max=%d), url=%s\n"),
+                                            _unresponsiveReplyNum, kWebProcessUnresponsiveReplyDefaultLimit,
+                                            activeURL.c_str()));
+            }
+
+            if (_unresponsiveReplyNum == kWebProcessUnresponsiveReplyDefaultLimit)
+            {
+                webkit_web_view_terminate_web_process(_view);
+            }
+
 #else
             std::string activeURL = GetPageActiveURL(GetPage());
             pid_t webprocessPID = WKPageGetProcessIdentifier(GetPage());
-#endif
 
             if (isWebProcessResponsive)
             {
@@ -2414,6 +2435,7 @@ static GSourceFuncs _handlerIntervention =
                     SYSLOG(Trace::Error, (_T("tgkill failed, signal=%d process=%u errno=%d (%s)"), SIGFPE, webprocessPID, errno, strerror(errno)));
                 }
             }
+#endif
             else if (_unresponsiveReplyNum == (2 * kWebProcessUnresponsiveReplyDefaultLimit))
             {
                 DeactivateBrowser(PluginHost::IShell::WATCHDOG_EXPIRED);
@@ -2427,9 +2449,8 @@ static GSourceFuncs _handlerIntervention =
                 if (self->_unresponsiveReplyNum > 0)
                 {
                     std::string activeURL(webkit_web_view_get_uri(self->_view));
-                    pid_t webprocessPID = webkit_web_view_get_page_id(self->_view);
-                    SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, pid=%u, url=%s\n"),
-                                                self->_unresponsiveReplyNum, webprocessPID, activeURL.c_str()));
+                    SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, url=%s\n"),
+                                                self->_unresponsiveReplyNum, activeURL.c_str()));
                     self->_unresponsiveReplyNum = 0;
                 }
             }
