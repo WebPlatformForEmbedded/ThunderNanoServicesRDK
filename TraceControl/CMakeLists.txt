@@ -27,9 +27,9 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_TRACECONTROL_AUTOSTART true CACHE BOOL "Automatically start TraceControl plugin")
-set(PLUGIN_TRACECONTROL_REMOTE false CACHE BOOL "Remote binding details enabled")
-set(PLUGIN_TRACECONTROL_PORT 0 CACHE STRING "PORT address")
+set(PLUGIN_TRACECONTROL_AUTOSTART "true" CACHE STRING "Automatically start TraceControl plugin")
+set(PLUGIN_TRACECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")
+set(PLUGIN_TRACECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_TRACECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
