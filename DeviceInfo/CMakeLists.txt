@@ -27,7 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_DEVICEINFO_AUTOSTART true CACHE STRING "Automatically start DeviceInfo plugin")
+set(PLUGIN_DEVICEINFO_AUTOSTART "true" CACHE STRING "Automatically start DeviceInfo plugin")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
