@@ -27,8 +27,14 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_OPENCDMI_AUTOSTART true CACHE STRING "Automatically start OpenCDMi plugin")
-set(PLUGIN_OPENCDMI_OOP true CACHE BOOL "Controls if the plugin should run in its own process")
+set(PLUGIN_OPENCDMI_AUTOSTART "true" CACHE STRING "Automatically start OpenCDMi plugin")
+set(PLUGIN_OPENCDMI_OUTOFPROCESS "true" CACHE STRING "Controls if the plugin should run in its own process")
+
+# deprecated/legacy flags support
+if(PLUGIN_OPENCDMI_OOP)
+    set(PLUGIN_OPENCDMI_OUTOFPROCESS "${PLUGIN_OPENCDMI_OOP}" CACHE STRING "Outofprocess state" FORCE)
+    unset(PLUGIN_OPENCDMI_OOP CACHE)
+endif()
 
 find_package(ocdm REQUIRED)
 find_package(${NAMESPACE}Plugins REQUIRED)
