@@ -123,7 +123,8 @@
       "locator"
     ]
   },
-  "interface": {
-    "$cppref": "{cppinterfacedir}/IBrowser.h"
-  }
+  "interface": [ 
+   { "$cppref": "{cppinterfacedir}/IBrowser.h" },
+   { "$ref": "{interfacedir}/WebKitBrowser.json#" }
+  ]
 }
