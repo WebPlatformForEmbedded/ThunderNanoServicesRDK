@@ -129,7 +129,7 @@ public:
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
         } else {
             // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
-            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
+            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId()); 
         }
 #ifdef WEBKIT_GLIB_API
         _bundle = WEBKIT_WEB_EXTENSION(g_object_ref(bundle));
