@@ -191,7 +191,7 @@ namespace {
         }
 
         bool IsActive(const uint32_t ID) const {
-            return (_traceChannelOutputs.count(ID) > 0) ? true : false;
+            return (_traceChannelOutputs.count(ID) > 0);
         }
 
         void Output(const char fileName[], const uint32_t lineNumber, const char className[], const WPEFramework::Trace::ITrace* information) override {
