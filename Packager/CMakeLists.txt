@@ -27,6 +27,9 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
+set(PLUGIN_PACKAGER_AUTOSTART "true" CACHE STRING "Automatically start Packager plugin")
+set(PLUGIN_PACKAGER_OUTOFPROCESS "true" CACHE STRING "Controls if the plugin should run in its own process")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
