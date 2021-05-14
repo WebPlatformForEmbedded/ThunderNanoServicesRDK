@@ -148,6 +148,7 @@ namespace Plugin {
             , _service(nullptr)
             , _browser(nullptr)
             , _memory(nullptr)
+            , _application(nullptr)
             , _notification(this)
             , _jsonBodyDataFactory(2)
         {
