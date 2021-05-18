@@ -50,6 +50,26 @@
           "type": "string",
           "description": "Output resolution (unknown, 480i, 480p, 576i, 576p, 720p, 1080i, 1080p, 2160p30, 2160p60, 4320p30, 4320p60)"
         }
+      },
+      "modelName": {
+        "type": "string",
+        "description": "Model Name"
+      },
+      "modelYear": {
+        "type": "string",
+        "description": "Model Year"
+      },
+      "friendlyName": {
+        "type": "string",
+        "description": "friendly Name"
+      },
+      "systemIntegratorName": {
+        "type": "string",
+        "description": "system Integrator Name"
+      },
+      "platformName": {
+        "type": "string",
+        "description": "platform Name"
       }
     },
     "required": [
@@ -59,7 +79,12 @@
       "hdcp",
       "audio",
       "video",
-      "resolution"
+      "resolution",
+      "modelName",
+      "modelYear",
+      "friendlyName",
+      "systemIntegratorName",
+      "platformName"
     ]
   },
   "interface": {
