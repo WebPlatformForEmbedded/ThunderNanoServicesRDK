@@ -229,5 +229,34 @@ namespace Plugin {
         }
     }
 
+    void DeviceInfo::MetadataInfo(JsonData::DeviceInfo::MetadataData& metadatainfo) const
+    {
+        ASSERT(_implementation != nullptr);
+        string localresult = "";
+        Exchange::IDeviceMetadata* iDeviceMetaDataPtr = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
+        if (iDeviceMetaDataPtr==nullptr) return ;
+
+        if (iDeviceMetaDataPtr->ModelName(localresult) == Core::ERROR_NONE) {
+            metadatainfo.ModelName = localresult;
+        }
+
+        uint32_t year;
+        if (iDeviceMetaDataPtr->ModelYear(year) == Core::ERROR_NONE) {
+            metadatainfo.ModelYear = year;
+        }
+
+        if (iDeviceMetaDataPtr->FriendlyName(localresult) == Core::ERROR_NONE) {
+            metadatainfo.FriendlyName = localresult;
+        }
+
+        if (iDeviceMetaDataPtr->SystemIntegratorName(localresult) == Core::ERROR_NONE) {
+            metadatainfo.SystemIntegratorName = localresult;
+        }
+
+        if (iDeviceMetaDataPtr->PlatformName(localresult) == Core::ERROR_NONE) {
+            metadatainfo.PlatformName = localresult;
+        }
+    }
+
 } // namespace Plugin
 } // namespace WPEFramework

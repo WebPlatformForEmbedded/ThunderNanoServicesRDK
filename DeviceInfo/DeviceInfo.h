@@ -116,11 +116,13 @@ namespace Plugin {
         uint32_t get_addresses(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response) const;
         uint32_t get_socketinfo(JsonData::DeviceInfo::SocketinfoData& response) const;
         uint32_t get_capabilities(JsonData::DeviceInfo::CapabilitiesData& response) const;
+        uint32_t get_metadata(JsonData::DeviceInfo::MetadataData& response) const;
 
         void SysInfo(JsonData::DeviceInfo::SysteminfoData& systemInfo) const;
         void AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const;
         void SocketPortInfo(JsonData::DeviceInfo::SocketinfoData& socketPortInfo) const;
         void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
+        void MetadataInfo(JsonData::DeviceInfo::MetadataData& response) const;
         string GetDeviceId() const;
 
     private:

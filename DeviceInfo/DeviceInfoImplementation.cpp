@@ -92,7 +92,7 @@ namespace Plugin {
         value= _modelName;
         return Core::ERROR_NONE;
     }
-    uint32_t DeviceInfoImplementation::ModelYear(string& value) const 
+    uint32_t DeviceInfoImplementation::ModelYear(uint32_t& value) const 
     {
         value= _modelYear;
         return Core::ERROR_NONE;

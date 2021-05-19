@@ -56,7 +56,7 @@
         "description": "Model Name"
       },
       "modelYear": {
-        "type": "string",
+        "type": "number",
         "description": "Model Year"
       },
       "friendlyName": {

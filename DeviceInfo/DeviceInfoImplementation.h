@@ -43,7 +43,7 @@ namespace Plugin {
             Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::VideoOutput>> Video;
             Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::OutputResolution>> Resolution;
             Core::JSON::String ModelName;
-            Core::JSON::String ModelYear;
+            Core::JSON::DecUInt32 ModelYear;
             Core::JSON::String FriendlyName;
             Core::JSON::String SystemIntegratorName;
             Core::JSON::String PlatformName;
@@ -85,7 +85,7 @@ namespace Plugin {
         uint32_t CEC(bool& supportsCEC) const override;
         uint32_t HDCP(CopyProtection& supportedHDCP) const override;
         uint32_t ModelName(string& value) const override ; 
-        uint32_t ModelYear(string& value) const override; 
+        uint32_t ModelYear(uint32_t& value) const override; 
         uint32_t FriendlyName(string& value) const override; 
         uint32_t SystemIntegratorName(string& value) const override; 
         uint32_t PlatformName(string& value) const override; 
@@ -101,7 +101,7 @@ namespace Plugin {
         std::list<IDeviceCapabilities::VideoOutput> _video;
         std::list<IDeviceCapabilities::OutputResolution> _resolution;
         string _modelName;
-        string _modelYear;
+        uint32_t _modelYear;
         string _friendlyName;
         string _systemIntegratorName;
         string _platformName;
