@@ -380,7 +380,7 @@ namespace Plugin {
         void InitPackageDB();
         void TermPackageDB();
 
-        void NotifyIntallStep(Exchange::IPackager::state status, uint32_t task = 0, string id = "", int32_t code = 0);   // NOTIFY
+        void NotifyInstallStep(Exchange::IPackager::state status, uint32_t task = 0, string id = "", int32_t code = 0);   // NOTIFY
 
         static const uint64_t STORE_BYTES_QUOTA;
         static const char*    STORE_NAME;
