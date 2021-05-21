@@ -21,7 +21,7 @@
 #define __INJECTEDBUNDLE_MODULE_H
 
 #ifndef MODULE_NAME
-#define MODULE_NAME Plugin_WebKitBrowser
+#define MODULE_NAME Plugin_WebKitBrowserInjectedBundle
 #endif
 
 #include <com/com.h>
