@@ -85,7 +85,7 @@ namespace Plugin {
         return Core::ERROR_NONE;
     }
 
-    // Property: metadata
+    // Property: metadata - metadata of the STB
     // Return codes:
     //  - ERROR_NONE: Success
     uint32_t DeviceInfo::get_metadata(MetadataData& response) const

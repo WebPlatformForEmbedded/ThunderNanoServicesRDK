@@ -240,7 +240,7 @@ namespace Plugin {
             metadatainfo.ModelName = localresult;
         }
 
-        uint32_t year;
+        uint16_t year;
         if (iDeviceMetaDataPtr->ModelYear(year) == Core::ERROR_NONE) {
             metadatainfo.ModelYear = year;
         }
