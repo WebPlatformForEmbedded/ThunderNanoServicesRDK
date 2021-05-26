@@ -47,6 +47,8 @@ namespace Plugin {
             SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
         } else {
             _implementation->Configure(_service);
+            _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
+            ASSERT(_deviceMetadataInterface != nullptr);
         }
 
         ASSERT(_subSystem != nullptr);
@@ -59,8 +61,12 @@ namespace Plugin {
     {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);
+        ASSERT(_deviceMetadataInterface != nullptr);
+        
 
         _implementation->Release();
+        _deviceMetadataInterface->Release();
+
 
         if (_connectionId != 0) {
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
@@ -231,31 +237,30 @@ namespace Plugin {
 
     void DeviceInfo::MetadataInfo(JsonData::DeviceInfo::MetadataData& metadatainfo) const
     {
-        ASSERT(_implementation != nullptr);
-        string localresult = "";
-        Exchange::IDeviceMetadata* iDeviceMetaDataPtr = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
-        if (iDeviceMetaDataPtr==nullptr) return ;
+        ASSERT(_deviceMetadataInterface != nullptr);
+        string localresult ;
 
-        if (iDeviceMetaDataPtr->ModelName(localresult) == Core::ERROR_NONE) {
+        if (_deviceMetadataInterface->ModelName(localresult) == Core::ERROR_NONE) {
             metadatainfo.ModelName = localresult;
         }
-
-        uint16_t year;
-        if (iDeviceMetaDataPtr->ModelYear(year) == Core::ERROR_NONE) {
+        
+        uint16_t year = 0;
+        if (_deviceMetadataInterface->ModelYear(year) == Core::ERROR_NONE) {
             metadatainfo.ModelYear = year;
         }
 
-        if (iDeviceMetaDataPtr->FriendlyName(localresult) == Core::ERROR_NONE) {
+        if (_deviceMetadataInterface->FriendlyName(localresult) == Core::ERROR_NONE) {
             metadatainfo.FriendlyName = localresult;
         }
 
-        if (iDeviceMetaDataPtr->SystemIntegratorName(localresult) == Core::ERROR_NONE) {
+        if (_deviceMetadataInterface->SystemIntegratorName(localresult) == Core::ERROR_NONE) {
             metadatainfo.SystemIntegratorName = localresult;
         }
 
-        if (iDeviceMetaDataPtr->PlatformName(localresult) == Core::ERROR_NONE) {
+        if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
             metadatainfo.PlatformName = localresult;
         }
+        
     }
 
 } // namespace Plugin

@@ -132,6 +132,7 @@ namespace Plugin {
         string _systemId;
         mutable string _deviceId;
         Exchange::IDeviceCapabilities* _implementation;
+        Exchange::IDeviceMetadata* _deviceMetadataInterface;
         uint32_t _connectionId;
 
     };

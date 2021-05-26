@@ -19,6 +19,11 @@ namespace Plugin {
                 , Audio()
                 , Video()
                 , Resolution()
+                , ModelName("")
+                , ModelYear(0)
+                , FriendlyName("")
+                , SystemIntegratorName("")
+                , PlatformName("")
             {
                 Add(_T("hdr"), &Hdr);
                 Add(_T("atmos"), &Atmos);
@@ -66,6 +71,11 @@ namespace Plugin {
             , _audio()
             , _video()
             , _resolution()
+            , _modelName("")
+            , _modelYear(0)
+            , _friendlyName("")
+            , _systemIntegratorName("")
+            , _platformName("")
         {
         }
         ~DeviceInfoImplementation() {}
