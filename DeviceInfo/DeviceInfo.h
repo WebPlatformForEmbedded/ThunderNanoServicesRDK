@@ -79,6 +79,7 @@ namespace Plugin {
             , _systemId()
             , _deviceId()
             , _implementation(nullptr)
+            ,_deviceMetadataInterface(nullptr)
             , _connectionId(0)
         {
             RegisterAll();

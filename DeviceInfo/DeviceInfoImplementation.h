@@ -19,11 +19,11 @@ namespace Plugin {
                 , Audio()
                 , Video()
                 , Resolution()
-                , ModelName("")
-                , ModelYear(0)
-                , FriendlyName("")
-                , SystemIntegratorName("")
-                , PlatformName("")
+                , ModelName()
+                , ModelYear()
+                , FriendlyName()
+                , SystemIntegratorName()
+                , PlatformName()
             {
                 Add(_T("hdr"), &Hdr);
                 Add(_T("atmos"), &Atmos);
