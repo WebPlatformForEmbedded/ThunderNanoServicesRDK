@@ -94,6 +94,7 @@ namespace Plugin {
         INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
         INTERFACE_AGGREGATE(Exchange::IDeviceCapabilities, _implementation)
+        INTERFACE_AGGREGATE(Exchange::IDeviceMetadata, _implementation)
         END_INTERFACE_MAP
 
     public:

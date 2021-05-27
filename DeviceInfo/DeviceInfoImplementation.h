@@ -71,11 +71,11 @@ namespace Plugin {
             , _audio()
             , _video()
             , _resolution()
-            , _modelName("")
-            , _modelYear(0)
-            , _friendlyName("")
-            , _systemIntegratorName("")
-            , _platformName("")
+            , _modelName()
+            , _modelYear()
+            , _friendlyName()
+            , _systemIntegratorName()
+            , _platformName()
         {
         }
         ~DeviceInfoImplementation() {}
