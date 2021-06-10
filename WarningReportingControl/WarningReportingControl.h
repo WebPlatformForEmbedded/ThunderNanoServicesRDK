@@ -60,10 +60,9 @@ namespace Plugin {
                 };
 
             public:
-                Source() = delete;
-                Source(const Source&) = delete;
-                Source& operator=(const Source&) = delete;
-
+                Source() = default;
+                Source(const Source&) = default;
+                Source& operator=(const Source&) = default;
 
                 Source(const string& warningsPath, RPC::IRemoteConnection* connection)
                     : Core::CyclicBuffer(SourceName(warningsPath, connection), Core::File::USER_WRITE | Core::File::USER_READ | Core::File::SHAREABLE, 0, true)
@@ -192,7 +191,6 @@ namespace Plugin {
         public:
             Observer(WarningReportingControl& parent)
                 : Thread(Core::Thread::DefaultStackSize(), _T("WarningReportingWorker"))
-                , _buffers()
                 , _parent(parent)
                 , _refcount(0)
                 , _warningReportingUnit(WarningReporting::WarningReportingUnit::Instance())
@@ -212,8 +210,11 @@ namespace Plugin {
                 _warningReportingUnit.Announce();
             }
             void Start()
-            {
-                _buffers.insert(std::pair<const uint32_t, std::unique_ptr<Source>>(0, new Source(_parent.WarningsPath(), nullptr)));
+            {                
+                _buffers.emplace(std::piecewise_construct,
+                    std::forward_as_tuple(0),
+                    std::forward_as_tuple(_parent.WarningsPath(), nullptr));
+
                 _warningReportingUnit.Announce();
                 Thread::Run();
             }
@@ -227,22 +228,29 @@ namespace Plugin {
 
                 _adminLock.Lock();
 
-                for(auto& buffer : _buffers){
-                    buffer.second.reset(nullptr);
-                }
                 _buffers.clear();
 
                 _adminLock.Unlock();
             }
             void Activated(RPC::IRemoteConnection* connection) override
             {
+                ASSERT(connection != nullptr);
                 _adminLock.Lock();
 
-                ASSERT(_buffers.find(connection->Id()) == _buffers.end());
+                if (connection != nullptr) {
+                    
+                    ASSERT(_buffers.find(connection->Id()) == _buffers.end());
 
-                // By definition, get the buffer file from WPEFramework (local source)
-                _buffers.insert(std::pair<const uint32_t, std::unique_ptr<Source>>(connection->Id(), new Source(_parent.WarningsPath(), connection)));
-                _warningReportingUnit.Announce();
+                    if (_buffers.find(connection->Id()) == _buffers.end()) {
+                        
+                        // By definition, get the buffer file from WPEFramework (local source)
+                        _buffers.emplace(std::piecewise_construct,
+                            std::forward_as_tuple(connection->Id()),
+                            std::forward_as_tuple(_parent.WarningsPath(), connection));
+
+                        _warningReportingUnit.Announce();
+                    }
+                }
 
                 _adminLock.Unlock();
             }
@@ -253,7 +261,6 @@ namespace Plugin {
                 auto index = _buffers.find(connection->Id());
 
                 if (index != _buffers.end()) {
-                    index->second.reset(nullptr);
                     _buffers.erase(index);
                 }
 
@@ -281,45 +288,41 @@ namespace Plugin {
                     // Before we start we reset the flag, if new info is coming in, we will get a retrigger flag.
                     _warningReportingUnit.Acknowledge();
 
-                    Source* selected;
-                    std::map<const uint32_t, std::unique_ptr<Source>>::iterator selectedIterator;
-                    
+                    std::unordered_map<uint32_t, Source>::iterator selected = _buffers.end();
 
                     uint64_t timeStamp;
 
                     do {
-                        selected = nullptr;
+                        selected = _buffers.end();
 
                         _adminLock.Lock();
 
                         timeStamp = static_cast<uint64_t>(~0);
 
-
-                        for(auto& buffer : _buffers){
-                            Source::state state(buffer.second->Load(_warningReportingUnit));
+                        for (auto buffer = _buffers.begin(); buffer != _buffers.end(); ++buffer) {
+                            Source::state state(buffer->second.Load(_warningReportingUnit));
 
                             if (state == Source::LOADED) {
-                                if (buffer.second->Timestamp() < timeStamp) {
-                                    timeStamp = buffer.second->Timestamp();
+                                if (buffer->second.Timestamp() < timeStamp) {
+                                    timeStamp = buffer->second.Timestamp();
 
                                     if (state == Source::LOADED) {
-                                        selected = buffer.second.get();
+                                        selected = buffer;
                                     }
                                 }
                             } else if (state == Source::FAILURE) {
                                 // Oops this requires recovery, so let's flush
-                                buffer.second->Flush();
+                                buffer->second.Flush();
                             }
-
                         }
 
-                        if (selected != nullptr) {
+                        if (selected != _buffers.end()) {
 
                             // Oke, output this entry
-                            _parent.Dispatch(selected->warningInformation());
+                            _parent.Dispatch(selected->second.warningInformation());
 
                             // Ready to load a new one..
-                            selected->Clear();
+                            selected->second.Clear();
                         } else if (timeStamp != static_cast<uint64_t>(~0)) {
                             // Looks like we are waiting for a message to be completed.
                             // Give up our slice, so the producer, can produce.
@@ -336,7 +339,7 @@ namespace Plugin {
 
         private:
             Core::CriticalSection _adminLock;
-            std::map<const uint32_t, std::unique_ptr<Source>> _buffers;
+            std::unordered_map<uint32_t, Source> _buffers;
             WarningReporting::WarningReportingUnit& _warningReportingUnit;
             WarningReportingControl& _parent;
             mutable uint32_t _refcount;
