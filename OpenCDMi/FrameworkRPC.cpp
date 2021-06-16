@@ -309,6 +309,9 @@ namespace Plugin {
 
                                 // Whatever the result, we are done with the buffer..
                                 Consumed();
+
+				//Lets release the clear content buffer
+				_mediaKeys->ReleaseClearContent(nullptr, 0,clearContentSize,clearContent);
                             }
                         }
 
