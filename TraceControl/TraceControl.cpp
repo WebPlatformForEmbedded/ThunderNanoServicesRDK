@@ -26,6 +26,7 @@ namespace {
 
     WPEFramework::Core::ProxyPoolType<WPEFramework::Web::JSONBodyType<WPEFramework::Plugin::TraceControl::Data>> jsonBodyDataFactory(4);
     WPEFramework::Core::ProxyPoolType<WPEFramework::Plugin::TraceJSONOutput::Data> jsonExportDataFactory(2);
+    constexpr uint32_t MAX_CONNECTIONS = 5;
 
     class WebSocketExporter : public WPEFramework::Plugin::TraceJSONOutput {
 
@@ -84,34 +85,36 @@ namespace {
             WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
 
             void Output(const char fileName[], const uint32_t lineNumber, const char className[], const WPEFramework::Trace::ITrace* information) {
-                ExtraOutputOptions options = _outputoptions;
+                if (!IsPaused()) {
+                    ExtraOutputOptions options = _outputoptions;
 
-                WPEFramework::Core::ProxyType<Data> data = GetDataContainer();
-                data->Clear();
-                if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE) ) != 0 ) {
-                    data->Time = WPEFramework::Core::Time::Now().ToRFC1123(true);
-                } else {
-                    data->Time = WPEFramework::Core::Time::Now().ToTimeOnly(true);
-                }
-
-                if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME) ) != 0 ) {
-                    data->Filename = fileName;
-                    if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER) ) != 0 ) {
-                        data->Linenumber = lineNumber;
+                    WPEFramework::Core::ProxyType<Data> data = GetDataContainer();
+                    data->Clear();
+                    if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE) ) != 0 ) {
+                        data->Time = WPEFramework::Core::Time::Now().ToRFC1123(true);
+                    } else {
+                        data->Time = WPEFramework::Core::Time::Now().ToTimeOnly(true);
                     }
+
+                    if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME) ) != 0 ) {
+                        data->Filename = fileName;
+                        if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER) ) != 0 ) {
+                            data->Linenumber = lineNumber;
+                        }
+                    }
+
+                    if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::CLASSNAME) ) != 0 ) {
+                        data->Classname = className;
+                    }
+
+                    if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY) ) != 0 ) {
+                        data->Category = information->Category();
+                    }
+
+                    data->Message = information->Data();
+
+                    HandleTraceMessage(data);
                 }
-
-                if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::CLASSNAME) ) != 0 ) {
-                    data->Classname = className;
-                }
-
-                if( ( AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY) ) != 0 ) {
-                    data->Category = information->Category();
-                }
-
-                data->Message = information->Data();
-
-                HandleTraceMessage(data);
             }
 
             bool IsPaused() const {
@@ -141,44 +144,51 @@ namespace {
         WebSocketExporter(const WebSocketExporter& copy) = delete;
         WebSocketExporter& operator=(const WebSocketExporter&) = delete;
 
-        static WebSocketExporter &Instance()
+        static WebSocketExporter &Instance(uint32_t maxConnections = MAX_CONNECTIONS)
         {
-            static WebSocketExporter _instance;
+            static WebSocketExporter _instance(maxConnections);
             return (_instance);
         }
 
-        WebSocketExporter()
-            : _lock() {
+        WebSocketExporter(const uint32_t maxConnections)
+            : WPEFramework::Plugin::TraceJSONOutput()
+            ,_traceChannelOutputs()
+            , _lock()
+            , _maxExportConnections(maxConnections) {
         }
 
         ~WebSocketExporter() override = default;
 
         bool Activate(WPEFramework::PluginHost::Channel& channel) {
 
+            bool accepted = false;
+
             _lock.Lock();
 
-            ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
-            _traceChannelOutputs.emplace(std::make_pair(channel.Id(), new TraceChannelOutput(channel)));
+            if ((_maxExportConnections !=0) && (_maxExportConnections - _traceChannelOutputs.size() > 0)) {
+                ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
+                _traceChannelOutputs.emplace(std::make_pair(channel.Id(), new TraceChannelOutput(channel)));
+                accepted = true;
+
+            }
 
             _lock.Unlock();
 
-            return true;
+            return accepted;
         }
 
         bool Deactivate(WPEFramework::PluginHost::Channel& channel) {
 
             bool deactivated = false;
 
+            _lock.Lock();
+
             if ( 0 != _traceChannelOutputs.count(channel.Id())) {
-
-                _lock.Lock();
-
                 _traceChannelOutputs.erase(channel.Id());
-
                 deactivated = true;
-
-                _lock.Unlock();
             }
+
+            _lock.Unlock();
 
             return deactivated;
 
@@ -186,20 +196,11 @@ namespace {
 
         WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> HandleExportCommand(const uint32_t ID, const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
 
-        uint16_t ActiveChannelCount() const {
-            return static_cast<uint16_t>(_traceChannelOutputs.size());
-        }
-
-        bool IsActive(const uint32_t ID) const {
-            return (_traceChannelOutputs.count(ID) > 0);
-        }
-
         void Output(const char fileName[], const uint32_t lineNumber, const char className[], const WPEFramework::Trace::ITrace* information) override {
 
             _lock.Lock();
 
             for (auto& item : _traceChannelOutputs) {
-                if (!item.second->IsPaused())
                     item.second->Output(fileName, lineNumber, className, information);
             }
 
@@ -227,9 +228,10 @@ namespace {
 
         std::unordered_map<uint32_t, TraceChannelOutputPtr>   _traceChannelOutputs;
         mutable WPEFramework::Core::CriticalSection           _lock;
+        const uint32_t                                        _maxExportConnections;
     };
 
-    WPEFramework::Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
+    static WPEFramework::Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
 
 
     WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExporter::HandleExportCommand(const uint32_t ID,
@@ -239,7 +241,7 @@ namespace {
 
         _lock.Lock();
 
-        if (IsActive(ID))
+        if (_traceChannelOutputs.count(ID) > 0)
             response = (_traceChannelOutputs[ID]->Process(element));
 
         _lock.Unlock();
@@ -346,7 +348,6 @@ namespace Plugin {
         _config.FromString(_service->ConfigLine());
         _tracePath = service->VolatilePath();
 
-        _maxExportConnections = _config.MaxExportConnections.Value();
 
         size_t pos = service->Callsign().length(); 
         if ( (pos = _tracePath.find_last_of('/', (_tracePath.length() >= pos ? _tracePath.length() - pos : string::npos))) != string::npos ) 
@@ -370,13 +371,14 @@ namespace Plugin {
             _outputs.emplace_back(std::unique_ptr<Trace::ITraceMedia, Custom_deleter>(new Trace::TraceMedia(logNode), customDeleter));
         }
 
-        // put the WebSocketExporter last so we can find it there if needed
-        if( _maxExportConnections != 0 ) {
-            std::unique_ptr<Trace::ITraceMedia, Custom_deleter> obj{&(WebSocketExporter::Instance()), [](Trace::ITraceMedia*){
+        uint32_t maxExportConnections = (_config.MaxExportConnections.IsSet() == true) ? _config.MaxExportConnections.Value() : MAX_CONNECTIONS;
+
+        if( maxExportConnections != 0 ) {
+            std::unique_ptr<Trace::ITraceMedia, Custom_deleter> obj{&(WebSocketExporter::Instance(maxExportConnections)), [](Trace::ITraceMedia*){
                 //NOP
             }};
 
-            _outputs.push_back(std::move(obj));
+            _outputs.emplace_back(std::move(obj));
         }
 
         _service->Register(&_observer);
@@ -408,49 +410,22 @@ namespace Plugin {
     }
 
     bool TraceControl::Attach(PluginHost::Channel& channel) {
-
-        bool accepted = false;
-
-        auto& webSocketExporterInstance = WebSocketExporter::Instance();
-
-        if( (_maxExportConnections !=0) && (_maxExportConnections - webSocketExporterInstance.ActiveChannelCount() > 0) ) {
-                TRACE(Trace::Information, (Core::Format(_T("Opened export connection channel ID [%d]"), channel.Id()).c_str()));
-                accepted = webSocketExporterInstance.Activate(channel);
-        }
-
-        return accepted;
+        TRACE(Trace::Information, (Core::Format(_T("Activating channel ID [%d]"), channel.Id()).c_str()));
+        return WebSocketExporter::Instance().Activate(channel);
     }
 
     void TraceControl::Detach(PluginHost::Channel& channel) {
-
-        auto& webSocketExporterInstance = WebSocketExporter::Instance();
-
-        if( (_maxExportConnections !=0) && (webSocketExporterInstance.ActiveChannelCount() > 0)) {
-            if(webSocketExporterInstance.Deactivate(channel) == true) {
-                TRACE(Trace::Information, (Core::Format(_T("Closed export connection channel ID [%d]"), channel.Id()).c_str()));
-            }
-        }
+        TRACE(Trace::Information, (Core::Format(_T("Deactivating channel ID [%d]"), channel.Id()).c_str()));
+        WebSocketExporter::Instance().Deactivate(channel);
     }
-
-    WPEFramework::Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
 
     Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string& identifier) {
         return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element());
     }
 
     Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) {
-
-        Core::ProxyType<Core::JSON::IElement> response;
-
-        auto& webSocketExporterInstance = WebSocketExporter::Instance();
-
-        if ( (_maxExportConnections !=0) && (webSocketExporterInstance.IsActive(ID)) ) {
-            response = WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(webSocketExporterInstance.HandleExportCommand(ID, element));
-        }
-
-        return response;
+        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(WebSocketExporter::Instance().HandleExportCommand(ID, element));
     }
-        
     void TraceControl::Inbound(Web::Request& /* request */)
     {
         // There are no requests coming in with a body that require a JSON body. So continue without action here.

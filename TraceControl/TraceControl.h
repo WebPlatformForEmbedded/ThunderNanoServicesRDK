@@ -938,7 +938,6 @@ namespace Plugin {
             , _outputs()
             , _tracePath()
             , _observer(*this)
-            , _maxExportConnections(0)
         {
             RegisterAll();
         }
@@ -1039,7 +1038,6 @@ namespace Plugin {
         TraceMediaContainer _outputs;
         string _tracePath;
         Observer _observer;
-        uint32_t _maxExportConnections;
     };
 }
 }
