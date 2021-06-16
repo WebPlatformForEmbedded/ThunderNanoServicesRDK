@@ -31,6 +31,7 @@ set(PLUGIN_TRACECONTROL_AUTOSTART "true" CACHE STRING "Automatically start Trace
 set(PLUGIN_TRACECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")
 set(PLUGIN_TRACECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_TRACECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
+set(PLUGIN_TRACECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
