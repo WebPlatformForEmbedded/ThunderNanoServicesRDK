@@ -21,12 +21,12 @@ DeviceInfo plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the DeviceInfo plugin. It includes detailed specification about its configuration and properties provided.
+This document describes purpose and functionality of the DeviceInfo plugin. It includes detailed specification of its configuration and properties provided.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
 
-All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
+All identifiers on the interface described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
 <a name="head.Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
@@ -84,23 +84,17 @@ The table below lists configuration options of the plugin.
 | video[#] | string | Video output (other, rf_modulator, composite, svideo, component, scart_rgb, hdmi, displayport) |
 | resolution | array | Supported output resolutions |
 | resolution[#] | string | Output resolution (unknown, 480i, 480p, 576i, 576p, 720p, 1080i, 1080p, 2160p30, 2160p60, 4320p30, 4320p60) |
-| modelName | string | Model Name |
-| modelYear | number | Model Year |
-| friendlyName | string | friendly Name |
-| systemIntegratorName | string | system Integrator Name |
-| platformName | string | platform Name |
 
 <a name="head.Properties"></a>
 # Properties
 
-The following properties are provided by the DeviceInfo plugin:
+The following properties are provided by the DeviceInfo interface:
 
 DeviceInfo interface properties:
 
 | Property | Description |
 | :-------- | :-------- |
-| [capabilities](#property.capabilities) <sup>RO</sup> | Capabilities of the STB |
-| [metadata](#property.metadata) <sup>RO</sup> | Metadata of the STB |
+| [capabilities](#property.capabilities) <sup>RO</sup> | Capabilities of the device |
 | [systeminfo](#property.systeminfo) <sup>RO</sup> | System general information |
 | [addresses](#property.addresses) <sup>RO</sup> | Network interface addresses |
 | [socketinfo](#property.socketinfo) <sup>RO</sup> | Socket information |
@@ -109,7 +103,7 @@ DeviceInfo interface properties:
 <a name="property.capabilities"></a>
 ## *capabilities <sup>property</sup>*
 
-Provides access to the capabilities of the STB.
+Provides access to the capabilities of the device.
 
 > This property is **read-only**.
 
@@ -117,7 +111,7 @@ Provides access to the capabilities of the STB.
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| (property) | object | Capabilities of the STB |
+| (property) | object | Capabilities of the device |
 | (property).hdr | boolean | Is HDR supported by this device |
 | (property).atmos | boolean | Is Atmos supported by this device |
 | (property).cec | boolean | Is CEC supported by this device |
@@ -165,52 +159,6 @@ Provides access to the capabilities of the STB.
 }
 ```
 
-<a name="property.metadata"></a>
-## *metadata <sup>property</sup>*
-
-Provides access to the metadata of the STB.
-
-> This property is **read-only**.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | object | Metadata of the STB |
-| (property)?.modelName | string | <sup>*(optional)*</sup> Model Name |
-| (property)?.modelYear | number | <sup>*(optional)*</sup> Model Year |
-| (property)?.friendlyName | string | <sup>*(optional)*</sup> friendly name |
-| (property)?.systemIntegratorName | string | <sup>*(optional)*</sup> system integrator name |
-| (property)?.platformName | string | <sup>*(optional)*</sup> platform name |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "DeviceInfo.1.metadata"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": {
-        "modelName": "model A",
-        "modelYear": 2020,
-        "friendlyName": "my device",
-        "systemIntegratorName": "Christophe A",
-        "platformName": "linux"
-    }
-}
-```
-
 <a name="property.systeminfo"></a>
 ## *systeminfo <sup>property</sup>*
 
@@ -227,14 +175,8 @@ Provides access to the system general information.
 | (property).uptime | number | System uptime (in seconds) |
 | (property).totalram | number | Total installed system RAM memory (in bytes) |
 | (property).freeram | number | Free system RAM memory (in bytes) |
-| (property).totalswap | number | Total swap space (in bytes) |
-| (property).freeswap | number | swap space still available (in bytes) |
 | (property).devicename | string | Host name |
 | (property).cpuload | string | Current CPU load (percentage) |
-| (property).cpuloadavg | object | CPU load average |
-| (property).cpuloadavg.avg1min | number | 1min cpuload average |
-| (property).cpuloadavg.avg5min | number | 5min cpuload average |
-| (property).cpuloadavg.avg15min | number | 15min cpuload average |
 | (property).serialnumber | string | Device serial number |
 | (property).time | string | Current system date and time |
 
@@ -249,7 +191,6 @@ Provides access to the system general information.
     "method": "DeviceInfo.1.systeminfo"
 }
 ```
-
 #### Get Response
 
 ```json
@@ -261,21 +202,13 @@ Provides access to the system general information.
         "uptime": 120,
         "totalram": 655757312,
         "freeram": 563015680,
-        "totalswap": 789132680,
-        "freeswap": 789132680,
         "devicename": "buildroot",
         "cpuload": "2",
-        "cpuloadavg": {
-            "avg1min": 789132680,
-            "avg5min": 789132680,
-            "avg15min": 789132680
-        },
         "serialnumber": "WPEuCfrLF45",
         "time": "Mon, 11 Mar 2019 14:38:18"
     }
 }
 ```
-
 <a name="property.addresses"></a>
 ## *addresses <sup>property</sup>*
 
@@ -305,7 +238,6 @@ Provides access to the network interface addresses.
     "method": "DeviceInfo.1.addresses"
 }
 ```
-
 #### Get Response
 
 ```json
@@ -323,7 +255,6 @@ Provides access to the network interface addresses.
     ]
 }
 ```
-
 <a name="property.socketinfo"></a>
 ## *socketinfo <sup>property</sup>*
 
@@ -354,7 +285,6 @@ Provides access to the socket information.
     "method": "DeviceInfo.1.socketinfo"
 }
 ```
-
 #### Get Response
 
 ```json

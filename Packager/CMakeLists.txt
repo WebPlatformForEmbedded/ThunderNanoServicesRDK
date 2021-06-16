@@ -82,21 +82,39 @@ if (BUILD_WITH_PACKAGER_EX)
     add_definitions(${SQLITE_CFLAGS_OTHER} ${PLABELS_FLAGS})
     link_directories(${SQLITE_LIBRARY_DIRS})
 
+
     target_include_directories(${MODULE_NAME} PRIVATE ../helpers
             ${SQLITE_INCLUDE_DIRS}
             ${PLABELS_INCLUDE_DIRS}
             ${GLIB_INCLUDE_DIRS})
 
-    target_link_libraries(${MODULE_NAME} PRIVATE
-            CompileSettingsDebug::CompileSettingsDebug
-            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-            LibOPKG::LibOPKG
-            ${LIBUUID_LIBRARY}
-            ${SQLITE_LIBRARIES}
-            ${GLIB_LIBRARIES})
-
     if (libprovision_FOUND)
-        target_link_libraries(${MODULE_NAME} PRIVATE libprovision::libprovision)
+        target_link_libraries(${MODULE_NAME}
+            PRIVATE
+                CompileSettingsDebug::CompileSettingsDebug
+                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+                LibOPKG::LibOPKG
+                ${LIBUUID_LIBRARY}
+                ${SQLITE_LIBRARIES}
+                ${GLIB_LIBRARIES}
+                libprovision::libprovision
+
+                )
+    else (libprovision_FOUND)
+        target_include_directories(${MODULE_NAME}
+            PRIVATE
+                ${LIBOPKG_INCLUDE_DIRS}
+                )
+
+        target_link_libraries(${MODULE_NAME}
+            PRIVATE
+                CompileSettingsDebug::CompileSettingsDebug
+                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+                ${LIBOPKG_LIBRARIES}
+                ${LIBUUID_LIBRARY}
+                ${SQLITE_LIBRARIES}
+                ${GLIB_LIBRARIES}
+                )
     endif (libprovision_FOUND)
 
     string(TOLOWER ${NAMESPACE} STORAGENAME)
@@ -138,13 +156,26 @@ else (BUILD_WITH_PACKAGER_EX)
     target_include_directories(${MODULE_NAME} PRIVATE ../helpers
             ${PLABELS_INCLUDE_DIRS})
 
-    target_link_libraries(${MODULE_NAME} PRIVATE
-            CompileSettingsDebug::CompileSettingsDebug
-            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-            LibOPKG::LibOPKG)
-
     if (libprovision_FOUND)
-        target_link_libraries(${MODULE_NAME} PRIVATE libprovision::libprovision)
+        target_link_libraries(${MODULE_NAME}
+            PRIVATE
+                CompileSettingsDebug::CompileSettingsDebug
+                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+                LibOPKG::LibOPKG
+                libprovision::libprovision
+                )
+    else (libprovision_FOUND)
+        target_include_directories(${MODULE_NAME}
+            PRIVATE
+                ${LIBOPKG_INCLUDE_DIRS}
+                )
+
+        target_link_libraries(${MODULE_NAME}
+            PRIVATE
+                CompileSettingsDebug::CompileSettingsDebug
+                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+                ${LIBOPKG_LIBRARIES}
+                )
     endif (libprovision_FOUND)
 
     string(TOLOWER ${NAMESPACE} STORAGENAME)

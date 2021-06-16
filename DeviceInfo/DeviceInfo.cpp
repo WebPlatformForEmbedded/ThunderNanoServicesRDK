@@ -47,8 +47,6 @@ namespace Plugin {
             SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
         } else {
             _implementation->Configure(_service);
-            _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
-            ASSERT(_deviceMetadataInterface != nullptr);
         }
 
         ASSERT(_subSystem != nullptr);
@@ -61,12 +59,8 @@ namespace Plugin {
     {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);
-        ASSERT(_deviceMetadataInterface != nullptr);
-        
 
         _implementation->Release();
-        _deviceMetadataInterface->Release();
-
 
         if (_connectionId != 0) {
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
@@ -233,34 +227,6 @@ namespace Plugin {
                 response.Output_resolutions.Add(jsonResolution = static_cast<JsonData::DeviceInfo::CapabilitiesData::Output_resolutionType>(resolution));
             }
         }
-    }
-
-    void DeviceInfo::MetadataInfo(JsonData::DeviceInfo::MetadataData& metadatainfo) const
-    {
-        ASSERT(_deviceMetadataInterface != nullptr);
-        string localresult ;
-
-        if (_deviceMetadataInterface->ModelName(localresult) == Core::ERROR_NONE) {
-            metadatainfo.ModelName = localresult;
-        }
-        
-        uint16_t year = 0;
-        if (_deviceMetadataInterface->ModelYear(year) == Core::ERROR_NONE) {
-            metadatainfo.ModelYear = year;
-        }
-
-        if (_deviceMetadataInterface->FriendlyName(localresult) == Core::ERROR_NONE) {
-            metadatainfo.FriendlyName = localresult;
-        }
-
-        if (_deviceMetadataInterface->SystemIntegratorName(localresult) == Core::ERROR_NONE) {
-            metadatainfo.SystemIntegratorName = localresult;
-        }
-
-        if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
-            metadatainfo.PlatformName = localresult;
-        }
-        
     }
 
 } // namespace Plugin

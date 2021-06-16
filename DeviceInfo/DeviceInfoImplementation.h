@@ -5,7 +5,7 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    class DeviceInfoImplementation : public Exchange::IDeviceCapabilities , public Exchange::IDeviceMetadata{
+    class DeviceInfoImplementation : public Exchange::IDeviceCapabilities {
     private:
         //CONFIG
         class Config : public Core::JSON::Container {
@@ -19,11 +19,6 @@ namespace Plugin {
                 , Audio()
                 , Video()
                 , Resolution()
-                , ModelName()
-                , ModelYear()
-                , FriendlyName()
-                , SystemIntegratorName()
-                , PlatformName()
             {
                 Add(_T("hdr"), &Hdr);
                 Add(_T("atmos"), &Atmos);
@@ -32,11 +27,6 @@ namespace Plugin {
                 Add(_T("audio"), &Audio);
                 Add(_T("video"), &Video);
                 Add(_T("resolution"), &Resolution);
-                Add(_T("modelName"), &ModelName);
-                Add(_T("modelYear"), &ModelYear);
-                Add(_T("friendlyName"), &FriendlyName);
-                Add(_T("systemIntegratorName"), &SystemIntegratorName);
-                Add(_T("platformName"), &PlatformName);
             }
             ~Config() = default;
 
@@ -47,11 +37,6 @@ namespace Plugin {
             Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::AudioOutput>> Audio;
             Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::VideoOutput>> Video;
             Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::OutputResolution>> Resolution;
-            Core::JSON::String ModelName;
-            Core::JSON::DecUInt16 ModelYear;
-            Core::JSON::String FriendlyName;
-            Core::JSON::String SystemIntegratorName;
-            Core::JSON::String PlatformName;
 
         private:
             Config(const Config&) = delete;
@@ -71,18 +56,12 @@ namespace Plugin {
             , _audio()
             , _video()
             , _resolution()
-            , _modelName()
-            , _modelYear()
-            , _friendlyName()
-            , _systemIntegratorName()
-            , _platformName()
         {
         }
         ~DeviceInfoImplementation() {}
 
         BEGIN_INTERFACE_MAP(DeviceInfoImplementation)
         INTERFACE_ENTRY(Exchange::IDeviceCapabilities)
-        INTERFACE_ENTRY(Exchange::IDeviceMetadata)
         END_INTERFACE_MAP
 
         uint32_t Configure(const PluginHost::IShell* service) override;
@@ -94,12 +73,6 @@ namespace Plugin {
         uint32_t Atmos(bool& supportsAtmos) const override;
         uint32_t CEC(bool& supportsCEC) const override;
         uint32_t HDCP(CopyProtection& supportedHDCP) const override;
-        uint32_t ModelName(string& value) const override ; 
-        uint32_t ModelYear(uint16_t& value) const override; 
-        uint32_t FriendlyName(string& value) const override; 
-        uint32_t SystemIntegratorName(string& value) const override; 
-        uint32_t PlatformName(string& value) const override; 
-        
 
     private:
         Config _config;
@@ -110,11 +83,6 @@ namespace Plugin {
         std::list<IDeviceCapabilities::AudioOutput> _audio;
         std::list<IDeviceCapabilities::VideoOutput> _video;
         std::list<IDeviceCapabilities::OutputResolution> _resolution;
-        string _modelName;
-        uint16_t _modelYear;
-        string _friendlyName;
-        string _systemIntegratorName;
-        string _platformName;
     };
 } //namespace WPEFramework
 } //namespace Plugin
