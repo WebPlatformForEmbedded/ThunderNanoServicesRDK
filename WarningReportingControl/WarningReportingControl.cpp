@@ -62,11 +62,16 @@ namespace Plugin {
             _warningsPath = _warningsPath.substr(0, pos);
         }
         
-        if (((service->Background() == false) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false)) || ((_config.Console.IsSet() == true) && (_config.Console.Value() == true))) {
-            _outputs.emplace_back(new WarningReportConsoleOutput(false));
+        if (((service->Background() == false) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false))
+            || ((_config.Console.IsSet() == true) && (_config.Console.Value() == true))) {
+            _outputs.emplace_back(new WarningReportConsoleOutput(_config.Abbreviated.Value()));
         }
-        if (((service->Background() == true) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false)) || ((_config.SysLog.IsSet() == true) && (_config.SysLog.Value() == true))) {
+        if (((service->Background() == true) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false))
+            || ((_config.SysLog.IsSet() == true) && (_config.SysLog.Value() == true))) {
             _outputs.emplace_back(new WarningReportSyslogOutput(_config.Abbreviated.Value()));
+        }
+        if(_config.FilePath.IsSet()){
+        _outputs.emplace_back(new WarningReportFileOutput(_config.Abbreviated.Value(), _config.FilePath.Value()));
         }
 
         _service->Register(&_observer);
@@ -100,17 +105,6 @@ namespace Plugin {
     {
         ASSERT(information.event != nullptr);
         if (information.event != nullptr) {
-
-            std::cerr << "LINE: " << information.lineNumber << std::endl;
-            std::cerr << "FILENAME: " << information.filename << std::endl;
-            std::cerr << "CATEGORY: " << information.category << std::endl;
-            std::cerr << "IDENTIFIER: " << information.identifier << std::endl;
-
-            std::string res;
-            information.event->ToString(res);
-            std::cerr << "TOSTRING: " << res << std::endl;
-
-
             for(const auto& output: _outputs){
                 output->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
             }

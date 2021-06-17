@@ -191,6 +191,7 @@ namespace Plugin {
         public:
             Observer(WarningReportingControl& parent)
                 : Thread(Core::Thread::DefaultStackSize(), _T("WarningReportingWorker"))
+                , _maxUint64value(std::numeric_limits<uint64_t>::max())
                 , _parent(parent)
                 , _refcount(0)
                 , _warningReportingUnit(WarningReporting::WarningReportingUnit::Instance())
@@ -287,17 +288,15 @@ namespace Plugin {
                 while ((IsRunning() == true) && (_warningReportingUnit.Wait(Core::infinite) == Core::ERROR_NONE)) {
                     // Before we start we reset the flag, if new info is coming in, we will get a retrigger flag.
                     _warningReportingUnit.Acknowledge();
-
                     std::unordered_map<uint32_t, Source>::iterator selected = _buffers.end();
-
-                    uint64_t timeStamp;
+                    uint64_t timeStamp = _maxUint64value;
 
                     do {
                         selected = _buffers.end();
 
                         _adminLock.Lock();
 
-                        timeStamp = static_cast<uint64_t>(~0);
+                        timeStamp = _maxUint64value;
 
                         for (auto buffer = _buffers.begin(); buffer != _buffers.end(); ++buffer) {
                             Source::state state(buffer->second.Load(_warningReportingUnit));
@@ -323,7 +322,7 @@ namespace Plugin {
 
                             // Ready to load a new one..
                             selected->second.Clear();
-                        } else if (timeStamp != static_cast<uint64_t>(~0)) {
+                        } else if (timeStamp != _maxUint64value) {
                             // Looks like we are waiting for a message to be completed.
                             // Give up our slice, so the producer, can produce.
                             std::this_thread::yield();
@@ -331,13 +330,14 @@ namespace Plugin {
 
                         _adminLock.Unlock();
 
-                    } while ((IsRunning() == true) && (timeStamp != static_cast<uint64_t>(~0)));
+                    } while ((IsRunning() == true) && (timeStamp != _maxUint64value));
                 }
 
                 return (Core::infinite);
             }
 
         private:
+            const uint64_t _maxUint64value;
             Core::CriticalSection _adminLock;
             std::unordered_map<uint32_t, Source> _buffers;
             WarningReporting::WarningReportingUnit& _warningReportingUnit;
@@ -354,12 +354,14 @@ namespace Plugin {
         public:
             Config()
                 : Core::JSON::Container()
+                , FilePath()
                 , Console(false)
                 , SysLog(true)
                 , Abbreviated(true)
             {
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
+                Add(_T("filepath"), &FilePath);
                 Add(_T("abbreviated"), &Abbreviated);
             }
             ~Config()
@@ -367,6 +369,7 @@ namespace Plugin {
             }
 
         public:
+            Core::JSON::String FilePath;
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
             Core::JSON::Boolean Abbreviated;

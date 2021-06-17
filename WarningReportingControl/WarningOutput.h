@@ -48,7 +48,7 @@ namespace Plugin {
         void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information) override
         {
             std::stringstream output;
-            std::string message;
+            string message;
             information->ToString(message);
 
             if (_abbreviated == true) {
@@ -107,6 +107,40 @@ namespace Plugin {
         {
             printf(_T("%s"), message.c_str());
         }
+    };
+
+    class WarningReportFileOutput : public WarningReportOutput {
+    public:
+        WarningReportFileOutput(const WarningReportFileOutput&) = delete;
+        WarningReportFileOutput& operator=(const WarningReportFileOutput&) = delete;
+
+        explicit WarningReportFileOutput(const bool abbreviated, const string& filepath)
+            : WarningReportOutput(abbreviated)
+            , _file(filepath)
+        {
+            _file.Create();
+
+            if (!_file.IsOpen()) {
+                TRACE(Trace::Error, (_T("Could not open file <%s>. Outputing warnings to file unavailable."), filepath));
+            }
+        }
+        ~WarningReportFileOutput() override
+        {
+            if (_file.IsOpen()) {
+                _file.Close();
+            }
+        }
+
+    private:
+        void HandleTraceMessage(const string& message) override
+        {
+            if (_file.IsOpen()) {
+                _file.Write(reinterpret_cast<const uint8_t*>(message.c_str()), message.length());
+            }
+        }
+
+    private:
+        Core::File _file;
     };
 }
 }
