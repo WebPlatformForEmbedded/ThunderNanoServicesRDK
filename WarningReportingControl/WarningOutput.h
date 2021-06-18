@@ -193,13 +193,20 @@ namespace Plugin {
             ALL = 31
         };
 
-        explicit WarningReportingJSONOutput(const ExtraOutputOptions outputoptions = ExtraOutputOptions::ALL)
-            : _outputoptions(outputoptions)
+        explicit WarningReportingJSONOutput(WPEFramework::PluginHost::Channel& channel)
+            : _exportChannel(channel)
+            , _outputoptions(ExtraOutputOptions::ALL)
+            , _paused(false)
         {
         }
         ~WarningReportingJSONOutput() override = default;
 
     public:
+        bool IsPaused() const
+        {
+            return _paused;
+        }
+
         ExtraOutputOptions OutputOptions() const
         {
             return _outputoptions;
@@ -210,21 +217,61 @@ namespace Plugin {
             _outputoptions = outputoptions;
         }
 
-        // just because I'm lazy :)
         template <typename E>
         static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type
         {
             return static_cast<typename std::underlying_type<E>::type>(t);
         }
 
-    public:
-        virtual void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information) = 0;
-    private:
-        virtual void HandleTraceMessage(const Core::ProxyType<Data>& jsondata) = 0;
-        virtual Core::ProxyType<Data> GetDataContainer() = 0;
+        void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information)
+        {
+            if (!IsPaused()) {
+                ExtraOutputOptions options = _outputoptions;
+
+                WPEFramework::Core::ProxyType<Data> data = GetDataContainer();
+                data->Clear();
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
+                    data->Time = WPEFramework::Core::Time::Now().ToRFC1123(true);
+                } else {
+                    data->Time = WPEFramework::Core::Time::Now().ToTimeOnly(true);
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
+                    data->Filename = fileName;
+                    if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
+                        data->Linenumber = lineNumber;
+                    }
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::IDENTIFIER)) != 0) {
+                    data->Identifier = identifer;
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
+                    data->Category = information->Category();
+                }
+
+                string message;
+                information->ToString(message);
+                data->Message = message;
+
+                HandleTraceMessage(data);
+            }
+        }
+        virtual WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element) = 0;
 
     private:
+        virtual Core::ProxyType<Data> GetDataContainer() = 0;
+
+        void HandleTraceMessage(const Core::ProxyType<Data>& jsondata)
+        {
+            _exportChannel.Submit(WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsondata));
+        }
+
+    protected:
         std::atomic<ExtraOutputOptions> _outputoptions;
+        WPEFramework::PluginHost::Channel& _exportChannel;
+        bool _paused;
     };
 }
 }

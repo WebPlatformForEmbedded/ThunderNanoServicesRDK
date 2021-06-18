@@ -27,7 +27,7 @@ namespace {
 WPEFramework::Core::ProxyPoolType<WPEFramework::Plugin::WarningReportingJSONOutput::Data> jsonExportDataFactory(2);
 constexpr uint16_t MAX_CONNECTIONS = 5;
 
-class WebSocketExporter : public WPEFramework::Plugin::WarningReportingJSONOutput {
+class WebSocketExporter : public WPEFramework::WarningReporting::IWarningReportingMedia {
 
 public:
     class ExportCommand : public WPEFramework::Core::JSON::Container {
@@ -62,88 +62,23 @@ public:
     };
 
 public:
-    class TraceChannelOutput {
+    class TraceChannelOutput : public WPEFramework::Plugin::WarningReportingJSONOutput {
 
     public:
         TraceChannelOutput(const TraceChannelOutput&) = delete;
         TraceChannelOutput& operator=(const TraceChannelOutput&) = delete;
 
         explicit TraceChannelOutput(WPEFramework::PluginHost::Channel& channel)
-            : _exportChannel(&channel)
-            , _outputoptions(ExtraOutputOptions::ALL)
-            , _paused(false)
+            : WPEFramework::Plugin::WarningReportingJSONOutput(channel)
         {
         }
-
-        ~TraceChannelOutput() = default;
-
-        void HandleTraceMessage(const WPEFramework::Core::ProxyType<Data>& jsondata)
-        {
-            _exportChannel->Submit(WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsondata));
-        }
+        ~TraceChannelOutput() override = default;
 
         WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
-
-        void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WPEFramework::WarningReporting::IWarningEvent* information)
-        {
-            if (!IsPaused()) {
-                ExtraOutputOptions options = _outputoptions;
-
-                WPEFramework::Core::ProxyType<Data> data = GetDataContainer();
-                data->Clear();
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data->Time = WPEFramework::Core::Time::Now().ToRFC1123(true);
-                } else {
-                    data->Time = WPEFramework::Core::Time::Now().ToTimeOnly(true);
-                }
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
-                    data->Filename = fileName;
-                    if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
-                        data->Linenumber = lineNumber;
-                    }
-                }
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::IDENTIFIER)) != 0) {
-                    data->Identifier = identifer;
-                }
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
-                    data->Category = information->Category();
-                }
-
-                string message;
-                information->ToString(message);
-                data->Message = message;
-
-                HandleTraceMessage(data);
-            }
-        }
-
-        bool IsPaused() const
-        {
-            return _paused;
-        }
-
-        WPEFramework::Core::ProxyType<Data> GetDataContainer()
+        WPEFramework::Core::ProxyType<Data> GetDataContainer() override
         {
             return jsonExportDataFactory.Element();
         }
-
-        ExtraOutputOptions OutputOptions() const
-        {
-            return _outputoptions;
-        }
-
-        void OutputOptions(const ExtraOutputOptions outputoptions)
-        {
-            _outputoptions = outputoptions;
-        }
-
-    private:
-        WPEFramework::PluginHost::Channel* _exportChannel;
-        std::atomic<ExtraOutputOptions> _outputoptions;
-        bool _paused;
     };
 
 public:
@@ -151,8 +86,7 @@ public:
     WebSocketExporter& operator=(const WebSocketExporter&) = delete;
 
     WebSocketExporter(const uint32_t maxConnections = MAX_CONNECTIONS)
-        : WPEFramework::Plugin::WarningReportingJSONOutput()
-        , _traceChannelOutputs()
+        : _traceChannelOutputs()
         , _lock()
         , _maxExportConnections(maxConnections)
     {
@@ -209,24 +143,7 @@ public:
     }
 
 private:
-    void HandleTraceMessage(const WPEFramework::Core::ProxyType<Data>& jsondata) override
-    {
-        _lock.Lock();
-
-        for (auto& item : _traceChannelOutputs) {
-            item.second->HandleTraceMessage(jsondata);
-        }
-
-        _lock.Unlock();
-    }
-
-    WPEFramework::Core::ProxyType<Data> GetDataContainer() override
-    {
-        return jsonExportDataFactory.Element();
-    }
-
-private:
-    using TraceChannelOutputPtr = std::unique_ptr<WebSocketExporter::TraceChannelOutput>;
+    using TraceChannelOutputPtr = std::unique_ptr<WPEFramework::Plugin::WarningReportingJSONOutput>;
 
     std::unordered_map<uint32_t, TraceChannelOutputPtr> _traceChannelOutputs;
     mutable WPEFramework::Core::CriticalSection _lock;
@@ -243,8 +160,10 @@ WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExpor
 
     _lock.Lock();
 
-    if (_traceChannelOutputs.count(ID) > 0)
-        response = (_traceChannelOutputs[ID]->Process(element));
+    auto index = _traceChannelOutputs.find(ID);
+    if (index != _traceChannelOutputs.end()) {
+        response = index->second->Process(element);
+    }
 
     _lock.Unlock();
 
@@ -361,9 +280,9 @@ namespace Plugin {
         if (_config.FilePath.IsSet()) {
             _outputs.emplace(typeid(WarningReportFileOutput), new WarningReportFileOutput(_config.Abbreviated.Value(), _config.FilePath.Value()));
         }
-    
-        uint16_t maxExportConnections = _config.MaxExportConnections.IsSet()  ? _config.MaxExportConnections.Value() : MAX_CONNECTIONS;
-        if(maxExportConnections > 0){
+
+        uint16_t maxExportConnections = _config.MaxExportConnections.IsSet() ? _config.MaxExportConnections.Value() : MAX_CONNECTIONS;
+        if (maxExportConnections > 0) {
             _outputs.emplace(typeid(WebSocketExporter), new WebSocketExporter(maxExportConnections));
         }
 
@@ -433,9 +352,6 @@ namespace Plugin {
 
     void WarningReportingControl::Dispatch(const WarningInformation& information)
     {
-        auto index = _outputs.find(typeid(WarningReportConsoleOutput));
-        index->second->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
-
         ASSERT(information.event != nullptr);
         if (information.event != nullptr) {
             for (const auto& output : _outputs) {
