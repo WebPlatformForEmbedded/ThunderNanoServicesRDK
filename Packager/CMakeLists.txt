@@ -30,7 +30,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 set(PLUGIN_PACKAGER_AUTOSTART "true" CACHE STRING "Automatically start Packager plugin")
 set(PLUGIN_PACKAGER_OUTOFPROCESS "true" CACHE STRING "Controls if the plugin should run in its own process")
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(libprovision QUIET)
@@ -104,7 +104,7 @@ if (BUILD_WITH_PACKAGER_EX)
         DESTINATION lib/${STORAGENAME}/plugins)
 
     configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/opkg.conf.in"
+            "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"
             "${CMAKE_CURRENT_BINARY_DIR}/opkg.conf"
             @ONLY)
 
@@ -126,7 +126,7 @@ else (BUILD_WITH_PACKAGER_EX)
     set(PLUGIN_NAME Packager)
     set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
 
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
     find_package(CompileSettingsDebug CONFIG REQUIRED)
 
@@ -152,7 +152,7 @@ else (BUILD_WITH_PACKAGER_EX)
         DESTINATION lib/${STORAGENAME}/plugins)
 
     configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/opkg.conf.in"
+            "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"
             "${CMAKE_CURRENT_BINARY_DIR}/opkg.conf"
             @ONLY)
 
