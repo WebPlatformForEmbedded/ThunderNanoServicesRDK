@@ -20,10 +20,12 @@
 #pragma once
 
 #include "Module.h"
+#include <typeindex>
 
 namespace WPEFramework {
 namespace Plugin {
-    class WarningReportingControl : public PluginHost::IPlugin {
+    class WarningReportingControl : public PluginHost::IPluginExtended,
+                                    public PluginHost::IWebSocket {
 
     public:
         enum state {
@@ -211,7 +213,7 @@ namespace Plugin {
                 _warningReportingUnit.Announce();
             }
             void Start()
-            {                
+            {
                 _buffers.emplace(std::piecewise_construct,
                     std::forward_as_tuple(0),
                     std::forward_as_tuple(_parent.WarningsPath(), nullptr));
@@ -239,11 +241,11 @@ namespace Plugin {
                 _adminLock.Lock();
 
                 if (connection != nullptr) {
-                    
+
                     ASSERT(_buffers.find(connection->Id()) == _buffers.end());
 
                     if (_buffers.find(connection->Id()) == _buffers.end()) {
-                        
+
                         // By definition, get the buffer file from WPEFramework (local source)
                         _buffers.emplace(std::piecewise_construct,
                             std::forward_as_tuple(connection->Id()),
@@ -358,11 +360,13 @@ namespace Plugin {
                 , Console(false)
                 , SysLog(true)
                 , Abbreviated(true)
+                , MaxExportConnections(1)
             {
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
                 Add(_T("filepath"), &FilePath);
                 Add(_T("abbreviated"), &Abbreviated);
+                Add(_T("maxexportconnections"), &MaxExportConnections);
             }
             ~Config()
             {
@@ -373,6 +377,7 @@ namespace Plugin {
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
             Core::JSON::Boolean Abbreviated;
+            Core::JSON::DecUInt16 MaxExportConnections;
         };
 
     public:
@@ -395,6 +400,8 @@ namespace Plugin {
 
         BEGIN_INTERFACE_MAP(WarningReportingControl)
         INTERFACE_ENTRY(PluginHost::IPlugin)
+        INTERFACE_ENTRY(PluginHost::IPluginExtended)
+        INTERFACE_ENTRY(PluginHost::IWebSocket)
         END_INTERFACE_MAP
 
     public:
@@ -419,6 +426,30 @@ namespace Plugin {
         // to this plugin. This Metadata can be used by the MetData plugin to publish this information to the ouside world.
         string Information() const override;
 
+        //	IPluginExtended methods
+        // -------------------------------------------------------------------------------------------------------
+
+        // Whenever a Channel (WebSocket connection) is created to the plugin that will be reported via the Attach.
+        // Whenever the channel is closed, it is reported via the detach method.
+        bool Attach(PluginHost::Channel& channel) override;
+        void Detach(PluginHost::Channel& channel) override;
+
+        //! @{
+        //! ================================== CALLED ON COMMUNICATION THREAD =====================================
+        //! Whenever a WebSocket is opened with a locator (URL) pointing to this plugin, it is capable of sending
+        //! JSON object to us. This method allows the plugin to return a JSON object that will be used to deserialize
+        //! the comming content on the communication channel. In case the content does not start with a { or [, the
+        //! first keyword deserialized is passed as the identifier.
+        //! @}
+        Core::ProxyType<Core::JSON::IElement> Inbound(const string& identifier) override;
+
+        //! @{
+        //! ==================================== CALLED ON THREADPOOL THREAD ======================================
+        //! Once the passed object from the previous method is filled (completed), this method allows it to be handled
+        //! and to form an answer on the incoming JSON message(if needed).
+        //! @}
+        Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
+
     private:
         void Dispatch(const WarningInformation& information);
 
@@ -428,7 +459,8 @@ namespace Plugin {
         }
 
     private:
-        using WarningsMediaContainer = std::list<std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
+        //I will need to quickly find WebSocketExporter class
+        using WarningsMediaContainer = std::unordered_map<std::type_index, std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
 
         PluginHost::IShell* _service;
         Config _config;

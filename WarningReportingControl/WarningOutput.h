@@ -33,16 +33,16 @@ namespace WPEFramework {
 
 namespace Plugin {
 
-    class WarningReportOutput : public WarningReporting::IWarningReportingMedia {
+    class WarningReportingTextOutput : public WarningReporting::IWarningReportingMedia {
     public:
-        WarningReportOutput(const WarningReportOutput&) = delete;
-        WarningReportOutput& operator=(const WarningReportOutput&) = delete;
+        WarningReportingTextOutput(const WarningReportingTextOutput&) = delete;
+        WarningReportingTextOutput& operator=(const WarningReportingTextOutput&) = delete;
 
-        explicit WarningReportOutput(const bool abbreviated)
+        explicit WarningReportingTextOutput(const bool abbreviated)
             : _abbreviated(abbreviated)
         {
         }
-        ~WarningReportOutput() override = default;
+        ~WarningReportingTextOutput() override = default;
 
     public:
         void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information) override
@@ -68,13 +68,13 @@ namespace Plugin {
     private:
         bool _abbreviated;
     };
-    class WarningReportSyslogOutput : public WarningReportOutput {
+    class WarningReportSyslogOutput : public WarningReportingTextOutput {
     public:
         WarningReportSyslogOutput(const WarningReportSyslogOutput&) = delete;
         WarningReportSyslogOutput& operator=(const WarningReportSyslogOutput&) = delete;
 
         explicit WarningReportSyslogOutput(const bool abbreviated)
-            : WarningReportOutput(abbreviated)
+            : WarningReportingTextOutput(abbreviated)
         {
         }
 
@@ -91,13 +91,13 @@ namespace Plugin {
         }
     };
 
-    class WarningReportConsoleOutput : public WarningReportOutput {
+    class WarningReportConsoleOutput : public WarningReportingTextOutput {
     public:
         WarningReportConsoleOutput(const WarningReportConsoleOutput&) = delete;
         WarningReportConsoleOutput& operator=(const WarningReportConsoleOutput&) = delete;
 
         explicit WarningReportConsoleOutput(const bool abbreviated)
-            : WarningReportOutput(abbreviated)
+            : WarningReportingTextOutput(abbreviated)
         {
         }
         ~WarningReportConsoleOutput() override = default;
@@ -109,19 +109,19 @@ namespace Plugin {
         }
     };
 
-    class WarningReportFileOutput : public WarningReportOutput {
+    class WarningReportFileOutput : public WarningReportingTextOutput {
     public:
         WarningReportFileOutput(const WarningReportFileOutput&) = delete;
         WarningReportFileOutput& operator=(const WarningReportFileOutput&) = delete;
 
         explicit WarningReportFileOutput(const bool abbreviated, const string& filepath)
-            : WarningReportOutput(abbreviated)
+            : WarningReportingTextOutput(abbreviated)
             , _file(filepath)
         {
             _file.Create();
 
             if (!_file.IsOpen()) {
-                TRACE(Trace::Error, (_T("Could not open file <%s>. Outputing warnings to file unavailable."), filepath));
+                TRACE(Trace::Error, (_T("Could not open file <%s>. Outputting warnings to file unavailable."), filepath));
             }
         }
         ~WarningReportFileOutput() override
@@ -141,6 +141,90 @@ namespace Plugin {
 
     private:
         Core::File _file;
+    };
+
+    class WarningReportingJSONOutput : public WarningReporting::IWarningReportingMedia {
+    public:
+        class Data : public Core::JSON::Container {
+
+        public:
+            Data(const Data&) = delete;
+            Data& operator=(const Data&) = delete;
+
+            Data()
+                : Core::JSON::Container()
+                , Time()
+                , Filename()
+                , Linenumber()
+                , Identifier()
+                , Category()
+                , Message()
+            {
+                Add(_T("time"), &Time);
+                Add(_T("filename"), &Filename);
+                Add(_T("linenumber"), &Linenumber);
+                Add(_T("category"), &Category);
+                Add(_T("identifier"), &Identifier);
+                Add(_T("message"), &Message);
+            }
+
+            ~Data() override = default;
+
+        public:
+            Core::JSON::String Time;
+            Core::JSON::String Filename;
+            Core::JSON::DecUInt32 Linenumber;
+            Core::JSON::String Category;
+            Core::JSON::String Identifier;
+            Core::JSON::String Message;
+        };
+
+    public:
+        WarningReportingJSONOutput(const WarningReportingJSONOutput&) = delete;
+        WarningReportingJSONOutput& operator=(const WarningReportingJSONOutput&) = delete;
+
+        enum class ExtraOutputOptions {
+            ABREVIATED = 0,
+            FILENAME = 1,
+            LINENUMBER = 3, // selecting LINENUMBER will automatically select FILENAME
+            IDENTIFIER = 4,
+            CATEGORY = 8,
+            INCLUDINGDATE = 16,
+            ALL = 31
+        };
+
+        explicit WarningReportingJSONOutput(const ExtraOutputOptions outputoptions = ExtraOutputOptions::ALL)
+            : _outputoptions(outputoptions)
+        {
+        }
+        ~WarningReportingJSONOutput() override = default;
+
+    public:
+        ExtraOutputOptions OutputOptions() const
+        {
+            return _outputoptions;
+        }
+
+        void OutputOptions(const ExtraOutputOptions outputoptions)
+        {
+            _outputoptions = outputoptions;
+        }
+
+        // just because I'm lazy :)
+        template <typename E>
+        static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type
+        {
+            return static_cast<typename std::underlying_type<E>::type>(t);
+        }
+
+    public:
+        virtual void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information) = 0;
+    private:
+        virtual void HandleTraceMessage(const Core::ProxyType<Data>& jsondata) = 0;
+        virtual Core::ProxyType<Data> GetDataContainer() = 0;
+
+    private:
+        std::atomic<ExtraOutputOptions> _outputoptions;
     };
 }
 }
