@@ -419,7 +419,7 @@ namespace Plugin {
         WebSocketExporter::Instance().Deactivate(channel);
     }
 
-    Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string& identifier) {
+    Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string& /* identifier */) {
         return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element());
     }
 
