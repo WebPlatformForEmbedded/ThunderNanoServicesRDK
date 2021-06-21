@@ -115,11 +115,11 @@ namespace Plugin {
         }
         int32_t Latitude() const override
         {
-            return (_data.Latitude.Value() * 1000000);
+            return (static_cast<int32_t>(_data.Latitude.Value() * 1000000));
         }
         int32_t Longitude() const override
         {
-            return (_data.Longitude.Value() * 1000000);
+            return (static_cast<int32_t>(_data.Longitude.Value() * 1000000));
         }
         string IP() const override
         {
@@ -182,7 +182,7 @@ namespace Plugin {
                     Core::JSON::ArrayType<Core::JSON::Double>::ConstIterator index = _LL.Elements();
 
                     if (index.Next() == true) {
-                        result = index.Current() * 1000000;
+                        result = static_cast<int32_t>(index.Current() * 1000000);
                     }
 
                     return (result);
@@ -192,7 +192,7 @@ namespace Plugin {
                     Core::JSON::ArrayType<Core::JSON::Double>::ConstIterator index = _LL.Elements();
 
                     if ( (index.Next() == true) && (index.Next() == true) ) {
-                        result = index.Current() * 1000000;
+                        result = static_cast<int32_t>(index.Current() * 1000000);
                     }
 
                     return (result);
