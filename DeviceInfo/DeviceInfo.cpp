@@ -40,6 +40,8 @@ namespace Plugin {
         _service = service;
         _systemId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
 
+        ASSERT(_subSystem != nullptr);
+
         _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
         if (_implementation == nullptr) {
@@ -51,10 +53,8 @@ namespace Plugin {
             ASSERT(_deviceMetadataInterface != nullptr);
         }
 
-        ASSERT(_subSystem != nullptr);
-
         // On success return empty, to indicate there is no error text.
-        return (_subSystem != nullptr) ? EMPTY_STRING : _T("Could not retrieve System Information.");
+        return (_implementation != nullptr) ? EMPTY_STRING : _T("Could not retrieve System Information.");
     }
 
     /* virtual */ void DeviceInfo::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
@@ -63,10 +63,8 @@ namespace Plugin {
         ASSERT(_implementation != nullptr);
         ASSERT(_deviceMetadataInterface != nullptr);
         
-
         _implementation->Release();
         _deviceMetadataInterface->Release();
-
 
         if (_connectionId != 0) {
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
@@ -77,12 +75,9 @@ namespace Plugin {
                 connection->Release();
             }
         }
-        _service = nullptr;
 
-        if (_subSystem != nullptr) {
-            _subSystem->Release();
-            _subSystem = nullptr;
-        }
+        _subSystem->Release();
+        _subSystem = nullptr;
 
         _service = nullptr;
     }
