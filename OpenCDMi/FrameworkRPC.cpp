@@ -279,6 +279,7 @@ namespace Plugin {
                             if (IsRunning() == true) {
                                 uint8_t keyIdLength = 0;
                                 const uint8_t* keyIdData = KeyId(keyIdLength);
+				uint8_t *payloadBuffer = Buffer();
 
                                 int cr = _mediaKeys->Decrypt(
                                     _sessionKey,
@@ -287,7 +288,7 @@ namespace Plugin {
                                     0, //number of subsamples
                                     IVKey(),
                                     IVKeyLength(),
-                                    Buffer(),
+                                    payloadBuffer,
                                     BytesWritten(),
                                     &clearContentSize,
                                     &clearContent,
@@ -300,8 +301,14 @@ namespace Plugin {
                                         Size(clearContentSize);
                                     }
 
-                                    // Adjust the buffer on our sied (this process) on what we will write back
-                                    SetBuffer(0, clearContentSize, clearContent);
+				    if(payloadBuffer != clearContent) {
+					// This wasn't a case of in-place decryption. So, make sure the decrypted buffer is copied to memory mapped file and released
+                                        // Adjust the buffer on our side (this process) on what we will write back
+                                        SetBuffer(0, clearContentSize, clearContent);
+                                        //Lets release the clear content buffer
+                                        _mediaKeys->ReleaseClearContent(nullptr, 0,clearContentSize,clearContent);
+				    }
+
                                 }
 
                                 // Store the status we have for the other side.
@@ -310,8 +317,6 @@ namespace Plugin {
                                 // Whatever the result, we are done with the buffer..
                                 Consumed();
 
-				//Lets release the clear content buffer
-				_mediaKeys->ReleaseClearContent(nullptr, 0,clearContentSize,clearContent);
                             }
                         }
 
