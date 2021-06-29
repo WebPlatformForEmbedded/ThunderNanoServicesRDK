@@ -309,10 +309,8 @@ namespace Plugin {
         TRACE(Trace::Information, (Core::Format(_T("Activating channel ID [%d]"), channel.Id()).c_str()));
         auto index = _outputs.find(typeid(WebSocketExporter));
         if (index != _outputs.end()) {
-            auto instance = dynamic_cast<WebSocketExporter*>(index->second.get());
-            if (instance != nullptr) {
-                return instance->Activate(channel);
-            }
+            auto instance = static_cast<WebSocketExporter*>(index->second.get());
+            return instance->Activate(channel);
         }
     }
 
@@ -321,10 +319,8 @@ namespace Plugin {
         TRACE(Trace::Information, (Core::Format(_T("Deactivating channel ID [%d]"), channel.Id()).c_str()));
         auto index = _outputs.find(typeid(WebSocketExporter));
         if (index != _outputs.end()) {
-            auto instance = dynamic_cast<WebSocketExporter*>(index->second.get());
-            if (instance != nullptr) {
-                instance->Deactivate(channel);
-            }
+            auto instance = static_cast<WebSocketExporter*>(index->second.get());
+            instance->Deactivate(channel);
         }
     }
 
@@ -337,10 +333,8 @@ namespace Plugin {
     {
         auto index = _outputs.find(typeid(WebSocketExporter));
         if (index != _outputs.end()) {
-            auto instance = dynamic_cast<WebSocketExporter*>(index->second.get());
-            if (instance != nullptr) {
-                return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(instance->HandleExportCommand(ID, element));
-            }
+            auto instance = static_cast<WebSocketExporter*>(index->second.get());
+            return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(instance->HandleExportCommand(ID, element));
         }
     }
 
