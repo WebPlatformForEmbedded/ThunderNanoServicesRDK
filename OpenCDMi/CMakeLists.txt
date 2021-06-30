@@ -36,7 +36,7 @@ if(PLUGIN_OPENCDMI_OOP)
     unset(PLUGIN_OPENCDMI_OOP CACHE)
 endif()
 
-find_package(ocdm REQUIRED)
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
@@ -58,19 +58,11 @@ set_target_properties(${MODULE_NAME} PROPERTIES
 target_link_libraries(${MODULE_NAME} 
         PRIVATE
                 CompileSettingsDebug::CompileSettingsDebug
-                ${NAMESPACE}Plugins::${NAMESPACE}Plugins 
-                ocdm::ocdm)
+                ${NAMESPACE}Plugins::${NAMESPACE}Plugins )
 # Library definition section
 install(TARGETS ${MODULE_NAME} 
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins)
 
-if("${CMAKE_FIND_ROOT_PATH}" STREQUAL "")
-   # Desktop case: not cross compiling
-   target_link_libraries(${MODULE_NAME} PRIVATE "${CMAKE_INSTALL_PREFIX}/lib/libocdm.so")
-else()
-   # Cross compiling: buildroot
-   target_link_libraries(${MODULE_NAME} PRIVATE ${PLUGINS_LIBRARIES} ${OCDM_LIBRARIES})
-endif()
 
 # Library installation section
 string(TOLOWER ${NAMESPACE} STORAGENAME)

@@ -28,6 +28,7 @@
 // DRM engines.
 #include <interfaces/IDRM.h>
 #include <interfaces/IContentDecryption.h>
+#include <interfaces/IOCDM.h>
 
 extern "C" {
 
@@ -235,15 +236,16 @@ namespace Plugin {
                 SessionImplementation(const SessionImplementation&) = delete;
                 SessionImplementation& operator=(const SessionImplementation&) = delete;
 
-                class DataExchange : public ::OCDM::DataExchange, public Core::Thread {
+                class DataExchange : public WPEFramework::Exchange::DataExchange, public Core::Thread {
                 private:
                     DataExchange() = delete;
-                    DataExchange(const DataExchange&) = delete;
+                    DataExchange(const DataExchange
+                    &) = delete;
                     DataExchange& operator=(const DataExchange&) = delete;
 
                 public:
                     DataExchange(CDMi::IMediaKeySession* mediaKeys, const string& name, const uint32_t defaultSize)
-                        : ::OCDM::DataExchange(name, defaultSize)
+                        :  WPEFramework::Exchange::DataExchange(name, defaultSize)
                         , Core::Thread(Core::Thread::DefaultStackSize(), _T("DRMSessionThread"))
                         , _mediaKeys(mediaKeys)
                         , _mediaKeysExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeys))
@@ -255,7 +257,7 @@ namespace Plugin {
                     }
                     ~DataExchange()
                     {
-                        TRACE(Trace::Information, (_T("Destructing buffer server side: %p - %s"), this, ::OCDM::DataExchange::Name().c_str()));
+                        TRACE(Trace::Information, (_T("Destructing buffer server side: %p - %s"), this, WPEFramework::Exchange::DataExchange::Name().c_str()));
                         // Make sure the thread reaches a HALT.. We are done.
                         Core::Thread::Stop();
 

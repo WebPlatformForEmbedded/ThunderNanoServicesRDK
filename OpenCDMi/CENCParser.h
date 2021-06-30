@@ -21,6 +21,7 @@
 #define __CENCPARSER_H
 
 #include "Module.h"
+#include <interfaces/IOCDM.h>
 
 namespace WPEFramework {
 namespace Plugin {
