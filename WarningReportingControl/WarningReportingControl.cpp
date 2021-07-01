@@ -22,8 +22,6 @@
 
 #include <algorithm>
 
-namespace {
-
 WPEFramework::Core::ProxyPoolType<WPEFramework::Plugin::WarningReportingJSONOutput::Data> jsonExportDataFactory(2);
 constexpr uint16_t MAX_CONNECTIONS = 5;
 
@@ -227,7 +225,6 @@ WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExpor
 
     return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(response);
 }
-}
 
 namespace WPEFramework {
 
@@ -271,19 +268,20 @@ namespace Plugin {
 
         if (((service->Background() == false) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false))
             || ((_config.Console.IsSet() == true) && (_config.Console.Value() == true))) {
-            _outputs.emplace(typeid(WarningReportConsoleOutput), new WarningReportConsoleOutput(_config.Abbreviated.Value()));
+            _outputs.emplace_back(new WarningReportConsoleOutput(_config.Abbreviated.Value()));
         }
         if (((service->Background() == true) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false))
             || ((_config.SysLog.IsSet() == true) && (_config.SysLog.Value() == true))) {
-            _outputs.emplace(typeid(WarningReportSyslogOutput), new WarningReportSyslogOutput(_config.Abbreviated.Value()));
+            _outputs.emplace_back(new WarningReportSyslogOutput(_config.Abbreviated.Value()));
         }
         if (_config.FilePath.IsSet()) {
-            _outputs.emplace(typeid(WarningReportFileOutput), new WarningReportFileOutput(_config.Abbreviated.Value(), _config.FilePath.Value()));
+            _outputs.emplace_back(new WarningReportFileOutput(_config.Abbreviated.Value(), _config.FilePath.Value()));
         }
 
         uint16_t maxExportConnections = _config.MaxExportConnections.IsSet() ? _config.MaxExportConnections.Value() : MAX_CONNECTIONS;
         if (maxExportConnections > 0) {
-            _outputs.emplace(typeid(WebSocketExporter), new WebSocketExporter(maxExportConnections));
+            _webSocketExporterInstance = new WebSocketExporter(maxExportConnections);
+            _outputs.emplace_back(_webSocketExporterInstance);
         }
 
         _service->Register(&_observer);
@@ -307,21 +305,13 @@ namespace Plugin {
     bool WarningReportingControl::Attach(PluginHost::Channel& channel)
     {
         TRACE(Trace::Information, (Core::Format(_T("Activating channel ID [%d]"), channel.Id()).c_str()));
-        auto index = _outputs.find(typeid(WebSocketExporter));
-        if (index != _outputs.end()) {
-            auto instance = static_cast<WebSocketExporter*>(index->second.get());
-            return instance->Activate(channel);
-        }
+        return _webSocketExporterInstance->Activate(channel);
     }
 
     void WarningReportingControl::Detach(PluginHost::Channel& channel)
     {
         TRACE(Trace::Information, (Core::Format(_T("Deactivating channel ID [%d]"), channel.Id()).c_str()));
-        auto index = _outputs.find(typeid(WebSocketExporter));
-        if (index != _outputs.end()) {
-            auto instance = static_cast<WebSocketExporter*>(index->second.get());
-            instance->Deactivate(channel);
-        }
+        _webSocketExporterInstance->Deactivate(channel);
     }
 
     Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const string& identifier)
@@ -331,11 +321,7 @@ namespace Plugin {
 
     Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element)
     {
-        auto index = _outputs.find(typeid(WebSocketExporter));
-        if (index != _outputs.end()) {
-            auto instance = static_cast<WebSocketExporter*>(index->second.get());
-            return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(instance->HandleExportCommand(ID, element));
-        }
+        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(_webSocketExporterInstance->HandleExportCommand(ID, element));
     }
 
     string WarningReportingControl::Information() const
@@ -349,7 +335,7 @@ namespace Plugin {
         ASSERT(information.event != nullptr);
         if (information.event != nullptr) {
             for (const auto& output : _outputs) {
-                output.second->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
+                output->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
             }
         }
     }

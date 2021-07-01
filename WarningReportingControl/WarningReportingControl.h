@@ -20,8 +20,8 @@
 #pragma once
 
 #include "Module.h"
-#include <typeindex>
 
+class WebSocketExporter;
 namespace WPEFramework {
 namespace Plugin {
     class WarningReportingControl : public PluginHost::IPluginExtended,
@@ -460,13 +460,14 @@ namespace Plugin {
 
     private:
         //I will need to quickly find WebSocketExporter class
-        using WarningsMediaContainer = std::unordered_map<std::type_index, std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
+        using WarningsMediaContainer = std::list<std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
 
         PluginHost::IShell* _service;
         Config _config;
         WarningsMediaContainer _outputs;
         string _warningsPath;
         Observer _observer;
+        WebSocketExporter* _webSocketExporterInstance;
     };
 }
 }
