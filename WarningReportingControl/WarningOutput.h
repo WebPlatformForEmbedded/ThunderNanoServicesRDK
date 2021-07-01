@@ -156,8 +156,8 @@ namespace Plugin {
                 , Time()
                 , Filename()
                 , Linenumber()
-                , Identifier()
                 , Category()
+                , Identifier()
                 , Message()
             {
                 Add(_T("time"), &Time);
@@ -269,8 +269,8 @@ namespace Plugin {
         }
 
     protected:
-        std::atomic<ExtraOutputOptions> _outputoptions;
         WPEFramework::PluginHost::Channel& _exportChannel;
+        std::atomic<ExtraOutputOptions> _outputoptions;
         bool _paused;
     };
 }

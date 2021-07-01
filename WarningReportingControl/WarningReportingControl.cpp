@@ -22,210 +22,6 @@
 
 #include <algorithm>
 
-WPEFramework::Core::ProxyPoolType<WPEFramework::Plugin::WarningReportingJSONOutput::Data> jsonExportDataFactory(2);
-constexpr uint16_t MAX_CONNECTIONS = 5;
-
-class WebSocketExporter : public WPEFramework::WarningReporting::IWarningReportingMedia {
-
-public:
-    class ExportCommand : public WPEFramework::Core::JSON::Container {
-
-    public:
-        ExportCommand(const ExportCommand&) = delete;
-        ExportCommand& operator=(const ExportCommand&) = delete;
-
-        ExportCommand()
-            : WPEFramework::Core::JSON::Container()
-            , Filename()
-            , Identifier()
-            , Category()
-            , IncludingDate()
-            , Paused()
-        {
-            Add(_T("filename"), &Filename);
-            Add(_T("identifier"), &Identifier);
-            Add(_T("category"), &Category);
-            Add(_T("includingdate"), &IncludingDate);
-            Add(_T("paused"), &Paused);
-        }
-
-        ~ExportCommand() override = default;
-
-    public:
-        WPEFramework::Core::JSON::Boolean Filename;
-        WPEFramework::Core::JSON::Boolean Identifier;
-        WPEFramework::Core::JSON::Boolean Category;
-        WPEFramework::Core::JSON::Boolean IncludingDate;
-        WPEFramework::Core::JSON::Boolean Paused;
-    };
-
-public:
-    class TraceChannelOutput : public WPEFramework::Plugin::WarningReportingJSONOutput {
-
-    public:
-        TraceChannelOutput(const TraceChannelOutput&) = delete;
-        TraceChannelOutput& operator=(const TraceChannelOutput&) = delete;
-
-        explicit TraceChannelOutput(WPEFramework::PluginHost::Channel& channel)
-            : WPEFramework::Plugin::WarningReportingJSONOutput(channel)
-        {
-        }
-        ~TraceChannelOutput() override = default;
-
-        WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
-        WPEFramework::Core::ProxyType<Data> GetDataContainer() override
-        {
-            return jsonExportDataFactory.Element();
-        }
-    };
-
-public:
-    WebSocketExporter(const WebSocketExporter& copy) = delete;
-    WebSocketExporter& operator=(const WebSocketExporter&) = delete;
-
-    WebSocketExporter(const uint32_t maxConnections = MAX_CONNECTIONS)
-        : _traceChannelOutputs()
-        , _lock()
-        , _maxExportConnections(maxConnections)
-    {
-    }
-
-    ~WebSocketExporter() override = default;
-
-    bool Activate(WPEFramework::PluginHost::Channel& channel)
-    {
-
-        bool accepted = false;
-
-        _lock.Lock();
-
-        if ((_maxExportConnections != 0) && (_maxExportConnections - _traceChannelOutputs.size() > 0)) {
-            ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
-            _traceChannelOutputs.emplace(std::make_pair(channel.Id(), new TraceChannelOutput(channel)));
-            accepted = true;
-        }
-
-        _lock.Unlock();
-
-        return accepted;
-    }
-
-    bool Deactivate(WPEFramework::PluginHost::Channel& channel)
-    {
-
-        bool deactivated = false;
-
-        _lock.Lock();
-
-        if (_traceChannelOutputs.count(channel.Id() != 0)) {
-            _traceChannelOutputs.erase(channel.Id());
-            deactivated = true;
-        }
-
-        _lock.Unlock();
-
-        return deactivated;
-    }
-
-    WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> HandleExportCommand(const uint32_t ID, const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
-    void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WPEFramework::WarningReporting::IWarningEvent* information) override
-    {
-
-        _lock.Lock();
-
-        for (auto& item : _traceChannelOutputs) {
-            item.second->Output(fileName, lineNumber, identifer, information);
-        }
-
-        _lock.Unlock();
-    }
-
-private:
-    using TraceChannelOutputPtr = std::unique_ptr<WPEFramework::Plugin::WarningReportingJSONOutput>;
-
-    std::unordered_map<uint32_t, TraceChannelOutputPtr> _traceChannelOutputs;
-    mutable WPEFramework::Core::CriticalSection _lock;
-    const uint32_t _maxExportConnections;
-};
-
-static WPEFramework::Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
-
-WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExporter::HandleExportCommand(const uint32_t ID,
-    const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element)
-{
-
-    WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> response;
-
-    _lock.Lock();
-
-    auto index = _traceChannelOutputs.find(ID);
-    if (index != _traceChannelOutputs.end()) {
-        response = index->second->Process(element);
-    }
-
-    _lock.Unlock();
-
-    return response;
-}
-
-WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExporter::TraceChannelOutput::Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element)
-{
-    WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand>
-        inbound(WPEFramework::Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
-
-    ASSERT(inbound.IsValid() == true);
-
-    ExtraOutputOptions options = OutputOptions();
-
-    if (inbound->Filename.IsSet() == true) {
-        if (inbound->Filename == true) {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::LINENUMBER));
-        } else {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::LINENUMBER));
-        }
-    }
-
-    if (inbound->Identifier.IsSet() == true) {
-        if (inbound->Identifier == true) {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::IDENTIFIER));
-        } else {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::IDENTIFIER));
-        }
-    }
-
-    if (inbound->Category.IsSet() == true) {
-        if (inbound->Category == true) {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::CATEGORY));
-        } else {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::CATEGORY));
-        }
-    }
-
-    if (inbound->IncludingDate.IsSet() == true) {
-        if (inbound->IncludingDate == true) {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::INCLUDINGDATE));
-        } else {
-            options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::INCLUDINGDATE));
-        }
-    }
-
-    OutputOptions(options);
-
-    if (inbound->Paused.IsSet() == true) {
-        _paused = inbound->Paused;
-    }
-
-    WPEFramework::Core::ProxyType<ExportCommand> response(jsonExportCommandFactory.Element());
-
-    response->Filename = ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
-    response->Identifier = ((AsNumber(options) & AsNumber(ExtraOutputOptions::IDENTIFIER)) != 0);
-    response->Category = ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
-    response->IncludingDate = ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
-    response->Paused = IsPaused();
-
-    return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(response);
-}
-
 namespace WPEFramework {
 
 ENUM_CONVERSION_BEGIN(Plugin::WarningReportingControl::state)
@@ -239,6 +35,209 @@ ENUM_CONVERSION_BEGIN(Plugin::WarningReportingControl::state)
 namespace Plugin {
 
     SERVICE_REGISTRATION(WarningReportingControl, 1, 0);
+    Core::ProxyPoolType<Plugin::WarningReportingJSONOutput::Data> jsonExportDataFactory(2);
+    constexpr uint16_t MAX_CONNECTIONS = 5;
+
+    class WebSocketExporter : public WarningReporting::IWarningReportingMedia {
+
+    public:
+        class ExportCommand : public Core::JSON::Container {
+
+        public:
+            ExportCommand(const ExportCommand&) = delete;
+            ExportCommand& operator=(const ExportCommand&) = delete;
+
+            ExportCommand()
+                : Core::JSON::Container()
+                , Filename()
+                , Identifier()
+                , Category()
+                , IncludingDate()
+                , Paused()
+            {
+                Add(_T("filename"), &Filename);
+                Add(_T("identifier"), &Identifier);
+                Add(_T("category"), &Category);
+                Add(_T("includingdate"), &IncludingDate);
+                Add(_T("paused"), &Paused);
+            }
+
+            ~ExportCommand() override = default;
+
+        public:
+            Core::JSON::Boolean Filename;
+            Core::JSON::Boolean Identifier;
+            Core::JSON::Boolean Category;
+            Core::JSON::Boolean IncludingDate;
+            Core::JSON::Boolean Paused;
+        };
+
+    public:
+        class TraceChannelOutput : public Plugin::WarningReportingJSONOutput {
+
+        public:
+            TraceChannelOutput(const TraceChannelOutput&) = delete;
+            TraceChannelOutput& operator=(const TraceChannelOutput&) = delete;
+
+            explicit TraceChannelOutput(PluginHost::Channel& channel)
+                : Plugin::WarningReportingJSONOutput(channel)
+            {
+            }
+            ~TraceChannelOutput() override = default;
+
+            Core::ProxyType<Core::JSON::IElement> Process(const Core::ProxyType<Core::JSON::IElement>& element);
+            Core::ProxyType<Data> GetDataContainer() override
+            {
+                return jsonExportDataFactory.Element();
+            }
+        };
+
+    public:
+        WebSocketExporter(const WebSocketExporter& copy) = delete;
+        WebSocketExporter& operator=(const WebSocketExporter&) = delete;
+
+        WebSocketExporter(const uint32_t maxConnections = MAX_CONNECTIONS)
+            : _traceChannelOutputs()
+            , _lock()
+            , _maxExportConnections(maxConnections)
+        {
+        }
+
+        ~WebSocketExporter() override = default;
+
+        bool Activate(PluginHost::Channel& channel)
+        {
+
+            bool accepted = false;
+
+            _lock.Lock();
+
+            if ((_maxExportConnections != 0) && (_maxExportConnections - _traceChannelOutputs.size() > 0)) {
+                ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
+                _traceChannelOutputs.emplace(std::make_pair(channel.Id(), new TraceChannelOutput(channel)));
+                accepted = true;
+            }
+
+            _lock.Unlock();
+
+            return accepted;
+        }
+
+        bool Deactivate(PluginHost::Channel& channel)
+        {
+
+            bool deactivated = false;
+
+            _lock.Lock();
+
+            if (_traceChannelOutputs.count(channel.Id() != 0)) {
+                _traceChannelOutputs.erase(channel.Id());
+                deactivated = true;
+            }
+
+            _lock.Unlock();
+
+            return deactivated;
+        }
+
+        Core::ProxyType<Core::JSON::IElement> HandleExportCommand(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element);
+        void Output(const char fileName[], const uint32_t lineNumber, const char identifer[], const WarningReporting::IWarningEvent* information) override
+        {
+
+            _lock.Lock();
+
+            for (auto& item : _traceChannelOutputs) {
+                item.second->Output(fileName, lineNumber, identifer, information);
+            }
+
+            _lock.Unlock();
+        }
+
+    private:
+        using TraceChannelOutputPtr = std::unique_ptr<Plugin::WarningReportingJSONOutput>;
+
+        std::unordered_map<uint32_t, TraceChannelOutputPtr> _traceChannelOutputs;
+        mutable Core::CriticalSection _lock;
+        const uint32_t _maxExportConnections;
+    };
+
+    static Core::ProxyPoolType<WebSocketExporter::ExportCommand> jsonExportCommandFactory(2);
+
+    Core::ProxyType<Core::JSON::IElement> WebSocketExporter::HandleExportCommand(const uint32_t ID,
+        const Core::ProxyType<Core::JSON::IElement>& element)
+    {
+
+        Core::ProxyType<Core::JSON::IElement> response;
+
+        _lock.Lock();
+
+        auto index = _traceChannelOutputs.find(ID);
+        if (index != _traceChannelOutputs.end()) {
+            response = index->second->Process(element);
+        }
+
+        _lock.Unlock();
+
+        return response;
+    }
+
+    Core::ProxyType<Core::JSON::IElement> WebSocketExporter::TraceChannelOutput::Process(const Core::ProxyType<Core::JSON::IElement>& element)
+    {
+        Core::ProxyType<WebSocketExporter::ExportCommand>
+            inbound(Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
+
+        ASSERT(inbound.IsValid() == true);
+
+        ExtraOutputOptions options = OutputOptions();
+
+        if (inbound->Filename.IsSet() == true) {
+            if (inbound->Filename == true) {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::LINENUMBER));
+            } else {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::LINENUMBER));
+            }
+        }
+
+        if (inbound->Identifier.IsSet() == true) {
+            if (inbound->Identifier == true) {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::IDENTIFIER));
+            } else {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::IDENTIFIER));
+            }
+        }
+
+        if (inbound->Category.IsSet() == true) {
+            if (inbound->Category == true) {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::CATEGORY));
+            } else {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::CATEGORY));
+            }
+        }
+
+        if (inbound->IncludingDate.IsSet() == true) {
+            if (inbound->IncludingDate == true) {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) | AsNumber(ExtraOutputOptions::INCLUDINGDATE));
+            } else {
+                options = static_cast<ExtraOutputOptions>(AsNumber(options) & ~AsNumber(ExtraOutputOptions::INCLUDINGDATE));
+            }
+        }
+
+        OutputOptions(options);
+
+        if (inbound->Paused.IsSet() == true) {
+            _paused = inbound->Paused;
+        }
+
+        Core::ProxyType<ExportCommand> response(jsonExportCommandFactory.Element());
+
+        response->Filename = ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
+        response->Identifier = ((AsNumber(options) & AsNumber(ExtraOutputOptions::IDENTIFIER)) != 0);
+        response->Category = ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
+        response->IncludingDate = ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
+        response->Paused = IsPaused();
+
+        return Core::proxy_cast<Core::JSON::IElement>(response);
+    }
 
     /* static */ string WarningReportingControl::Observer::Source::SourceName(const string& prefix, RPC::IRemoteConnection* connection)
     {
@@ -314,14 +313,14 @@ namespace Plugin {
         _webSocketExporterInstance->Deactivate(channel);
     }
 
-    Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const string& identifier)
+    Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const string&)
     {
-        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element());
+        return Core::proxy_cast<Core::JSON::IElement>(jsonExportCommandFactory.Element());
     }
 
     Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element)
     {
-        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(_webSocketExporterInstance->HandleExportCommand(ID, element));
+        return Core::proxy_cast<Core::JSON::IElement>(_webSocketExporterInstance->HandleExportCommand(ID, element));
     }
 
     string WarningReportingControl::Information() const

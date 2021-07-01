@@ -21,9 +21,9 @@
 
 #include "Module.h"
 
-class WebSocketExporter;
 namespace WPEFramework {
 namespace Plugin {
+class WebSocketExporter;
     class WarningReportingControl : public PluginHost::IPluginExtended,
                                     public PluginHost::IWebSocket {
 
@@ -193,10 +193,10 @@ namespace Plugin {
         public:
             Observer(WarningReportingControl& parent)
                 : Thread(Core::Thread::DefaultStackSize(), _T("WarningReportingWorker"))
-                , _maxUint64value(std::numeric_limits<uint64_t>::max())
+                , _maxUint64value(Core::NumberType<uint64_t>::Max())
+                , _warningReportingUnit(WarningReporting::WarningReportingUnit::Instance())
                 , _parent(parent)
                 , _refcount(0)
-                , _warningReportingUnit(WarningReporting::WarningReportingUnit::Instance())
             {
             }
             ~Observer()
