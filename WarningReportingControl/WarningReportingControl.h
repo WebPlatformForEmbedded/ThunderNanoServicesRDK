@@ -356,12 +356,14 @@ class WebSocketExporter;
         public:
             Config()
                 : Core::JSON::Container()
+                , WarningsOnly(false)
                 , FilePath()
                 , Console(false)
                 , SysLog(true)
                 , Abbreviated(true)
                 , MaxExportConnections(1)
-            {
+            {   
+                Add(_T("warningsonly"), &WarningsOnly);
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
                 Add(_T("filepath"), &FilePath);
@@ -373,6 +375,7 @@ class WebSocketExporter;
             }
 
         public:
+            Core::JSON::Boolean WarningsOnly;
             Core::JSON::String FilePath;
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
@@ -386,9 +389,12 @@ class WebSocketExporter;
 #endif
         WarningReportingControl()
             : _service(nullptr)
+            , _config()
             , _outputs()
             , _warningsPath()
             , _observer(*this)
+            , _webSocketExporterInstance(nullptr)
+            , _outputOnlyWarnings(false)
         {
         }
 #ifdef __WINDOWS__
@@ -459,7 +465,6 @@ class WebSocketExporter;
         }
 
     private:
-        //I will need to quickly find WebSocketExporter class
         using WarningsMediaContainer = std::list<std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
 
         PluginHost::IShell* _service;
@@ -468,6 +473,7 @@ class WebSocketExporter;
         string _warningsPath;
         Observer _observer;
         WebSocketExporter* _webSocketExporterInstance;
+        bool _outputOnlyWarnings;
     };
 }
 }

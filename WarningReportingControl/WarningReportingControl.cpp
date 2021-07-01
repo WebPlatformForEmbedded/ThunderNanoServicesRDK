@@ -259,6 +259,7 @@ namespace Plugin {
         _service = service;
         _config.FromString(_service->ConfigLine());
         _warningsPath = service->VolatilePath();
+        _outputOnlyWarnings = _config.WarningsOnly.Value();
 
         std::size_t pos = service->Callsign().length();
         if ((pos = _warningsPath.find_last_of('/', (_warningsPath.length() >= pos ? _warningsPath.length() - pos : string::npos))) != string::npos) {
@@ -331,10 +332,14 @@ namespace Plugin {
 
     void WarningReportingControl::Dispatch(const WarningInformation& information)
     {
+        bool toOutput = false;
+
         ASSERT(information.event != nullptr);
         if (information.event != nullptr) {
-            for (const auto& output : _outputs) {
-                output->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
+            if ((_outputOnlyWarnings && information.event->IsWarning()) || (!_outputOnlyWarnings)) {
+                for (const auto& output : _outputs) {
+                    output->Output(information.filename.c_str(), information.lineNumber, information.identifier.c_str(), information.event.get());
+                }
             }
         }
     }
