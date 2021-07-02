@@ -75,10 +75,11 @@ The table below lists configuration options of the plugin.
 | locator | string | Library name: *libWPEFrameworkWarningReportingControl.so* |
 | autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
 | configuration | object | <sup>*(optional)*</sup>  |
-| configuration?.warningsonly | boolean |Display only warnings (if value is greater than given "warningbound"|
-| configuration?.console | boolean | <sup>*(optional)*</sup> Enable console |
-| configuration?.syslog | boolean | <sup>*(optional)*</sup> Enable SysLog |
-| configuration?.abbreviated | boolean | <sup>*(optional)*</sup> Enable abbreviated logging |
+| configuration?.warningsonly | boolean | <sup>*(optional)*</sup> Display only warnings (if value is greater than given "warningbound" specified in Thunder config|
+| configuration?.console | boolean | <sup>*(optional)*</sup> Enable console output|
+| configuration?.syslog | boolean | <sup>*(optional)*</sup> Enable SysLog output |
+| configuration?.filepath | string | <sup>*(optional)*</sup> Path to store warnings - do not output to file if not set |
+| configuration?.abbreviated | boolean | <sup>*(optional)*</sup> Enable abbreviated information logging |
 
 
 ```
