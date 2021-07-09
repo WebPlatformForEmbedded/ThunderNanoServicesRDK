@@ -73,17 +73,17 @@ namespace Plugin {
         };
 
     public:
-        class TraceChannelOutput : public Plugin::WarningReportingJSONOutput {
+        class WarningChannelOutput : public Plugin::WarningReportingJSONOutput {
 
         public:
-            TraceChannelOutput(const TraceChannelOutput&) = delete;
-            TraceChannelOutput& operator=(const TraceChannelOutput&) = delete;
+            WarningChannelOutput(const WarningChannelOutput&) = delete;
+            WarningChannelOutput& operator=(const WarningChannelOutput&) = delete;
 
-            explicit TraceChannelOutput(PluginHost::Channel& channel)
+            explicit WarningChannelOutput(PluginHost::Channel& channel)
                 : Plugin::WarningReportingJSONOutput(channel)
             {
             }
-            ~TraceChannelOutput() override = default;
+            ~WarningChannelOutput() override = default;
 
             Core::ProxyType<Core::JSON::IElement> Process(const Core::ProxyType<Core::JSON::IElement>& element);
             Core::ProxyType<Data> GetDataContainer() override
@@ -97,7 +97,7 @@ namespace Plugin {
         WebSocketExporter& operator=(const WebSocketExporter&) = delete;
 
         WebSocketExporter(const uint32_t maxConnections = MAX_CONNECTIONS)
-            : _traceChannelOutputs()
+            : _warningChannelOutputs()
             , _lock()
             , _maxExportConnections(maxConnections)
         {
@@ -112,9 +112,9 @@ namespace Plugin {
 
             _lock.Lock();
 
-            if ((_maxExportConnections != 0) && (_maxExportConnections - _traceChannelOutputs.size() > 0)) {
-                ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
-                _traceChannelOutputs.emplace(std::make_pair(channel.Id(), new TraceChannelOutput(channel)));
+            if ((_maxExportConnections != 0) && (_maxExportConnections - _warningChannelOutputs.size() > 0)) {
+                ASSERT(0 == _warningChannelOutputs.count(channel.Id()));
+                _warningChannelOutputs.emplace(std::make_pair(channel.Id(), new WarningChannelOutput(channel)));
                 accepted = true;
             }
 
@@ -130,8 +130,8 @@ namespace Plugin {
 
             _lock.Lock();
 
-            if (_traceChannelOutputs.count(channel.Id() != 0)) {
-                _traceChannelOutputs.erase(channel.Id());
+            if (_warningChannelOutputs.count(channel.Id() != 0)) {
+                _warningChannelOutputs.erase(channel.Id());
                 deactivated = true;
             }
 
@@ -146,7 +146,7 @@ namespace Plugin {
 
             _lock.Lock();
 
-            for (auto& item : _traceChannelOutputs) {
+            for (auto& item : _warningChannelOutputs) {
                 item.second->Output(fileName, lineNumber, identifer, information);
             }
 
@@ -154,9 +154,7 @@ namespace Plugin {
         }
 
     private:
-        using TraceChannelOutputPtr = std::unique_ptr<Plugin::WarningReportingJSONOutput>;
-
-        std::unordered_map<uint32_t, TraceChannelOutputPtr> _traceChannelOutputs;
+        std::unordered_map<uint32_t, std::unique_ptr<Plugin::WarningReportingJSONOutput>> _warningChannelOutputs;
         mutable Core::CriticalSection _lock;
         const uint32_t _maxExportConnections;
     };
@@ -171,8 +169,8 @@ namespace Plugin {
 
         _lock.Lock();
 
-        auto index = _traceChannelOutputs.find(ID);
-        if (index != _traceChannelOutputs.end()) {
+        auto index = _warningChannelOutputs.find(ID);
+        if (index != _warningChannelOutputs.end()) {
             response = index->second->Process(element);
         }
 
@@ -181,7 +179,7 @@ namespace Plugin {
         return response;
     }
 
-    Core::ProxyType<Core::JSON::IElement> WebSocketExporter::TraceChannelOutput::Process(const Core::ProxyType<Core::JSON::IElement>& element)
+    Core::ProxyType<Core::JSON::IElement> WebSocketExporter::WarningChannelOutput::Process(const Core::ProxyType<Core::JSON::IElement>& element)
     {
         Core::ProxyType<WebSocketExporter::ExportCommand>
             inbound(Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
@@ -248,7 +246,7 @@ namespace Plugin {
             pathName += '.' + Core::NumberType<uint32_t>(connection->Id()).Text();
         }
 
-        return (pathName);
+        return pathName;
     }
 
     const string WarningReportingControl::Initialize(PluginHost::IShell* service)
@@ -261,11 +259,13 @@ namespace Plugin {
         _warningsPath = service->VolatilePath();
         _outputOnlyWarnings = _config.WarningsOnly.Value();
 
+        //warning buffers are placed in volatile path base (eg. /tmp/, not /tmp/WarnigReportingControl)
         std::size_t pos = service->Callsign().length();
         if ((pos = _warningsPath.find_last_of('/', (_warningsPath.length() >= pos ? _warningsPath.length() - pos : string::npos))) != string::npos) {
             _warningsPath = _warningsPath.substr(0, pos);
         }
 
+        //always output somewhere
         if (((service->Background() == false) && (_config.Console.IsSet() == false) && (_config.SysLog.IsSet() == false))
             || ((_config.Console.IsSet() == true) && (_config.Console.Value() == true))) {
             _outputs.emplace_back(new WarningReportConsoleOutput(_config.Abbreviated.Value()));
@@ -287,7 +287,7 @@ namespace Plugin {
         _service->Register(&_observer);
         _observer.Start();
 
-        return (_T(""));
+        return _T("");
     }
 
     void WarningReportingControl::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
@@ -327,13 +327,11 @@ namespace Plugin {
     string WarningReportingControl::Information() const
     {
         // No additional info to report.
-        return (nullptr);
+        return nullptr;
     }
 
     void WarningReportingControl::Dispatch(const WarningInformation& information)
     {
-        bool toOutput = false;
-
         ASSERT(information.event != nullptr);
         if (information.event != nullptr) {
             if ((_outputOnlyWarnings && information.event->IsWarning()) || (!_outputOnlyWarnings)) {

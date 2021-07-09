@@ -86,7 +86,7 @@ class WebSocketExporter;
             public:
                 uint32_t Id() const
                 {
-                    return (_connection != nullptr ? _connection->Id() : 0);
+                    return _connection != nullptr ? _connection->Id() : 0;
                 }
 
                 state Load(WarningReporting::WarningReportingUnit& warningReportingUnit)
@@ -98,13 +98,12 @@ class WebSocketExporter;
                         available = Core::CyclicBuffer::Validate();
                     }
 
-                    // Traces will be commited in one go, First reserve, then write. So if there is a length (2 bytes)
-                    // The full trace has to be available as well.
+                    // Warnings will be commited in one go, First reserve, then write. So if there is a length (2 bytes)
                     if ((available == true) && (_state == EMPTY) && ((length = Read(_warningsBuffer, sizeof(_warningsBuffer))) != 0)) {
 
                         if (length < 2) {
                             // Didn't even get enough data to read entry size. This is impossible, fallback to failure.
-                            TRACE(Trace::Error, (_T("Inconsistent trace dump. Need to flush. %d"), length));
+                            TRACE(Trace::Error, (_T("Inconsistent warning dump. Need to flush. %d"), length));
                             _state = FAILURE;
                         } else {
 
@@ -193,7 +192,6 @@ class WebSocketExporter;
         public:
             Observer(WarningReportingControl& parent)
                 : Thread(Core::Thread::DefaultStackSize(), _T("WarningReportingWorker"))
-                , _maxUint64value(Core::NumberType<uint64_t>::Max())
                 , _warningReportingUnit(WarningReporting::WarningReportingUnit::Instance())
                 , _parent(parent)
                 , _refcount(0)
@@ -283,7 +281,7 @@ class WebSocketExporter;
             {
                 Core::InterlockedDecrement(_refcount);
 
-                return (Core::ERROR_NONE);
+                return Core::ERROR_NONE;
             }
             uint32_t Worker() override
             {
@@ -291,14 +289,14 @@ class WebSocketExporter;
                     // Before we start we reset the flag, if new info is coming in, we will get a retrigger flag.
                     _warningReportingUnit.Acknowledge();
                     std::unordered_map<uint32_t, Source>::iterator selected = _buffers.end();
-                    uint64_t timeStamp = _maxUint64value;
+                    uint64_t timeStamp = Core::NumberType<uint64_t>::Max();
 
                     do {
                         selected = _buffers.end();
 
                         _adminLock.Lock();
 
-                        timeStamp = _maxUint64value;
+                        timeStamp = Core::NumberType<uint64_t>::Max();
 
                         for (auto buffer = _buffers.begin(); buffer != _buffers.end(); ++buffer) {
                             Source::state state(buffer->second.Load(_warningReportingUnit));
@@ -324,7 +322,7 @@ class WebSocketExporter;
 
                             // Ready to load a new one..
                             selected->second.Clear();
-                        } else if (timeStamp != _maxUint64value) {
+                        } else if (timeStamp != Core::NumberType<uint64_t>::Max()) {
                             // Looks like we are waiting for a message to be completed.
                             // Give up our slice, so the producer, can produce.
                             std::this_thread::yield();
@@ -332,14 +330,13 @@ class WebSocketExporter;
 
                         _adminLock.Unlock();
 
-                    } while ((IsRunning() == true) && (timeStamp != _maxUint64value));
+                    } while ((IsRunning() == true) && (timeStamp != Core::NumberType<uint64_t>::Max()));
                 }
 
-                return (Core::infinite);
+                return Core::infinite;
             }
 
         private:
-            const uint64_t _maxUint64value;
             Core::CriticalSection _adminLock;
             std::unordered_map<uint32_t, Source> _buffers;
             WarningReporting::WarningReportingUnit& _warningReportingUnit;
@@ -461,7 +458,7 @@ class WebSocketExporter;
 
         inline const string& WarningsPath() const
         {
-            return (_warningsPath);
+            return _warningsPath;
         }
 
     private:

@@ -50,13 +50,14 @@ namespace Plugin {
             std::stringstream output;
             string message;
             information->ToString(message);
+            output << (information->IsWarning() ? "[WARNING]" : "[REPORT]");
 
             if (_abbreviated == true) {
                 string time(Core::Time::Now().ToTimeOnly(true));
-                output << '[' << time.c_str() << "]: " << message << std::endl;
+                output << '[' << time.c_str() << "][" << Core::FileNameOnly(fileName) << ':' << lineNumber << "]: " << message << std::endl;
             } else {
                 string time(Core::Time::Now().ToRFC1123(true));
-                output << '[' << time.c_str() << "]:[" << identifer << "]:[" << Core::FileNameOnly(fileName) << ':' << lineNumber << "] " << information->Category()
+                output << '[' << time.c_str() << "][" << identifer << "][" << Core::FileNameOnly(fileName) << ':' << lineNumber << "] " << information->Category()
                        << ": " << message << std::endl;
             }
             HandleTraceMessage(output.str());
