@@ -85,10 +85,6 @@ namespace Plugin {
 
     /* virtual */ const string OCDM::Initialize(PluginHost::IShell* service)
     {
-		#ifdef __WINDOWS__
-        ForceLinkingOfOpenCDM();
-		#endif
-
         string message;
 
         ASSERT(_service == nullptr);
@@ -180,7 +176,7 @@ namespace Plugin {
     /* virtual */ string OCDM::Information() const
     {
         // No additional info to report.
-        return (nullptr);
+        return string();
     }
 
     /* virtual */ void OCDM::Inbound(Web::Request&)
