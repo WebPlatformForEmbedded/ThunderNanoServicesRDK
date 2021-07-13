@@ -71,11 +71,13 @@ set(PLUGIN_YOUTUBE_AUTOSTART "false" CACHE STRING "Automatically start Youtube p
 set(PLUGIN_YOUTUBE_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string YouTube")
 set(PLUGIN_YOUTUBE_WEBINSPECTOR_ADDRESS "0.0.0.0:9999" CACHE STRING "IP:Port for WebInspector of YouTube")
 set(PLUGIN_YOUTUBE_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of YouTube App")
+set(PLUGIN_YOUTUBE_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for WebKit")
 
 set(PLUGIN_UX_AUTOSTART "false" CACHE STRING "Automatically start UX plugin")
 set(PLUGIN_UX_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for UX")
 set(PLUGIN_UX_WEBINSPECTOR_ADDRESS "0.0.0.0:10000" CACHE STRING "IP:Port for WebInspector of UX")
 set(PLUGIN_UX_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of UX")
+set(PLUGIN_UX_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for WebKit")
 
 set(PLUGIN_APPS_AUTOSTART "false" CACHE STRING "Automatically start Apps plugin")
 set(PLUGIN_APPS_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Apps")
