@@ -78,7 +78,7 @@ The table below lists configuration options of the plugin.
 | configuration?.warningsonly | boolean | <sup>*(optional)*</sup> Display only warnings (if value is greater than given "warningbound" specified in Thunder config|
 | configuration?.console | boolean | <sup>*(optional)*</sup> Enable console output|
 | configuration?.syslog | boolean | <sup>*(optional)*</sup> Enable SysLog output |
-| configuration?.filepath | string | <sup>*(optional)*</sup> Path to store warnings - do not output to file if not set |
+| configuration?.filename | string | <sup>*(optional)*</sup> Filename to output warnings (in VolatilePath) |
 | configuration?.abbreviated | boolean | <sup>*(optional)*</sup> Enable abbreviated information logging |
 
 
