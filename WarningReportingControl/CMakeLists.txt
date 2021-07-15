@@ -27,6 +27,13 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
+set(PLUGIN_WARNINGREPORTINGCONTROL_AUTOSTART true CACHE STRING "Automatically start WarningReportingControl plugin")
+set(PLUGIN_WARNINGREPORTINGCONTROL_CONSOLE true CACHE STRING "Output warnings to console (if running in foreground)")
+set(PLUGIN_WARNINGREPORTINGCONTROL_SYSLOG true CACHE STRING "Output warnings to syslog")
+set(PLUGIN_WARNINGREPORTINGCONTROL_FILENAME "warnings.log" CACHE STRING "Filename in volatile path to store warnings")
+set(PLUGIN_WARNINGREPORTINGCONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
+set(PLUGIN_WARNINGREPORTINGCONTROL_WARNINGSONLY false CACHE STRING "Display only warnings (not reports)")
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(${NAMESPACE}WarningReporting)
