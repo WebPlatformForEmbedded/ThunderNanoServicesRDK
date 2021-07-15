@@ -274,8 +274,9 @@ namespace Plugin {
             || ((_config.SysLog.IsSet() == true) && (_config.SysLog.Value() == true))) {
             _outputs.emplace_back(new WarningReportSyslogOutput(_config.Abbreviated.Value()));
         }
-        if (_config.FilePath.IsSet()) {
-            _outputs.emplace_back(new WarningReportFileOutput(_config.Abbreviated.Value(), _config.FilePath.Value()));
+        if (_config.FileName.IsSet()) {
+            string fullPath = service->VolatilePath() + _config.FileName.Value();
+            _outputs.emplace_back(new WarningReportFileOutput(_config.Abbreviated.Value(), fullPath));
         }
 
         uint16_t maxExportConnections = _config.MaxExportConnections.IsSet() ? _config.MaxExportConnections.Value() : MAX_CONNECTIONS;

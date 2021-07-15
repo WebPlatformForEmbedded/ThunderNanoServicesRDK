@@ -354,8 +354,8 @@ class WebSocketExporter;
             Config()
                 : Core::JSON::Container()
                 , WarningsOnly(false)
-                , FilePath()
-                , Console(false)
+                , FileName()
+                , Console(true)
                 , SysLog(true)
                 , Abbreviated(true)
                 , MaxExportConnections(1)
@@ -363,7 +363,7 @@ class WebSocketExporter;
                 Add(_T("warningsonly"), &WarningsOnly);
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
-                Add(_T("filepath"), &FilePath);
+                Add(_T("filepath"), &FileName);
                 Add(_T("abbreviated"), &Abbreviated);
                 Add(_T("maxexportconnections"), &MaxExportConnections);
             }
@@ -373,7 +373,7 @@ class WebSocketExporter;
 
         public:
             Core::JSON::Boolean WarningsOnly;
-            Core::JSON::String FilePath;
+            Core::JSON::String FileName;
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
             Core::JSON::Boolean Abbreviated;
