@@ -806,7 +806,9 @@ namespace Plugin {
 
                 _adminLock.Unlock();
             }
- 
+            void Unavailable(const string&, PluginHost::IShell*) override
+            {
+            }
             void Snapshot(Core::JSON::ArrayType<Monitor::Data>& snapshot)
             {
                 _adminLock.Lock();
