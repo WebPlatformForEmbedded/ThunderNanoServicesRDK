@@ -35,6 +35,11 @@ if (NOT PC_WPE_WEBKIT_FOUND)
 pkg_check_modules(PC_WPE_WEBKIT wpe-webkit-0.1)
 endif()
 
+# Support old, non-versioned pc
+if (NOT PC_WPE_WEBKIT_FOUND)
+pkg_check_modules(PC_WPE_WEBKIT wpe-webkit)
+endif()
+
 if (PC_WPE_WEBKIT_FOUND)
     set(WPE_WEBKIT_FOUND TRUE)
     set(WPE_WEBKIT_VERSION ${PC_WPE_WEBKIT_VERSION})
