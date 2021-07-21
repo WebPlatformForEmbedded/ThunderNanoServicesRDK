@@ -42,7 +42,7 @@ namespace Plugin {
         Unregister(_T("socketinfo"));
         Unregister(_T("addresses"));
         Unregister(_T("systeminfo"));
-        Unregister(_T("stbcapabilities"));
+        Unregister(_T("capabilities"));
         Unregister(_T("metadata"));
     }
 
