@@ -31,7 +31,6 @@ namespace Plugin {
         {
             bcm_host_init();
 
-            UpdateChipset(_chipset);
             UpdateFirmwareVersion(_firmwareVersion);
         }
 
