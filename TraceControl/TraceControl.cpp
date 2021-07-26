@@ -168,6 +168,7 @@ namespace {
             if ((_maxExportConnections !=0) && (_maxExportConnections - _traceChannelOutputs.size() > 0)) {
                 ASSERT(0 == _traceChannelOutputs.count(channel.Id()));
                 _traceChannelOutputs.emplace(std::piecewise_construct, std::forward_as_tuple(channel.Id()), std::forward_as_tuple(WebSocketExporter::TraceChannelOutputPtr(new WebSocketExporter::TraceChannelOutput(channel))));
+                accepted = true;
             }
 
             _lock.Unlock();
