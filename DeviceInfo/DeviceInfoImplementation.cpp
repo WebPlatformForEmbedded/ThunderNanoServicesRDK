@@ -22,6 +22,11 @@ namespace Plugin {
         _supportsAtmos = _config.Atmos.Value();
         _supportsCEC = _config.Cec.Value();
         _supportedHDCP = _config.Hdcp.Value();
+        _modelName = _config.ModelName.Value();
+        _modelYear = _config.ModelYear.Value();
+        _friendlyName = _config.FriendlyName.Value();
+        _systemIntegratorName = _config.SystemIntegratorName.Value();
+        _platformName = _config.PlatformName.Value();
 
         AudioJsonArray::Iterator audioIterator(_config.Audio.Elements());
         while (audioIterator.Next()) {
@@ -79,6 +84,32 @@ namespace Plugin {
     uint32_t DeviceInfoImplementation::HDCP(CopyProtection& supportedHDCP) const
     {
         supportedHDCP = _supportedHDCP;
+        return Core::ERROR_NONE;
+    }
+
+    uint32_t DeviceInfoImplementation::ModelName(string& value) const  
+    {
+        value = _modelName;
+        return Core::ERROR_NONE;
+    }
+    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const 
+    {
+        value = _modelYear;
+        return Core::ERROR_NONE;
+    }
+    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const 
+    {
+        value = _friendlyName;
+        return Core::ERROR_NONE;
+    }
+    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const 
+    {
+        value = _systemIntegratorName;
+        return Core::ERROR_NONE;
+    }
+    uint32_t DeviceInfoImplementation::PlatformName(string& value) const 
+    {
+        value = _platformName ;
         return Core::ERROR_NONE;
     }
 }

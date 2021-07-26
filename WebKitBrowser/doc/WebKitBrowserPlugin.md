@@ -222,7 +222,6 @@ WebBrowser interface properties:
 | [url](#property.url) | Page loaded in the browser |
 | [visibility](#property.visibility) | Browser window visibility state |
 | [fps](#property.fps) <sup>RO</sup> | Current framerate the browser is rendering at |
-| [headerlist](#property.headerlist) | Headers to send on all requests that the browser makes |
 | [useragent](#property.useragent) | UserAgent string used by the browser |
 | [localstorageenabled](#property.localstorageenabled) | Controls the local storage availability |
 | [httpcookieacceptpolicy](#property.httpcookieacceptpolicy) | HTTP cookies accept policy |
@@ -383,60 +382,6 @@ Provides access to the current framerate the browser is rendering at.
     "jsonrpc": "2.0",
     "id": 1234567890,
     "result": 0
-}
-```
-
-<a name="property.headerlist"></a>
-## *headerlist <sup>property</sup>*
-
-Provides access to the headers to send on all requests that the browser makes.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | Header Names |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.headerlist"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": ""
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.headerlist",
-    "params": ""
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
 }
 ```
 
@@ -872,7 +817,6 @@ WebBrowser interface events:
 | [urlchange](#event.urlchange) | Signals a URL change in the browser |
 | [visibilitychange](#event.visibilitychange) | Signals a visibility change of the browser |
 | [pageclosure](#event.pageclosure) | Notifies that the web page requests to close its window |
-| [bridgequeryresponse](#event.bridgequeryresponse) | Base64 encoded JSON message from legacy $badger bridge |
 
 WebKitBrowser interface events:
 
@@ -1005,34 +949,12 @@ This event carries no parameters.
 }
 ```
 
-<a name="event.bridgequeryresponse"></a>
-## *bridgequeryresponse <sup>event</sup>*
-
-Base64 encoded JSON message from legacy $badger bridge.
-
-### Parameters
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.message | string |  |
-
-### Example
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "client.events.1.bridgequeryresponse",
-    "params": {
-        "message": ""
-    }
-}
-```
-
 <a name="event.bridgequery"></a>
 ## *bridgequery <sup>event</sup>*
 
 A Base64 encoded JSON message from legacy $badger bridge.
+
+> This API is **obsolete**. It is no longer recommended for use in new implementations.
 
 ### Parameters
 

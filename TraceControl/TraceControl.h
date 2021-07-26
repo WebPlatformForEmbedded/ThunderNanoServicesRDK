@@ -938,7 +938,6 @@ namespace Plugin {
             , _outputs()
             , _tracePath()
             , _observer(*this)
-            , _maxExportConnections(0)
         {
             RegisterAll();
         }
@@ -1030,7 +1029,8 @@ namespace Plugin {
         }
 
     private:
-        using TraceMediaContainer = std::list<std::unique_ptr<Trace::ITraceMedia>>;
+        using Custom_deleter = std::function<void(Trace::ITraceMedia*)>;
+        using TraceMediaContainer = std::list<std::unique_ptr<Trace::ITraceMedia, Custom_deleter>>;
 
         uint8_t _skipURL;
         PluginHost::IShell* _service;
@@ -1038,7 +1038,6 @@ namespace Plugin {
         TraceMediaContainer _outputs;
         string _tracePath;
         Observer _observer;
-        uint32_t _maxExportConnections;
     };
 }
 }

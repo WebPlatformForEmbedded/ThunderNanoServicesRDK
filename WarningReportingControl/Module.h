@@ -16,18 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef __MODULE_PLUGIN_OPENCDMI_MODULE_H
-#define __MODULE_PLUGIN_OPENCDMI_MODULE_H
+ 
+#ifndef __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H
+#define __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H
 
 #ifndef MODULE_NAME
-#define MODULE_NAME Plugin_OCDM
+#define MODULE_NAME Plugin_WarningReportingControl
 #endif
 
 #include <plugins/plugins.h>
+#include <interfaces/definitions.h>
+#include <warningreporting/warningreporting.h>
+#include <warningreporting/WarningReportingUnit.h>
 
 
 #undef EXTERNAL
 #define EXTERNAL
 
-#endif // __MODULE_PLUGIN_OPENCDMI_MODULE_H
+#endif // __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H

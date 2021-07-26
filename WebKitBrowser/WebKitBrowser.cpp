@@ -288,8 +288,7 @@ namespace Plugin {
     void WebKitBrowser::BridgeQueryResponse(const string& message)
     {
         TRACE(Trace::Information, (_T("BridgeQueryResponse: %s"), message.c_str()));
-        Exchange::JWebBrowser::Event::BridgeQueryResponse(*this, message);
-        event_bridgequery(message);
+       event_bridgequery(message);
     }
 
     void WebKitBrowser::StateChange(const PluginHost::IStateControl::state state)

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(TraceControl)
+project(WarningReportingControl)
 
 cmake_minimum_required(VERSION 3.3)
 
@@ -27,19 +27,20 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_TRACECONTROL_AUTOSTART "true" CACHE STRING "Automatically start TraceControl plugin")
-set(PLUGIN_TRACECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")
-set(PLUGIN_TRACECONTROL_PORT "0" CACHE STRING "PORT address")
-set(PLUGIN_TRACECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
-set(PLUGIN_TRACECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
+set(PLUGIN_WARNINGREPORTINGCONTROL_AUTOSTART true CACHE STRING "Automatically start WarningReportingControl plugin")
+set(PLUGIN_WARNINGREPORTINGCONTROL_CONSOLE true CACHE STRING "Output warnings to console (if running in foreground)")
+set(PLUGIN_WARNINGREPORTINGCONTROL_SYSLOG true CACHE STRING "Output warnings to syslog")
+set(PLUGIN_WARNINGREPORTINGCONTROL_FILENAME "warnings.log" CACHE STRING "Filename in volatile path to store warnings")
+set(PLUGIN_WARNINGREPORTINGCONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
+set(PLUGIN_WARNINGREPORTINGCONTROL_WARNINGSONLY false CACHE STRING "Display only warnings (not reports)")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
+find_package(${NAMESPACE}WarningReporting)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED 
-    TraceControl.cpp
-    TraceControlJsonRpc
+    WarningReportingControl.cpp
     Module.cpp)
 
 set_target_properties(${MODULE_NAME} PROPERTIES
@@ -50,6 +51,7 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}WarningReporting
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
 
 install(TARGETS ${MODULE_NAME} 

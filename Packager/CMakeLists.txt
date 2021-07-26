@@ -30,7 +30,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 set(PLUGIN_PACKAGER_AUTOSTART "true" CACHE STRING "Automatically start Packager plugin")
 set(PLUGIN_PACKAGER_OUTOFPROCESS "true" CACHE STRING "Controls if the plugin should run in its own process")
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(libprovision QUIET)
@@ -82,39 +82,21 @@ if (BUILD_WITH_PACKAGER_EX)
     add_definitions(${SQLITE_CFLAGS_OTHER} ${PLABELS_FLAGS})
     link_directories(${SQLITE_LIBRARY_DIRS})
 
-
     target_include_directories(${MODULE_NAME} PRIVATE ../helpers
             ${SQLITE_INCLUDE_DIRS}
             ${PLABELS_INCLUDE_DIRS}
             ${GLIB_INCLUDE_DIRS})
 
+    target_link_libraries(${MODULE_NAME} PRIVATE
+            CompileSettingsDebug::CompileSettingsDebug
+            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+            LibOPKG::LibOPKG
+            ${LIBUUID_LIBRARY}
+            ${SQLITE_LIBRARIES}
+            ${GLIB_LIBRARIES})
+
     if (libprovision_FOUND)
-        target_link_libraries(${MODULE_NAME}
-            PRIVATE
-                CompileSettingsDebug::CompileSettingsDebug
-                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-                LibOPKG::LibOPKG
-                ${LIBUUID_LIBRARY}
-                ${SQLITE_LIBRARIES}
-                ${GLIB_LIBRARIES}
-                libprovision::libprovision
-
-                )
-    else (libprovision_FOUND)
-        target_include_directories(${MODULE_NAME}
-            PRIVATE
-                ${LIBOPKG_INCLUDE_DIRS}
-                )
-
-        target_link_libraries(${MODULE_NAME}
-            PRIVATE
-                CompileSettingsDebug::CompileSettingsDebug
-                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-                ${LIBOPKG_LIBRARIES}
-                ${LIBUUID_LIBRARY}
-                ${SQLITE_LIBRARIES}
-                ${GLIB_LIBRARIES}
-                )
+        target_link_libraries(${MODULE_NAME} PRIVATE libprovision::libprovision)
     endif (libprovision_FOUND)
 
     string(TOLOWER ${NAMESPACE} STORAGENAME)
@@ -122,7 +104,7 @@ if (BUILD_WITH_PACKAGER_EX)
         DESTINATION lib/${STORAGENAME}/plugins)
 
     configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/opkg.conf.in"
+            "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"
             "${CMAKE_CURRENT_BINARY_DIR}/opkg.conf"
             @ONLY)
 
@@ -144,7 +126,7 @@ else (BUILD_WITH_PACKAGER_EX)
     set(PLUGIN_NAME Packager)
     set(MODULE_NAME ${NAMESPACE}${PLUGIN_NAME})
 
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
     find_package(CompileSettingsDebug CONFIG REQUIRED)
 
@@ -156,26 +138,13 @@ else (BUILD_WITH_PACKAGER_EX)
     target_include_directories(${MODULE_NAME} PRIVATE ../helpers
             ${PLABELS_INCLUDE_DIRS})
 
-    if (libprovision_FOUND)
-        target_link_libraries(${MODULE_NAME}
-            PRIVATE
-                CompileSettingsDebug::CompileSettingsDebug
-                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-                LibOPKG::LibOPKG
-                libprovision::libprovision
-                )
-    else (libprovision_FOUND)
-        target_include_directories(${MODULE_NAME}
-            PRIVATE
-                ${LIBOPKG_INCLUDE_DIRS}
-                )
+    target_link_libraries(${MODULE_NAME} PRIVATE
+            CompileSettingsDebug::CompileSettingsDebug
+            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+            LibOPKG::LibOPKG)
 
-        target_link_libraries(${MODULE_NAME}
-            PRIVATE
-                CompileSettingsDebug::CompileSettingsDebug
-                ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-                ${LIBOPKG_LIBRARIES}
-                )
+    if (libprovision_FOUND)
+        target_link_libraries(${MODULE_NAME} PRIVATE libprovision::libprovision)
     endif (libprovision_FOUND)
 
     string(TOLOWER ${NAMESPACE} STORAGENAME)
@@ -183,7 +152,7 @@ else (BUILD_WITH_PACKAGER_EX)
         DESTINATION lib/${STORAGENAME}/plugins)
 
     configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/opkg.conf.in"
+            "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"
             "${CMAKE_CURRENT_BINARY_DIR}/opkg.conf"
             @ONLY)
 
