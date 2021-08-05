@@ -805,6 +805,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
+
         uint32_t UserAgent(string& ua) const override
         {
             _adminLock.Lock();
@@ -852,6 +853,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
+
         uint32_t LocalStorageEnabled(bool& enabled) const override
         {
             _adminLock.Lock();
@@ -897,6 +899,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
+
         uint32_t HTTPCookieAcceptPolicy(HTTPCookieAcceptPolicyType& policy) const override
         {
 #ifdef WEBKIT_GLIB_API
@@ -935,6 +938,7 @@ static GSourceFuncs _handlerIntervention =
             _adminLock.Unlock();
             return Core::ERROR_NONE;
         }
+
         uint32_t HTTPCookieAcceptPolicy(const HTTPCookieAcceptPolicyType policy) override
         {
             if (_context == nullptr)
@@ -1012,16 +1016,19 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
+
         uint32_t BridgeReply(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectReply, payload);
             return Core::ERROR_NONE;
         }
+
         uint32_t BridgeEvent(const string& payload) override
         {
             SendToBridge(Tags::BridgeObjectEvent, payload);
             return Core::ERROR_NONE;
         }
+
         void SendToBridge(const string& name, const string& payload)
         {
             if (_context == nullptr)
@@ -1061,7 +1068,8 @@ static GSourceFuncs _handlerIntervention =
                 });
         }
 
-        uint32_t CollectGarbage() override {
+        uint32_t CollectGarbage() override
+        {
             g_main_context_invoke_full(
                 _context,
                 G_PRIORITY_DEFAULT,
@@ -1134,6 +1142,7 @@ static GSourceFuncs _handlerIntervention =
 
             return Core::ERROR_NONE;
         }
+
         uint32_t URL(string& url) const override
         {
             _adminLock.Lock();
@@ -1142,15 +1151,18 @@ static GSourceFuncs _handlerIntervention =
 
             return 0;
         }
+
         uint32_t FPS(uint8_t& fps) const override
         {
             fps = _fps;
             return 0;
         }
+
         PluginHost::IStateControl::state State() const override
         {
             return (_state);
         }
+
         uint32_t Request(PluginHost::IStateControl::command command) override
         {
             uint32_t result = Core::ERROR_ILLEGAL_STATE;
@@ -1185,6 +1197,7 @@ static GSourceFuncs _handlerIntervention =
 
             return (result);
         }
+
         void Register(PluginHost::IStateControl::INotification* sink)
         {
             _adminLock.Lock();
@@ -1199,6 +1212,7 @@ static GSourceFuncs _handlerIntervention =
 
             TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
         }
+
         void Unregister(PluginHost::IStateControl::INotification* sink)
         {
             _adminLock.Lock();
@@ -1216,6 +1230,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void Hide(const bool hidden) override
         {
             if (hidden == true) {
@@ -1224,19 +1239,26 @@ static GSourceFuncs _handlerIntervention =
                 Show();
             }
         }
-        void SetURL(const string& url) override {
+
+        void SetURL(const string& url) override
+        {
             URL(url);
         }
-        string GetURL() const override {
+
+        string GetURL() const override
+        {
             string url;
             URL(url);
             return url;
         }
-        uint32_t GetFPS() const override {
+
+        uint32_t GetFPS() const override
+        {
             uint8_t fps = 0;
             FPS(fps);
             return static_cast<uint32_t>(fps);
         }
+
         void Register(Exchange::IWebBrowser::INotification* sink) override
         {
             _adminLock.Lock();
@@ -1269,6 +1291,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void Register(Exchange::IBrowser::INotification* sink) override
         {
             _adminLock.Lock();
@@ -1304,7 +1327,8 @@ static GSourceFuncs _handlerIntervention =
 
         // IApplication implementation
 
-        void Register(Exchange::IApplication::INotification* sink) override {
+        void Register(Exchange::IApplication::INotification* sink) override
+        {
             _adminLock.Lock();
 
             // Make sure a sink is not registered multiple times.
@@ -1318,7 +1342,8 @@ static GSourceFuncs _handlerIntervention =
             TRACE(Trace::Information, (_T("Registered an IApplication sink on the browser %p"), sink));
         }
 
-        void Unregister(Exchange::IApplication::INotification* sink) override {
+        void Unregister(Exchange::IApplication::INotification* sink) override
+        {
             _adminLock.Lock();
 
             std::list<Exchange::IApplication::INotification*>::iterator index(std::find(_applicationClients.begin(), _applicationClients.end(), sink));
@@ -1335,11 +1360,13 @@ static GSourceFuncs _handlerIntervention =
             _adminLock.Unlock();
         }
 
-        uint32_t Reset(const resettype type) override {
+        uint32_t Reset(const resettype type) override
+        {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t Identifier(string& id) const override {
+        uint32_t Identifier(string& id) const override
+        {
 
             const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
             if (identifier != nullptr) {
@@ -1358,31 +1385,37 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t ContentLink(const string& link) override {
+        uint32_t ContentLink(const string& link) override
+        {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t LaunchPoint(launchpointtype& point) const override {
+        uint32_t LaunchPoint(launchpointtype& point) const override
+        {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t LaunchPoint(const launchpointtype&) override {
+        uint32_t LaunchPoint(const launchpointtype&) override
+        {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t Visible(bool& visiblity) const override {
+        uint32_t Visible(bool& visiblity) const override
+        {
             _adminLock.Lock();
             visiblity = (_hidden == false);
             _adminLock.Unlock();
             return Core::ERROR_NONE;
         }
 
-        uint32_t Visible(const bool& visiblity) override {
+        uint32_t Visible(const bool& visiblity) override
+        {
             Hide(!visiblity);
             return Core::ERROR_NONE;
         }
 
-        uint32_t Language(string& language) const override {
+        uint32_t Language(string& language) const override
+        {
             _adminLock.Lock();
             Core::JSON::ArrayType<Core::JSON::String> langsArray = _config.Languages;
             _adminLock.Unlock();
@@ -1391,7 +1424,8 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t Language(const string& language) override {
+        uint32_t Language(const string& language) override
+        {
             if (_context == nullptr)
                 return Core::ERROR_GENERAL;
 
@@ -1476,12 +1510,14 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
 #ifdef WEBKIT_GLIB_API
         void OnLoadFinished()
         {
             string URL = Core::ToString(webkit_web_view_get_uri(_view));
             OnLoadFinished(URL);
         }
+
         void OnLoadFinished(const string& URL)
         {
 #else
@@ -1514,6 +1550,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void OnLoadFailed()
         {
             _adminLock.Lock();
@@ -1527,6 +1564,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void OnStateChange(const PluginHost::IStateControl::state newState)
         {
             _adminLock.Lock();
@@ -1544,6 +1582,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void Hidden(const bool hidden)
         {
             _adminLock.Lock();
@@ -1577,12 +1616,14 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
         void OnJavaScript(const std::vector<string>& text) const
         {
             for (const string& line : text) {
                 std::cout << "  " << line << std::endl;
             }
         }
+
         void OnBridgeQuery(const string& text)
         {
             _adminLock.Lock();
@@ -1590,7 +1631,7 @@ static GSourceFuncs _handlerIntervention =
             std::list<Exchange::IWebBrowser::INotification*>::iterator index(_notificationClients.begin());
 
             while (index != _notificationClients.end()) {
-                (*index)->BridgeQueryResponse(text);
+                (*index)->BridgeQuery(text);
                 index++;
             }
 

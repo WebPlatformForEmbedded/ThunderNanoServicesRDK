@@ -285,10 +285,10 @@ namespace Plugin {
         Exchange::JWebBrowser::Event::PageClosure(*this);
     }
 
-    void WebKitBrowser::BridgeQueryResponse(const string& message)
+    void WebKitBrowser::BridgeQuery(const string& message)
     {
-        TRACE(Trace::Information, (_T("BridgeQueryResponse: %s"), message.c_str()));
-       event_bridgequery(message);
+        TRACE(Trace::Information, (_T("BridgeQuery: %s"), message.c_str()));
+        event_bridgequery(message);
     }
 
     void WebKitBrowser::StateChange(const PluginHost::IStateControl::state state)
