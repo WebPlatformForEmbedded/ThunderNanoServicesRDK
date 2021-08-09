@@ -83,9 +83,9 @@ namespace Plugin {
             {
                 _parent.PageClosure();
             }
-            void BridgeQueryResponse(const string& message) override
+            void BridgeQuery(const string& message) override
             {
-                _parent.BridgeQueryResponse(message);
+                _parent.BridgeQuery(message);
             }
             void StateChange(const PluginHost::IStateControl::state state) override
             {
@@ -216,7 +216,7 @@ namespace Plugin {
         void URLChange(const string& URL, bool loaded);
         void VisibilityChange(const bool hidden);
         void PageClosure();
-        void BridgeQueryResponse(const string& message);
+        void BridgeQuery(const string& message);
         void StateChange(const PluginHost::IStateControl::state state);
         uint32_t DeleteDir(const string& path);
 
