@@ -54,7 +54,7 @@ namespace Plugin {
 
             if (_abbreviated == true) {
                 string time(Core::Time::Now().ToTimeOnly(true));
-                output << '[' << time.c_str() << "][" << Core::FileNameOnly(fileName) << ':' << lineNumber << "]: " << message << std::endl;
+                output << '[' << time.c_str() << "][" << identifer << "]: " << message << std::endl;
             } else {
                 string time(Core::Time::Now().ToRFC1123(true));
                 output << '[' << time.c_str() << "][" << identifer << "][" << Core::FileNameOnly(fileName) << ':' << lineNumber << "] " << information->Category()
