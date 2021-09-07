@@ -73,17 +73,28 @@ namespace Plugin {
     static void ParseContentType(const std::string& contentType, std::string& mimeType, std::vector<std::string>& codecsList) {
         codecsList.clear();
         if (contentType.empty() == false) {
-            std::smatch matches;
-            const size_t kCaptureGroupsNumber = 4;
-            std::regex expr("\\s*([a-zA-Z0-9\\-\\+]+/[a-zA-Z0-9\\-\\+]+)\\s*(;\\s*codecs\\*?\\s*=\\s*\"?([a-zA-Z0-9,\\s\\+\\-\\.']+)\"?\\s*)?");
-            bool matched = std::regex_match(contentType, matches, expr, std::regex_constants::match_default);
 
-            if (matched && matches.size() == kCaptureGroupsNumber) {
-                ASSERT(matches[0] == contentType);
-                mimeType = matches[1];
-                if (matches[2].str().empty() == false) {
-                    std::vector<std::string> codecs = Tokenize(matches[3], ',');
-                    codecsList.swap(codecs);
+            std::vector<std::string> components = Tokenize(contentType, ';');
+            if (!components.empty()) {
+
+                // Verify if there is a valid type/subtype in the beginning.
+                std::vector<std::string> typeContainer = Tokenize(components.front(), '/');
+                if (!(typeContainer.size() != 2 || typeContainer[0].empty() || typeContainer[1].empty())) {
+
+                    mimeType = components.front();
+                    components.erase(components.begin());
+
+                    // Iterate through name/value pairs
+                    for (auto iter = components.begin(); iter != components.end(); ++iter) {
+                        std::vector<std::string> nameValue = Tokenize(*iter, '=');
+                        if (!(nameValue.size() != 2 || nameValue[0].empty() || nameValue[1].empty())) {
+                            if (nameValue[0] == "codecs") {
+                                std::vector<std::string> codecs = Tokenize(nameValue[1].substr(1, nameValue[1].size() - 2), ',');
+                                codecsList.swap(codecs);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
