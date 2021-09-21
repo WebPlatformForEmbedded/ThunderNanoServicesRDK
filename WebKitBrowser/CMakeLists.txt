@@ -102,7 +102,7 @@ set(PLUGIN_SEARCH_AND_DISCOVERY_APP_WEBINSPECTOR_ADDRESS ":::10003" CACHE STRING
 set(PLUGIN_SEARCH_AND_DISCOVERY_APP_LOCALSTORAGE_ENABLE "false" CACHE STRING "Enable LocalStorage of Search&Discovery App")
 
 set(PLUGIN_HTML_APP_AUTOSTART "false" CACHE STRING "Automatically start Htmp App plugin")
-set(PLUGIN_HTML_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
+set(PLUGIN_HTML_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_HTML_APP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Html App")
 set(PLUGIN_HTML_APP_WEBINSPECTOR_ADDRESS ":::10001" CACHE STRING "IP:Port for WebInspector of Html App")
 set(PLUGIN_HTML_APP_LOCALSTORAGE_ENABLE "false" CACHE STRING "Enable LocalStorage of Html App")
