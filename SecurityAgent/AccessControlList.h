@@ -57,26 +57,11 @@ namespace {
         ReplaceString(regex,":*",":[0-9]+");
         ReplaceString(regex,"*:","[a-z]+:");
         ReplaceString(regex,".","\\.");
-        ReplaceString(regex,"*","[a-zA-Z0-9\\.\\-]+");
+        ReplaceString(regex,"*","[a-zA-Z0-9\\.]+");
         regex.insert(regex.begin(),'(');
         regex.insert(regex.end(),')');
-        regex.insert(regex.begin(),'^');
-        regex.insert(regex.end(),'$');
         
         return regex;
-    }
-
-    string GetUrlOrigin(const string& input)
-    {
-        // see https://tools.ietf.org/html/rfc3986
-        auto path = input.find('/', input.find("//") + 2);
-        auto fragment = input.rfind('#', path);
-        auto end = fragment == string::npos ? path : fragment;
-        auto query = input.rfind('?', end);
-        if (query != string::npos)
-            end = query;
-
-        return input.substr(0, end);
     }
 }
 
@@ -389,8 +374,6 @@ namespace Plugin {
         }
         const Filter* FilterMapFromURL(const string& URL) const
         {
-            auto origin = GetUrlOrigin(URL);
-
             const Filter* result = nullptr;
             std::smatch matchList;
             URLList::const_iterator index = _urlMap.begin();
@@ -401,7 +384,7 @@ namespace Plugin {
                 // matching behavior.
                 std::regex expression(index->first.c_str());
 
-                if (std::regex_search(origin, matchList, expression) == true) {
+                if (std::regex_search(URL, matchList, expression) == true) {
                     result = &(index->second);
                 }
                 else {
