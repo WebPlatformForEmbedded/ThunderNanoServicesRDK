@@ -45,9 +45,7 @@ struct _opkg_progress_data_t;
 namespace WPEFramework {
 namespace Plugin {
 
-
-    class PackagerImplementation : public Exchange::IPackager
-    {
+    class PackagerImplementation : public Exchange::IPackager {
     public:
         PackagerImplementation(const PackagerImplementation&) = delete;
         PackagerImplementation& operator=(const PackagerImplementation&) = delete;
@@ -367,7 +365,6 @@ namespace Plugin {
         };
 
         uint32_t DoWork(const string* name, const string* version, const string* arch);
-
         void UpdateConfig() const;
 #if !defined (DO_NOT_USE_DEPRECATED_API)
         static void InstallationProgessNoLock(const _opkg_progress_data_t* progress, void* data);

@@ -55,11 +55,9 @@ namespace {
 
     class Packager : public PluginHost::IPlugin,
                      public PluginHost::IWeb,
-                     public PluginHost::JSONRPC
-    {
+                     public PluginHost::JSONRPC {
     public:
-        struct Params : public Core::JSON::Container
-        {
+        struct Params : public Core::JSON::Container {
             Params& operator=(const Params& other) = delete;
             Params() {
                 Add(_T("package"), &Package);
@@ -379,12 +377,11 @@ namespace {
             Notification(const Notification&) = delete;
             Notification& operator=(const Notification&) = delete;
 
-          public:
-            virtual void Activated(RPC::IRemoteConnection*) override
+            void Activated(RPC::IRemoteConnection*) override
             {
             }
 
-            virtual void Deactivated(RPC::IRemoteConnection* connection) override
+            void Deactivated(RPC::IRemoteConnection* connection) override
             {
                 _parent.Deactivated(connection);
             }
