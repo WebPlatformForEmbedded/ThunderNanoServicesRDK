@@ -32,14 +32,13 @@ namespace Plugin {
         string message;
 
         _identifier = service->Root<PluginHost::ISubSystem::IIdentifier>(_connectionId, RPC::CommunicationTimeOut, _T("DeviceImplementation"));
-        
+
         if (_identifier != nullptr) {
             _deviceId = GetDeviceId();
-            
+
             if (_deviceId.empty() != true) {
                 service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, _identifier);
             }
-
         }
 
         if (_identifier == nullptr) {
