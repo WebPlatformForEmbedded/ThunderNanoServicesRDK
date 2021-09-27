@@ -81,33 +81,38 @@ namespace Plugin {
         supportsCEC = _supportsCEC;
         return Core::ERROR_NONE;
     }
+
     uint32_t DeviceInfoImplementation::HDCP(CopyProtection& supportedHDCP) const
     {
         supportedHDCP = _supportedHDCP;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::ModelName(string& value) const  
+    uint32_t DeviceInfoImplementation::ModelName(string& value) const
     {
         value = _modelName;
         return Core::ERROR_NONE;
     }
-    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const 
+
+    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const
     {
         value = _modelYear;
         return Core::ERROR_NONE;
     }
-    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const
     {
         value = _friendlyName;
         return Core::ERROR_NONE;
     }
-    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const
     {
         value = _systemIntegratorName;
         return Core::ERROR_NONE;
     }
-    uint32_t DeviceInfoImplementation::PlatformName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::PlatformName(string& value) const
     {
         value = _platformName ;
         return Core::ERROR_NONE;

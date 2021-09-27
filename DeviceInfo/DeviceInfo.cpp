@@ -62,7 +62,7 @@ namespace Plugin {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);
         ASSERT(_deviceMetadataInterface != nullptr);
-        
+
         _implementation->Release();
         _deviceMetadataInterface->Release();
 
@@ -238,7 +238,7 @@ namespace Plugin {
         if (_deviceMetadataInterface->ModelName(localresult) == Core::ERROR_NONE) {
             metadatainfo.ModelName = localresult;
         }
-        
+
         uint16_t year = 0;
         if (_deviceMetadataInterface->ModelYear(year) == Core::ERROR_NONE) {
             metadatainfo.ModelYear = year;
@@ -255,7 +255,6 @@ namespace Plugin {
         if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
             metadatainfo.PlatformName = localresult;
         }
-        
     }
 
 } // namespace Plugin

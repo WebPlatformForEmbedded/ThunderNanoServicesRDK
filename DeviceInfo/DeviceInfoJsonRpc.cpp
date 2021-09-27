@@ -94,7 +94,5 @@ namespace Plugin {
         return Core::ERROR_NONE;
     }
 
-
-
 } // namespace Plugin
 }
