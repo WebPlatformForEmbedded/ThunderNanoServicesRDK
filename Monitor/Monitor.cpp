@@ -92,7 +92,7 @@ namespace Plugin {
 
                     _monitor->Snapshot(*response);
 
-                    result->Body(Core::proxy_cast<Web::IBody>(response));
+                    result->Body(Core::ProxyType<Web::IBody>(response));
                 }
             } else {
                 MetaData memoryInfo;
@@ -103,7 +103,7 @@ namespace Plugin {
 
                     *response = memoryInfo;
 
-                    result->Body(Core::proxy_cast<Web::IBody>(response));
+                    result->Body(Core::ProxyType<Web::IBody>(response));
                 }
             }
 
@@ -117,7 +117,7 @@ namespace Plugin {
 
                 *response = memoryInfo;
 
-                result->Body(Core::proxy_cast<Web::IBody>(response));
+                result->Body(Core::ProxyType<Web::IBody>(response));
             }
 
             result->ContentType = Web::MIME_JSON;

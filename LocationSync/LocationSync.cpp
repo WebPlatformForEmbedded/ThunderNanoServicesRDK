@@ -115,7 +115,7 @@ namespace Plugin {
             response->City = location->City();
 
             result->ContentType = Web::MIMETypes::MIME_JSON;
-            result->Body(Core::proxy_cast<Web::IBody>(response));
+            result->Body(Core::ProxyType<Web::IBody>(response));
         } else if (request.Verb == Web::Request::HTTP_POST) {
             index.Next();
             if (index.Next()) {
