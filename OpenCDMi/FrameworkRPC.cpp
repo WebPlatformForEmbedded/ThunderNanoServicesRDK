@@ -284,20 +284,28 @@ namespace Plugin {
                                 const uint8_t* keyIdData = KeyId(keyIdLength);
 				uint8_t *payloadBuffer = Buffer();
 
-                                int cr = _mediaKeys->Decrypt(
-                                    _sessionKey,
-                                    _sessionKeyLength,
-                                    nullptr, //subsamples
-                                    0, //number of subsamples
-                                    IVKey(),
-                                    IVKeyLength(),
-                                    payloadBuffer,
-                                    BytesWritten(),
-                                    &clearContentSize,
-                                    &clearContent,
-                                    keyIdLength,
-                                    keyIdData,
-                                    InitWithLast15());
+
+                                int cr = 0;
+                                REPORT_DURATION_WARNING(
+                                    {
+                                    cr = _mediaKeys->Decrypt(
+                                        _sessionKey,
+                                        _sessionKeyLength,
+                                        nullptr, //subsamples
+                                        0, //number of subsamples
+                                        IVKey(),
+                                        IVKeyLength(),
+                                        payloadBuffer,
+                                        BytesWritten(),
+                                        &clearContentSize,
+                                        &clearContent,
+                                        keyIdLength,
+                                        keyIdData,
+                                        InitWithLast15());
+                                    },
+                                    WarningReporting::TooLongDecrypt
+                                )
+
                                 if ((cr == 0) && (clearContentSize != 0)) {
                                     if (clearContentSize != BytesWritten()) {
                                         TRACE(Trace::Information, (_T("Returned clear sample size (%d) differs from encrypted buffer size (%d)"), clearContentSize, BytesWritten()));
