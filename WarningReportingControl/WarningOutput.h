@@ -266,7 +266,7 @@ namespace Plugin {
 
         void HandleTraceMessage(const Core::ProxyType<Data>& jsondata)
         {
-            _exportChannel.Submit(WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsondata));
+            _exportChannel.Submit(WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(jsondata));
         }
 
     protected:

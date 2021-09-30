@@ -62,7 +62,7 @@ namespace Plugin {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);
         ASSERT(_deviceMetadataInterface != nullptr);
-        
+
         _implementation->Release();
         _deviceMetadataInterface->Release();
 
@@ -126,7 +126,7 @@ namespace Plugin {
             // TODO RB: I guess we should do something here to return other info (e.g. time) as well.
 
             result->ContentType = Web::MIMETypes::MIME_JSON;
-            result->Body(Core::proxy_cast<Web::IBody>(response));
+            result->Body(Core::ProxyType<Web::IBody>(response));
         } else {
             result->ErrorCode = Web::STATUS_BAD_REQUEST;
             result->Message = _T("Unsupported request for the [DeviceInfo] service.");
@@ -238,7 +238,7 @@ namespace Plugin {
         if (_deviceMetadataInterface->ModelName(localresult) == Core::ERROR_NONE) {
             metadatainfo.ModelName = localresult;
         }
-        
+
         uint16_t year = 0;
         if (_deviceMetadataInterface->ModelYear(year) == Core::ERROR_NONE) {
             metadatainfo.ModelYear = year;
@@ -255,7 +255,6 @@ namespace Plugin {
         if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
             metadatainfo.PlatformName = localresult;
         }
-        
     }
 
 } // namespace Plugin
