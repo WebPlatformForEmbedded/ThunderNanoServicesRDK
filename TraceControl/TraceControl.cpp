@@ -79,7 +79,7 @@ namespace {
             ~TraceChannelOutput() = default;
 
             void HandleTraceMessage(const WPEFramework::Core::ProxyType<Data>& jsondata) {
-                _exportChannel->Submit(WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsondata));
+                _exportChannel->Submit(WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(jsondata));
             }
 
             WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element);
@@ -250,8 +250,7 @@ namespace {
 
 
     WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement> WebSocketExporter::TraceChannelOutput::Process(const WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>& element) {
-        WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand>
-                            inbound(WPEFramework::Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
+        WPEFramework::Core::ProxyType<WebSocketExporter::ExportCommand> inbound(element);
 
         ASSERT(inbound.IsValid() == true);
 
@@ -303,7 +302,7 @@ namespace {
         response->IncludingDate = ( ( AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE) ) != 0 );
         response->Paused = IsPaused();
 
-        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(response);
+        return (WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(response));
     }
 
 
@@ -419,11 +418,11 @@ namespace Plugin {
     }
 
     Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const string& /* identifier */) {
-        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element());
+        return (WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(jsonExportCommandFactory.Element()));
     }
 
     Core::ProxyType<Core::JSON::IElement> TraceControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) {
-        return WPEFramework::Core::proxy_cast<WPEFramework::Core::JSON::IElement>(WebSocketExporter::Instance().HandleExportCommand(ID, element));
+        return (WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(WebSocketExporter::Instance().HandleExportCommand(ID, element)));
     }
     void TraceControl::Inbound(Web::Request& /* request */)
     {
@@ -468,7 +467,7 @@ namespace Plugin {
                 }
             }
 
-            result->Body(Core::proxy_cast<Web::IBody>(response));
+            result->Body(Core::ProxyType<Web::IBody>(response));
             result->ContentType = Web::MIME_JSON;
         } else if ((request.Verb == Web::Request::HTTP_PUT) && (index.Next() == true)) {
             if ((index.Current() == _T("on")) || (index.Current() == _T("off"))) {

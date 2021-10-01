@@ -282,17 +282,18 @@ namespace Plugin {
                             if (IsRunning() == true) {
                                 uint8_t keyIdLength = 0;
                                 const uint8_t* keyIdData = KeyId(keyIdLength);
-				uint8_t *payloadBuffer = Buffer();
-
-
+                                uint8_t *payloadBuffer = Buffer();
+                                CDMi::EncryptionPattern pattern = {0};
+                                EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
+                                
                                 int cr = 0;
                                 REPORT_DURATION_WARNING(
                                     {
                                     cr = _mediaKeys->Decrypt(
                                         _sessionKey,
                                         _sessionKeyLength,
-                                        nullptr, //subsamples
-                                        0, //number of subsamples
+                                        static_cast<CDMi::EncryptionScheme>(EncScheme()),
+                                        pattern,
                                         IVKey(),
                                         IVKeyLength(),
                                         payloadBuffer,
@@ -306,20 +307,20 @@ namespace Plugin {
                                     WarningReporting::TooLongDecrypt
                                 )
 
+
                                 if ((cr == 0) && (clearContentSize != 0)) {
                                     if (clearContentSize != BytesWritten()) {
                                         TRACE(Trace::Information, (_T("Returned clear sample size (%d) differs from encrypted buffer size (%d)"), clearContentSize, BytesWritten()));
                                         Size(clearContentSize);
                                     }
 
-				    if(payloadBuffer != clearContent) {
-					// This wasn't a case of in-place decryption. So, make sure the decrypted buffer is copied to memory mapped file and released
+                                    if(payloadBuffer != clearContent) {
+                                        // This wasn't a case of in-place decryption. So, make sure the decrypted buffer is copied to memory mapped file and released
                                         // Adjust the buffer on our side (this process) on what we will write back
                                         SetBuffer(0, clearContentSize, clearContent);
                                         //Lets release the clear content buffer
                                         _mediaKeys->ReleaseClearContent(nullptr, 0,clearContentSize,clearContent);
-				    }
-
+                                    }
                                 }
 
                                 // Store the status we have for the other side.
@@ -1376,7 +1377,7 @@ namespace Plugin {
             }
         }
 
-    private:
+    public:
         // -------------------------------------------------------------------------------------------------------------
         // IDecryption methods
         // -------------------------------------------------------------------------------------------------------------

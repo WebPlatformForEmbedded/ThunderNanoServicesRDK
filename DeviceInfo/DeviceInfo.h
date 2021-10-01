@@ -79,7 +79,7 @@ namespace Plugin {
             , _systemId()
             , _deviceId()
             , _implementation(nullptr)
-            ,_deviceMetadataInterface(nullptr)
+            , _deviceMetadataInterface(nullptr)
             , _connectionId(0)
         {
             RegisterAll();
@@ -136,7 +136,6 @@ namespace Plugin {
         Exchange::IDeviceCapabilities* _implementation;
         Exchange::IDeviceMetadata* _deviceMetadataInterface;
         uint32_t _connectionId;
-
     };
 
 } // namespace Plugin
