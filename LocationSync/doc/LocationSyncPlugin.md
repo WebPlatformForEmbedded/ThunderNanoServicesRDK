@@ -169,6 +169,12 @@ Provides access to the location information.
 | (property).timezone | string | Time zone information |
 | (property).publicip | string | Public IP |
 
+### Errors
+
+| Code | Message | Description |
+| :-------- | :-------- | :-------- |
+| 2 | ```ERROR_UNAVAILABLE``` | Internet and Location information are not available |
+
 ### Example
 
 #### Get Request
