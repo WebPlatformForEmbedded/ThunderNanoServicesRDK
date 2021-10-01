@@ -305,7 +305,7 @@ namespace Plugin {
                                         InitWithLast15());
                                     },
                                     WarningReporting::TooLongDecrypt
-                                )
+                                );
 
 
                                 if ((cr == 0) && (clearContentSize != 0)) {
