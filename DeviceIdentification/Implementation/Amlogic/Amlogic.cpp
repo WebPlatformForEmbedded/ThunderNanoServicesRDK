@@ -4,8 +4,8 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier {
-        static constexpr const TCHAR* ChipsetInofFile = _T("/sys/firmware/devicetree/base/model");
+    class DeviceImplementation : public Exchange::IDeviceProperties, public PluginHost::ISubSystem::IIdentifier {
+	    static constexpr const TCHAR* ChipsetInfo= _T("T962X3");
         static constexpr const TCHAR* VERSIONFile = _T("/version.txt");
 
     public:
@@ -79,18 +79,12 @@ namespace Plugin {
 
         inline void UpdateChipset(string& chipset) const
         {
-            string line;
-            std::ifstream file(ChipsetInofFile);
 
-            if (file.is_open()) {
-                while (getline(file, line)) {
-                    if (line.find("Amlogic") != std::string::npos) {
-                        chipset.assign(line);
-                    }
-                }
-
-                file.close();
-            }
+#ifndef DEVICE_IDENTIFICATION_CHIPSET_INFO
+             chipset.assign(ChipsetInfo);
+#else
+             chipset.assign(DEVICE_IDENTIFICATION_CHIPSET_INFO);
+#endif
         }
 
         inline void UpdateIdentifier()
