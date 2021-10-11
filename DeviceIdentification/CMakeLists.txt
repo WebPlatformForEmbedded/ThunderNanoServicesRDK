@@ -71,7 +71,7 @@ elseif (NEXUS_FOUND)
         set(DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY "https://code.rdkcentral.com/r/soc/broadcom/components/rdkcentral/thundernanoservices/DeviceIdentification" CACHE STRING "DeviceIdentification implementation repository")
         GetExternalCode(
             GIT_REPOSITORY ${DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY}
-            GIT_TAG ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
+            GIT_VERSION ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
             SOURCE_DIR "Implementation/Nexus"
         )
         target_sources(${MODULE_NAME}
