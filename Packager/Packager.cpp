@@ -89,7 +89,7 @@ namespace {
         return (string());
     }
 
-    void Packager::Inbound(Web::Request& request)
+    void Packager::Inbound(VARIABLE_IS_NOT_USED Web::Request& request)
     {
     }
 

@@ -213,7 +213,9 @@ private:
 #endif
 
     }
-    static void pageCreatedCallback(WebKitWebExtension*, WebKitWebPage* page, PluginHost* host)
+    static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
+                                    WebKitWebPage* page,
+                                    VARIABLE_IS_NOT_USED PluginHost* host)
     {
         g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), nullptr);
@@ -222,7 +224,7 @@ private:
         g_signal_connect(page, "send-request",
                 G_CALLBACK(sendRequestCallback), nullptr);
     }
-    static void consoleMessageSentCallback(WebKitWebPage* page, WebKitConsoleMessage* message)
+    static void consoleMessageSentCallback(VARIABLE_IS_NOT_USED WebKitWebPage* page, WebKitConsoleMessage* message)
     {
         string messageString = Core::ToString(webkit_console_message_get_text(message));
         uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
