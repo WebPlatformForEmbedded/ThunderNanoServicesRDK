@@ -50,7 +50,7 @@ if (PLUGIN_DEVICEIDENTIFICATION_USE_MFR AND MFRFWLIBS_FOUND)
             Implementation/MFR/MFR.cpp)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
-            mfrfwlibs::mfrfwlibs)
+            MFRFWLibs::MFRFWLibs)
 elseif (BUILD_BROADCOM)
     target_sources(${MODULE_NAME}
         PRIVATE
