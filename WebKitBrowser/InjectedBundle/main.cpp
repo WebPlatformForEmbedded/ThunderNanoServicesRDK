@@ -136,8 +136,7 @@ public:
 
         const char *uid;
         const char *whitelist;
-        gboolean logToSystemConsoleEnabled;
-        g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &logToSystemConsoleEnabled);
+        g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &_logToSystemConsoleEnabled);
 
         /*
          * Note: It doesn't work and needs to be resolved.
@@ -150,9 +149,7 @@ public:
                 "window-object-cleared", G_CALLBACK(windowObjectClearedCallback),
                 nullptr);
 
-        if (logToSystemConsoleEnabled == TRUE) {
-            g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
-        }
+        g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
 
         if (whitelist != nullptr) {
             _whiteListedOriginDomainPairs =
@@ -215,8 +212,10 @@ private:
     }
     static void pageCreatedCallback(WebKitWebExtension*, WebKitWebPage* page, PluginHost* host)
     {
-        g_signal_connect(page, "console-message-sent",
+        if (host->_logToSystemConsoleEnabled == TRUE) {
+            g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), nullptr);
+        }
         g_signal_connect(page, "user-message-received",
                 G_CALLBACK(userMessageReceivedCallback), nullptr);
         g_signal_connect(page, "send-request",
@@ -251,6 +250,7 @@ private:
 
     WKBundleRef _bundle;
     WebKitScriptWorld* _scriptWorld;
+    gboolean _logToSystemConsoleEnabled;
 
 #endif
 
