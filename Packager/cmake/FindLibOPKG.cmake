@@ -21,8 +21,15 @@
 #  LIBOPKG_INCLUDE_DIRS - The libopkg include directories
 #  LIBOPKG_LIBRARIES - The libraries needed to use libopkg
 #
+
+if(LibOPKG_FIND_QUIETLY)
+    set(_LIBOPKG_MODE QUIET)
+elseif(LibOPKG_FIND_REQUIRED)
+    set(_LIBOPKG_MODE REQUIRED)
+endif()
+
 find_package(PkgConfig)
-pkg_check_modules(PC_LIBOPKG libopkg)
+pkg_check_modules(PC_LIBOPKG ${_LIBOPKG_MODE} libopkg)
 
 if(PC_LIBOPKG_FOUND)
     if(LIBOPKG_FIND_VERSION AND PC_LIBOPKG_VERSION)
@@ -43,7 +50,8 @@ set(LIBOPKG_LIBRARIES ${PC_LIBOPKG_LIBRARIES})
 set(LIBOPKG_LIBRARY_DIRS ${PC_LIBOPKG_LIBRARY_DIRS} ${PC_LIBOPKG_LIBDIR})
 
 find_library(OPKG_LIBRARY_LOCATION "${LIBOPKG_LIBRARIES}")
-
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LibOPKG DEFAULT_MSG OPKG_LIBRARY_LOCATION LIBOPKG_INCLUDE_DIRS LIBOPKG_LIBRARIES)
 mark_as_advanced(LIBOPKG_DEFINITIONS LIBOPKG_INCLUDE_DIRS LIBOPKG_LIBRARIES)
 
 if(NOT TARGET LibOPKG::LibOPKG)
