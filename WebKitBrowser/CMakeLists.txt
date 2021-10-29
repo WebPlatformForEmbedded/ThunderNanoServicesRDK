@@ -70,6 +70,7 @@ set(PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS "0.0.0.0:9224" CACHE STRING "IP:Po
 set(PLUGIN_WEBKITBROWSER_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of WebKitBrowser")
 set(PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE "true" CACHE STRING "Enable Thunder decryptor preference in WebKit")
 set(PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX "" CACHE STRING "Specify callsign persistent path postfix")
+set(PLUGIN_WEBKITBROWSER_PTSOFFSET "8" CACHE STRING "Set ptsoffset for webkit")
 
 set(PLUGIN_YOUTUBE_AUTOSTART "false" CACHE STRING "Automatically start Youtube plugin")
 set(PLUGIN_YOUTUBE_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
