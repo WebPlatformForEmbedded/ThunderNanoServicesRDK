@@ -93,7 +93,7 @@ set(PLUGIN_APPS_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User
 set(PLUGIN_APPS_WEBINSPECTOR_ADDRESS "0.0.0.0:10001" CACHE STRING "IP:Port for WebInspector of Apps")
 set(PLUGIN_APPS_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of Apps")
 set(PLUGIN_APPS_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for Apps")
-set(PLUGIN_APPS_WEBGL "false" CACHE STRING "Enable Apps WebGL)
+set(PLUGIN_APPS_WEBGL "false" CACHE STRING "Enable Apps WebGL")
 
 set(PLUGIN_RESIDENT_APP_AUTOSTART "false" CACHE STRING "Automatically start Resident App plugin")
 set(PLUGIN_RESIDENT_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
