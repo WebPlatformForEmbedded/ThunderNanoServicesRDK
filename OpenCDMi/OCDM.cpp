@@ -147,7 +147,7 @@ namespace Plugin {
         // It should have been the last reference we are releasing,
         // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
         // are leaking...
-        ASSERT(result == Core::ERROR_DESCRUCTION_SUCCEEDED);
+        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
 
         // If this was running in a (container) proccess...
         if (connection != nullptr) {
