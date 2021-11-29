@@ -285,20 +285,29 @@ namespace Plugin {
                                 uint8_t *payloadBuffer = Buffer();
                                 CDMi::EncryptionPattern pattern = {0};
                                 EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
-                                int cr = _mediaKeys->Decrypt(
-                                    _sessionKey,
-                                    _sessionKeyLength,
-                                    static_cast<CDMi::EncryptionScheme>(EncScheme()),
-                                    pattern,
-                                    IVKey(),
-                                    IVKeyLength(),
-                                    payloadBuffer,
-                                    BytesWritten(),
-                                    &clearContentSize,
-                                    &clearContent,
-                                    keyIdLength,
-                                    keyIdData,
-                                    InitWithLast15());
+                                
+                                int cr = 0;
+                                REPORT_DURATION_WARNING(
+                                    {
+                                    cr = _mediaKeys->Decrypt(
+                                        _sessionKey,
+                                        _sessionKeyLength,
+                                        static_cast<CDMi::EncryptionScheme>(EncScheme()),
+                                        pattern,
+                                        IVKey(),
+                                        IVKeyLength(),
+                                        payloadBuffer,
+                                        BytesWritten(),
+                                        &clearContentSize,
+                                        &clearContent,
+                                        keyIdLength,
+                                        keyIdData,
+                                        InitWithLast15());
+                                    },
+                                    WarningReporting::TooLongDecrypt
+                                );
+
+
                                 if ((cr == 0) && (clearContentSize != 0)) {
                                     if (clearContentSize != BytesWritten()) {
                                         TRACE(Trace::Information, (_T("Returned clear sample size (%d) differs from encrypted buffer size (%d)"), clearContentSize, BytesWritten()));

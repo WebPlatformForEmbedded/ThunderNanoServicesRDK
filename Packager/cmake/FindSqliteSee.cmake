@@ -1,3 +1,8 @@
 find_package(PkgConfig)
 
-pkg_search_module(SQLITE REQUIRED sqlite3see)
+if(SqliteSee_FIND_QUIETLY)
+    set(_SQLITE_SEE_MODE QUIET)
+elseif(SqliteSee_FIND_REQUIRED)
+    set(_SQLITE_SEE_MODE REQUIRED)
+endif()
+pkg_search_module(SQLITE_SEE ${_SQLITE_SEE_MODE} sqlite3see)
