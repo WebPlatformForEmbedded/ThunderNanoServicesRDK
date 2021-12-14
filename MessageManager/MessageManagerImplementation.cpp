@@ -33,7 +33,6 @@ namespace Plugin {
         }
         ~MessageManagerImplementation() override
         {
-            std::cerr << "Stop begin" << std::endl;
             _adminLock.Lock();
 
             _buffers.clear();
@@ -41,7 +40,6 @@ namespace Plugin {
             _job.Revoke();
 
             _adminLock.Unlock();
-            std::cerr << "Stop end" << std::endl;
         }
 
         MessageManagerImplementation(const MessageManagerImplementation&) = delete;
@@ -52,7 +50,6 @@ namespace Plugin {
         {
             _job.Submit();
 
-            std::cerr << "INFO: " << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
             //messages from wpeframework are of id = 0
             _buffers.emplace(std::piecewise_construct,
                 std::forward_as_tuple(0),
@@ -61,21 +58,13 @@ namespace Plugin {
             _unit.Announce(Core::MessageInformation::MessageType::TRACING, &_factory);
         }
 
-        void Stop() override
-        {
-        }
-
         void Activated(const uint32_t id) override
         {
-            std::cerr << "ATID: " << std::this_thread::get_id() << std::endl;
-
-            std::cerr << "ACTIVATED" << std::endl;
             _adminLock.Lock();
 
             ASSERT(_buffers.find(id) == _buffers.end());
 
             if (_buffers.find(id) == _buffers.end()) {
-                std::cerr << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
                 _buffers.emplace(std::piecewise_construct,
                     std::forward_as_tuple(id),
                     std::forward_as_tuple(_dispatcherIdentifier, id, false, _dispatcherBasePath));
@@ -85,8 +74,6 @@ namespace Plugin {
         }
         void Deactivated(const uint32_t id) override
         {
-            std::cerr << "DEACTIVATED BEGIN" << std::endl;
-
             _adminLock.Lock();
 
             auto index = _buffers.find(id);
@@ -96,23 +83,17 @@ namespace Plugin {
             }
 
             _adminLock.Unlock();
-
-            std::cerr << "DEACTIVATED END" << std::endl;
         }
 
         void Dispatch()
         {
-            std::cerr << "TID: " << std::this_thread::get_id() << std::endl;
             _unit.WaitForUpdates(Core::infinite);
-            std::cerr << "DISPATCH" << std::endl;
 
             for (auto buffer = _buffers.begin(); buffer != _buffers.end(); ++buffer) {
 
                 _adminLock.Lock();
 
                 auto result = _unit.Pop(buffer->second);
-
-                std::cerr << "BUFFER" << std::endl;
 
                 if (result.first.Type() != Core::MessageInformation::MessageType::INVALID) {
                     string message;

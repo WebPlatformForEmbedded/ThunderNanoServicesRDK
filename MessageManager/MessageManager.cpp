@@ -33,10 +33,9 @@ namespace Plugin {
         service->Register(&_observer);
 
         if (_manager == nullptr) {
-            std::cerr << _T("MessageManager plugin could not be instantiated.") << std::endl;
+            message = _T("MessageManager plugin could not be instantiated.");
 
         } else {
-            std::cerr << "INITIALIZED" << std::endl;
             _manager->Start();
         }
 
@@ -45,16 +44,12 @@ namespace Plugin {
 
     void MessageManager::Deinitialize(PluginHost::IShell* service)
     {
-        std::cerr << "DEINITIALIZE" << std::endl;
         ASSERT(service != nullptr);
         ASSERT(_manager != nullptr);
         service->Unregister(&_observer);
 
         if (_manager != nullptr) {
-            std::cerr << "BEFORE STOP" << std::endl;
-            //_manager->Stop();
             _manager->Release();
-            std::cerr << "AFTER STOP" << std::endl;
             _manager = nullptr;
         }
         _connectionId = 0;
