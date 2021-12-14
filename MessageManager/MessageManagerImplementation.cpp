@@ -29,12 +29,13 @@ namespace Plugin {
             : _unit(Core::MessageUnit::Instance())
             , _job(*this)
         {
+            DispatcherInfo(_dispatcherIdentifier, _dispatcherBasePath);
         }
         ~MessageManagerImplementation() override
         {
             std::cerr << "Stop begin" << std::endl;
             _adminLock.Lock();
-            
+
             _buffers.clear();
             _unit.Ring();
             _job.Revoke();
@@ -49,14 +50,13 @@ namespace Plugin {
     public:
         void Start() override
         {
-            DispatcherInfo(_dispatcherIdentifier, _dispatcherBasePath);
             _job.Submit();
 
-            std::cerr << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
+            std::cerr << "INFO: " << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
             //messages from wpeframework are of id = 0
             _buffers.emplace(std::piecewise_construct,
                 std::forward_as_tuple(0),
-                std::forward_as_tuple(_T("md"), 0, false, _T("/tmp/MessageDispatcher")));
+                std::forward_as_tuple(_dispatcherIdentifier, 0, false, _dispatcherBasePath));
 
             _unit.Announce(Core::MessageInformation::MessageType::TRACING, &_factory);
         }
@@ -78,7 +78,7 @@ namespace Plugin {
                 std::cerr << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
                 _buffers.emplace(std::piecewise_construct,
                     std::forward_as_tuple(id),
-                    std::forward_as_tuple(_T("md"), id, false, _T("/tmp/MessageDispatcher")));
+                    std::forward_as_tuple(_dispatcherIdentifier, id, false, _dispatcherBasePath));
             }
 
             _adminLock.Unlock();
@@ -116,8 +116,14 @@ namespace Plugin {
 
                 if (result.first.Type() != Core::MessageInformation::MessageType::INVALID) {
                     string message;
+                    std::stringstream output;
                     result.second->ToString(message);
-                    std::cout << message << std::endl;
+
+                    string time(Core::Time::Now().ToRFC1123(true));
+                    output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(result.first.FileName().c_str()) << ':' << result.first.LineNumber() << "] "
+                           << result.first.Category() << ": " << message << std::endl;
+
+                    std::cout << output.str() << std::endl;
                 }
 
                 _adminLock.Unlock();
@@ -135,10 +141,8 @@ namespace Plugin {
     private:
         void DispatcherInfo(string& outIdentifer, string& outBasePath)
         {
-            outIdentifer = _T("md");
-            outBasePath = _T("/tmp/MessageDispatcher");
-            //Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPATCHER_PATH_ENV, outBasePath);
-            //Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPACTHER_IDENTIFIER_ENV, outIdentifer);
+            Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPATCHER_PATH_ENV, outBasePath);
+            Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPACTHER_IDENTIFIER_ENV, outIdentifer);
         }
 
     private:
