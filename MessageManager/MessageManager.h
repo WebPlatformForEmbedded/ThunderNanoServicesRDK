@@ -24,11 +24,11 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    class EventManager : public PluginHost::IPlugin {
+    class MessageManager : public PluginHost::IPlugin {
     private:
         class Observer : public RPC::IRemoteConnection::INotification {
         public:
-            Observer(EventManager* parent)
+            Observer(MessageManager* parent)
                 : _parent(*parent)
             {
             }
@@ -59,27 +59,27 @@ namespace Plugin {
             }
 
             Core::CriticalSection _adminLock;
-            EventManager& _parent;
+            MessageManager& _parent;
             mutable uint32_t _refcount;
         };
 
     public:
-        EventManager(const EventManager&) = delete;
-        EventManager& operator=(const EventManager&) = delete;
+        MessageManager(const MessageManager&) = delete;
+        MessageManager& operator=(const MessageManager&) = delete;
 
-        EventManager()
+        MessageManager()
             : _connectionId(0)
             , _observer(this)
         {
         }
 
-        virtual ~EventManager()
+        virtual ~MessageManager()
         {
         }
 
-        BEGIN_INTERFACE_MAP(EventManager)
+        BEGIN_INTERFACE_MAP(MessageManager)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_AGGREGATE(Exchange::IEventManager, _manager)
+        INTERFACE_AGGREGATE(Exchange::IMessageManager, _manager)
         END_INTERFACE_MAP
 
     public:
@@ -104,7 +104,7 @@ namespace Plugin {
         }
 
         uint32_t _connectionId;
-        Exchange::IEventManager* _manager;
+        Exchange::IMessageManager* _manager;
         Observer _observer;
     };
 

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(EventManager)
+project(MessageManager)
 
 cmake_minimum_required(VERSION 3.3)
 
@@ -27,19 +27,19 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-#set(PLUGIN_EventManager_AUTOSTART "true" CACHE STRING "Automatically start EventManager plugin")
-#set(PLUGIN_EventManager_REMOTE "false" CACHE STRING "Remote binding details enabled")
-#set(PLUGIN_EventManager_PORT "0" CACHE STRING "PORT address")
-#set(PLUGIN_EventManager_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
-#set(PLUGIN_EventManager_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
+#set(PLUGIN_MessageManager_AUTOSTART "true" CACHE STRING "Automatically start MessageManager plugin")
+#set(PLUGIN_MessageManager_REMOTE "false" CACHE STRING "Remote binding details enabled")
+#set(PLUGIN_MessageManager_PORT "0" CACHE STRING "PORT address")
+#set(PLUGIN_MessageManager_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
+#set(PLUGIN_MessageManager_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED 
-    EventManager.cpp
-    EventManagerImplementation.cpp
+    MessageManager.cpp
+    MessageManagerImplementation.cpp
     Module.cpp)
 
 set_target_properties(${MODULE_NAME} PROPERTIES

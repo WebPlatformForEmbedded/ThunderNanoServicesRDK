@@ -21,7 +21,7 @@
 #define __MODULE_PLUGIN_TRACECONTROL_H
 
 #ifndef MODULE_NAME
-#define MODULE_NAME Plugin_EventManager
+#define MODULE_NAME Plugin_MessageManager
 #endif
 
 #include <plugins/plugins.h>

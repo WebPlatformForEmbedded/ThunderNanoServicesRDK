@@ -17,23 +17,23 @@
  * limitations under the License.
  */
 
-#include "EventManager.h"
+#include "MessageManager.h"
 
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(EventManager, 1, 0);
+    SERVICE_REGISTRATION(MessageManager, 1, 0);
 
-    const string EventManager::Initialize(PluginHost::IShell* service)
+    const string MessageManager::Initialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
         string message;
 
-        _manager = service->Root<Exchange::IEventManager>(_connectionId, RPC::CommunicationTimeOut, _T("EventManagerImplementation"));
+        _manager = service->Root<Exchange::IMessageManager>(_connectionId, RPC::CommunicationTimeOut, _T("MessageManagerImplementation"));
         service->Register(&_observer);
 
         if (_manager == nullptr) {
-            std::cerr << _T("EventManager plugin could not be instantiated.") << std::endl;
+            std::cerr << _T("MessageManager plugin could not be instantiated.") << std::endl;
 
         } else {
             std::cerr << "INITIALIZED" << std::endl;
@@ -43,7 +43,7 @@ namespace Plugin {
         return message;
     }
 
-    void EventManager::Deinitialize(PluginHost::IShell* service)
+    void MessageManager::Deinitialize(PluginHost::IShell* service)
     {
         std::cerr << "DEINITIALIZE" << std::endl;
         ASSERT(service != nullptr);
@@ -60,7 +60,7 @@ namespace Plugin {
         _connectionId = 0;
     }
 
-    string EventManager::Information() const
+    string MessageManager::Information() const
     {
         // No additional info to report.
         return (string());

@@ -21,53 +21,36 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    class EventManagerImplementation : public Exchange::IEventManager {
+    class MessageManagerImplementation : public Exchange::IMessageManager {
+        using Job = Core::ThreadPool::JobType<MessageManagerImplementation>;
+
     public:
-        class Worker : public Core::IDispatch {
-        public:
-            Worker(EventManagerImplementation* parent)
-                : _parent(*parent)
-            {
-            }
-
-            void Dispatch() override
-            {
-                std::cerr << "WORKER TID: " << std::this_thread::get_id() << std::endl;
-
-                _parent.Dispatch();
-                Core::IWorkerPool::Instance().Schedule(Core::Time::Now(), Core::ProxyType<Core::IDispatch>(*this));
-            }
-
-        private:
-            EventManagerImplementation& _parent;
-        };
-
-        EventManagerImplementation()
-            : _worker(Core::ProxyType<Worker>::Create(this))
-            , _unit(Core::EventUnit::Instance())
+        MessageManagerImplementation()
+            : _unit(Core::MessageUnit::Instance())
+            , _job(*this)
         {
         }
-        ~EventManagerImplementation() override
+        ~MessageManagerImplementation() override
         {
             std::cerr << "Stop begin" << std::endl;
             _adminLock.Lock();
-
-            Core::IWorkerPool::Instance().Revoke(Core::ProxyType<Core::IDispatch>(_worker), Core::infinite);
+            
             _buffers.clear();
             _unit.Ring();
+            _job.Revoke();
 
             _adminLock.Unlock();
             std::cerr << "Stop end" << std::endl;
         }
 
-        EventManagerImplementation(const EventManagerImplementation&) = delete;
-        EventManagerImplementation& operator=(const EventManagerImplementation&) = delete;
+        MessageManagerImplementation(const MessageManagerImplementation&) = delete;
+        MessageManagerImplementation& operator=(const MessageManagerImplementation&) = delete;
 
     public:
         void Start() override
         {
             DispatcherInfo(_dispatcherIdentifier, _dispatcherBasePath);
-            Core::IWorkerPool::Instance().Schedule(Core::Time::Now(), Core::ProxyType<Core::IDispatch>(_worker));
+            _job.Submit();
 
             std::cerr << _dispatcherIdentifier << " " << _dispatcherBasePath << std::endl;
             //messages from wpeframework are of id = 0
@@ -75,7 +58,7 @@ namespace Plugin {
                 std::forward_as_tuple(0),
                 std::forward_as_tuple(_T("md"), 0, false, _T("/tmp/MessageDispatcher")));
 
-            _unit.Announce(Core::EventInformation::EventType::TRACING, &_factory);
+            _unit.Announce(Core::MessageInformation::MessageType::TRACING, &_factory);
         }
 
         void Stop() override
@@ -84,6 +67,8 @@ namespace Plugin {
 
         void Activated(const uint32_t id) override
         {
+            std::cerr << "ATID: " << std::this_thread::get_id() << std::endl;
+
             std::cerr << "ACTIVATED" << std::endl;
             _adminLock.Lock();
 
@@ -129,7 +114,7 @@ namespace Plugin {
 
                 std::cerr << "BUFFER" << std::endl;
 
-                if (result.first.Type() != Core::EventInformation::EventType::INVALID) {
+                if (result.first.Type() != Core::MessageInformation::MessageType::INVALID) {
                     string message;
                     result.second->ToString(message);
                     std::cout << message << std::endl;
@@ -137,10 +122,14 @@ namespace Plugin {
 
                 _adminLock.Unlock();
             }
+
+            if (_buffers.size() > 0) {
+                _job.Submit();
+            }
         }
 
-        BEGIN_INTERFACE_MAP(EventManagerImplementation)
-        INTERFACE_ENTRY(Exchange::IEventManager)
+        BEGIN_INTERFACE_MAP(MessageManagerImplementation)
+        INTERFACE_ENTRY(Exchange::IMessageManager)
         END_INTERFACE_MAP
 
     private:
@@ -153,16 +142,18 @@ namespace Plugin {
         }
 
     private:
+        friend Core::ThreadPool::JobType<MessageManagerImplementation&>;
+
         string _dispatcherBasePath;
         string _dispatcherIdentifier;
-        Core::ProxyType<Worker> _worker;
-        std::unordered_map<uint32_t, Core::EventUnit::MessageDispatcher> _buffers;
+        std::unordered_map<uint32_t, Core::MessageUnit::MessageDispatcher> _buffers;
         Core::CriticalSection _adminLock;
-        Core::EventUnit& _unit;
+        Core::WorkerPool::JobType<MessageManagerImplementation&> _job;
+        Core::MessageUnit& _unit;
 
         Trace::Factory _factory;
     };
 
-    SERVICE_REGISTRATION(EventManagerImplementation, 1, 0);
+    SERVICE_REGISTRATION(MessageManagerImplementation, 1, 0);
 }
 }
