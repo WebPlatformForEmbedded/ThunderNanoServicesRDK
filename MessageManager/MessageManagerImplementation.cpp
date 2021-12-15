@@ -38,24 +38,52 @@ namespace {
 }
 
 namespace Plugin {
+
     class MessageManagerImplementation : public Exchange::IMessageManager {
-        using Job = Core::ThreadPool::JobType<MessageManagerImplementation>;
+        class WorkerThread : private Core::Thread {
+        public:
+            WorkerThread(MessageManagerImplementation& parent)
+                : Core::Thread()
+                , _parent(parent)
+            {
+            }
+            void Start()
+            {
+                Thread::Run();
+            }
+            void Stop()
+            {
+                Thread::Block();
+            }
+
+        private:
+            uint32_t Worker() override
+            {
+                if (Thread::IsRunning()) {
+                    _parent.Dispatch();
+                }
+
+                return Core::infinite;
+            }
+
+            MessageManagerImplementation& _parent;
+        };
 
     public:
         MessageManagerImplementation()
             : _dispatcherIdentifier(DispatcherIdentifier())
             , _dispatcherBasePath(DispatcherBasePath())
             , _client(_dispatcherIdentifier, _dispatcherBasePath)
-            , _job(*this)
+            , _worker(*this)
         {
         }
         ~MessageManagerImplementation() override
         {
+            _worker.Stop();
+            _client.SkipWaiting();
+            
             _adminLock.Lock();
-
-            _client.CancelWaiting();
-            _job.Revoke();
-
+            _client.ClearInstances();
             _adminLock.Unlock();
         }
 
@@ -67,7 +95,10 @@ namespace Plugin {
         {
             _client.AddInstance(0);
             _client.AddFactory(Core::MessageInformation::MessageType::TRACING, &_factory);
-            _job.Submit();
+            _worker.Start();
+
+            //check if data is already available
+            _client.SkipWaiting();
         }
 
         void Activated(const uint32_t id) override
@@ -105,10 +136,6 @@ namespace Plugin {
                 }
             }
 
-            if (instanceIdList.size() > 0) {
-                _job.Submit();
-            }
-
             _adminLock.Unlock();
         }
 
@@ -117,14 +144,12 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     private:
-        friend Core::ThreadPool::JobType<MessageManagerImplementation&>;
         mutable Core::CriticalSection _adminLock;
-
-        string _dispatcherBasePath;
         string _dispatcherIdentifier;
-        std::list<uint32_t> instanceIds;
-        Core::WorkerPool::JobType<MessageManagerImplementation&> _job;
-        Core::MessageClient _client;
+        string _dispatcherBasePath;
+        WorkerThread _worker;
+        Messaging::MessageClient _client;
+
 
         Trace::Factory _factory;
     };

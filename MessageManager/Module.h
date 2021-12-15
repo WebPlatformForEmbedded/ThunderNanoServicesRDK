@@ -16,19 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef __MODULE_PLUGIN_TRACECONTROL_H
-#define __MODULE_PLUGIN_TRACECONTROL_H
+
+#pragma once
 
 #ifndef MODULE_NAME
 #define MODULE_NAME Plugin_MessageManager
 #endif
 
-#include <plugins/plugins.h>
 #include <interfaces/IEventManager.h>
-#include <tracing/tracing.h>
+#include <messaging/messaging.h>
+#include <plugins/plugins.h>
 
 #undef EXTERNAL
 #define EXTERNAL
-
-#endif // __MODULE_PLUGIN_TRACECONTROL_H
