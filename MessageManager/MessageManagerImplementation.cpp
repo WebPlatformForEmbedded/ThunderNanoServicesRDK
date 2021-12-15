@@ -20,23 +20,40 @@
 #include "Module.h"
 
 namespace WPEFramework {
+namespace {
+    string DispatcherIdentifier()
+    {
+        string result;
+        Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
+        return result;
+    }
+
+    string DispatcherBasePath()
+    {
+        string result;
+        Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPATCHER_PATH_ENV, result);
+        return result;
+    }
+
+}
+
 namespace Plugin {
     class MessageManagerImplementation : public Exchange::IMessageManager {
         using Job = Core::ThreadPool::JobType<MessageManagerImplementation>;
 
     public:
         MessageManagerImplementation()
-            : _unit(Core::MessageUnit::Instance())
+            : _dispatcherIdentifier(DispatcherIdentifier())
+            , _dispatcherBasePath(DispatcherBasePath())
+            , _client(_dispatcherIdentifier, _dispatcherBasePath)
             , _job(*this)
         {
-            DispatcherInfo(_dispatcherIdentifier, _dispatcherBasePath);
         }
         ~MessageManagerImplementation() override
         {
             _adminLock.Lock();
 
-            _buffers.clear();
-            _unit.Ring();
+            _client.CancelWaiting();
             _job.Revoke();
 
             _adminLock.Unlock();
@@ -48,52 +65,32 @@ namespace Plugin {
     public:
         void Start() override
         {
+            _client.AddInstance(0);
+            _client.AddFactory(Core::MessageInformation::MessageType::TRACING, &_factory);
             _job.Submit();
-
-            //messages from wpeframework are of id = 0
-            _buffers.emplace(std::piecewise_construct,
-                std::forward_as_tuple(0),
-                std::forward_as_tuple(_dispatcherIdentifier, 0, false, _dispatcherBasePath));
-
-            _unit.Announce(Core::MessageInformation::MessageType::TRACING, &_factory);
         }
 
         void Activated(const uint32_t id) override
         {
-            _adminLock.Lock();
-
-            ASSERT(_buffers.find(id) == _buffers.end());
-
-            if (_buffers.find(id) == _buffers.end()) {
-                _buffers.emplace(std::piecewise_construct,
-                    std::forward_as_tuple(id),
-                    std::forward_as_tuple(_dispatcherIdentifier, id, false, _dispatcherBasePath));
-            }
-
-            _adminLock.Unlock();
+            Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
+            _client.AddInstance(id);
         }
         void Deactivated(const uint32_t id) override
         {
-            _adminLock.Lock();
-
-            auto index = _buffers.find(id);
-
-            if (index != _buffers.end()) {
-                _buffers.erase(index);
-            }
-
-            _adminLock.Unlock();
+            Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
+            _client.RemoveInstance(id);
         }
 
         void Dispatch()
         {
-            _unit.WaitForUpdates(Core::infinite);
+            _adminLock.Lock();
 
-            for (auto buffer = _buffers.begin(); buffer != _buffers.end(); ++buffer) {
+            _client.WaitForUpdates(Core::infinite);
+            auto instanceIdList = _client.InstanceIds();
 
-                _adminLock.Lock();
+            for (const auto& id : instanceIdList) {
 
-                auto result = _unit.Pop(buffer->second);
+                auto result = _client.Pop(id);
 
                 if (result.first.Type() != Core::MessageInformation::MessageType::INVALID) {
                     string message;
@@ -106,13 +103,13 @@ namespace Plugin {
 
                     std::cout << output.str() << std::endl;
                 }
-
-                _adminLock.Unlock();
             }
 
-            if (_buffers.size() > 0) {
+            if (instanceIdList.size() > 0) {
                 _job.Submit();
             }
+
+            _adminLock.Unlock();
         }
 
         BEGIN_INTERFACE_MAP(MessageManagerImplementation)
@@ -120,21 +117,14 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     private:
-        void DispatcherInfo(string& outIdentifer, string& outBasePath)
-        {
-            Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPATCHER_PATH_ENV, outBasePath);
-            Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPACTHER_IDENTIFIER_ENV, outIdentifer);
-        }
-
-    private:
         friend Core::ThreadPool::JobType<MessageManagerImplementation&>;
+        mutable Core::CriticalSection _adminLock;
 
         string _dispatcherBasePath;
         string _dispatcherIdentifier;
-        std::unordered_map<uint32_t, Core::MessageUnit::MessageDispatcher> _buffers;
-        Core::CriticalSection _adminLock;
+        std::list<uint32_t> instanceIds;
         Core::WorkerPool::JobType<MessageManagerImplementation&> _job;
-        Core::MessageUnit& _unit;
+        Core::MessageClient _client;
 
         Trace::Factory _factory;
     };
