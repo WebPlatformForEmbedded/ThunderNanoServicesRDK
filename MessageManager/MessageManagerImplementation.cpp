@@ -24,14 +24,14 @@ namespace {
     string DispatcherIdentifier()
     {
         string result;
-        Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
+        Core::SystemInfo::GetEnvironment(Core::MessageUnit::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
         return result;
     }
 
     string DispatcherBasePath()
     {
         string result;
-        Core::SystemInfo::GetEnvironment(Core::MESSAGE_DISPATCHER_PATH_ENV, result);
+        Core::SystemInfo::GetEnvironment(Core::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
         return result;
     }
 
@@ -73,8 +73,8 @@ namespace Plugin {
         MessageManagerImplementation()
             : _dispatcherIdentifier(DispatcherIdentifier())
             , _dispatcherBasePath(DispatcherBasePath())
-            , _client(_dispatcherIdentifier, _dispatcherBasePath)
             , _worker(*this)
+            , _client(_dispatcherIdentifier, _dispatcherBasePath)
         {
         }
         ~MessageManagerImplementation() override
