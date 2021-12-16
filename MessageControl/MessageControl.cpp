@@ -17,23 +17,23 @@
  * limitations under the License.
  */
 
-#include "MessageManager.h"
+#include "MessageControl.h"
 
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(MessageManager, 1, 0);
+    SERVICE_REGISTRATION(MessageControl, 1, 0);
 
-    const string MessageManager::Initialize(PluginHost::IShell* service)
+    const string MessageControl::Initialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
         string message;
 
-        _manager = service->Root<Exchange::IMessageManager>(_connectionId, RPC::CommunicationTimeOut, _T("MessageManagerImplementation"));
+        _manager = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
         service->Register(&_observer);
 
         if (_manager == nullptr) {
-            message = _T("MessageManager plugin could not be instantiated.");
+            message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
             _manager->Start();
@@ -42,7 +42,7 @@ namespace Plugin {
         return message;
     }
 
-    void MessageManager::Deinitialize(PluginHost::IShell* service)
+    void MessageControl::Deinitialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
         ASSERT(_manager != nullptr);
@@ -55,7 +55,7 @@ namespace Plugin {
         _connectionId = 0;
     }
 
-    string MessageManager::Information() const
+    string MessageControl::Information() const
     {
         // No additional info to report.
         return (string());

@@ -29,7 +29,7 @@ option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
 option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
 option(PLUGIN_WARNINGREPORTINGCONTROL "Include WarningReportingControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
-option(PLUGIN_MESSAGE_MANAGER "Include MessageManager plugin" ON)
+option(PLUGIN_MESSAGE_CONTROL "Include MessageControl plugin" ON)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
 
@@ -77,6 +77,6 @@ if(PLUGIN_WEBKITBROWSER)
     add_subdirectory(WebKitBrowser)
 endif()
 
-if(PLUGIN_MESSAGE_MANAGER)
-    add_subdirectory(MessageManager)
+if(PLUGIN_MESSAGE_CONTROL)
+    add_subdirectory(MessageControl)
 endif()

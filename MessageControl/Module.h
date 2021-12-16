@@ -20,10 +20,10 @@
 #pragma once
 
 #ifndef MODULE_NAME
-#define MODULE_NAME Plugin_MessageManager
+#define MODULE_NAME Plugin_MessageControl
 #endif
 
-#include <interfaces/IEventManager.h>
+#include <interfaces/IMessageControl.h>
 #include <messaging/messaging.h>
 #include <plugins/plugins.h>
 

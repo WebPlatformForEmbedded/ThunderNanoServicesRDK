@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(MessageManager)
+project(MessageControl)
 
 cmake_minimum_required(VERSION 3.3)
 
@@ -27,11 +27,11 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-#set(PLUGIN_MessageManager_AUTOSTART "true" CACHE STRING "Automatically start MessageManager plugin")
-#set(PLUGIN_MessageManager_REMOTE "false" CACHE STRING "Remote binding details enabled")
-#set(PLUGIN_MessageManager_PORT "0" CACHE STRING "PORT address")
-#set(PLUGIN_MessageManager_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
-#set(PLUGIN_MessageManager_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
+#set(PLUGIN_MessageControl_AUTOSTART "true" CACHE STRING "Automatically start MessageControl plugin")
+#set(PLUGIN_MessageControl_REMOTE "false" CACHE STRING "Remote binding details enabled")
+#set(PLUGIN_MessageControl_PORT "0" CACHE STRING "PORT address")
+#set(PLUGIN_MessageControl_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
+#set(PLUGIN_MessageControl_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
@@ -39,8 +39,8 @@ find_package(${NAMESPACE}Messaging REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED 
-    MessageManager.cpp
-    MessageManagerImplementation.cpp
+    MessageControl.cpp
+    MessageControlImplementation.cpp
     Module.cpp)
 
 set_target_properties(${MODULE_NAME} PROPERTIES

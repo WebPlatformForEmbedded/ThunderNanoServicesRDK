@@ -24,12 +24,12 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    class MessageManager : public PluginHost::IPlugin {
+    class MessageControl : public PluginHost::IPlugin {
     private:
         class Observer : public RPC::IRemoteConnection::INotification {
         public:
-            Observer(MessageManager* parent)
-                : _parent(*parent)
+            Observer(MessageControl& parent)
+                : _parent(parent)
             {
             }
 
@@ -59,27 +59,25 @@ namespace Plugin {
             }
 
             Core::CriticalSection _adminLock;
-            MessageManager& _parent;
+            MessageControl& _parent;
             mutable uint32_t _refcount;
         };
 
     public:
-        MessageManager(const MessageManager&) = delete;
-        MessageManager& operator=(const MessageManager&) = delete;
+        MessageControl(const MessageControl&) = delete;
+        MessageControl& operator=(const MessageControl&) = delete;
 
-        MessageManager()
+        MessageControl()
             : _connectionId(0)
-            , _observer(this)
+            , _observer(*this)
         {
         }
 
-        virtual ~MessageManager()
-        {
-        }
+        ~MessageControl() override = default;
 
-        BEGIN_INTERFACE_MAP(MessageManager)
+        BEGIN_INTERFACE_MAP(MessageControl)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_AGGREGATE(Exchange::IMessageManager, _manager)
+        INTERFACE_AGGREGATE(Exchange::IMessageControl, _manager)
         END_INTERFACE_MAP
 
     public:
@@ -96,15 +94,13 @@ namespace Plugin {
         }
         void Deactivated(RPC::IRemoteConnection* connection)
         {
-            std::cerr << "DEACTIVATED" << std::endl;
-
             if (_manager != nullptr && connection != nullptr) {
                 _manager->Deactivated(connection->Id());
             }
         }
 
         uint32_t _connectionId;
-        Exchange::IMessageManager* _manager;
+        Exchange::IMessageControl* _manager;
         Observer _observer;
     };
 

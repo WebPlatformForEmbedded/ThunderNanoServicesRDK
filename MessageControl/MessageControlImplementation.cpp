@@ -39,10 +39,10 @@ namespace {
 
 namespace Plugin {
 
-    class MessageManagerImplementation : public Exchange::IMessageManager {
+    class MessageControlImplementation : public Exchange::IMessageControl {
         class WorkerThread : private Core::Thread {
         public:
-            WorkerThread(MessageManagerImplementation& parent)
+            WorkerThread(MessageControlImplementation& parent)
                 : Core::Thread()
                 , _parent(parent)
             {
@@ -66,29 +66,29 @@ namespace Plugin {
                 return Core::infinite;
             }
 
-            MessageManagerImplementation& _parent;
+            MessageControlImplementation& _parent;
         };
 
     public:
-        MessageManagerImplementation()
+        MessageControlImplementation()
             : _dispatcherIdentifier(DispatcherIdentifier())
             , _dispatcherBasePath(DispatcherBasePath())
             , _worker(*this)
             , _client(_dispatcherIdentifier, _dispatcherBasePath)
         {
         }
-        ~MessageManagerImplementation() override
+        ~MessageControlImplementation() override
         {
             _worker.Stop();
             _client.SkipWaiting();
-            
+
             _adminLock.Lock();
             _client.ClearInstances();
             _adminLock.Unlock();
         }
 
-        MessageManagerImplementation(const MessageManagerImplementation&) = delete;
-        MessageManagerImplementation& operator=(const MessageManagerImplementation&) = delete;
+        MessageControlImplementation(const MessageControlImplementation&) = delete;
+        MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
         void Start() override
@@ -139,8 +139,8 @@ namespace Plugin {
             _adminLock.Unlock();
         }
 
-        BEGIN_INTERFACE_MAP(MessageManagerImplementation)
-        INTERFACE_ENTRY(Exchange::IMessageManager)
+        BEGIN_INTERFACE_MAP(MessageControlImplementation)
+        INTERFACE_ENTRY(Exchange::IMessageControl)
         END_INTERFACE_MAP
 
     private:
@@ -150,10 +150,9 @@ namespace Plugin {
         WorkerThread _worker;
         Messaging::MessageClient _client;
 
-
         Trace::Factory _factory;
     };
 
-    SERVICE_REGISTRATION(MessageManagerImplementation, 1, 0);
+    SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);
 }
 }
