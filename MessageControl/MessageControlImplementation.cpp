@@ -103,40 +103,34 @@ namespace Plugin {
 
         void Activated(const uint32_t id) override
         {
-            Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
             _client.AddInstance(id);
         }
         void Deactivated(const uint32_t id) override
         {
-            Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
             _client.RemoveInstance(id);
         }
 
         void Dispatch()
         {
-            _adminLock.Lock();
-
             _client.WaitForUpdates(Core::infinite);
-            auto instanceIdList = _client.InstanceIds();
 
-            for (const auto& id : instanceIdList) {
+            Messaging::MessageClient::Message message;
 
-                auto result = _client.Pop(id);
+            do {
+                message = _client.Pop();
+                if (message.Value().first.Type() != Core::MessageInformation::MessageType::INVALID) {
 
-                if (result.first.Type() != Core::MessageInformation::MessageType::INVALID) {
-                    string message;
+                    string deserialized;
                     std::stringstream output;
-                    result.second->ToString(message);
+                    message.Value().second->ToString(deserialized);
 
                     string time(Core::Time::Now().ToRFC1123(true));
-                    output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(result.first.FileName().c_str()) << ':' << result.first.LineNumber() << "] "
-                           << result.first.Category() << ": " << message << std::endl;
+                    output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(message.Value().first.FileName().c_str()) << ':' << message.Value().first.LineNumber() << "] "
+                           << message.Value().first.Category() << ": " << deserialized << std::endl;
 
                     std::cout << output.str() << std::endl;
                 }
-            }
-
-            _adminLock.Unlock();
+            } while (!message.IsSet());
         }
 
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
