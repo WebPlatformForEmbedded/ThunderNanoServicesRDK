@@ -82,9 +82,7 @@ namespace Plugin {
             _worker.Stop();
             _client.SkipWaiting();
 
-            _adminLock.Lock();
             _client.ClearInstances();
-            _adminLock.Unlock();
         }
 
         MessageControlImplementation(const MessageControlImplementation&) = delete;
@@ -94,7 +92,7 @@ namespace Plugin {
         void Start() override
         {
             _client.AddInstance(0);
-            _client.AddFactory(Core::MessageInformation::MessageType::TRACING, &_factory);
+            _client.AddFactory(Core::MessageMetaData::MessageType::TRACING, &_factory);
             _worker.Start();
 
             //check if data is already available
@@ -118,7 +116,7 @@ namespace Plugin {
 
             do {
                 message = _client.Pop();
-                if (message.Value().first.Type() != Core::MessageInformation::MessageType::INVALID) {
+                if (message.Value().first.Type() != Core::MessageMetaData::MessageType::INVALID) {
 
                     string deserialized;
                     std::stringstream output;
@@ -126,11 +124,11 @@ namespace Plugin {
 
                     string time(Core::Time::Now().ToRFC1123(true));
                     output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(message.Value().first.FileName().c_str()) << ':' << message.Value().first.LineNumber() << "] "
-                           << message.Value().first.Category() << ": " << deserialized << std::endl;
+                           << message.Value().first.Category() << ": " << deserialized;
 
                     std::cout << output.str() << std::endl;
                 }
-            } while (!message.IsSet());
+            } while (message.IsSet());
         }
 
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
@@ -138,7 +136,6 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     private:
-        mutable Core::CriticalSection _adminLock;
         string _dispatcherIdentifier;
         string _dispatcherBasePath;
         WorkerThread _worker;

@@ -30,13 +30,13 @@ namespace Plugin {
         string message;
 
         _manager = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
-        service->Register(&_observer);
 
         if (_manager == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
             _manager->Start();
+            service->Register(&_observer);
         }
 
         return message;
