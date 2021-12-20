@@ -116,7 +116,7 @@ namespace Plugin {
 
             do {
                 message = _client.Pop();
-                if (message.Value().first.Type() != Core::MessageMetaData::MessageType::INVALID) {
+                if (message.Value().first.MetaData().Type() != Core::MessageMetaData::MessageType::INVALID) {
 
                     string deserialized;
                     std::stringstream output;
@@ -124,7 +124,7 @@ namespace Plugin {
 
                     string time(Core::Time::Now().ToRFC1123(true));
                     output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(message.Value().first.FileName().c_str()) << ':' << message.Value().first.LineNumber() << "] "
-                           << message.Value().first.Category() << ": " << deserialized;
+                           << message.Value().first.MetaData().Category() << ": " << deserialized;
 
                     std::cout << output.str() << std::endl;
                 }
