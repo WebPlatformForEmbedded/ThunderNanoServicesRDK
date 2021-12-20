@@ -35,6 +35,8 @@ namespace Plugin {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
+
+            _manager->Configure(service->Background(), service->ConfigLine());
             _manager->Start();
             service->Register(&_observer);
         }

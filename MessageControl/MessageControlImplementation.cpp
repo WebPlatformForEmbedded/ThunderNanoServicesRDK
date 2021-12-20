@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+#include "MessageOutput.h"
 #include "Module.h"
 
 namespace WPEFramework {
@@ -33,6 +34,12 @@ namespace {
         string result;
         Core::SystemInfo::GetEnvironment(Core::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
         return result;
+    }
+
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 
 }
@@ -69,6 +76,38 @@ namespace Plugin {
             MessageControlImplementation& _parent;
         };
 
+        class Config : public Core::JSON::Container {
+        private:
+            Config(const Config&);
+            Config& operator=(const Config&);
+
+        public:
+            Config()
+                : Core::JSON::Container()
+                , FileName()
+                , Console(true)
+                , SysLog(true)
+                , Abbreviated(true)
+                , MaxExportConnections(1)
+            {
+                Add(_T("console"), &Console);
+                Add(_T("syslog"), &SysLog);
+                Add(_T("filepath"), &FileName);
+                Add(_T("abbreviated"), &Abbreviated);
+                Add(_T("maxexportconnections"), &MaxExportConnections);
+            }
+            ~Config()
+            {
+            }
+
+        public:
+            Core::JSON::String FileName;
+            Core::JSON::Boolean Console;
+            Core::JSON::Boolean SysLog;
+            Core::JSON::Boolean Abbreviated;
+            Core::JSON::DecUInt16 MaxExportConnections;
+        };
+
     public:
         MessageControlImplementation()
             : _dispatcherIdentifier(DispatcherIdentifier())
@@ -99,6 +138,17 @@ namespace Plugin {
             _client.SkipWaiting();
         }
 
+        void Configure(const bool isBackground, const string& configuration) override
+        {
+            Config config;
+            config.FromString(configuration);
+
+            if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
+                || (config.Console.IsSet() && config.Console.Value())) {
+                _outputDirector.AddOutput(make_unique<ConsoleOutput>());
+            }
+        }
+
         void Activated(const uint32_t id) override
         {
             _client.AddInstance(id);
@@ -117,16 +167,7 @@ namespace Plugin {
             do {
                 message = _client.Pop();
                 if (message.Value().first.MetaData().Type() != Core::MessageMetaData::MessageType::INVALID) {
-
-                    string deserialized;
-                    std::stringstream output;
-                    message.Value().second->ToString(deserialized);
-
-                    string time(Core::Time::Now().ToRFC1123(true));
-                    output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(message.Value().first.FileName().c_str()) << ':' << message.Value().first.LineNumber() << "] "
-                           << message.Value().first.MetaData().Category() << ": " << deserialized;
-
-                    std::cout << output.str() << std::endl;
+                    _outputDirector.Output(message.Value().first, message.Value().second.Origin());
                 }
             } while (message.IsSet());
         }
@@ -142,6 +183,7 @@ namespace Plugin {
         Messaging::MessageClient _client;
 
         Trace::Factory _factory;
+        MessageDirector _outputDirector;
     };
 
     SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);
