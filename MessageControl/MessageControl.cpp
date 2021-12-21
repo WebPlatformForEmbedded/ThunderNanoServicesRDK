@@ -36,7 +36,7 @@ namespace Plugin {
 
         } else {
 
-            _manager->Configure(service->Background(), service->ConfigLine());
+            _manager->Configure(service->Background(), service->ConfigLine(), service->VolatilePath());
             _manager->Start();
             service->Register(&_observer);
         }

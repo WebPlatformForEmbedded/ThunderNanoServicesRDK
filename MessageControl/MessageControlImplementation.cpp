@@ -88,13 +88,11 @@ namespace Plugin {
                 , Console(true)
                 , SysLog(true)
                 , Abbreviated(true)
-                , MaxExportConnections(1)
             {
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
                 Add(_T("filepath"), &FileName);
                 Add(_T("abbreviated"), &Abbreviated);
-                Add(_T("maxexportconnections"), &MaxExportConnections);
             }
             ~Config()
             {
@@ -105,7 +103,6 @@ namespace Plugin {
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
             Core::JSON::Boolean Abbreviated;
-            Core::JSON::DecUInt16 MaxExportConnections;
         };
 
     public:
@@ -138,14 +135,24 @@ namespace Plugin {
             _client.SkipWaiting();
         }
 
-        void Configure(const bool isBackground, const string& configuration) override
+        void Configure(const bool isBackground, const string& configuration, const string& volatilePath) override
         {
             Config config;
             config.FromString(configuration);
-
+            if (config.Abbreviated.IsSet()) {
+                _outputDirector.AbbreviateMessages(config.Abbreviated.Value());
+            }
             if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                 || (config.Console.IsSet() && config.Console.Value())) {
                 _outputDirector.AddOutput(make_unique<ConsoleOutput>());
+            }
+            if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
+                || (config.SysLog.IsSet() && config.SysLog.Value())) {
+                _outputDirector.AddOutput(make_unique<SyslogOutput>());
+            }
+            if (config.FileName.IsSet()) {
+                string fullPath = volatilePath + config.FileName.Value();
+                _outputDirector.AddOutput(make_unique<FileOutput>(fullPath));
             }
         }
 

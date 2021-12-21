@@ -27,11 +27,11 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-#set(PLUGIN_MessageControl_AUTOSTART "true" CACHE STRING "Automatically start MessageControl plugin")
-#set(PLUGIN_MessageControl_REMOTE "false" CACHE STRING "Remote binding details enabled")
-#set(PLUGIN_MessageControl_PORT "0" CACHE STRING "PORT address")
-#set(PLUGIN_MessageControl_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
-#set(PLUGIN_MessageControl_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
+set(PLUGIN_MESSAGEGCONTROL_AUTOSTART true CACHE STRING "Automatically start plugin")
+set(PLUGIN_MESSAGEGCONTROL_CONSOLE true CACHE STRING "Output to console (if running in foreground)")
+set(PLUGIN_MESSAGEGCONTROL_SYSLOG true CACHE STRING "Output to syslog")
+set(PLUGIN_MESSAGEGCONTROL_FILENAME "messages.log" CACHE STRING "Filename in volatile path to store messages")
+set(PLUGIN_MESSAGEGCONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
@@ -40,6 +40,7 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED 
     MessageControl.cpp
+    MessageOutput.cpp
     MessageControlImplementation.cpp
     Module.cpp)
 

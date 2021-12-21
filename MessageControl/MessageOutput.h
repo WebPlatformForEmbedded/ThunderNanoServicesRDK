@@ -9,7 +9,7 @@ struct IMessageAssembler {
 
 struct IMessageOutput {
     virtual ~IMessageOutput() = default;
-    virtual void Output(const string& message) const = 0;
+    virtual void Output(const string& message) = 0;
 };
 
 class TraceFormatter : public IMessageAssembler {
@@ -26,7 +26,7 @@ public:
 
         string time(Core::Time::Now().ToRFC1123(true));
         _output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(info.FileName().c_str()) << ':' << info.LineNumber() << "] "
-                << info.MetaData().Category() << ": " << _deserializedMessage;
+                << info.MetaData().Category() << ": " << _deserializedMessage << std::endl;
 
         return _output.str();
     }
@@ -39,38 +39,47 @@ private:
 
 class ConsoleOutput : public IMessageOutput {
 public:
-    void Output(const string& message) const override
-    {
-        std::cout << message << std::endl;
-    }
+    ConsoleOutput() = default;
+    ~ConsoleOutput() override = default;
+    ConsoleOutput(const ConsoleOutput&) = delete;
+    ConsoleOutput& operator=(const ConsoleOutput&) = delete;
+
+    void Output(const string& message) override;
+};
+
+class SyslogOutput : public IMessageOutput {
+public:
+    SyslogOutput() = default;
+    ~SyslogOutput() override = default;
+    SyslogOutput(const SyslogOutput&) = delete;
+    SyslogOutput& operator=(const SyslogOutput&) = delete;
+
+    void Output(const string& message) override;
+};
+
+class FileOutput : public IMessageOutput {
+public:
+    explicit FileOutput(const string& filepath);
+    ~FileOutput() override;
+    FileOutput(const FileOutput&) = delete;
+    FileOutput& operator=(const FileOutput&) = delete;
+
+    void Output(const string& message) override;
+
+private:
+    Core::File _file;
 };
 
 class MessageDirector {
 public:
-    MessageDirector()
-    {
-        _formatters[Core::MessageMetaData::MessageType::TRACING].reset(new TraceFormatter());
-    }
+    MessageDirector();
     ~MessageDirector() = default;
+    MessageDirector(const MessageDirector&) = delete;
+    MessageDirector& operator=(const MessageDirector&) = delete;
 
-    void AbbreviateMessages(bool abbreviate)
-    {
-        _abbreviate = abbreviate;
-    }
-    void AddOutput(std::unique_ptr<IMessageOutput> output)
-    {
-        _outputs.push_back(std::move(output));
-    }
-
-    void Output(const Core::MessageInformation& info, const Core::IMessageEvent* message)
-    {
-        auto formatter = _formatters.find(info.MetaData().Type());
-        auto preparedMessage = formatter->second->Prepare(_abbreviate, info, message);
-
-        for (const auto& output : _outputs) {
-            output->Output(preparedMessage);
-        }
-    }
+    void AbbreviateMessages(bool abbreviate);
+    void AddOutput(std::unique_ptr<IMessageOutput> output);
+    void Output(const Core::MessageInformation& info, const Core::IMessageEvent* message);
 
 private:
     std::unordered_map<Core::MessageMetaData::MessageType, std::unique_ptr<IMessageAssembler>> _formatters;
