@@ -1,6 +1,7 @@
 #include "MessageOutput.h"
 
 namespace WPEFramework {
+
 void ConsoleOutput::Output(const string& message)
 {
     std::cout << message;
@@ -42,14 +43,14 @@ void FileOutput::Output(const string& message)
 MessageDirector::MessageDirector()
     : _abbreviate(false)
 {
-    _formatters[Core::MessageMetaData::MessageType::TRACING].reset(new TraceFormatter());
+    _formatters[Core::MessageMetaData::MessageType::TRACING].reset(new Trace::TraceFormatter());
 }
 
 void MessageDirector::AbbreviateMessages(bool abbreviate)
 {
     _abbreviate = abbreviate;
 }
-void MessageDirector::AddOutput(std::unique_ptr<IMessageOutput> output)
+void MessageDirector::AddOutput(std::unique_ptr<Messaging::IMessageOutput> output)
 {
     _outputs.push_back(std::move(output));
 }
