@@ -24,7 +24,7 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    class MessageControl : public PluginHost::IPlugin {
+    class MessageControl : public PluginHost::IPlugin, public PluginHost::JSONRPC {
     private:
         class Observer : public RPC::IRemoteConnection::INotification {
         public:
@@ -67,17 +67,13 @@ namespace Plugin {
         MessageControl(const MessageControl&) = delete;
         MessageControl& operator=(const MessageControl&) = delete;
 
-        MessageControl()
-            : _connectionId(0)
-            , _observer(*this)
-        {
-        }
-
-        ~MessageControl() override = default;
+        MessageControl();
+        ~MessageControl() override;
 
         BEGIN_INTERFACE_MAP(MessageControl)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_AGGREGATE(Exchange::IMessageControl, _manager)
+        INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_AGGREGATE(Exchange::IMessageControl, _control)
         END_INTERFACE_MAP
 
     public:
@@ -85,22 +81,27 @@ namespace Plugin {
         virtual void Deinitialize(PluginHost::IShell* service) override;
         virtual string Information() const override;
 
+        //JSONRPC
+        void RegisterAll();
+        void UnregisterAll();
+        uint32_t endpoint_set(const JsonData::MessageControl::MessageData& params);
+
     private:
         void Activated(RPC::IRemoteConnection* connection)
         {
-            if (_manager != nullptr && connection != nullptr) {
-                _manager->Activated(connection->Id());
+            if (_control != nullptr && connection != nullptr) {
+                _control->Activated(connection->Id());
             }
         }
         void Deactivated(RPC::IRemoteConnection* connection)
         {
-            if (_manager != nullptr && connection != nullptr) {
-                _manager->Deactivated(connection->Id());
+            if (_control != nullptr && connection != nullptr) {
+                _control->Deactivated(connection->Id());
             }
         }
 
         uint32_t _connectionId;
-        Exchange::IMessageControl* _manager;
+        Exchange::IMessageControl* _control;
         Observer _observer;
     };
 

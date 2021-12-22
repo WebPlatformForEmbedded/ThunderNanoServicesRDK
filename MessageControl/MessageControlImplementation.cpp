@@ -165,6 +165,14 @@ namespace Plugin {
             _client.RemoveInstance(id);
         }
 
+        uint32_t EnableMessage(MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
+        {
+            Core::MessageMetaData metaData(static_cast<Core::MessageMetaData::MessageType>(type), categoryName, moduleName);
+            _client.Enable(metaData, enable);
+
+            return Core::ERROR_NONE;
+        }
+
         void Dispatch()
         {
             _client.WaitForUpdates(Core::infinite);

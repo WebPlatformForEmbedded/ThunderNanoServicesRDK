@@ -24,20 +24,32 @@ namespace Plugin {
 
     SERVICE_REGISTRATION(MessageControl, 1, 0);
 
+    MessageControl::MessageControl()
+        : _connectionId(0)
+        , _observer(*this)
+    {
+        RegisterAll();
+    }
+
+    MessageControl::~MessageControl()
+    {
+        UnregisterAll();
+    }
+
     const string MessageControl::Initialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
         string message;
 
-        _manager = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
+        _control = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
 
-        if (_manager == nullptr) {
+        if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
 
-            _manager->Configure(service->Background(), service->ConfigLine(), service->VolatilePath());
-            _manager->Start();
+            _control->Configure(service->Background(), service->ConfigLine(), service->VolatilePath());
+            _control->Start();
             service->Register(&_observer);
         }
 
@@ -47,12 +59,12 @@ namespace Plugin {
     void MessageControl::Deinitialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
-        ASSERT(_manager != nullptr);
+        ASSERT(_control != nullptr);
         service->Unregister(&_observer);
 
-        if (_manager != nullptr) {
-            _manager->Release();
-            _manager = nullptr;
+        if (_control != nullptr) {
+            _control->Release();
+            _control = nullptr;
         }
         _connectionId = 0;
     }
