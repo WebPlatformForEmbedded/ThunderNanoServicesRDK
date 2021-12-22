@@ -18,7 +18,6 @@
  */
  
 #include "LocationSync.h"
-#include <time.h>
 
 namespace WPEFramework {
 namespace Plugin {
