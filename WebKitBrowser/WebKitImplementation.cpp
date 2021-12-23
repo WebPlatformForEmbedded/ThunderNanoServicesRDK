@@ -2206,6 +2206,11 @@ static GSourceFuncs _handlerIntervention =
                 }, this, nullptr);
             }
 
+            if (_config.Transparent.Value() == true) {
+                WebKitColor transparentColor{0, 0, 0, 0};
+                webkit_web_view_set_background_color(_view, &transparentColor);
+            }
+
             auto* userContentManager = webkit_web_view_get_user_content_manager(_view);
             /*
              * Note: It gives TypeError and needs to be resolved.
