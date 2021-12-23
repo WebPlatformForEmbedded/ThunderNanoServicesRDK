@@ -144,6 +144,8 @@ namespace Plugin {
 
         ASSERT(subSystem != nullptr);
 
+        _dispatcher.reset(nullptr);
+        
         if (subSystem != nullptr) {
             subSystem->Set(PluginHost::ISubSystem::NOT_SECURITY, nullptr);
             subSystem->Release();
