@@ -154,7 +154,8 @@ namespace Plugin {
             subSystem->Release();
 
             if ((_sink.Location() != nullptr) && (_sink.Location()->TimeZone().empty() == false)) {
-                Core::SystemInfo::SetEnvironment(_T("TZ"), _sink.Location()->TimeZone());
+                Core::SystemInfo::Instance().SetTimeZone(_sink.Location()->TimeZone());
+                SYSLOG(Logging::Startup, (_T("Local time %s."),Core::Time::Now().ToRFC1123(true).c_str()));
                 event_locationchange();
             }
         }
