@@ -982,7 +982,7 @@ namespace Plugin {
                         _job.Submit();
                     } else {
                         nextSlot += 1000 /* Add 1 ms */;
-                        _job.Schedule(nextSlot);
+                        _job.Reschedule(nextSlot);
                     }
                 } else {
                     TRACE(Trace::Information, (_T("Stopping to probe due to lack of active observees.")));
