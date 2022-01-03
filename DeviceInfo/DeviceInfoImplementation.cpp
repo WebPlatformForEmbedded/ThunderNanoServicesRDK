@@ -81,36 +81,61 @@ namespace Plugin {
         supportsCEC = _supportsCEC;
         return Core::ERROR_NONE;
     }
+
     uint32_t DeviceInfoImplementation::HDCP(CopyProtection& supportedHDCP) const
     {
         supportedHDCP = _supportedHDCP;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::ModelName(string& value) const  
+    uint32_t DeviceInfoImplementation::ModelName(string& value) const
     {
-        value = _modelName;
-        return Core::ERROR_NONE;
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_modelName.empty() == false) {
+            value = _modelName;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
-    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const 
+
+    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const
     {
-        value = _modelYear;
-        return Core::ERROR_NONE;
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_modelYear != 0) {
+            value = _modelYear;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
-    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const
     {
-        value = _friendlyName;
-        return Core::ERROR_NONE;
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_friendlyName.empty() == false) {
+            value = _friendlyName;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
-    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const
     {
-        value = _systemIntegratorName;
-        return Core::ERROR_NONE;
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_systemIntegratorName.empty() == false) {
+            value = _systemIntegratorName;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
-    uint32_t DeviceInfoImplementation::PlatformName(string& value) const 
+
+    uint32_t DeviceInfoImplementation::PlatformName(string& value) const
     {
-        value = _platformName ;
-        return Core::ERROR_NONE;
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_platformName.empty() == false) {
+            value = _platformName;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
 }
 }

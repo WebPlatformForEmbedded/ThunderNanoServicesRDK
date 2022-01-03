@@ -99,7 +99,6 @@ namespace Plugin {
         uint32_t FriendlyName(string& value) const override; 
         uint32_t SystemIntegratorName(string& value) const override; 
         uint32_t PlatformName(string& value) const override; 
-        
 
     private:
         Config _config;

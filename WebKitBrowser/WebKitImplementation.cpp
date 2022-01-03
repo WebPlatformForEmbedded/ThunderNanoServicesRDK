@@ -346,9 +346,9 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
-    class WebKitImplementation : public Core::Thread, 
-                                 public Exchange::IBrowser, 
-                                 public Exchange::IWebBrowser, 
+    class WebKitImplementation : public Core::Thread,
+                                 public Exchange::IBrowser,
+                                 public Exchange::IWebBrowser,
                                  public Exchange::IApplication,
                                  public PluginHost::IStateControl {
     public:
@@ -627,7 +627,7 @@ static GSourceFuncs _handlerIntervention =
                     _browser.DeactivateBrowser(PluginHost::IShell::WATCHDOG_EXPIRED);
                 }
 
-                _worker.Schedule(Core::Time::Now().Add(_watchDogTimeoutInSeconds * 1000));
+                _worker.Reschedule(Core::Time::Now().Add(_watchDogTimeoutInSeconds * 1000));
             }
 
         public:
@@ -681,7 +681,7 @@ static GSourceFuncs _handlerIntervention =
                 g_source_attach ( hangSource, ctx );
                 #endif
 
-                _worker.Schedule(Core::Time::Now().Add(_watchDogTimeoutInSeconds * 1000));
+                _worker.Reschedule(Core::Time::Now().Add(_watchDogTimeoutInSeconds * 1000));
             }
 
             HangDetector(const HangDetector&) = delete;
@@ -1085,7 +1085,7 @@ static GSourceFuncs _handlerIntervention =
                 return G_SOURCE_REMOVE;
             },
             this,
-            [](gpointer customdata) {
+            [](gpointer) {
             });
             return Core::ERROR_NONE;
         }
@@ -1360,7 +1360,7 @@ static GSourceFuncs _handlerIntervention =
             _adminLock.Unlock();
         }
 
-        uint32_t Reset(const resettype type) override
+        uint32_t Reset(VARIABLE_IS_NOT_USED const resettype type) override
         {
             return Core::ERROR_UNAVAILABLE;
         }
@@ -1385,17 +1385,17 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t ContentLink(const string& link) override
+        uint32_t ContentLink(VARIABLE_IS_NOT_USED const string& link) override
         {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t LaunchPoint(launchpointtype& point) const override
+        uint32_t LaunchPoint(VARIABLE_IS_NOT_USED launchpointtype& point) const override
         {
             return Core::ERROR_UNAVAILABLE;
         }
 
-        uint32_t LaunchPoint(const launchpointtype&) override
+        uint32_t LaunchPoint(VARIABLE_IS_NOT_USED const launchpointtype&) override
         {
             return Core::ERROR_UNAVAILABLE;
         }
@@ -1717,10 +1717,14 @@ static GSourceFuncs _handlerIntervention =
 
             // WebInspector
             if (_config.Inspector.Value().empty() == false) {
+#ifdef WEBKIT_GLIB_API
+                Core::SystemInfo::SetEnvironment(_T("WEBKIT_INSPECTOR_SERVER"), _config.Inspector.Value(), !environmentOverride);
+#else
                 if (_config.Automation.Value())
                     Core::SystemInfo::SetEnvironment(_T("WEBKIT_INSPECTOR_SERVER"), _config.Inspector.Value(), !environmentOverride);
                 else
                     Core::SystemInfo::SetEnvironment(_T("WEBKIT_LEGACY_INSPECTOR_SERVER"), _config.Inspector.Value(), !environmentOverride);
+#endif
             }
 
             // RPI mouse support
@@ -1970,6 +1974,8 @@ static GSourceFuncs _handlerIntervention =
 
                         TRACE_GLOBAL(Trace::Information, (_T("Internal Suspend Notification took %d mS."), static_cast<uint32_t>(Core::Time::Now().Ticks() - object->_time)));
 
+                        object->CheckWebProcess();
+
                         return FALSE;
                     },
                     this);
@@ -2035,12 +2041,12 @@ static GSourceFuncs _handlerIntervention =
         {
             browser->OnURLChanged(Core::ToString(webkit_web_view_get_uri(webView)));
         }
-        static void loadChangedCallback(WebKitWebView* webView, WebKitLoadEvent loadEvent, WebKitImplementation* browser)
+        static void loadChangedCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitLoadEvent loadEvent, WebKitImplementation* browser)
         {
             if (loadEvent == WEBKIT_LOAD_FINISHED)
                 browser->OnLoadFinished();
         }
-        static void webProcessTerminatedCallback(WebKitWebView* webView, WebKitWebProcessTerminationReason reason)
+        static void webProcessTerminatedCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitWebProcessTerminationReason reason)
         {
             switch (reason) {
             case WEBKIT_WEB_PROCESS_CRASHED:
@@ -2055,25 +2061,25 @@ static GSourceFuncs _handlerIntervention =
             }
             exit(1);
         }
-        static void closeCallback(WebKitWebView*, WebKitImplementation* browser)
+        static void closeCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitImplementation* browser)
         {
             browser->NotifyClosure();
         }
-        static gboolean decidePermissionCallback(WebKitWebView*, WebKitPermissionRequest* permissionRequest)
+        static gboolean decidePermissionCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitPermissionRequest* permissionRequest)
         {
             webkit_permission_request_allow(permissionRequest);
             return TRUE;
         }
-        static gboolean showNotificationCallback(WebKitWebView*, WebKitNotification* notification, WebKitImplementation* browser)
+        static gboolean showNotificationCallback(VARIABLE_IS_NOT_USED WebKitWebView* webView, WebKitNotification* notification, VARIABLE_IS_NOT_USED WebKitImplementation* browser)
         {
             TRACE_GLOBAL(HTML5Notification, (_T("%s - %s"), webkit_notification_get_title(notification), webkit_notification_get_body(notification)));
             return FALSE;
         }
-        static WebKitWebView* createWebViewForAutomationCallback(WebKitAutomationSession* session, WebKitImplementation* browser)
+        static WebKitWebView* createWebViewForAutomationCallback(VARIABLE_IS_NOT_USED WebKitAutomationSession* session, WebKitImplementation* browser)
         {
             return browser->_view;
         }
-        static void automationStartedCallback(WebKitWebContext* context, WebKitAutomationSession* session, WebKitImplementation* browser)
+        static void automationStartedCallback(VARIABLE_IS_NOT_USED WebKitWebContext* context, WebKitAutomationSession* session, WebKitImplementation* browser)
         {
             WebKitApplicationInfo *info = webkit_application_info_new();
             webkit_application_info_set_name(info, "WPEWebKitBrowser");
@@ -2202,6 +2208,11 @@ static GSourceFuncs _handlerIntervention =
                     auto* browser = static_cast<WebKitImplementation*>(userData);
                     browser->SetFPS();
                 }, this, nullptr);
+            }
+
+            if (_config.Transparent.Value() == true) {
+                WebKitColor transparentColor{0, 0, 0, 0};
+                webkit_web_view_set_background_color(_view, &transparentColor);
             }
 
             auto* userContentManager = webkit_web_view_get_user_content_manager(_view);
@@ -2557,6 +2568,28 @@ static GSourceFuncs _handlerIntervention =
                 SYSLOG(Logging::Notification, (_T("WebProcess is unresponsive, pid=%u, reply num=%d(max=%d), url=%s\n"),
                                             webprocessPID, _unresponsiveReplyNum, kWebProcessUnresponsiveReplyDefaultLimit,
                                             activeURL.c_str()));
+            }
+
+            if (!isWebProcessResponsive && _state == PluginHost::IStateControl::SUSPENDED)
+            {
+                SYSLOG(Logging::Notification, (_T("Killing unresponsive suspended WebProcess, pid=%u, reply num=%d(max=%d), url=%s\n"),
+                                            webprocessPID, _unresponsiveReplyNum, kWebProcessUnresponsiveReplyDefaultLimit,
+                                            activeURL.c_str()));
+                if (_unresponsiveReplyNum <= kWebProcessUnresponsiveReplyDefaultLimit)
+                {
+                    SYSLOG(Trace::Error, (_T("tgkill failed, signal=%d process=%u errno=%d (%s)"), SIGFPE, webprocessPID, errno, strerror(errno)));
+                    _unresponsiveReplyNum = kWebProcessUnresponsiveReplyDefaultLimit;
+                    Logging::DumpSystemFiles(webprocessPID);
+                    if (syscall(__NR_tgkill, webprocessPID, webprocessPID, SIGFPE) == -1)
+                    {
+                        SYSLOG(Trace::Error, (_T("tgkill failed, signal=%d process=%u errno=%d (%s)"), SIGFPE, webprocessPID, errno, strerror(errno)));
+                    }
+                }
+                else
+                {
+                    DeactivateBrowser(PluginHost::IShell::FAILURE);
+                }
+                return;
             }
 
             if (_unresponsiveReplyNum == kWebProcessUnresponsiveReplyDefaultLimit)

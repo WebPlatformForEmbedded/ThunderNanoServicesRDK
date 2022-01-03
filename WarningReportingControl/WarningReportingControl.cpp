@@ -181,8 +181,7 @@ namespace Plugin {
 
     Core::ProxyType<Core::JSON::IElement> WebSocketExporter::WarningChannelOutput::Process(const Core::ProxyType<Core::JSON::IElement>& element)
     {
-        Core::ProxyType<WebSocketExporter::ExportCommand>
-            inbound(Core::proxy_cast<WebSocketExporter::ExportCommand>(element));
+        Core::ProxyType<WebSocketExporter::ExportCommand> inbound(element);
 
         ASSERT(inbound.IsValid() == true);
 
@@ -234,7 +233,7 @@ namespace Plugin {
         response->IncludingDate = ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         response->Paused = IsPaused();
 
-        return Core::proxy_cast<Core::JSON::IElement>(response);
+        return (Core::ProxyType<Core::JSON::IElement>(response));
     }
 
     /* static */ string WarningReportingControl::Observer::Source::SourceName(const string& prefix, RPC::IRemoteConnection* connection)
@@ -317,12 +316,12 @@ namespace Plugin {
 
     Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const string&)
     {
-        return Core::proxy_cast<Core::JSON::IElement>(jsonExportCommandFactory.Element());
+        return (Core::ProxyType<Core::JSON::IElement>(jsonExportCommandFactory.Element()));
     }
 
     Core::ProxyType<Core::JSON::IElement> WarningReportingControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element)
     {
-        return Core::proxy_cast<Core::JSON::IElement>(_webSocketExporterInstance->HandleExportCommand(ID, element));
+        return (Core::ProxyType<Core::JSON::IElement>(_webSocketExporterInstance->HandleExportCommand(ID, element)));
     }
 
     string WarningReportingControl::Information() const

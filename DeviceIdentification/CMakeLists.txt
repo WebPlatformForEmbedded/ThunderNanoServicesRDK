@@ -50,7 +50,11 @@ if (PLUGIN_DEVICEIDENTIFICATION_USE_MFR AND MFRFWLIBS_FOUND)
             Implementation/MFR/MFR.cpp)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
-            mfrfwlibs::mfrfwlibs)
+            MFRFWLibs::MFRFWLibs)
+elseif (BUILD_BROADCOM)
+    target_sources(${MODULE_NAME}
+        PRIVATE
+            Implementation/Broadcom/Broadcom.cpp)
 elseif (NEXUS_FOUND)
     find_package(NXCLIENT REQUIRED)
     target_link_libraries(${MODULE_NAME} 
@@ -63,11 +67,11 @@ elseif (NEXUS_FOUND)
                 ${DEVICEIDENTIFICATION_IMPLEMENTATION_PATH}/Nexus.cpp)
     else()
         include(GetExternalCode)
-        set(DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION "master" CACHE STRING "DeviceIdentification implementation version")
+        set(DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION "master" CACHE STRING "DeviceIdentification implementation version: commit_id_or_tag_or_branch_name")
         set(DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY "https://code.rdkcentral.com/r/soc/broadcom/components/rdkcentral/thundernanoservices/DeviceIdentification" CACHE STRING "DeviceIdentification implementation repository")
         GetExternalCode(
             GIT_REPOSITORY ${DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY}
-            GIT_TAG ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
+            GIT_VERSION ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
             SOURCE_DIR "Implementation/Nexus"
         )
         target_sources(${MODULE_NAME}
