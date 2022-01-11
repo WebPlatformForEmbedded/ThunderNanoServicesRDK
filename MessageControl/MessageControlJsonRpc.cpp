@@ -32,12 +32,14 @@ namespace Plugin {
 
     void MessageControl::RegisterAll()
     {
-        Register<MessageData, void>(_T("set"), &MessageControl::endpoint_set, this);
+        Register<MessageInfo, void>(_T("set"), &MessageControl::endpoint_set, this);
+        Register<StatusParamsData, StatusResultData>(_T("status"), &MessageControl::endpoint_status, this);
     }
 
     void MessageControl::UnregisterAll()
     {
         Unregister(_T("set"));
+        Unregister(_T("status"));
     }
 
     // API implementation
@@ -46,13 +48,59 @@ namespace Plugin {
     // Method: set - Sets messages
     // Return codes:
     //  - ERROR_NONE: Success
-    uint32_t MessageControl::endpoint_set(const MessageData& params)
+    uint32_t MessageControl::endpoint_set(const MessageInfo& params)
     {
         uint32_t result = Core::ERROR_NONE;
         if (_control != nullptr) {
-            auto state = params.State.Value() == MessageData::StateType::ENABLED ? true : false;
+            auto state = params.State.Value() == StateType::ENABLED ? true : false;
             result = _control->EnableMessage(static_cast<Exchange::IMessageControl::MessageType>(params.Type.Value()), params.Module.Value(), params.Category.Value(), state);
         }
+        return result;
+    }
+
+    // Method: status - Retrieves general information
+    // Return codes:
+    //  - ERROR_NONE: Success
+    uint32_t MessageControl::endpoint_status(const StatusParamsData& params, StatusResultData& response)
+    {
+        uint32_t result = Core::ERROR_NONE;
+
+        _control->PrepareEnabledMessagesList();
+
+        Exchange::IMessageControl::MessageType type;
+        string module;
+        string category;
+        bool enabled;
+        bool add = false;
+
+        while (_control->EnabledMessage(type, module, category, enabled)) {
+            if (params.Module.IsSet() && !params.Category.IsSet()) {
+                if (params.Module.Value() == module) {
+                    add = true;
+                }
+            } else if (!params.Module.IsSet() && params.Category.IsSet()) {
+                if (params.Category.Value() == category) {
+                    add = true;
+                }
+            } else if (params.Module.IsSet() && params.Category.IsSet()) {
+                if (params.Category.Value() == category && params.Module.Value() == module) {
+                    add = true;
+                }
+            } else if (!params.Module.IsSet() && !params.Category.IsSet()) {
+                add = true;
+            }
+
+            if (add) {
+                MessageInfo messageResponse;
+                messageResponse.Type = static_cast<Message_typeType>(type);
+                messageResponse.Module = module;
+                messageResponse.Category = category;
+                messageResponse.State = enabled ? StateType::ENABLED : StateType::DISABLED;
+                response.Settings.Add(messageResponse);
+                add = false;
+            }
+        }
+
         return result;
     }
 } // namespace Plugin

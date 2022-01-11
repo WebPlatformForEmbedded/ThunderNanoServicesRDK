@@ -173,6 +173,43 @@ namespace Plugin {
             return Core::ERROR_NONE;
         }
 
+        /**
+         * @brief Prepare list of enabled messages
+         * 
+         * @return uint32_t ERROR_NONE: OK
+         *                  ERROR_GENERAL: Unable to prepare list
+         */
+        uint32_t PrepareEnabledMessagesList() override
+        {
+            Core::SafeSyncType<Core::CriticalSection> _guard(_adminLock);
+            _controls.Reset(0);
+            _controls = _client.Enabled();
+            return _controls.IsValid() ? Core::ERROR_NONE : Core::ERROR_GENERAL;
+        }
+
+        /**
+         * @brief Retreive currently enabled messages information. Caller should call this function until the result is false
+         * 
+         * @param type type of the message
+         * @param moduleName module 
+         * @param categoryName category 
+         * @param enable is enabled
+         * @return true more data is ready
+         * @return false no more data available
+         */
+        bool EnabledMessage(MessageType& type, string& moduleName, string& categoryName, bool& enable) override
+        {
+            Core::SafeSyncType<Core::CriticalSection> _guard(_adminLock);
+            bool hasNext = _controls.Next();
+            if (hasNext) {
+                type = static_cast<MessageType>(_controls.Current().first.Type());
+                moduleName = _controls.Current().first.Module();
+                categoryName = _controls.Current().first.Category();
+                enable = _controls.Current().second;
+            }
+            return hasNext;
+        }
+
         void Dispatch()
         {
             _client.WaitForUpdates(Core::infinite);
@@ -199,6 +236,9 @@ namespace Plugin {
 
         Trace::Factory _factory;
         MessageDirector _outputDirector;
+        Core::ControlList::Iterator _controls;
+
+        Core::CriticalSection _adminLock;
     };
 
     SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);

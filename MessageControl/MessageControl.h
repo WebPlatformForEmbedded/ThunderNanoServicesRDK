@@ -84,7 +84,8 @@ namespace Plugin {
         //JSONRPC
         void RegisterAll();
         void UnregisterAll();
-        uint32_t endpoint_set(const JsonData::MessageControl::MessageData& params);
+        uint32_t endpoint_set(const JsonData::MessageControl::MessageInfo& params);
+        uint32_t endpoint_status(const JsonData::MessageControl::StatusParamsData& params, JsonData::MessageControl::StatusResultData& response);
 
     private:
         void Activated(RPC::IRemoteConnection* connection)
