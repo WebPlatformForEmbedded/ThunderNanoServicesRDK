@@ -25,14 +25,14 @@ namespace {
     string DispatcherIdentifier()
     {
         string result;
-        Core::SystemInfo::GetEnvironment(Core::MessageUnit::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
+        Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
         return result;
     }
 
     string DispatcherBasePath()
     {
         string result;
-        Core::SystemInfo::GetEnvironment(Core::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
+        Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
         return result;
     }
 
@@ -134,19 +134,19 @@ namespace Plugin {
             }
             if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                 || (config.Console.IsSet() && config.Console.Value())) {
-                _outputDirector.AddOutput(make_unique<ConsoleOutput>());
+                _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>());
             }
             if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                 || (config.SysLog.IsSet() && config.SysLog.Value())) {
-                _outputDirector.AddOutput(make_unique<SyslogOutput>());
+                _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>());
             }
             if (config.FileName.IsSet()) {
                 string fullPath = volatilePath + config.FileName.Value();
-                _outputDirector.AddOutput(make_unique<FileOutput>(fullPath));
+                _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(fullPath));
             }
 
             _client.AddInstance(0);
-            _client.AddFactory(Core::MessageMetaData::MessageType::TRACING, &_factory);
+            _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
             _worker.Start();
 
             //check if data is already available
@@ -165,7 +165,7 @@ namespace Plugin {
 
         uint32_t EnableMessage(MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
         {
-            Core::MessageMetaData metaData(static_cast<Core::MessageMetaData::MessageType>(type), categoryName, moduleName);
+            Core::Messaging::MetaData metaData(static_cast<Core::Messaging::MetaData::MessageType>(type), categoryName, moduleName);
             _client.Enable(metaData, enable);
 
             return Core::ERROR_NONE;
@@ -214,7 +214,7 @@ namespace Plugin {
 
             do {
                 message = _client.Pop();
-                if (message.Value().first.MetaData().Type() != Core::MessageMetaData::MessageType::INVALID) {
+                if (message.Value().first.MessageMetaData().Type() != Core::Messaging::MetaData::MessageType::INVALID) {
                     _outputDirector.Output(message.Value().first, message.Value().second.Origin());
                 }
             } while (message.IsSet());
@@ -231,8 +231,8 @@ namespace Plugin {
         Messaging::MessageClient _client;
 
         Trace::Factory _factory;
-        MessageDirector _outputDirector;
-        Core::ControlList::Iterator _controls;
+        Messaging::MessageDirector _outputDirector;
+        Core::Messaging::ControlList::Iterator _controls;
 
         Core::CriticalSection _adminLock;
     };
