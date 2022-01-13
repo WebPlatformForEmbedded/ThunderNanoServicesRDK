@@ -49,7 +49,6 @@ namespace Plugin {
         } else {
 
             _control->Configure(service->Background(), service->ConfigLine(), service->VolatilePath());
-            _control->Start();
             service->Register(&_observer);
         }
 

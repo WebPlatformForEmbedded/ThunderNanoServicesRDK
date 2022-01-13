@@ -125,17 +125,7 @@ namespace Plugin {
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
-        void Start() override
-        {
-            _client.AddInstance(0);
-            _client.AddFactory(Core::MessageMetaData::MessageType::TRACING, &_factory);
-            _worker.Start();
-
-            //check if data is already available
-            _client.SkipWaiting();
-        }
-
-        void Configure(const bool isBackground, const string& configuration, const string& volatilePath) override
+        uint32_t Configure(const bool isBackground, const string& configuration, const string& volatilePath) override
         {
             Config config;
             config.FromString(configuration);
@@ -154,13 +144,21 @@ namespace Plugin {
                 string fullPath = volatilePath + config.FileName.Value();
                 _outputDirector.AddOutput(make_unique<FileOutput>(fullPath));
             }
+
+            _client.AddInstance(0);
+            _client.AddFactory(Core::MessageMetaData::MessageType::TRACING, &_factory);
+            _worker.Start();
+
+            //check if data is already available
+            _client.SkipWaiting();
+            return Core::ERROR_NONE;
         }
 
-        void Activated(const uint32_t id) override
+        void RegisterConnection(const uint32_t id) override
         {
             _client.AddInstance(id);
         }
-        void Deactivated(const uint32_t id) override
+        void UnregisterConnection(const uint32_t id) override
         {
             _client.RemoveInstance(id);
         }
@@ -174,40 +172,38 @@ namespace Plugin {
         }
 
         /**
-         * @brief Prepare list of enabled messages
+         * @brief Retreive currently enabled messages information.
          * 
-         * @return uint32_t ERROR_NONE: OK
-         *                  ERROR_GENERAL: Unable to prepare list
-         */
-        uint32_t PrepareEnabledMessagesList() override
-        {
-            Core::SafeSyncType<Core::CriticalSection> _guard(_adminLock);
-            _controls.Reset(0);
-            _controls = _client.Enabled();
-            return _controls.IsValid() ? Core::ERROR_NONE : Core::ERROR_GENERAL;
-        }
-
-        /**
-         * @brief Retreive currently enabled messages information. Caller should call this function until the result is false
-         * 
+         * @param initialize should the data be fetch (first call)
          * @param type type of the message
          * @param moduleName module 
          * @param categoryName category 
          * @param enable is enabled
-         * @return true more data is ready
-         * @return false no more data available
+         * @return uint32_t ERROR_NONE: Data still available in a list - one should call this method again (but with initialize = false)
+         *                  ERROR_UNAVAILABLE: No more data available
+         *                  
          */
-        bool EnabledMessage(MessageType& type, string& moduleName, string& categoryName, bool& enable) override
+        uint32_t ActiveMessages(const bool initialize, MessageType& type, string& moduleName, string& categoryName, bool& enable) override
         {
-            Core::SafeSyncType<Core::CriticalSection> _guard(_adminLock);
-            bool hasNext = _controls.Next();
-            if (hasNext) {
-                type = static_cast<MessageType>(_controls.Current().first.Type());
-                moduleName = _controls.Current().first.Module();
-                categoryName = _controls.Current().first.Category();
-                enable = _controls.Current().second;
+            uint32_t result = Core::ERROR_UNAVAILABLE;
+
+            if (initialize) {
+                _controls.Reset(0);
+                _controls = _client.Enabled();
             }
-            return hasNext;
+
+            if (_controls.Count() > 0) {
+                bool hasNext = _controls.Next();
+                if (hasNext) {
+                    type = static_cast<MessageType>(_controls.Current().first.Type());
+                    moduleName = _controls.Current().first.Module();
+                    categoryName = _controls.Current().first.Category();
+                    enable = _controls.Current().second;
+                    result = Core::ERROR_NONE;
+                }
+            }
+
+            return result;
         }
 
         void Dispatch()

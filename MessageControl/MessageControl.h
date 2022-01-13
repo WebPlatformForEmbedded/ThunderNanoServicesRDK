@@ -77,9 +77,9 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     public:
-        virtual const string Initialize(PluginHost::IShell* service) override;
-        virtual void Deinitialize(PluginHost::IShell* service) override;
-        virtual string Information() const override;
+        const string Initialize(PluginHost::IShell* service) override;
+        void Deinitialize(PluginHost::IShell* service) override;
+        string Information() const override;
 
         //JSONRPC
         void RegisterAll();
@@ -91,13 +91,13 @@ namespace Plugin {
         void Activated(RPC::IRemoteConnection* connection)
         {
             if (_control != nullptr && connection != nullptr) {
-                _control->Activated(connection->Id());
+                _control->RegisterConnection(connection->Id());
             }
         }
         void Deactivated(RPC::IRemoteConnection* connection)
         {
             if (_control != nullptr && connection != nullptr) {
-                _control->Deactivated(connection->Id());
+                _control->UnregisterConnection(connection->Id());
             }
         }
 

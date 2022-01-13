@@ -65,15 +65,14 @@ namespace Plugin {
     {
         uint32_t result = Core::ERROR_NONE;
 
-        _control->PrepareEnabledMessagesList();
-
         Exchange::IMessageControl::MessageType type;
         string module;
         string category;
         bool enabled;
         bool add = false;
+        bool initialize = true;
 
-        while (_control->EnabledMessage(type, module, category, enabled)) {
+        while (_control->ActiveMessages(initialize, type, module, category, enabled) == Core::ERROR_NONE) {
             if (params.Module.IsSet() && !params.Category.IsSet()) {
                 if (params.Module.Value() == module) {
                     add = true;
@@ -99,6 +98,7 @@ namespace Plugin {
                 response.Settings.Add(messageResponse);
                 add = false;
             }
+            initialize = false;
         }
 
         return result;
