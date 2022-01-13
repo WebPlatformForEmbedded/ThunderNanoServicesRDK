@@ -36,11 +36,11 @@ namespace Plugin {
         Config config;
         config.FromString(service->ConfigLine());
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
-        _subSystem = service->SubSystems();
         _service = service;
-        _systemId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
-
+        _subSystem = service->SubSystems();
         ASSERT(_subSystem != nullptr);
+
+        UpdateSystemId(_systemId);
 
         _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
@@ -146,6 +146,8 @@ namespace Plugin {
         systemInfo.Totalram = singleton.GetTotalRam();
         systemInfo.Devicename = singleton.GetHostName();
         systemInfo.Cpuload = Core::NumberType<uint32_t>(static_cast<uint32_t>(singleton.GetCpuLoad())).Text();
+        //string systemId;
+        //UpdateSystemId(systemId);
         systemInfo.Serialnumber = _systemId;
     }
 
@@ -254,6 +256,23 @@ namespace Plugin {
 
         if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
             metadatainfo.PlatformName = localresult;
+        }
+    }
+
+    void DeviceInfo::UpdateSystemId(string& systemId) const
+    {
+        const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
+        if (identifier != nullptr) {
+            uint8_t buffer[64];
+
+            buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
+                        ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
+
+            if (buffer[0] != 0) {
+                systemId = Core::SystemInfo::Instance().Id(buffer, ~0);
+            }
+
+            identifier->Release();
         }
     }
 

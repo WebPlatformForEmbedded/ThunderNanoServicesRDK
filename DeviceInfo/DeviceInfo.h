@@ -125,6 +125,7 @@ namespace Plugin {
         void SocketPortInfo(JsonData::DeviceInfo::SocketinfoData& socketPortInfo) const;
         void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
         void MetadataInfo(JsonData::DeviceInfo::MetadataData& response) const;
+        void UpdateSystemId(string& systemId) const;
         string GetDeviceId() const;
 
     private:
