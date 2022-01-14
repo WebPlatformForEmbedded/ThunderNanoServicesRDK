@@ -125,33 +125,43 @@ namespace Plugin {
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
-        uint32_t Configure(const bool isBackground, const string& configuration, const string& volatilePath) override
+        uint32_t Configure(PluginHost::IShell* service) override
         {
-            Config config;
-            config.FromString(configuration);
-            if (config.Abbreviated.IsSet()) {
-                _outputDirector.AbbreviateMessages(config.Abbreviated.Value());
-            }
-            if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
-                || (config.Console.IsSet() && config.Console.Value())) {
-                _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>());
-            }
-            if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
-                || (config.SysLog.IsSet() && config.SysLog.Value())) {
-                _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>());
-            }
-            if (config.FileName.IsSet()) {
-                string fullPath = volatilePath + config.FileName.Value();
-                _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(fullPath));
+            ASSERT(service != nullptr);
+            uint32_t result = Core::ERROR_GENERAL;
+            if (service != nullptr) {
+
+                Config config;
+                config.FromString(service->ConfigLine());
+
+                auto isBackground = service->Background();
+
+                if (config.Abbreviated.IsSet()) {
+                    _outputDirector.AbbreviateMessages(config.Abbreviated.Value());
+                }
+                if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
+                    || (config.Console.IsSet() && config.Console.Value())) {
+                    _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>());
+                }
+                if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
+                    || (config.SysLog.IsSet() && config.SysLog.Value())) {
+                    _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>());
+                }
+                if (config.FileName.IsSet()) {
+                    string fullPath = service->VolatilePath() + config.FileName.Value();
+                    _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(fullPath));
+                }
+
+                _client.AddInstance(0);
+                _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
+                _worker.Start();
+
+                //check if data is already available
+                _client.SkipWaiting();
+                result = Core::ERROR_NONE;
             }
 
-            _client.AddInstance(0);
-            _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
-            _worker.Start();
-
-            //check if data is already available
-            _client.SkipWaiting();
-            return Core::ERROR_NONE;
+            return result;
         }
 
         void RegisterConnection(const uint32_t id) override

@@ -87,9 +87,11 @@ namespace Plugin {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
-
-            _control->Configure(service->Background(), service->ConfigLine(), service->VolatilePath());
-            service->Register(&_observer);
+            if (_control->Configure(service) != Core::ERROR_NONE) {
+                message = _T("MessageControl plugin could not be instantiated.");
+            } else {
+                service->Register(&_observer);
+            }
         }
 
         return message;
