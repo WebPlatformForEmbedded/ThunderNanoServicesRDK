@@ -24,6 +24,47 @@ namespace Plugin {
 
     SERVICE_REGISTRATION(MessageControl, 1, 0);
 
+    MessageControl::Observer::Observer(MessageControl& parent)
+        : _adminLock()
+        , _parent(parent)
+        , _activationIds()
+        , _deactivationIds()
+        , _job(*this)
+    {
+    }
+
+    void MessageControl::Observer::Activated(RPC::IRemoteConnection* connection)
+    {
+        ASSERT(connection != nullptr);
+        Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
+        _activationIds.push_back(connection->Id());
+        _job.Submit();
+    }
+    void MessageControl::Observer::Deactivated(RPC::IRemoteConnection* connection)
+    {
+        ASSERT(connection != nullptr);
+        Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
+        _deactivationIds.push_back(connection->Id());
+        _job.Submit();
+    }
+
+    void MessageControl::Observer::Dispatch()
+    {
+        _adminLock.Lock();
+
+        while (_activationIds.size() > 0) {
+            _parent.Activated(_deactivationIds.back());
+            _activationIds.pop_back();
+        }
+
+        while (_deactivationIds.size() > 0) {
+            _parent.Deactivated(_deactivationIds.back());
+            _deactivationIds.pop_back();
+        }
+
+        _adminLock.Unlock();
+    }
+
     MessageControl::MessageControl()
         : _connectionId(0)
         , _observer(*this)
@@ -42,7 +83,6 @@ namespace Plugin {
         string message;
 
         _control = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
-
         if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
 
@@ -72,6 +112,17 @@ namespace Plugin {
     {
         // No additional info to report.
         return (string());
+    }
+
+    void MessageControl::Activated(const uint32_t id)
+    {
+        ASSERT(_control != nullptr);
+        _control->RegisterConnection(id);
+    }
+    void MessageControl::Deactivated(const uint32_t id)
+    {
+        ASSERT(_control != nullptr);
+        _control->UnregisterConnection(id);
     }
 
 } // namespace Plugin

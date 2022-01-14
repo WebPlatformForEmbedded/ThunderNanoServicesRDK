@@ -28,39 +28,26 @@ namespace Plugin {
     private:
         class Observer : public RPC::IRemoteConnection::INotification {
         public:
-            Observer(MessageControl& parent)
-                : _parent(parent)
-            {
-            }
+            Observer(MessageControl& parent);
 
-            void Activated(RPC::IRemoteConnection* connection) override
-            {
-                _parent.Activated(connection);
-            }
-            void Deactivated(RPC::IRemoteConnection* connection) override
-            {
-                _parent.Deactivated(connection);
-            }
+            void Activated(RPC::IRemoteConnection* connection) override;
+            void Deactivated(RPC::IRemoteConnection* connection) override;
 
         private:
+            friend class Core::ThreadPool::JobType<Observer&>;
+
+            void Dispatch();
+
             BEGIN_INTERFACE_MAP(Observer)
             INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
             END_INTERFACE_MAP
 
-            void AddRef() const override
-            {
-                Core::InterlockedIncrement(_refcount);
-            }
-            uint32_t Release() const override
-            {
-                Core::InterlockedDecrement(_refcount);
-
-                return Core::ERROR_NONE;
-            }
-
             Core::CriticalSection _adminLock;
             MessageControl& _parent;
-            mutable uint32_t _refcount;
+
+            std::list<uint32_t> _activationIds;
+            std::list<uint32_t> _deactivationIds;
+            Core::WorkerPool::JobType<Observer&> _job;
         };
 
     public:
@@ -88,22 +75,12 @@ namespace Plugin {
         uint32_t endpoint_status(const JsonData::MessageControl::StatusParamsData& params, JsonData::MessageControl::StatusResultData& response);
 
     private:
-        void Activated(RPC::IRemoteConnection* connection)
-        {
-            if (_control != nullptr && connection != nullptr) {
-                _control->RegisterConnection(connection->Id());
-            }
-        }
-        void Deactivated(RPC::IRemoteConnection* connection)
-        {
-            if (_control != nullptr && connection != nullptr) {
-                _control->UnregisterConnection(connection->Id());
-            }
-        }
+        void Activated(const uint32_t id);
+        void Deactivated(const uint32_t id);
 
         uint32_t _connectionId;
         Exchange::IMessageControl* _control;
-        Observer _observer;
+        Core::Sink<Observer> _observer;
     };
 
 } // namespace Plugin
