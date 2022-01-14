@@ -39,8 +39,9 @@ namespace Plugin {
         _service = service;
         _subSystem = service->SubSystems();
         ASSERT(_subSystem != nullptr);
-
-        UpdateSystemId(_systemId);
+        if (_subSystem != nullptr) {
+            _subSystem->Register(&_notification);
+        }
 
         _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
@@ -76,6 +77,7 @@ namespace Plugin {
             }
         }
 
+        _subSystem->Unregister(&_notification);
         _subSystem->Release();
         _subSystem = nullptr;
 
@@ -146,9 +148,10 @@ namespace Plugin {
         systemInfo.Totalram = singleton.GetTotalRam();
         systemInfo.Devicename = singleton.GetHostName();
         systemInfo.Cpuload = Core::NumberType<uint32_t>(static_cast<uint32_t>(singleton.GetCpuLoad())).Text();
-        //string systemId;
-        //UpdateSystemId(systemId);
-        systemInfo.Serialnumber = _systemId;
+
+        _adminLock.Lock();
+        systemInfo.Serialnumber = _deviceId;
+        _adminLock.Unlock();
     }
 
     void DeviceInfo::AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const
@@ -259,8 +262,20 @@ namespace Plugin {
         }
     }
 
-    void DeviceInfo::UpdateSystemId(string& systemId) const
+    void DeviceInfo::UpdateDeviceIdentifier()
     {
+        if ((_subSystem != nullptr) &&
+            (_subSystem->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true)) {
+            string deviceId = GetDeviceId();
+            _adminLock.Lock();
+            _deviceId = deviceId;
+            _adminLock.Unlock();
+        }
+    }
+
+    string DeviceInfo::GetDeviceId() const
+    {
+        string deviceId;
         const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
         if (identifier != nullptr) {
             uint8_t buffer[64];
@@ -269,11 +284,12 @@ namespace Plugin {
                         ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
 
             if (buffer[0] != 0) {
-                systemId = Core::SystemInfo::Instance().Id(buffer, ~0);
+                deviceId = Core::SystemInfo::Instance().Id(buffer, ~0);
             }
 
             identifier->Release();
         }
+        return deviceId;
     }
 
 } // namespace Plugin
