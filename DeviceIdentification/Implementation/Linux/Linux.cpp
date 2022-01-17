@@ -24,7 +24,26 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier {
+    class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier, public PluginHost::IConfigure {
+    private:
+        class Config : public Core::JSON::Container {
+        public:
+            Config(const Config&);
+            Config& operator=(const Config&);
+
+            Config()
+                : Core::JSON::Container()
+                , InterfaceName()
+            {
+                Add(_T("interfacename"), &InterfaceName);
+            }
+
+            ~Config() {}
+
+        public:
+            Core::JSON::String InterfaceName;
+        };
+
     public:
         DeviceImplementation() = default;
         virtual ~DeviceImplementation() = default;
@@ -33,9 +52,22 @@ namespace Plugin {
         DeviceImplementation& operator=(const DeviceImplementation&) = delete;
 
     public:
-        uint8_t Identifier(const uint8_t, uint8_t*) const override
+        uint32_t Configure(PluginHost::IShell* service) override
         {
-            return 0;
+            Config config;
+            config.FromString(service->ConfigLine());
+            _interfaceName = config.InterfaceName.Value();
+            UpdateDeviceId();
+        }
+
+        uint8_t Identifier(const uint8_t length, uint8_t* buffer) const override
+        {
+            uint8_t ret = 0;
+            if (_identifier.length()) {
+                ret = (_identifier.length() > length ? length : _identifier.length());
+                ::memcpy(buffer, _identifier.c_str(), ret);
+            }
+            return ret;
         }
         string Architecture() const override
         {
@@ -49,12 +81,34 @@ namespace Plugin {
         {
             return Core::SystemInfo::Instance().FirmwareVersion();
         }
+    private:
+        void UpdateDeviceId()
+        {
+            static uint8_t MACAddressBuffer[6];
 
+            // Fetch MAC of configured interface
+            if (_interfaceName.empty() != true) {
+                Core::AdapterIterator adapter(_interfaceName);
+
+                if (adapter.IsValid() == true) {
+                    adapter.MACAddress(&MACAddressBuffer[0], sizeof(MACAddressBuffer));
+                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+                }
+            }
+        }
+
+    public:
         BEGIN_INTERFACE_MAP(DeviceImplementation)
         INTERFACE_ENTRY(PluginHost::ISubSystem::IIdentifier)
+        INTERFACE_ENTRY(PluginHost::IConfigure)
         END_INTERFACE_MAP
+
+    private:
+        string _interfaceName;
+        string _identifier;
     };
 
     SERVICE_REGISTRATION(DeviceImplementation, 1, 0);
+
 }
 }
