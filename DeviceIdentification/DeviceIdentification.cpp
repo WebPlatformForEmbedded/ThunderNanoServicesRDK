@@ -34,6 +34,13 @@ namespace Plugin {
         _identifier = service->Root<PluginHost::ISubSystem::IIdentifier>(_connectionId, RPC::CommunicationTimeOut, _T("DeviceImplementation"));
 
         if (_identifier != nullptr) {
+
+            PluginHost::IConfigure* configure = _identifier->QueryInterface<PluginHost::IConfigure>();
+            if (configure != nullptr) {
+                configure->Configure(service);
+                configure->Release();
+            }
+
             _deviceId = GetDeviceId();
 
             if (_deviceId.empty() != true) {

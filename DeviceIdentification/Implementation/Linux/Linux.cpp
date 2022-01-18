@@ -33,15 +33,17 @@ namespace Plugin {
 
             Config()
                 : Core::JSON::Container()
-                , InterfaceName()
+                , Interface()
             {
-                Add(_T("interfacename"), &InterfaceName);
+                Add(_T("interface"), &Interface);
             }
 
-            ~Config() {}
+            ~Config() override
+            {
+            }
 
         public:
-            Core::JSON::String InterfaceName;
+            Core::JSON::String Interface;
         };
 
     public:
@@ -54,10 +56,17 @@ namespace Plugin {
     public:
         uint32_t Configure(PluginHost::IShell* service) override
         {
-            Config config;
-            config.FromString(service->ConfigLine());
-            _interfaceName = config.InterfaceName.Value();
-            UpdateDeviceId();
+            if (service) {
+                Config config;
+                config.FromString(service->ConfigLine());
+
+                _interface = config.Interface.Value();
+                if (_interface.empty() != true) {
+                         UpdateDeviceId();
+                }
+            }
+
+            return Core::ERROR_NONE;
         }
 
         uint8_t Identifier(const uint8_t length, uint8_t* buffer) const override
@@ -84,16 +93,13 @@ namespace Plugin {
     private:
         void UpdateDeviceId()
         {
-            static uint8_t MACAddressBuffer[6];
+            uint8_t MACAddressBuffer[6];
 
-            // Fetch MAC of configured interface
-            if (_interfaceName.empty() != true) {
-                Core::AdapterIterator adapter(_interfaceName);
+            Core::AdapterIterator adapter(_interface);
 
-                if (adapter.IsValid() == true) {
-                    adapter.MACAddress(&MACAddressBuffer[0], sizeof(MACAddressBuffer));
-                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
-                }
+            if (adapter.IsValid() == true) {
+                adapter.MACAddress(&MACAddressBuffer[0], sizeof(MACAddressBuffer));
+                _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
             }
         }
 
@@ -104,7 +110,7 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     private:
-        string _interfaceName;
+        string _interface;
         string _identifier;
     };
 
