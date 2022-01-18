@@ -52,9 +52,53 @@ namespace Plugin {
         };
 
     private:
-        DeviceInfo(const DeviceInfo&) = delete;
-        DeviceInfo& operator=(const DeviceInfo&) = delete;
+        class Notification : public PluginHost::ISubSystem::INotification {
+        private:
+            class Job {
+            public:
+                Job() = delete;
+                Job(const Job&) = delete;
+                Job& operator=(const Job&) = delete;
 
+                Job(DeviceInfo& parent) : _parent(parent) { }
+                ~Job() = default;
+
+            public:
+                void Dispatch() {
+                    _parent.UpdateDeviceIdentifier();
+                }
+
+            private:
+                DeviceInfo& _parent;
+            };
+
+        public:
+            Notification() = delete;
+            Notification(const Notification&) = delete;
+            Notification& operator=(const Notification&) = delete;
+
+            explicit Notification(DeviceInfo& parent)
+                : _job(parent) {
+            }
+            ~Notification() override {
+                _job.Revoke();
+            }
+
+        public:
+            // Some changes happened in the subsystems
+            void Updated() override {
+                _job.Submit();
+            }
+
+            BEGIN_INTERFACE_MAP(Notification)
+                INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
+            END_INTERFACE_MAP
+
+        private:
+            Core::WorkerPool::JobType<Job> _job;
+        };
+
+    private:
         uint32_t addresses(const Core::JSON::String&, Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response)
         {
             AddressInfo(response);
@@ -72,15 +116,18 @@ namespace Plugin {
         }
 
     public:
+        DeviceInfo(const DeviceInfo&) = delete;
+        DeviceInfo& operator=(const DeviceInfo&) = delete;
         DeviceInfo()
             : _skipURL(0)
             , _service(nullptr)
             , _subSystem(nullptr)
-            , _systemId()
             , _deviceId()
             , _implementation(nullptr)
             , _deviceMetadataInterface(nullptr)
             , _connectionId(0)
+            , _adminLock()
+            , _notification(*this)
         {
             RegisterAll();
         }
@@ -126,16 +173,18 @@ namespace Plugin {
         void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
         void MetadataInfo(JsonData::DeviceInfo::MetadataData& response) const;
         string GetDeviceId() const;
+        void UpdateDeviceIdentifier();
 
     private:
         uint8_t _skipURL;
         PluginHost::IShell* _service;
         PluginHost::ISubSystem* _subSystem;
-        string _systemId;
-        mutable string _deviceId;
+        string _deviceId;
         Exchange::IDeviceCapabilities* _implementation;
         Exchange::IDeviceMetadata* _deviceMetadataInterface;
         uint32_t _connectionId;
+        mutable Core::CriticalSection _adminLock;
+        Core::Sink<Notification> _notification;
     };
 
 } // namespace Plugin
