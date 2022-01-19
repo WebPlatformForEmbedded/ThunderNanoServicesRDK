@@ -240,7 +240,7 @@ namespace Plugin {
         WorkerThread _worker;
         Messaging::MessageClient _client;
 
-        Trace::Factory _factory;
+        Messaging::TraceFactory  _factory;
         Messaging::MessageDirector _outputDirector;
         Core::Messaging::ControlList::Iterator _controls;
 
