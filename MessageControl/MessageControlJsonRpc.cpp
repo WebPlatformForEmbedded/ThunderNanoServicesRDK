@@ -73,30 +73,32 @@ namespace Plugin {
         bool initialize = true;
 
         while (_control->ActiveMessages(initialize, type, module, category, enabled) == Core::ERROR_NONE) {
-            if (params.Module.IsSet() && !params.Category.IsSet()) {
-                if (params.Module.Value() == module) {
+            if (params.Type.IsSet() && params.Type.Value() == static_cast<Message_typeType>(type)) {
+                if (params.Module.IsSet() && !params.Category.IsSet()) {
+                    if (params.Module.Value() == module) {
+                        add = true;
+                    }
+                } else if (!params.Module.IsSet() && params.Category.IsSet()) {
+                    if (params.Category.Value() == category) {
+                        add = true;
+                    }
+                } else if (params.Module.IsSet() && params.Category.IsSet()) {
+                    if (params.Category.Value() == category && params.Module.Value() == module) {
+                        add = true;
+                    }
+                } else if (!params.Module.IsSet() && !params.Category.IsSet()) {
                     add = true;
                 }
-            } else if (!params.Module.IsSet() && params.Category.IsSet()) {
-                if (params.Category.Value() == category) {
-                    add = true;
-                }
-            } else if (params.Module.IsSet() && params.Category.IsSet()) {
-                if (params.Category.Value() == category && params.Module.Value() == module) {
-                    add = true;
-                }
-            } else if (!params.Module.IsSet() && !params.Category.IsSet()) {
-                add = true;
-            }
 
-            if (add) {
-                MessageInfo messageResponse;
-                messageResponse.Type = static_cast<Message_typeType>(type);
-                messageResponse.Module = module;
-                messageResponse.Category = category;
-                messageResponse.State = enabled ? StateType::ENABLED : StateType::DISABLED;
-                response.Settings.Add(messageResponse);
-                add = false;
+                if (add) {
+                    MessageInfo messageResponse;
+                    messageResponse.Type = static_cast<Message_typeType>(type);
+                    messageResponse.Module = module;
+                    messageResponse.Category = category;
+                    messageResponse.State = enabled ? StateType::ENABLED : StateType::DISABLED;
+                    response.Settings.Add(messageResponse);
+                    add = false;
+                }
             }
             initialize = false;
         }
