@@ -26,6 +26,9 @@ namespace WPEFramework {
 namespace Plugin {
     class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier, public PluginHost::IConfigure {
     private:
+        static uint8_t constexpr MacSize = 6;
+
+    private:
         class Config : public Core::JSON::Container {
         public:
             Config(const Config&);
@@ -61,9 +64,7 @@ namespace Plugin {
                 config.FromString(service->ConfigLine());
 
                 _interface = config.Interface.Value();
-                if (_interface.empty() != true) {
-                         UpdateDeviceId();
-                }
+                UpdateDeviceId();
             }
 
             return Core::ERROR_NONE;
@@ -95,14 +96,50 @@ namespace Plugin {
         {
             uint8_t MACAddressBuffer[6];
 
-            Core::AdapterIterator adapter(_interface);
-
-            if (adapter.IsValid() == true) {
-                adapter.MACAddress(&MACAddressBuffer[0], sizeof(MACAddressBuffer));
-                _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+            if (_interface.empty() != true) {
+                if (IsPhysicalInterface(MACAddressBuffer) == true) {
+                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+                }
+            } else {
+                if (IsAnyPhysicalInterface(MACAddressBuffer) == true) {
+                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+                }
             }
         }
+        bool IsPhysicalInterface(uint8_t* MACAddressBuffer)
+        {
+            bool valid = false;
+            Core::AdapterIterator adapter(_interface);
+            if (adapter.IsValid()) {
+                valid = IsValidMAC(adapter, MACAddressBuffer);
+            }
+            return valid;
+        }
+        bool IsAnyPhysicalInterface(uint8_t* MACAddressBuffer)
+        {
+            bool valid = false;
+            Core::AdapterIterator adapters;
 
+            while ((adapters.Next() == true)) {
+                if ((valid = IsValidMAC(adapters, MACAddressBuffer)) == true) {
+                    break;
+                }
+            }
+            return valid;
+        }
+        inline bool IsValidMAC(Core::AdapterIterator& adapter, uint8_t* MACAddressBuffer)
+        {
+            uint8_t check = 0;
+
+            memset(MACAddressBuffer, 0, MacSize);
+            adapter.MACAddress(&MACAddressBuffer[0], MacSize);
+
+            while ((check < (MacSize - 1)) && (MACAddressBuffer[check] == 0)) {
+                check++;
+            }
+
+            return (check < (MacSize - 1));
+        }
     public:
         BEGIN_INTERFACE_MAP(DeviceImplementation)
         INTERFACE_ENTRY(PluginHost::ISubSystem::IIdentifier)
