@@ -99,10 +99,14 @@ namespace Plugin {
             if (_interface.empty() != true) {
                 if (IsPhysicalInterface(MACAddressBuffer) == true) {
                     _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+                } else {
+                    TRACE(Trace::Error, (_T("Interface <%s>: is neither active nor a physical interface"), _interface.c_str()));
                 }
             } else {
                 if (IsAnyPhysicalInterface(MACAddressBuffer) == true) {
                     _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
+                } else {
+                    TRACE(Trace::Error, (_T("There is no any valid physical interface available")));
                 }
             }
         }
