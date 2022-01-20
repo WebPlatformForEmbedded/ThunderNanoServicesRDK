@@ -17,30 +17,19 @@
  * limitations under the License.
  */
  
-#ifndef __NOTIFYH
-#define __NOTIFYH
-
-#include "JavaScriptFunctionType.h"
-#include "../Tags.h"
+#include "Tags.h"
 
 namespace WPEFramework {
-namespace JavaScript {
-    namespace Functions {
 
-        class NotifyWPEFramework {
-        public:
-            NotifyWPEFramework();
+namespace Tags {
 
-            JSValueRef HandleMessage(JSContextRef context, JSObjectRef,
-                JSObjectRef, size_t argumentCount, const JSValueRef arguments[], JSValueRef*);
+const char* const Config = "Config.";
+const char* const Notification = "Notification";
+const char* const URL = "URL";
+const char* const BridgeObjectQuery = "BridgeObjectQuery";
+const char* const BridgeObjectReply = "BridgeObjectReply";
+const char* const BridgeObjectEvent = "BridgeObjectEvent";
+const char* const Headers = "Headers";
 
-            static inline string GetMessageName()
-            {
-                return Tags::Notification;
-            }
-        };
-    }
-}
-}
+} } ;
 
-#endif // __NOTIFYH

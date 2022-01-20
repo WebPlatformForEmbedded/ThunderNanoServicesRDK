@@ -156,7 +156,7 @@ target_link_libraries(${MODULE_NAME}
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
     Module.cpp
     WebKitImplementation.cpp
-    InjectedBundle/Tags.cpp
+    Tags.cpp
     )
 
 if(NOT WEBKIT_GLIB_API)
@@ -194,8 +194,12 @@ install(
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
-# also build injected bundle
-add_subdirectory(InjectedBundle)
+if(WEBKIT_GLIB_API)
+    add_subdirectory(Extension)
+else()
+    # also build injected bundle
+    add_subdirectory(InjectedBundle)
+endif()
 
 # resolution handling
 if(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "720p")

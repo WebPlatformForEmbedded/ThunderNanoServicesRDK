@@ -16,9 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef __INJECTEDBUNDLE_MODULE_H
-#define __INJECTEDBUNDLE_MODULE_H
+#pragma once
 
 #ifndef MODULE_NAME
 #define MODULE_NAME Plugin_WebKitBrowserInjectedBundle
@@ -30,5 +28,3 @@
 
 #undef EXTERNAL
 #define EXTERNAL
-
-#endif // __INJECTEDBUNDLE_MODULE_H
