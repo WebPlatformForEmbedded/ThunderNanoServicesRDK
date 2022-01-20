@@ -60,6 +60,7 @@ set(PLUGIN_WEBKITBROWSER_MEDIADISKCACHE "false" CACHE STRING "Media Disk Cache")
 set(PLUGIN_WEBKITBROWSER_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for WebKit")
 set(PLUGIN_WEBKITBROWSER_DISKCACHE "0" CACHE STRING "Disk Cache")
 set(PLUGIN_WEBKITBROWSER_XHRCACHE "true" CACHE STRING "XHR Cache")
+set(PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY "Extension" CACHE STRING "Directory to store extension libraries")
 set(PLUGIN_WEBKITBROWSER_LOCALSTORAGE "" CACHE STRING "HTML5 local storage path")
 set(PLUGIN_WEBKITBROWSER_COOKIESTORAGE "" CACHE STRING "Browser cookie storage path")
 set(PLUGIN_WEBKITBROWSER_WINDOWCLOSE "false" CACHE STRING "Allow window close")
@@ -156,7 +157,7 @@ target_link_libraries(${MODULE_NAME}
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
     Module.cpp
     WebKitImplementation.cpp
-    InjectedBundle/Tags.cpp
+    Tags.cpp
     )
 
 if(NOT WEBKIT_GLIB_API)
@@ -194,8 +195,12 @@ install(
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
-# also build injected bundle
-add_subdirectory(InjectedBundle)
+if(WEBKIT_GLIB_API)
+    add_subdirectory(Extension)
+else()
+    # also build injected bundle
+    add_subdirectory(InjectedBundle)
+endif()
 
 # resolution handling
 if(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "720p")

@@ -18,16 +18,31 @@
  */
 
 #include "Module.h"
-#include "MilestoneGLib.h"
+#include "SecurityAgent.h"
+
+#include <securityagent/securityagent.h>
 
 namespace WPEFramework {
 namespace JavaScript {
-namespace Milestone {
+namespace SecurityAgent {
 
-static void automationMilestone(const char* arg1, const char* arg2, const char* arg3)
+static char* thunderToken(gpointer userData)
 {
-    g_printerr("TEST TRACE: \"%s\" \"%s\" \"%s\"\n", arg1, arg2, arg3);
-    TRACE_GLOBAL(Trace::Information, (_T("TEST TRACE: \"%s\" \"%s\" \"%s\""), arg1, arg2, arg3));
+    WebKitFrame* frame = reinterpret_cast<WebKitFrame*>(userData);
+    const char *uri = webkit_frame_get_uri(frame);
+    if (uri) {
+        uint8_t buffer[2 * 1024];
+        size_t input_length = std::min ( strlen(uri), sizeof(buffer) );
+
+        ::memset (buffer, 0, sizeof(buffer));
+        ::memcpy (buffer, uri, input_length);
+
+        int length = GetToken(static_cast<uint16_t>(sizeof(buffer)), input_length, buffer);
+        if (length > 0) {
+            return g_strndup(reinterpret_cast<const char*>(buffer), length);
+        }
+    }
+    return nullptr;
 }
 
 void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
@@ -36,18 +51,16 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
         return;
 
     JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
-
     JSCValue* jsObject = jsc_value_new_object(jsContext, nullptr, nullptr);
-    JSCValue* jsFunction = jsc_value_new_function(jsContext, nullptr, reinterpret_cast<GCallback>(automationMilestone),
-        nullptr, nullptr, G_TYPE_NONE, 3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    jsc_value_object_set_property(jsObject, "Milestone", jsFunction);
+    JSCValue* jsFunction = jsc_value_new_function(jsContext, nullptr, reinterpret_cast<GCallback>(thunderToken),
+            (gpointer)frame, nullptr, G_TYPE_STRING, 0, G_TYPE_NONE);
+    jsc_value_object_set_property(jsObject, "token", jsFunction);
     g_object_unref(jsFunction);
-    jsc_context_set_value(jsContext, "automation", jsObject);
+    jsc_context_set_value(jsContext, "thunder", jsObject);
     g_object_unref(jsObject);
-
     g_object_unref(jsContext);
 }
 
-}  // Milestone
+}  // SecurityAgent
 }  // JavaScript
 }  // WPEFramework
