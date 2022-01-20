@@ -1827,7 +1827,9 @@ static GSourceFuncs _handlerIntervention =
             // Oke, so we are good to go.. Release....
             Core::Thread::Run();
 
+#ifndef WEBKIT_GLIB_API
             _configurationCompleted.WaitState(true, Core::infinite);
+#endif
 
             return (Core::ERROR_NONE);
         }
@@ -2233,8 +2235,6 @@ static GSourceFuncs _handlerIntervention =
             g_signal_connect(_view, "show-notification", reinterpret_cast<GCallback>(showNotificationCallback), this);
             g_signal_connect(_view, "user-message-received", reinterpret_cast<GCallback>(userMessageReceivedCallback), this);
             g_signal_connect(_view, "notify::is-web-process-responsive", reinterpret_cast<GCallback>(isWebProcessResponsiveCallback), this);
-
-            _configurationCompleted.SetState(true);
 
             URL(static_cast<const string>(_URL));
 
