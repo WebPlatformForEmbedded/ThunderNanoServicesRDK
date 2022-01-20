@@ -27,4 +27,4 @@
 #include <tracing/tracing.h>
 
 #undef EXTERNAL
-#define EXTERNAL
+#define EXTERNAL EXTERNAL_EXPORT
