@@ -2212,6 +2212,13 @@ static GSourceFuncs _handlerIntervention =
                 webkit_settings_set_user_agent(preferences, _config.UserAgent.Value().c_str());
             }
 
+            // Allow mixed content.
+            bool enableWebSecurity = _config.Secure.Value();
+            g_object_set(G_OBJECT(preferences),
+                     "enable-websecurity", enableWebSecurity,
+                     "allow-running-of-insecure-content", !enableWebSecurity,
+                     "allow-display-of-insecure-content", !enableWebSecurity, nullptr);
+
             _view = WEBKIT_WEB_VIEW(g_object_new(WEBKIT_TYPE_WEB_VIEW,
                 "backend", webkit_web_view_backend_new(wpe_view_backend_create(), nullptr, nullptr),
                 "web-context", wkContext,
