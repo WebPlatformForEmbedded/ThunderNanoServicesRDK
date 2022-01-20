@@ -23,7 +23,6 @@ find_package(securityagent QUIET)
 find_package(WPEWebKit REQUIRED)
 
 option(PLUGIN_AMAZON_HYBRID "Enable the Amazon Player interface (Hawaii) in the injected bundle and the creation of the Amazon tab" OFF)
-option(PLUGIN_SECURITYAGENT "Enable the Security Agent Features interface in javascript." OFF)
 option(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS "Enable AAMP JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 
