@@ -956,7 +956,7 @@ namespace Plugin {
                                 Core::EnumerateType<PluginHost::IShell::reason> why(((value & MonitorObject::EXCEEDED_MEMORY) != 0) ? PluginHost::IShell::MEMORY_EXCEEDED : PluginHost::IShell::FAILURE);
 
                                 const string message("{\"callsign\": \"" + plugin->Callsign() + "\", \"action\": \"Deactivate\", \"reason\": \"" + why.Data() + "\" }");
-                                SYSLOG(Trace::Fatal, (_T("FORCED Shutdown: %s by reason: %s."), plugin->Callsign().c_str(), why.Data()));
+                                SYSLOG(Logging::Fatal, (_T("FORCED Shutdown: %s by reason: %s."), plugin->Callsign().c_str(), why.Data()));
 
                                 _service->Notify(message);
 
@@ -982,7 +982,7 @@ namespace Plugin {
                         _job.Submit();
                     } else {
                         nextSlot += 1000 /* Add 1 ms */;
-                        _job.Schedule(nextSlot);
+                        _job.Reschedule(nextSlot);
                     }
                 } else {
                     TRACE(Trace::Information, (_T("Stopping to probe due to lack of active observees.")));

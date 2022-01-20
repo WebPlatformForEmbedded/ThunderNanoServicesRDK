@@ -47,19 +47,18 @@ if(PC_WPE_BACKEND_FOUND)
         NAMES ${PC_WPE_BACKEND_LIBRARIES}
         HINTS ${PC_WPE_BACKEND_LIBDIR} ${PC_WPE_BACKEND_LIBRARY_DIRS}
     )
+endif()
 
-    include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(WPEBackend 
-        VERSION_VAR PC_WPE_BACKEND_VERSION
-        REQUIRED_VARS WPE_BACKEND_LIBRARY WPE_BACKEND_INCLUDE_DIR WPE_BACKEND_LIBRARY)
-
-    if(PC_WPE_BACKEND_FOUND AND NOT TARGET WPEBackend::WPEBackend)
-        add_library(WPEBackend::WPEBackend SHARED IMPORTED)
-        set_target_properties(WPEBackend::WPEBackend PROPERTIES
-            IMPORTED_LOCATION "${WPE_BACKEND_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${WPE_BACKEND_INCLUDE_DIR}"
-        )
-    endif()
-
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(WPEBackend
+    VERSION_VAR PC_WPE_BACKEND_VERSION
+    REQUIRED_VARS WPE_BACKEND_LIBRARY WPE_BACKEND_INCLUDE_DIR)
     mark_as_advanced(WPE_BACKEND_INCLUDE_DIR WPE_BACKEND_LIBRARY)
+
+if(WPEBackend_FOUND AND NOT TARGET WPEBackend::WPEBackend)
+    add_library(WPEBackend::WPEBackend SHARED IMPORTED)
+    set_target_properties(WPEBackend::WPEBackend PROPERTIES
+        IMPORTED_LOCATION "${WPE_BACKEND_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${WPE_BACKEND_INCLUDE_DIR}"
+    )
 endif()

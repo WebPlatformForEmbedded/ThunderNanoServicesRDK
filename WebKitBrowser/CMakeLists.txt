@@ -42,6 +42,8 @@ option(PLUGIN_WEBKITBROWSER_LIGHTNING_APP "Include Lightning App in seperate plu
 
 option(PLUGIN_WEBKITBROWSER_ENABLE_JIT "Enable the use of JIT javascript optimalization" ON)
 option(PLUGIN_WEBKITBROWSER_ENABLE_DFG "Enable the use of DFG javascript optimalization" ON)
+option(PLUGIN_APPS_ENABLE_JIT "Enable the use of JIT javascript optimalization" OFF)
+option(PLUGIN_APPS_ENABLE_DFG "Enable the use of DFG javascript optimalization" OFF)
 
 set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implementation." )
 
@@ -68,13 +70,15 @@ set(PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS "0.0.0.0:9224" CACHE STRING "IP:Po
 set(PLUGIN_WEBKITBROWSER_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of WebKitBrowser")
 set(PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE "true" CACHE STRING "Enable Thunder decryptor preference in WebKit")
 set(PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX "" CACHE STRING "Specify callsign persistent path postfix")
+set(PLUGIN_WEBKITBROWSER_PTSOFFSET "0" CACHE STRING "Set ptsoffset for webkit")
 
 set(PLUGIN_YOUTUBE_AUTOSTART "false" CACHE STRING "Automatically start Youtube plugin")
 set(PLUGIN_YOUTUBE_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_YOUTUBE_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string YouTube")
 set(PLUGIN_YOUTUBE_WEBINSPECTOR_ADDRESS "0.0.0.0:9999" CACHE STRING "IP:Port for WebInspector of YouTube")
 set(PLUGIN_YOUTUBE_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of YouTube App")
-set(PLUGIN_YOUTUBE_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for WebKit")
+set(PLUGIN_YOUTUBE_MSEBUFFERS "${PLUGIN_WEBKITBROWSER_MSEBUFFERS}" CACHE STRING "MSE Buffers for WebKit")
+set(PLUGIN_YOUTUBE_RESOLUTION "720p" CACHE STRING "YouTube resolution")
 
 set(PLUGIN_UX_AUTOSTART "false" CACHE STRING "Automatically start UX plugin")
 set(PLUGIN_UX_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
@@ -88,6 +92,8 @@ set(PLUGIN_APPS_MODE "Local" CACHE STRING "Controls if the plugin should run in 
 set(PLUGIN_APPS_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Apps")
 set(PLUGIN_APPS_WEBINSPECTOR_ADDRESS "0.0.0.0:10001" CACHE STRING "IP:Port for WebInspector of Apps")
 set(PLUGIN_APPS_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of Apps")
+set(PLUGIN_APPS_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "MSE Buffers for Apps")
+set(PLUGIN_APPS_WEBGL "false" CACHE STRING "Enable Apps WebGL")
 
 set(PLUGIN_RESIDENT_APP_AUTOSTART "false" CACHE STRING "Automatically start Resident App plugin")
 set(PLUGIN_RESIDENT_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
@@ -204,6 +210,24 @@ elseif(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "2160p")
 elseif(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "auto")
     set(PLUGIN_WEBKITBROWSER_HEIGHT "")
     set(PLUGIN_WEBKITBROWSER_WIDTH "")
+endif()
+
+# YT resolution
+if(PLUGIN_YOUTUBE_RESOLUTION EQUAL "720p")
+    set(PLUGIN_YOUTUBE_HEIGHT "720")
+    set(PLUGIN_YOUTUBE_WIDTH "1280")
+elseif(PLUGIN_YOUTUBE_RESOLUTION EQUAL "1080p")
+    set(PLUGIN_YOUTUBE_HEIGHT "1080")
+    set(PLUGIN_YOUTUBE_WIDTH "1920")
+elseif(PLUGIN_YOUTUBE_RESOLUTION EQUAL "2160p")
+    set(PLUGIN_YOUTUBE_HEIGHT "2160")
+    set(PLUGIN_YOUTUBE_WIDTH "3840")
+elseif(PLUGIN_YOUTUBE_RESOLUTION EQUAL "auto")
+    set(PLUGIN_YOUTUBE_HEIGHT "")
+    set(PLUGIN_YOUTUBE_WIDTH "")
+else()
+    set(PLUGIN_YOUTUBE_HEIGHT ${PLUGIN_WEBKITBROWSER_HEIGHT})
+    set(PLUGIN_YOUTUBE_WIDTH ${PLUGIN_WEBKITBROWSER_WIDTH})
 endif()
 
 write_config()

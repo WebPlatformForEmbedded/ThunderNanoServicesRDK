@@ -116,7 +116,7 @@ namespace Plugin {
                 response->City = location->City();
 
                 result->ContentType = Web::MIMETypes::MIME_JSON;
-                result->Body(Core::proxy_cast<Web::IBody>(response));
+                result->Body(Core::ProxyType<Web::IBody>(response));
             } else {
                 result->ErrorCode = Web::STATUS_SERVICE_UNAVAILABLE;
                 result->Message = _T("Internet and Location Service not yet available");
@@ -154,7 +154,8 @@ namespace Plugin {
             subSystem->Release();
 
             if ((_sink.Location() != nullptr) && (_sink.Location()->TimeZone().empty() == false)) {
-                Core::SystemInfo::SetEnvironment(_T("TZ"), _sink.Location()->TimeZone());
+                Core::SystemInfo::Instance().SetTimeZone(_sink.Location()->TimeZone());
+                SYSLOG(Logging::Startup, (_T("Local time %s."),Core::Time::Now().ToRFC1123(true).c_str()));
                 event_locationchange();
             }
         }
