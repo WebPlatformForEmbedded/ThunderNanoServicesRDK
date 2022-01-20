@@ -45,6 +45,8 @@ add_library(${MODULE_NAME} SHARED
     ${SECAPI_RELATED_SOURCES}
     Module.cpp)
 
+# Following compilation flag is added as SecurityAgent plugin uses regex that 
+# prevents the plugin from unloading from memory after deactivation.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
 
 set_target_properties(${MODULE_NAME} PROPERTIES
