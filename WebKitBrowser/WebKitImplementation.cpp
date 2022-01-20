@@ -482,6 +482,7 @@ static GSourceFuncs _handlerIntervention =
                 , ScaleFactor(1.0)
                 , MaxFPS(60)
                 , ExecPath()
+                , ExtensionDir("Extension")
                 , HTTPProxy()
                 , HTTPProxyExclusion()
                 , TCPKeepAlive(false)
@@ -534,6 +535,7 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("maxfps"), &MaxFPS);
                 Add(_T("bundle"), &Bundle);
                 Add(_T("execpath"), &ExecPath);
+                Add(_T("extensiondir"), &ExtensionDir);
                 Add(_T("proxy"), &HTTPProxy);
                 Add(_T("proxyexclusion"), &HTTPProxyExclusion);
                 Add(_T("tcpkeepalive"), &TCPKeepAlive);
@@ -591,6 +593,7 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::DecUInt8 MaxFPS; // A value between 1 and 100...
             BundleConfig Bundle;
             Core::JSON::String ExecPath;
+            Core::JSON::String ExtensionDir;
             Core::JSON::String HTTPProxy;
             Core::JSON::String HTTPProxyExclusion;
             Core::JSON::Boolean TCPKeepAlive;
@@ -709,6 +712,7 @@ static GSourceFuncs _handlerIntervention =
             , _guid(Core::Time::Now().Ticks())
             , _httpCookieAcceptPolicy(WEBKIT_COOKIE_POLICY_ACCEPT_NO_THIRD_PARTY)
             , _webprocessPID(-1)
+            , _extensionPath()
 #else
             , _view()
             , _page()
@@ -2012,7 +2016,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
         static void initializeWebExtensionsCallback(WebKitWebContext* context, WebKitImplementation* browser)
         {
-            webkit_web_context_set_web_extensions_directory(context, browser->_dataPath.c_str());
+            webkit_web_context_set_web_extensions_directory(context, browser->_extensionPath.c_str());
             // FIX it
             GVariant* data = g_variant_new("(smsb)", std::to_string(browser->_guid).c_str(), !browser->_config.Whitelist.Value().empty() ? browser->_config.Whitelist.Value().c_str() : nullptr, browser->_config.LogToSystemConsoleEnabled.Value());
             webkit_web_context_set_web_extensions_initialization_user_data(context, data);
@@ -2155,6 +2159,7 @@ static GSourceFuncs _handlerIntervention =
             }
 
             if (_dataPath.empty() == false) {
+                _extensionPath = _dataPath + "/" + _config.ExtensionDir.Value();
                 // Set up injected bundle. Will be loaded once WPEWebProcess is started.
                 g_signal_connect(wkContext, "initialize-web-extensions", G_CALLBACK(initializeWebExtensionsCallback), this);
             }
@@ -2206,13 +2211,6 @@ static GSourceFuncs _handlerIntervention =
             if (_config.UserAgent.IsSet() == true && _config.UserAgent.Value().empty() == false) {
                 webkit_settings_set_user_agent(preferences, _config.UserAgent.Value().c_str());
             }
-
-            // Allow mixed content.
-            bool enableWebSecurity = _config.Secure.Value();
-            g_object_set(G_OBJECT(preferences),
-                    "enable-websecurity", enableWebSecurity,
-                    "allow-running-of-insecure-content", !enableWebSecurity,
-                    "allow-display-of-insecure-content", !enableWebSecurity, nullptr);
 
             _view = WEBKIT_WEB_VIEW(g_object_new(WEBKIT_TYPE_WEB_VIEW,
                 "backend", webkit_web_view_backend_new(wpe_view_backend_create(), nullptr, nullptr),
@@ -2657,6 +2655,7 @@ static GSourceFuncs _handlerIntervention =
         uint64_t _guid;
         WebKitCookieAcceptPolicy _httpCookieAcceptPolicy;
         pid_t _webprocessPID;
+        string _extensionPath;
 #else
         WKViewRef _view;
         WKPageRef _page;
