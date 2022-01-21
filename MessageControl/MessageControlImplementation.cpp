@@ -242,7 +242,7 @@ namespace Plugin {
 
         Messaging::TraceFactory  _factory;
         Messaging::MessageDirector _outputDirector;
-        Core::Messaging::ControlList::Iterator _controls;
+        Core::Messaging::ControlList::InformationIterator _controls;
 
         Core::CriticalSection _adminLock;
     };
