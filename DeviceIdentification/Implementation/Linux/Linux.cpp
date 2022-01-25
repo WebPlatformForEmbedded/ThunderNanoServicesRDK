@@ -18,13 +18,14 @@
  */
 
 #include "../../Module.h"
+#include <interfaces/IConfiguration.h>
 
 #include <fstream>
 #include <sys/utsname.h>
 
 namespace WPEFramework {
 namespace Plugin {
-    class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier, public PluginHost::IConfigure {
+    class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier, public Exchange::IConfiguration {
     private:
         static uint8_t constexpr MacSize = 6;
 
@@ -49,6 +50,101 @@ namespace Plugin {
             Core::JSON::String Interface;
         };
 
+    private:
+       class AdapterObserver : public WPEFramework::Core::AdapterObserver::INotification {
+        public:
+            static int32_t constexpr WaitTime = 5000; //Just wait for 5 seconds
+
+        public:
+            AdapterObserver() = delete;
+            AdapterObserver(const AdapterObserver&) = delete;
+            AdapterObserver& operator=(const AdapterObserver&) = delete;
+
+            AdapterObserver(const string& interface)
+                : _signal(false, true)
+                , _interface(interface)
+                , _observer(this)
+            {
+                _observer.Open();
+                if (_interface.empty() != true) {
+                    // Check given interface has valid MAC
+                    if (IsInterfaceHasValidMAC(interface) == true) {
+                        _signal.SetEvent();
+                    }
+                } else {
+                    // If interface is not given then,
+                    // check any of the activated interface has valid MAC
+                    if (IsAnyInterfaceHasValidMAC() == true) {
+                       _signal.SetEvent();
+                    }
+                }
+            }
+            ~AdapterObserver() override
+            {
+                _observer.Close();
+            }
+
+        public:
+            virtual void Event(const string& interface) override
+            {
+                if (_interface.empty() != true) {
+                    // Check configured interface has valid MAC
+                    if (interface == _interface) {
+                         if (IsInterfaceHasValidMAC(interface) == true) {
+                           _signal.SetEvent();
+                         }
+                    }
+                } else {
+                    // If interface is not configured then,
+                    // check activated interface has valid MAC
+                    if (IsInterfaceHasValidMAC(interface) == true) {
+                       _signal.SetEvent();
+                    }
+                }
+            }
+            inline uint32_t WaitForCompletion(int32_t waitTime)
+            {
+                return _signal.Lock(waitTime);
+            }
+            const uint8_t* MACAddress()
+            {
+                return _MACAddressBuffer;
+            }
+
+       private:
+            inline bool IsAnyInterfaceHasValidMAC()
+            {
+                bool valid = false;
+                Core::AdapterIterator adapters;
+
+                while ((adapters.Next() == true)) {
+                    if ((valid = IsValidMAC(adapters)) == true) {
+                        break;
+                    }
+                }
+                return valid;
+            }
+            inline bool IsInterfaceHasValidMAC(const string& interface)
+            {
+                Core::AdapterIterator adapter(interface);
+                return IsValidMAC(adapter);
+            }
+            inline bool IsValidMAC(Core::AdapterIterator adapter)
+            {
+                bool valid = false;
+                if ((adapter.IsValid() == true) && ((valid = adapter.HasMAC()) == true)) {
+                    memset(_MACAddressBuffer, 0, Core::AdapterIterator::MacSize);
+                    adapter.MACAddress(_MACAddressBuffer, Core::AdapterIterator::MacSize);
+                }
+                return valid;
+            }
+
+        private:
+            Core::Event _signal;
+            string _interface;
+            Core::AdapterObserver _observer;
+            uint8_t _MACAddressBuffer[Core::AdapterIterator::MacSize];
+        };
     public:
         DeviceImplementation() = default;
         virtual ~DeviceImplementation() = default;
@@ -91,63 +187,23 @@ namespace Plugin {
         {
             return Core::SystemInfo::Instance().FirmwareVersion();
         }
+
     private:
         void UpdateDeviceId()
         {
-            uint8_t MACAddressBuffer[6];
+            AdapterObserver observer(_interface);
 
-            if (_interface.empty() != true) {
-                if (IsPhysicalInterface(MACAddressBuffer) == true) {
-                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
-                } else {
-                    TRACE(Trace::Error, (_T("Interface <%s>: is neither active nor a physical interface"), _interface.c_str()));
-                }
+            if (observer.WaitForCompletion(AdapterObserver::WaitTime) == Core::ERROR_NONE) {
+                _identifier.assign(reinterpret_cast<const char*>(observer.MACAddress()), Core::AdapterIterator::MacSize);
             } else {
-                if (IsAnyPhysicalInterface(MACAddressBuffer) == true) {
-                    _identifier.assign(reinterpret_cast<char*>(MACAddressBuffer), sizeof(MACAddressBuffer));
-                } else {
-                    TRACE(Trace::Error, (_T("There is no any valid physical interface available")));
-                }
+                TRACE(Trace::Error, (_T("There is no any valid physical interface available")));
             }
         }
-        bool IsPhysicalInterface(uint8_t* MACAddressBuffer)
-        {
-            bool valid = false;
-            Core::AdapterIterator adapter(_interface);
-            if (adapter.IsValid()) {
-                valid = IsValidMAC(adapter, MACAddressBuffer);
-            }
-            return valid;
-        }
-        bool IsAnyPhysicalInterface(uint8_t* MACAddressBuffer)
-        {
-            bool valid = false;
-            Core::AdapterIterator adapters;
 
-            while ((adapters.Next() == true)) {
-                if ((valid = IsValidMAC(adapters, MACAddressBuffer)) == true) {
-                    break;
-                }
-            }
-            return valid;
-        }
-        inline bool IsValidMAC(Core::AdapterIterator& adapter, uint8_t* MACAddressBuffer)
-        {
-            uint8_t check = 0;
-
-            memset(MACAddressBuffer, 0, MacSize);
-            adapter.MACAddress(&MACAddressBuffer[0], MacSize);
-
-            while ((check < (MacSize - 1)) && (MACAddressBuffer[check] == 0)) {
-                check++;
-            }
-
-            return (check < (MacSize - 1));
-        }
     public:
         BEGIN_INTERFACE_MAP(DeviceImplementation)
         INTERFACE_ENTRY(PluginHost::ISubSystem::IIdentifier)
-        INTERFACE_ENTRY(PluginHost::IConfigure)
+        INTERFACE_ENTRY(Exchange::IConfiguration)
         END_INTERFACE_MAP
 
     private:

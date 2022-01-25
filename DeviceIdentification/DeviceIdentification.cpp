@@ -19,6 +19,7 @@
  
 #include "DeviceIdentification.h"
 #include "IdentityProvider.h"
+#include <interfaces/IConfiguration.h>
 
 namespace WPEFramework {
 namespace Plugin {
@@ -35,7 +36,7 @@ namespace Plugin {
 
         if (_identifier != nullptr) {
 
-            PluginHost::IConfigure* configure = _identifier->QueryInterface<PluginHost::IConfigure>();
+            Exchange::IConfiguration* configure = _identifier->QueryInterface<Exchange::IConfiguration>();
             if (configure != nullptr) {
                 configure->Configure(service);
                 configure->Release();
