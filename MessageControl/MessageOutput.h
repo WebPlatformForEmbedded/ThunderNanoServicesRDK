@@ -130,14 +130,15 @@ namespace Messaging {
         MessageDirector(const MessageDirector&) = delete;
         MessageDirector& operator=(const MessageDirector&) = delete;
 
-        void AddOutput(std::unique_ptr<Messaging::IMessageOutput> output);
+        void AddOutput(Core::Messaging::MetaData::MessageType type, std::unique_ptr<Messaging::IMessageOutput> output);
         void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message);
 
         void RegisterRawMessageNotification(Exchange::IMessageControl::INotification* notification);
         void UnregisterRawMessageNotification(const Exchange::IMessageControl::INotification* notification);
 
     private:
-        std::list<std::unique_ptr<IMessageOutput>> _outputs;
+        using Outputs = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::unique_ptr<IMessageOutput>>>;
+        Outputs _outputs;
         std::list<Exchange::IMessageControl::INotification*> _notifications;
     };
 }

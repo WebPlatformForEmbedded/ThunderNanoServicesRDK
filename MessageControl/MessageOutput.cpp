@@ -147,15 +147,15 @@ namespace Messaging {
     }
 
     //DIRECTOR
-    void MessageDirector::AddOutput(std::unique_ptr<Messaging::IMessageOutput> output)
+    void MessageDirector::AddOutput(Core::Messaging::MetaData::MessageType type, std::unique_ptr<Messaging::IMessageOutput> output)
     {
-        _outputs.push_back(std::move(output));
+        _outputs[type].push_back(std::move(output));
     }
 
     void MessageDirector::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
     {
 
-        for (const auto& output : _outputs) {
+        for (const auto& output : _outputs[info.MessageMetaData().Type()]) {
             output->Output(info, message);
         }
 

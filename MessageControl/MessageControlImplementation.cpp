@@ -136,25 +136,26 @@ namespace Plugin {
 
                 auto isBackground = service->Background();
                 bool abbreviate = false;
-                
+
                 if (config.Abbreviated.IsSet()) {
                     abbreviate = config.Abbreviated.Value();
                 }
                 if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                     || (config.Console.IsSet() && config.Console.Value())) {
-                    _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>(abbreviate));
+                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::ConsoleOutput>(abbreviate));
                 }
                 if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                     || (config.SysLog.IsSet() && config.SysLog.Value())) {
-                    _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>(abbreviate));
+                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::SyslogOutput>(abbreviate));
                 }
                 if (config.FileName.IsSet()) {
                     string fullPath = service->VolatilePath() + config.FileName.Value();
-                    _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(abbreviate, fullPath));
+                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::FileOutput>(abbreviate, fullPath));
                 }
 
                 _client.AddInstance(0);
                 _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
+                _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
                 _worker.Start();
 
                 //check if data is already available
@@ -230,14 +231,12 @@ namespace Plugin {
         {
             _client.WaitForUpdates(Core::infinite);
 
-            Messaging::MessageClient::Message message;
-
-            do {
-                message = _client.Pop();
-                if (message.Value().first.MessageMetaData().Type() != Core::Messaging::MetaData::MessageType::INVALID) {
-                    _outputDirector.Output(message.Value().first, message.Value().second.Origin());
+            auto messages = _client.Pop();
+            for (auto& message : messages) {
+                if (message.first.MessageMetaData().Type() != Core::Messaging::MetaData::MessageType::INVALID) {
+                    _outputDirector.Output(message.first, message.second.Origin());
                 }
-            } while (message.IsSet());
+            }
         }
 
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
