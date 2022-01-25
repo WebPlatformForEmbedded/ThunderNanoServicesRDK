@@ -23,12 +23,13 @@
 
 namespace WPEFramework {
 namespace Plugin {
+    class WebSocketExporter;
 
-    class MessageControl : public PluginHost::IPlugin, public PluginHost::JSONRPC {
+    class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
         class Observer : public RPC::IRemoteConnection::INotification {
         public:
-            Observer(MessageControl& parent);
+            explicit Observer(MessageControl& parent);
 
             void Activated(RPC::IRemoteConnection* connection) override;
             void Deactivated(RPC::IRemoteConnection* connection) override;
@@ -50,6 +51,43 @@ namespace Plugin {
             Core::WorkerPool::JobType<Observer&> _job;
         };
 
+        class MessageOutputNotification : public Exchange::IMessageControl::INotification {
+        public:
+            explicit MessageOutputNotification(MessageControl& parent);
+
+            void ReceiveRawMessage(Exchange::IMessageControl::MessageType type, const string& category,
+                const string& module, const string& fileName,
+                uint16_t lineNumber, uint64_t timestamp,
+                const string& message);
+
+        private:
+            BEGIN_INTERFACE_MAP(MessageOutputNotification)
+            INTERFACE_ENTRY(Exchange::IMessageControl::INotification)
+            END_INTERFACE_MAP
+
+            MessageControl& _parent;
+        };
+
+        class ComNotificationSink : public PluginHost::IShell::ICOMLink::INotification {
+        public:
+            ComNotificationSink() = delete;
+            explicit ComNotificationSink(MessageControl& parent);
+
+            ~ComNotificationSink() override = default;
+            ComNotificationSink(const ComNotificationSink&) = delete;
+            ComNotificationSink& operator=(const ComNotificationSink&) = delete;
+
+            BEGIN_INTERFACE_MAP(Notification)
+            INTERFACE_ENTRY(PluginHost::IShell::ICOMLink::INotification)
+            END_INTERFACE_MAP
+
+            void CleanedUp(const Core::IUnknown*, const uint32_t) override;
+            void Revoked(const Core::IUnknown* remote, const uint32_t interfaceId) override;
+
+        private:
+            MessageControl& _parent;
+        };
+
     public:
         MessageControl(const MessageControl&) = delete;
         MessageControl& operator=(const MessageControl&) = delete;
@@ -60,6 +98,8 @@ namespace Plugin {
         BEGIN_INTERFACE_MAP(MessageControl)
         INTERFACE_ENTRY(PluginHost::IPlugin)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(PluginHost::IPluginExtended)
+        INTERFACE_ENTRY(PluginHost::IWebSocket)
         INTERFACE_AGGREGATE(Exchange::IMessageControl, _control)
         END_INTERFACE_MAP
 
@@ -68,6 +108,11 @@ namespace Plugin {
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override;
 
+        bool Attach(PluginHost::Channel&) override;
+        void Detach(PluginHost::Channel&) override;
+        Core::ProxyType<Core::JSON::IElement> Inbound(const string& identifier) override;
+        Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
+
         //JSONRPC
         void RegisterAll();
         void UnregisterAll();
@@ -75,12 +120,16 @@ namespace Plugin {
         uint32_t endpoint_status(const JsonData::MessageControl::StatusParamsData& params, JsonData::MessageControl::StatusResultData& response);
 
     private:
+        void OnRevoke(const Exchange::IMessageControl::INotification* remote);
         void Activated(const uint32_t id);
         void Deactivated(const uint32_t id);
 
         uint32_t _connectionId;
         Exchange::IMessageControl* _control;
         Core::Sink<Observer> _observer;
+        Core::Sink<MessageOutputNotification> _outputNotification;
+        Core::Sink<ComNotificationSink> _comSink;
+        std::unique_ptr<WebSocketExporter> _webSocketExporter;
     };
 
 } // namespace Plugin

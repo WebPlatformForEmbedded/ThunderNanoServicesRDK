@@ -135,21 +135,22 @@ namespace Plugin {
                 config.FromString(service->ConfigLine());
 
                 auto isBackground = service->Background();
-
+                bool abbreviate = false;
+                
                 if (config.Abbreviated.IsSet()) {
-                    _outputDirector.AbbreviateMessages(config.Abbreviated.Value());
+                    abbreviate = config.Abbreviated.Value();
                 }
                 if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                     || (config.Console.IsSet() && config.Console.Value())) {
-                    _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>());
+                    _outputDirector.AddOutput(make_unique<Messaging::ConsoleOutput>(abbreviate));
                 }
                 if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
                     || (config.SysLog.IsSet() && config.SysLog.Value())) {
-                    _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>());
+                    _outputDirector.AddOutput(make_unique<Messaging::SyslogOutput>(abbreviate));
                 }
                 if (config.FileName.IsSet()) {
                     string fullPath = service->VolatilePath() + config.FileName.Value();
-                    _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(fullPath));
+                    _outputDirector.AddOutput(make_unique<Messaging::FileOutput>(abbreviate, fullPath));
                 }
 
                 _client.AddInstance(0);
@@ -216,6 +217,15 @@ namespace Plugin {
             return result;
         }
 
+        void RegisterOutputNotification(Exchange::IMessageControl::INotification* notification) override
+        {
+            _outputDirector.RegisterRawMessageNotification(notification);
+        }
+        void UnregisterOutputNotification(const Exchange::IMessageControl::INotification* notification) override
+        {
+            _outputDirector.UnregisterRawMessageNotification(notification);
+        }
+
         void Dispatch()
         {
             _client.WaitForUpdates(Core::infinite);
@@ -240,7 +250,7 @@ namespace Plugin {
         WorkerThread _worker;
         Messaging::MessageClient _client;
 
-        Messaging::TraceFactory  _factory;
+        Messaging::TraceFactory _factory;
         Messaging::MessageDirector _outputDirector;
         Core::Messaging::ControlList::InformationIterator _controls;
 
