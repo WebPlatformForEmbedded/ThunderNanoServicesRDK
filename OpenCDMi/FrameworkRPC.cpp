@@ -29,6 +29,7 @@
 #include <interfaces/IDRM.h>
 #include <interfaces/IContentDecryption.h>
 #include <interfaces/IOCDM.h>
+#define TR()    SYSLOG(Logging::Notification, (_T("--- %s:%d"), __FUNCTION__, __LINE__));
 
 extern "C" {
 
@@ -109,7 +110,7 @@ namespace Plugin {
 
         public:
             ExternalAccess(
-                const Core::NodeId& source, 
+                const Core::NodeId& source,
                 Exchange::IAccessorOCDM* parentInterface,
                 const string& proxyStubPath,
                 const Core::ProxyType<RPC::InvokeServer> & engine)
@@ -252,12 +253,12 @@ namespace Plugin {
                         , _mediaKeysExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeys))
                         , _sessionKey(nullptr)
                         , _sessionKeyLength(0)
-                    {
+                    { TR();
                         Core::Thread::Run();
                         TRACE(Trace::Information, (_T("Constructing buffer server side: %p - %s"), this, name.c_str()));
                     }
                     ~DataExchange()
-                    {
+                    { TR();
                         TRACE(Trace::Information, (_T("Destructing buffer server side: %p - %s"), this, Exchange::DataExchange::Name().c_str()));
                         // Make sure the thread reaches a HALT.. We are done.
                         Core::Thread::Stop();
@@ -270,7 +271,7 @@ namespace Plugin {
 
                 private:
                     virtual uint32_t Worker() override
-                    {
+                    { TR();
 
                         while (IsRunning() == true) {
 
@@ -285,7 +286,7 @@ namespace Plugin {
                                 uint8_t *payloadBuffer = Buffer();
                                 CDMi::EncryptionPattern pattern = {0};
                                 EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
-                                
+
                                 int cr = 0;
                                 REPORT_DURATION_WARNING(
                                     {
@@ -373,9 +374,9 @@ namespace Plugin {
                         const uint8_t* f_pbKeyMessage, //__in_bcount(f_cbKeyMessage)
                         uint32_t f_cbKeyMessage, //__in
                         const char* f_pszUrl) override
-                    {
+                    { TR();
                         TRACE(Trace::Information, ("OnKeyMessage(%s)", f_pszUrl));
-                        if (_callback != nullptr) {
+                        if (_callback != nullptr) { TR();
                             std::string url(f_pszUrl, strlen(f_pszUrl));
                             _callback->OnKeyMessage(f_pbKeyMessage, f_cbKeyMessage, url);
                         }
@@ -393,7 +394,7 @@ namespace Plugin {
 
                     //Event fired on key status update
                     virtual void OnKeyStatusUpdate(const char* keyMessage, const uint8_t buffer[], const uint8_t length) override
-                    {
+                    { TR();
                         ASSERT (buffer != nullptr);
 
                         Exchange::ISession::KeyStatus key;
@@ -459,20 +460,21 @@ namespace Plugin {
                     : _parent(*parent)
                     , _refCount(1)
                     , _keySystem(keySystem)
-                    , _sessionId(mediaKeySession->GetSessionId())
-                    , _mediaKeySession(mediaKeySession)
-                    , _mediaKeySessionExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeySession))
+                    , _sessionId("")
+                    //, _mediaKeySession(mediaKeySession)
+                    //, _mediaKeySessionExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeySession))
                     , _sink(this, callback)
                     , _buffer(nullptr)
                     , _cencData(*sessionData)
-                {
+                { TR();
                     ASSERT(parent != nullptr);
                     ASSERT(sessionData != nullptr);
-                    ASSERT(_mediaKeySession != nullptr);
+                    //ASSERT(_mediaKeySession != nullptr);
 
-                    _mediaKeySession->Run(&_sink);
-                    TRACE(Trace::Information, ("Server::Session::Session(%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), this));
-                    TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
+                    //_mediaKeySession->Run(&_sink);
+                    //TRACE(Trace::Information, ("Server::Session::Session(%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), this));
+                    //TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
+                    Set(mediaKeySession);
                 }
 
                 SessionImplementation(
@@ -485,22 +487,19 @@ namespace Plugin {
                     , _refCount(1)
                     , _keySystem(keySystem)
                     , _sessionId("")
-                    , _mediaKeySession(dynamic_cast<CDMi::IMediaKeySession*>(mediaKeySession))
-                    , _mediaKeySessionExt(mediaKeySession)
+                    //, _mediaKeySession(dynamic_cast<CDMi::IMediaKeySession*>(mediaKeySession))
+                    //, _mediaKeySessionExt(mediaKeySession)
                     , _sink(this, callback)
                     , _buffer(nullptr)
                     , _cencData(*sessionData)
-                {
+                { TR();
                     ASSERT(parent != nullptr);
                     ASSERT(sessionData != nullptr);
-                    ASSERT(_mediaKeySession != nullptr);
+                    ////ASSERT(_mediaKeySession != nullptr);
 
                     // This constructor can only be used for extended OCDM sessions.
-                    ASSERT(_mediaKeySessionExt != nullptr);
-
-                    TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
-                    _mediaKeySession->Run(&_sink);
-                    TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
+                    ////ASSERT(_mediaKeySessionExt != nullptr);
+                    Set(_mediaKeySession);
                 }
                 #ifdef __WINDOWS__
                 #pragma warning(default : 4355)
@@ -518,6 +517,20 @@ namespace Plugin {
 
                     TRACE(Trace::Information, ("Server::Session::~Session(%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), this));
                     TRACE(Trace::Information, (_T("Destructed the Session Server side: %p"), this));
+                }
+
+                void Set(CDMi::IMediaKeySession* mediaKeySession)
+                { TR();
+                    if (mediaKeySession) { TR();
+                        _mediaKeySession = mediaKeySession;
+                        _mediaKeySessionExt = dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeySession);
+
+                        _sessionId = _mediaKeySession->GetSessionId();
+
+                        TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
+                        _mediaKeySession->Run(&_sink);
+                        TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
+                    }
                 }
 
             public:
@@ -549,7 +562,7 @@ namespace Plugin {
                     return (_cencData.Status(CommonEncryptionData::KeyId(static_cast<CommonEncryptionData::systemType>(0), keyId, length)));
                 }
 
-                Exchange::OCDM_RESULT CreateSessionBuffer(std::string& bufferID) override {
+                Exchange::OCDM_RESULT CreateSessionBuffer(std::string& bufferID) override { TR();
 
                     Exchange::OCDM_RESULT result = Exchange::OCDM_SUCCESS;
                     _adminLock.Lock();
@@ -594,28 +607,28 @@ namespace Plugin {
 
                 // Loads the data stored for the specified session into the cdm object
                 virtual Exchange::OCDM_RESULT Load() override
-                {
+                { TR();
                     TRACE(Trace::Information, ("Load()"));
                     return (Exchange::OCDM_RESULT)(_mediaKeySession->Load());
                 }
 
                 // Process a key message response.
                 virtual void Update(const uint8_t* keyMessage, const uint16_t keyLength) override
-                {
+                { TR();
                     TRACE(Trace::Information, ("Update(%d)", keyLength));
                     return (_mediaKeySession->Update(keyMessage, keyLength));
                 }
 
                 //Removes all license(s) and key(s) associated with the session
                 virtual Exchange::OCDM_RESULT Remove() override
-                {
+                { TR();
                     TRACE(Trace::Information, ("Remove()"));
                     return (Exchange::OCDM_RESULT)(_mediaKeySession->Remove());
                 }
 
                 //We are done with the Session, close what we can..
                 virtual void Close() override
-                {
+                { TR();
                     TRACE(Trace::Information, ("Close()"));
 
                     _mediaKeySession->Close();
@@ -692,7 +705,8 @@ namespace Plugin {
                 , _administrator(name)
                 , _defaultSize(defaultSize)
                 , _sessionList()
-            {
+                , _thread(*this)
+            { TR();
                 ASSERT(parent != nullptr);
             }
             virtual ~AccessorOCDM()
@@ -729,6 +743,43 @@ namespace Plugin {
                 return _defaultSize;
             }
 
+            class CreateSessionThread {
+                public:
+                CreateSessionThread(AccessorOCDM& parent)
+                    : _parent(parent)
+                    , _worker(*this)
+                {
+                    SYSLOG(Logging::Notification, (_T("--- %s:%d Inside"), __FUNCTION__, __LINE__));
+                }
+                ~CreateSessionThread() {
+                    SYSLOG(Logging::Notification, (_T("--- %s:%d Inside"), __FUNCTION__, __LINE__));
+                }
+
+                void Start()
+                {
+                    SYSLOG(Logging::Notification, (_T("--- %s:%d Inside"), __FUNCTION__, __LINE__));
+                    _worker.Submit();
+                    //_worker.Schedule(Core::Time::Now().Add(1000));
+                }
+
+
+                CreateSessionThread(const CreateSessionThread&) = delete;
+                CreateSessionThread& operator=(const CreateSessionThread&) = delete;
+
+                private:
+                void Dispatch()
+                {
+                    SYSLOG(Logging::Notification, (_T("--- %s:%d Entering"), __FUNCTION__, __LINE__));
+                    sleep(1);
+                    SYSLOG(Logging::Notification, (_T("--- %s:%d Exiting"), __FUNCTION__, __LINE__));
+                }
+
+                private:
+                AccessorOCDM& _parent;
+                friend Core::ThreadPool::JobType<CreateSessionThread&>;
+                Core::WorkerPool::JobType<CreateSessionThread&> _worker;
+            };
+
             // Create a MediaKeySession using the supplied init data and CDM data.
             virtual Exchange::OCDM_RESULT CreateSession(
                 const std::string& keySystem,
@@ -741,53 +792,60 @@ namespace Plugin {
                 Exchange::ISession::ICallback* callback,
                 std::string& sessionId,
                 Exchange::ISession*& session) override
-            {
+            { TR();
                  CDMi::IMediaKeys *system = _parent.KeySystem(keySystem);
+
+                _thread.Start();
 
                  session = nullptr;
                  if (system != nullptr)
-                 {
+                 { TR();
                      CDMi::IMediaKeySession *sessionInterface = nullptr;
                      CommonEncryptionData keyIds(initData, initDataLength);
 
+                     SessionImplementation *newEntry =
+                        Core::Service<SessionImplementation>::Create<SessionImplementation>(this,
+                                     keySystem, sessionInterface,
+                                    callback, &keyIds);
+
                      // OKe we got a buffer machanism to transfer the raw data, now create
                      // the session.
-                     if (system->CreateMediaKeySession(keySystem, licenseType, 
-                                        initDataType.c_str(), initData, initDataLength, 
+                     if (system->CreateMediaKeySession(keySystem, licenseType,
+                                        initDataType.c_str(), initData, initDataLength,
                                         CDMData, CDMDataLength, &sessionInterface) == 0)
-                     {
-                         if (sessionInterface != nullptr)
-                         {
-                                 SessionImplementation *newEntry = 
-                                    Core::Service<SessionImplementation>::Create<SessionImplementation>(this,
-                                                 keySystem, sessionInterface,
-                                                callback, &keyIds);
+                     { TR();
+                        if (sessionInterface != nullptr) { TR();
+                            newEntry->Set(sessionInterface);
+                            session = newEntry;
+                            sessionId = session->SessionId();
 
-                                 session = newEntry;
-                                 sessionId = newEntry->SessionId();
+                             _adminLock.Lock();
+                             _sessionList.push_front(newEntry);
 
-                                 _adminLock.Lock();
+                            if(false == keyIds.IsEmpty())
+                            { TR();
+                                CommonEncryptionData::Iterator index(keyIds.Keys());
+                                while (index.Next() == true) { TR();
+                                    SYSLOG(Logging::Notification, (_T("%s:%d sessionId='%s' callback=%p"), __FUNCTION__, __LINE__, sessionId.c_str(), callback));
 
-                                 _sessionList.push_front(newEntry);
-                                
-                                if(false == keyIds.IsEmpty())
-                                {
-                                    CommonEncryptionData::Iterator index(keyIds.Keys());
-                                    while (index.Next() == true) {
-                                        const CommonEncryptionData::KeyId& entry(index.Current());
-                                        callback->OnKeyStatusUpdate( entry.Id(), entry.Length(), Exchange::ISession::StatusPending);
-                                    }
+                                    const CommonEncryptionData::KeyId& entry(index.Current());
+                                    callback->OnKeyStatusUpdate( entry.Id(), entry.Length(), Exchange::ISession::StatusPending);
                                 }
-                                _adminLock.Unlock();
-                         }
-                     }
+                            }
+                            _adminLock.Unlock();
+                        }
+                    }
                  }
 
                  if (session == nullptr) {
                      TRACE(Trace::Error, (_T("Could not create a DRM session! [%d]"), __LINE__));
                  }
 
-                 return (session != nullptr ? Exchange::OCDM_RESULT::OCDM_SUCCESS : Exchange::OCDM_RESULT::OCDM_S_FALSE);
+                TR();
+                sessionId = "";
+
+                //return (Exchange::OCDM_RESULT::OCDM_SUCCESS);
+                return (session != nullptr ? Exchange::OCDM_RESULT::OCDM_SUCCESS : Exchange::OCDM_RESULT::OCDM_S_FALSE);
             }
 
             // Set Server Certificate
@@ -1019,6 +1077,7 @@ namespace Plugin {
             BufferAdministrator _administrator;
             uint32_t _defaultSize;
             std::list<SessionImplementation*> _sessionList;
+            CreateSessionThread _thread;
         };
 
         class Config : public Core::JSON::Container {
@@ -1100,11 +1159,11 @@ namespace Plugin {
             , _compliant(false)
             , _systemToFactory()
             , _systemLibraries()
-        {
-            TRACE(Trace::Information, (_T("Constructing OCDMImplementation Service: %p"), this));
+        { TR();
+            TRACE_L1("Constructing OCDMImplementation Service: %p", this);
         }
         virtual ~OCDMImplementation()
-        {
+        { TR();
             if (_service != nullptr) {
                 delete _service;
             }
@@ -1123,7 +1182,7 @@ namespace Plugin {
 
     public:
         uint32_t Initialize(PluginHost::IShell* service) override
-        {
+        { TR();
             uint32_t result = Core::ERROR_OPENING_FAILED;
 
             // On activation subscribe, on deactivation un-subscribe
@@ -1140,8 +1199,11 @@ namespace Plugin {
             // Before we start loading the mapping of the Keys to the factories, load the factories :-)
             Core::Directory entry(locator.c_str(), _T("*.drm"));
             std::map<const string, SystemFactory> factories;
+            //SYSLOG(Logging::Notification, (_T("--- %s:%d sleeping 10 secs"), __FUNCTION__, __LINE__));
+            //sleep(10);
 
             while (entry.Next() == true) {
+                SYSLOG(Logging::Notification, (_T("--- %s:%d loading GetSystemFactory from %s"), __FUNCTION__, __LINE__, entry.Current().c_str()));
                 Core::Library library(entry.Current().c_str());
 
                 if (library.IsLoaded() == true) {
@@ -1166,7 +1228,7 @@ namespace Plugin {
 
             Core::JSON::ArrayType<Config::Systems>::ConstIterator index(static_cast<const Config&>(config).KeySystems.Elements());
 
-            while (index.Next() == true) {
+            while (index.Next() == true) { TR();
 
                 const string system(index.Current().Name.Value());
 
@@ -1189,7 +1251,7 @@ namespace Plugin {
                     }
 
                     //now handle the configuration
-                    if (factory != factories.end()) {
+                    if (factory != factories.end()) { TR();
                         const string configuration(index.Current().Configuration.Value());
                         factory->second.Factory->Initialize(service, configuration);
                     }
@@ -1220,7 +1282,7 @@ namespace Plugin {
                     _engine.Release();
                     _service = nullptr;
                     _entryPoint = nullptr;
-                } else {
+                } else { TR();
                     if (subSystem != nullptr) {
 
                         // Announce the port on which we are listening
@@ -1236,7 +1298,7 @@ namespace Plugin {
             }
             return (result);
         }
-        void Deinitialize(PluginHost::IShell* service) override {
+        void Deinitialize(PluginHost::IShell* service) override { TR();
             std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
 
             std::list<CDMi::ISystemFactory*> deinitialized;
@@ -1244,12 +1306,12 @@ namespace Plugin {
             while (factory != _systemToFactory.end()) {
                 std::list<CDMi::ISystemFactory*>::iterator index(std::find(deinitialized.begin(), deinitialized.end(), factory->second.Factory));
 
-                if(index == deinitialized.end()){ 
+                if(index == deinitialized.end()){
                     TRACE(Trace::Information, (_T("Deinitializing factory(%p) for key system %s"), factory->second.Factory, factory->second.Factory->KeySystem()));
                     factory->second.Factory->Deinitialize(service);
                     deinitialized.push_back(factory->second.Factory);
                 }
-                
+
                 factory++;
             }
         }
@@ -1276,7 +1338,7 @@ namespace Plugin {
 
     public:
         bool IsTypeSupported(const std::string& keySystem, const std::string& contentType)
-        {
+        { TR();
 
             // FIXME: The dead code below this statement has at least the following issues,
             //  - The MIME checking code is **very far** from compliant (no codec= support is one major issue, there are more)
@@ -1340,7 +1402,7 @@ namespace Plugin {
         }
 
         CDMi::IMediaKeys* KeySystem(const std::string& keySystem)
-        {
+        { TR();
             CDMi::IMediaKeys* result = nullptr;
 
             if (keySystem.empty() == false) {
@@ -1357,7 +1419,7 @@ namespace Plugin {
 
     private:
         void LoadDesignators(const string& keySystem, std::list<string>& designators) const
-        {
+        { TR();
             std::map<const std::string, SystemFactory>::const_iterator index(_systemToFactory.begin());
             while (index != _systemToFactory.end()) {
                 if (keySystem == index->second.Name) {
@@ -1367,7 +1429,7 @@ namespace Plugin {
             }
         }
         void LoadSessions(const string& keySystem, std::list<string>& designators) const
-        {
+        { TR();
             std::map<const std::string, SystemFactory>::const_iterator index(_systemToFactory.begin());
             while (index != _systemToFactory.end()) {
                 if (keySystem == index->second.Name) {
