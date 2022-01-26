@@ -16,17 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #pragma once
 
-#include <wpe/webkit-web-extension.h>
+#ifndef MODULE_NAME
+#define MODULE_NAME Plugin_WebBridge
+#endif
 
-namespace WPEFramework {
-namespace JavaScript {
-namespace NotifyWPEFramework {
+#include <plugins/plugins.h>
 
-void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
-
-}  // NotifyWPEFramework
-}  // JavaScript
-}  // WPEFramework
+#undef EXTERNAL
+#define EXTERNAL

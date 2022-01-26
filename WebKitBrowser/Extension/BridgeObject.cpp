@@ -18,8 +18,8 @@
  */
 
 #include "Module.h"
-#include "BridgeObjectGLib.h"
-#include "Tags.h"
+#include "BridgeObject.h"
+#include "../Tags.h"
 
 namespace WPEFramework {
 namespace JavaScript {
