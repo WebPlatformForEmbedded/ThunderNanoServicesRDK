@@ -76,34 +76,6 @@ namespace Plugin {
             MessageControlImplementation& _parent;
         };
 
-        class Config : public Core::JSON::Container {
-        private:
-            Config(const Config&);
-            Config& operator=(const Config&);
-
-        public:
-            Config()
-                : Core::JSON::Container()
-                , FileName()
-                , Console(true)
-                , SysLog(true)
-                , Abbreviated(true)
-            {
-                Add(_T("console"), &Console);
-                Add(_T("syslog"), &SysLog);
-                Add(_T("filepath"), &FileName);
-                Add(_T("abbreviated"), &Abbreviated);
-            }
-            ~Config()
-            {
-            }
-
-        public:
-            Core::JSON::String FileName;
-            Core::JSON::Boolean Console;
-            Core::JSON::Boolean SysLog;
-            Core::JSON::Boolean Abbreviated;
-        };
 
     public:
         MessageControlImplementation()
@@ -125,43 +97,27 @@ namespace Plugin {
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
-        uint32_t Configure(PluginHost::IShell* service) override
+        uint32_t Configure(bool isBackground, bool abbreviate, bool outputToConsole, bool outputToSysLog, const string& outputFileName) override
         {
-            ASSERT(service != nullptr);
-            uint32_t result = Core::ERROR_GENERAL;
-            if (service != nullptr) {
+            uint32_t result = Core::ERROR_NONE;
 
-                Config config;
-                config.FromString(service->ConfigLine());
-
-                auto isBackground = service->Background();
-                bool abbreviate = false;
-
-                if (config.Abbreviated.IsSet()) {
-                    abbreviate = config.Abbreviated.Value();
-                }
-                if ((!isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
-                    || (config.Console.IsSet() && config.Console.Value())) {
-                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::ConsoleOutput>(abbreviate));
-                }
-                if ((isBackground && !config.Console.IsSet() && !config.SysLog.IsSet())
-                    || (config.SysLog.IsSet() && config.SysLog.Value())) {
-                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::SyslogOutput>(abbreviate));
-                }
-                if (config.FileName.IsSet()) {
-                    string fullPath = service->VolatilePath() + config.FileName.Value();
-                    _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::FileOutput>(abbreviate, fullPath));
-                }
-
-                _client.AddInstance(0);
-                _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
-                _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
-                _worker.Start();
-
-                //check if data is already available
-                _client.SkipWaiting();
-                result = Core::ERROR_NONE;
+            if ((!isBackground && !outputToConsole && !outputToSysLog) || (outputToConsole)) {
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::ConsoleOutput>(abbreviate));
             }
+            if ((isBackground && !outputToConsole && !outputToSysLog) || (outputToSysLog)) {
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::SyslogOutput>(abbreviate));
+            }
+            if (!outputFileName.empty()) {
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::FileOutput>(abbreviate, outputFileName));
+            }
+
+            _client.AddInstance(0);
+            _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
+            _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
+            _worker.Start();
+
+            //check if data is already available
+            _client.SkipWaiting();
 
             return result;
         }

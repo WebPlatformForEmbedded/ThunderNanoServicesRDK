@@ -98,7 +98,10 @@ namespace Plugin {
             ~Config() = default;
 
         public:
-            Core::JSON::String OutputSettings;
+            Core::JSON::Boolean Console;
+            Core::JSON::Boolean SysLog;
+            Core::JSON::String FileName;
+            Core::JSON::Boolean Abbreviated;
             Core::JSON::DecUInt16 MaxExportConnections;
         };
 
@@ -144,6 +147,9 @@ namespace Plugin {
         Core::Sink<MessageOutputNotification> _outputNotification;
         Core::Sink<ComNotificationSink> _comSink;
         std::unique_ptr<WebSocketExporter> _webSocketExporter;
+        Config _config;
+        string _fullOutputFilePath;
+        uint16_t _maxExportConnections;
     };
 
 } // namespace Plugin

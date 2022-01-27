@@ -308,8 +308,16 @@ namespace Plugin {
 
     MessageControl::Config::Config()
         : Core::JSON::Container()
+        , Console(true)
+        , SysLog(true)
+        , FileName()
+        , Abbreviated(true)
         , MaxExportConnections(1)
     {
+        Add(_T("console"), &Console);
+        Add(_T("syslog"), &SysLog);
+        Add(_T("filepath"), &FileName);
+        Add(_T("abbreviated"), &Abbreviated);
         Add(_T("maxexportconnections"), &MaxExportConnections);
     }
 
@@ -318,6 +326,9 @@ namespace Plugin {
         , _observer(*this)
         , _outputNotification(*this)
         , _comSink(*this)
+        , _webSocketExporter(nullptr)
+        , _fullOutputFilePath(_T(""))
+        , _maxExportConnections(1)
     {
         RegisterAll();
     }
@@ -334,18 +345,20 @@ namespace Plugin {
 
         Config config;
         config.FromString(service->ConfigLine());
+        _fullOutputFilePath = service->VolatilePath() + config.FileName.Value();
+        _maxExportConnections = config.MaxExportConnections.IsSet() ? config.MaxExportConnections.Value() : MAX_CONNECTIONS;
 
         _control = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
         if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
-            if (_control->Configure(service) != Core::ERROR_NONE) {
+            if (_control->Configure(service->Background(), config.Abbreviated.Value(), config.Console.Value(), config.SysLog.Value(), _fullOutputFilePath) != Core::ERROR_NONE) {
                 message = _T("MessageControl plugin could not be instantiated.");
             } else {
                 service->Register(&_observer);
                 service->Register(&_comSink);
-                _webSocketExporter.reset(new WebSocketExporter(config.MaxExportConnections.Value()));
+                _webSocketExporter.reset(new WebSocketExporter(_maxExportConnections));
                 _control->RegisterOutputNotification(&_outputNotification);
             }
         }
