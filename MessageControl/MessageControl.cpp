@@ -306,6 +306,13 @@ namespace Plugin {
         }
     }
 
+    MessageControl::Config::Config()
+        : Core::JSON::Container()
+        , MaxExportConnections(1)
+    {
+        Add(_T("maxexportconnections"), &MaxExportConnections);
+    }
+
     MessageControl::MessageControl()
         : _connectionId(0)
         , _observer(*this)
@@ -325,6 +332,9 @@ namespace Plugin {
         ASSERT(service != nullptr);
         string message;
 
+        Config config;
+        config.FromString(service->ConfigLine());
+
         _control = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
         if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
@@ -335,7 +345,7 @@ namespace Plugin {
             } else {
                 service->Register(&_observer);
                 service->Register(&_comSink);
-                _webSocketExporter.reset(new WebSocketExporter());
+                _webSocketExporter.reset(new WebSocketExporter(config.MaxExportConnections.Value()));
                 _control->RegisterOutputNotification(&_outputNotification);
             }
         }

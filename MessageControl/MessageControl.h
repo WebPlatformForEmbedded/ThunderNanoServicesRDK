@@ -88,6 +88,20 @@ namespace Plugin {
             MessageControl& _parent;
         };
 
+        class Config : public Core::JSON::Container {
+        private:
+            Config(const Config&);
+            Config& operator=(const Config&);
+
+        public:
+            Config();
+            ~Config() = default;
+
+        public:
+            Core::JSON::String OutputSettings;
+            Core::JSON::DecUInt16 MaxExportConnections;
+        };
+
     public:
         MessageControl(const MessageControl&) = delete;
         MessageControl& operator=(const MessageControl&) = delete;

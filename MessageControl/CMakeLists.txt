@@ -32,6 +32,7 @@ set(PLUGIN_MESSAGEGCONTROL_CONSOLE true CACHE STRING "Output to console (if runn
 set(PLUGIN_MESSAGEGCONTROL_SYSLOG true CACHE STRING "Output to syslog")
 set(PLUGIN_MESSAGEGCONTROL_FILENAME "messages.log" CACHE STRING "Filename in volatile path to store messages")
 set(PLUGIN_MESSAGEGCONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
+set(PLUGIN_MESSAGEGCONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
