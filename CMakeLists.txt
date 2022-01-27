@@ -19,8 +19,9 @@ cmake_minimum_required(VERSION 3.3)
 project(NanoServicesRDK)
 
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
-option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" ON)
+option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
 option(PLUGIN_LOCATIONSYNC "Include LocationSync plugin" OFF)
+option(PLUGIN_MESSAGE_CONTROL "Include MessageControl plugin" OFF)
 option(PLUGIN_MESSENGER "Include Messenger plugin" OFF)
 option(PLUGIN_MONITOR "Include Monitor plugin" OFF)
 option(PLUGIN_OPENCDMI "Include OpenCDMi plugin" OFF)
@@ -29,7 +30,6 @@ option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
 option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
 option(PLUGIN_WARNINGREPORTINGCONTROL "Include WarningReportingControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
-option(PLUGIN_MESSAGE_CONTROL "Include MessageControl plugin" ON)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
 
