@@ -1,0 +1,47 @@
+{
+    "$schema": "plugin.schema.json",
+    "info": {
+      "title": "MessageControl Plugin",
+      "callsign": "MessageControl",
+      "locator": "libWPEFrameworkMessageControl.so",
+      "status": "production",
+      "description": "The MessageControl plugin allows reading of the traces from WPEFramework, and controlling them tracing and logging. Allows for outputting logging messages to the websocket",
+      "version": "1.0"
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "console": {
+          "type": "boolean",
+          "description": "Output messages to the console"
+        },
+        "syslog": {
+          "type": "boolean",
+          "description": "Output messages to the syslog"
+        },
+        "filepath": {
+          "type": "string",
+          "description": "Path to file (inside VolatilePath), where messages can be stored"
+        },
+        "abbreviated": {
+          "type": "boolean",
+          "description": "Should the messages be abbreviated"
+        },
+        "maxexportconnections": {
+          "type": "number",
+          "description": "To how many websockets can messages be outputted"
+        }
+        
+      },
+      "required": [
+        "console",
+        "syslog",
+        "filepath",
+        "abbreviated",
+        "maxexportconnections"
+      ]
+    },
+    "interface": {
+      "$ref": "{interfacedir}/MessageControl.json#"
+    }
+  }
