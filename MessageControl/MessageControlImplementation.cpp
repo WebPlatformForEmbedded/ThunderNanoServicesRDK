@@ -35,13 +35,6 @@ namespace {
         Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
         return result;
     }
-
-    template <typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args)
-    {
-        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-    }
-
 }
 
 namespace Plugin {
@@ -76,7 +69,6 @@ namespace Plugin {
             MessageControlImplementation& _parent;
         };
 
-
     public:
         MessageControlImplementation()
             : _dispatcherIdentifier(DispatcherIdentifier())
@@ -97,18 +89,23 @@ namespace Plugin {
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
-        uint32_t Configure(bool isBackground, bool abbreviate, bool outputToConsole, bool outputToSysLog, const string& outputFileName) override
+        uint32_t Configure(bool isBackground, bool abbreviate, bool outputToConsole, bool outputToSysLog, const string& outputFileName, const string& binding, uint32_t port) override
         {
             uint32_t result = Core::ERROR_NONE;
 
             if ((!isBackground && !outputToConsole && !outputToSysLog) || (outputToConsole)) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::ConsoleOutput>(abbreviate));
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::ConsoleOutput>(abbreviate));
             }
             if ((isBackground && !outputToConsole && !outputToSysLog) || (outputToSysLog)) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::SyslogOutput>(abbreviate));
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::SyslogOutput>(abbreviate));
             }
             if (!outputFileName.empty()) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, make_unique<Messaging::FileOutput>(abbreviate, outputFileName));
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::FileOutput>(abbreviate, outputFileName));
+            }
+            if (!binding.empty() && port != 0) {
+                auto udpOutput = std::make_shared<Messaging::UDPOutput>(Core::NodeId(binding.c_str(), port));
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, udpOutput);
+                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::LOGGING, udpOutput);
             }
 
             _client.AddInstance(0);

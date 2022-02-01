@@ -165,8 +165,65 @@ namespace Messaging {
         _exportChannel.Submit(WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(jsondata));
     }
 
+    //UDPOutput
+    UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
+        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Core::Messaging::MessageUnit::DataSize, 0)
+        , _loaded(0)
+    {
+    }
+    UDPOutput::Channel::~Channel()
+    {
+        Close(Core::infinite);
+    }
+
+    uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
+    {
+        _adminLock.Lock();
+
+        uint16_t actualByteCount = _loaded > maxSendSize ? maxSendSize : _loaded;
+        memcpy(dataFrame, _sendBuffer, actualByteCount);
+        _loaded = 0;
+
+        _adminLock.Unlock();
+        return (actualByteCount);
+    }
+
+    //unused
+    uint16_t UDPOutput::Channel::ReceiveData(uint8_t*, const uint16_t)
+    {
+        return 0;
+    }
+    void UDPOutput::Channel::StateChange()
+    {
+    }
+
+    void UDPOutput::Channel::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    {
+        _adminLock.Lock();
+
+        uint16_t length = 0;
+        length += info.Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
+        length += message->Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
+        _loaded = length;
+
+        _adminLock.Unlock();
+
+        Trigger();
+    }
+
+    UDPOutput::UDPOutput(const Core::NodeId& nodeId)
+        : _output(nodeId)
+    {
+        _output.Open(0);
+    }
+
+    void UDPOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    {
+        _output.Output(info, message);
+    }
+
     //DIRECTOR
-    void MessageDirector::AddOutput(Core::Messaging::MetaData::MessageType type, std::unique_ptr<Messaging::IMessageOutput> output)
+    void MessageDirector::AddOutput(Core::Messaging::MetaData::MessageType type, std::shared_ptr<Messaging::IMessageOutput> output)
     {
         _outputs[type].push_back(std::move(output));
     }

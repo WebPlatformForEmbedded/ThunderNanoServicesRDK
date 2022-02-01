@@ -4,7 +4,7 @@
 
 **Version: 1.0**
 
-**Status: :black_circle::black_circle::black_circle:**
+**Status: :black_circle::white_circle::white_circle:**
 
 A MessageControl plugin for Thunder framework.
 
@@ -80,6 +80,9 @@ The table below lists configuration options of the plugin.
 | filepath | string | Path to file (inside VolatilePath), where messages can be stored |
 | abbreviated | boolean | Should the messages be abbreviated |
 | maxexportconnections | number | To how many websockets can messages be outputted |
+| remote | object | <sup>*(optional)*</sup>  |
+| remote?.port | number | <sup>*(optional)*</sup> Port |
+| remote?.bindig | bindig | <sup>*(optional)*</sup> Binding |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -115,7 +118,7 @@ Disables/enables all/select category messages for particular module.
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*, *Warning_reporting*) |
+| params?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*) |
 | params?.module | string | <sup>*(optional)*</sup> Module name |
 | params?.category | string | <sup>*(optional)*</sup> Category name |
 | params.state | string | State value (must be one of the following: *enabled*, *disabled*, *tristated*) |
@@ -168,7 +171,7 @@ Retrieves the actual trace status information for targeted module and category, 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params.type | string | Type of message (must be one of the following: *Tracing*, *Logging*, *Warning_reporting*) |
+| params.type | string | Type of message (must be one of the following: *Tracing*, *Logging*) |
 | params?.module | string | <sup>*(optional)*</sup> Module name |
 | params?.category | string | <sup>*(optional)*</sup> Category name |
 
@@ -180,11 +183,14 @@ Retrieves the actual trace status information for targeted module and category, 
 | result.console | boolean | Output message to console (config attribute) |
 | result.syslog | boolean | Output message to syslog (config attribute) |
 | result.fileNameOutput | string | Filepath where messages are stored |
-| result.maxexportconnections | number | To how many websocked should the messages be outputted |
 | result.abbreviated | boolean | Should messages be shortened |
+| result.maxexportconnections | number | To how many websocked should the messages be outputted |
+| result.remote | object |  |
+| result.remote.port | number | Config attribute (port) |
+| result.remote.binding | string | Config attribute (binding) |
 | result.messages | array | List of currently announced message controls |
 | result.messages[#] | object |  |
-| result.messages[#]?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*, *Warning_reporting*) |
+| result.messages[#]?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*) |
 | result.messages[#]?.module | string | <sup>*(optional)*</sup> Module name |
 | result.messages[#]?.category | string | <sup>*(optional)*</sup> Category name |
 | result.messages[#].state | string | State value (must be one of the following: *enabled*, *disabled*, *tristated*) |
@@ -211,8 +217,12 @@ Retrieves the actual trace status information for targeted module and category, 
         "console": true,
         "syslog": true,
         "fileNameOutput": "/tmp/MessageControl/messages.log",
-        "maxexportconnections": 5,
         "abbreviated": true,
+        "maxexportconnections": 5,
+        "remote":{
+            "binding":"0.0.0.0",
+            "port":2200
+        },
         "messages": [
             {
                 "type": "Tracing",
@@ -303,3 +313,4 @@ Retrieves the actual trace status information for targeted module and category, 
     }
 }
 ```
+

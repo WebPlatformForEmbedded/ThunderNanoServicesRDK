@@ -90,19 +90,30 @@ namespace Plugin {
 
         class Config : public Core::JSON::Container {
         private:
-            Config(const Config&);
-            Config& operator=(const Config&);
+            class NetworkNode : public Core::JSON::Container {
+            public:
+                NetworkNode();
+                NetworkNode(const NetworkNode& copy);
+                ~NetworkNode() = default;
+
+            public:
+                Core::JSON::DecUInt16 Port;
+                Core::JSON::String Binding;
+            };
 
         public:
             Config();
             ~Config() = default;
 
-        public:
+            Config(const Config&) = delete;
+            Config& operator=(const Config&) = delete;
+
             Core::JSON::Boolean Console;
             Core::JSON::Boolean SysLog;
             Core::JSON::String FileName;
             Core::JSON::Boolean Abbreviated;
             Core::JSON::DecUInt16 MaxExportConnections;
+            NetworkNode Remote;
         };
 
     public:

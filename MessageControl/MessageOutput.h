@@ -142,6 +142,40 @@ namespace Messaging {
         bool _paused;
     };
 
+    class UDPOutput : public IMessageOutput {
+    private:
+        class Channel : public Core::SocketDatagram {
+        public:
+            Channel(const Core::NodeId& nodeId);
+            ~Channel() override;
+            Channel(const Channel&) = delete;
+            Channel& operator=(const Channel&) = delete;
+
+            void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message);
+
+        private:
+            uint16_t SendData(uint8_t* dataFrame, const uint16_t maxSendSize) override;
+            //unused
+            uint16_t ReceiveData(uint8_t*, const uint16_t) override;
+            void StateChange() override;
+
+            uint8_t _sendBuffer[Core::Messaging::MessageUnit::DataSize];
+            uint16_t _loaded;
+            Core::CriticalSection _adminLock;
+        };
+
+    public:
+        UDPOutput(const Core::NodeId& nodeId);
+        ~UDPOutput() = default;
+        UDPOutput(const UDPOutput&) = delete;
+        UDPOutput& operator=(const UDPOutput&) = delete;
+
+        void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) override;
+
+    private:
+        Channel _output;
+    };
+
     class MessageDirector {
     public:
         MessageDirector() = default;
@@ -149,14 +183,14 @@ namespace Messaging {
         MessageDirector(const MessageDirector&) = delete;
         MessageDirector& operator=(const MessageDirector&) = delete;
 
-        void AddOutput(Core::Messaging::MetaData::MessageType type, std::unique_ptr<Messaging::IMessageOutput> output);
+        void AddOutput(Core::Messaging::MetaData::MessageType type, std::shared_ptr<Messaging::IMessageOutput> output);
         void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message);
 
         void RegisterRawMessageNotification(Exchange::IMessageControl::INotification* notification);
         void UnregisterRawMessageNotification(const Exchange::IMessageControl::INotification* notification);
 
     private:
-        using Outputs = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::unique_ptr<IMessageOutput>>>;
+        using Outputs = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::shared_ptr<IMessageOutput>>>;
         Outputs _outputs;
         std::list<Exchange::IMessageControl::INotification*> _notifications;
     };

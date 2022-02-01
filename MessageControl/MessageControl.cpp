@@ -306,6 +306,23 @@ namespace Plugin {
         }
     }
 
+    MessageControl::Config::NetworkNode::NetworkNode()
+        : Core::JSON::Container()
+        , Port(2200)
+        , Binding("0.0.0.0")
+    {
+        Add(_T("port"), &Port);
+        Add(_T("binding"), &Binding);
+    }
+    MessageControl::Config::NetworkNode::NetworkNode(const NetworkNode& copy)
+        : Core::JSON::Container()
+        , Port(copy.Port)
+        , Binding(copy.Binding)
+    {
+        Add(_T("port"), &Port);
+        Add(_T("binding"), &Binding);
+    }
+
     MessageControl::Config::Config()
         : Core::JSON::Container()
         , Console(true)
@@ -313,12 +330,14 @@ namespace Plugin {
         , FileName()
         , Abbreviated(true)
         , MaxExportConnections(1)
+        , Remote()
     {
         Add(_T("console"), &Console);
         Add(_T("syslog"), &SysLog);
         Add(_T("filepath"), &FileName);
         Add(_T("abbreviated"), &Abbreviated);
         Add(_T("maxexportconnections"), &MaxExportConnections);
+        Add(_T("remote"), &Remote);
     }
 
     MessageControl::MessageControl()
@@ -353,7 +372,14 @@ namespace Plugin {
             message = _T("MessageControl plugin could not be instantiated.");
 
         } else {
-            if (_control->Configure(service->Background(), config.Abbreviated.Value(), config.Console.Value(), config.SysLog.Value(), _fullOutputFilePath) != Core::ERROR_NONE) {
+            if (_control->Configure(service->Background(),
+                    config.Abbreviated.Value(),
+                    config.Console.Value(),
+                    config.SysLog.Value(),
+                    _fullOutputFilePath,
+                    config.Remote.IsSet() ? config.Remote.Binding.Value() : _T(""),
+                    config.Remote.IsSet() ? config.Remote.Port.Value() : 0)
+                != Core::ERROR_NONE) {
                 message = _T("MessageControl plugin could not be instantiated.");
             } else {
                 service->Register(&_observer);

@@ -78,6 +78,10 @@ namespace Plugin {
             response.FileNameOutput = _fullOutputFilePath;
             response.Abbreviated = _config.Abbreviated.Value();
             response.Maxexportconnections = _maxExportConnections;
+            if (_config.Remote.IsSet()) {
+                response.Remote.Binding = _config.Remote.Binding.Value();
+                response.Remote.Port = _config.Remote.Port.Value();
+            }
         }
 
         while (_control->ActiveMessages(initialize, type, module, category, enabled) == Core::ERROR_NONE) {
