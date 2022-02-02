@@ -276,7 +276,7 @@ namespace Plugin {
     string DeviceInfo::GetDeviceId() const
     {
         string deviceId;
-        const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
+        const PluginHost::ISubSystem::IIdentifier* identifier(_subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
         if (identifier != nullptr) {
             uint8_t buffer[64];
 
