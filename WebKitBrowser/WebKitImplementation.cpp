@@ -1377,18 +1377,24 @@ static GSourceFuncs _handlerIntervention =
         uint32_t Identifier(string& id) const override
         {
 
-            const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
-            if (identifier != nullptr) {
-                uint8_t buffer[64];
+            uint32_t status = Core::ERROR_UNAVAILABLE;
+            PluginHost::ISubSystem* subSystem = _service->SubSystems();
+            if (subSystem) {
+                const PluginHost::ISubSystem::IIdentifier* identifier(subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
+                if (identifier != nullptr) {
+                    uint8_t buffer[64];
 
-                buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
-                            ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
+                    buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
+                                ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
 
-                if (buffer[0] != 0) {
-                    id = Core::SystemInfo::Instance().Id(buffer, ~0);
+                    if (buffer[0] != 0) {
+                        id = Core::SystemInfo::Instance().Id(buffer, ~0);
+                    }
+
+                    identifier->Release();
                 }
 
-                identifier->Release();
+                subSystem->Release();
             }
 
             return Core::ERROR_NONE;
