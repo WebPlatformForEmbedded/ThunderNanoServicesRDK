@@ -109,7 +109,7 @@ namespace Plugin {
 
         public:
             ExternalAccess(
-                const Core::NodeId& source, 
+                const Core::NodeId& source,
                 Exchange::IAccessorOCDM* parentInterface,
                 const string& proxyStubPath,
                 const Core::ProxyType<RPC::InvokeServer> & engine)
@@ -285,7 +285,7 @@ namespace Plugin {
                                 uint8_t *payloadBuffer = Buffer();
                                 CDMi::EncryptionPattern pattern = {0};
                                 EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
-                                
+
                                 int cr = 0;
                                 REPORT_DURATION_WARNING(
                                     {
@@ -752,13 +752,13 @@ namespace Plugin {
 
                      // OKe we got a buffer machanism to transfer the raw data, now create
                      // the session.
-                     if (system->CreateMediaKeySession(keySystem, licenseType, 
-                                        initDataType.c_str(), initData, initDataLength, 
+                     if (system->CreateMediaKeySession(keySystem, licenseType,
+                                        initDataType.c_str(), initData, initDataLength,
                                         CDMData, CDMDataLength, &sessionInterface) == 0)
                      {
                          if (sessionInterface != nullptr)
                          {
-                                 SessionImplementation *newEntry = 
+                                 SessionImplementation *newEntry =
                                     Core::Service<SessionImplementation>::Create<SessionImplementation>(this,
                                                  keySystem, sessionInterface,
                                                 callback, &keyIds);
@@ -769,7 +769,7 @@ namespace Plugin {
                                  _adminLock.Lock();
 
                                  _sessionList.push_front(newEntry);
-                                
+
                                 if(false == keyIds.IsEmpty())
                                 {
                                     CommonEncryptionData::Iterator index(keyIds.Keys());
@@ -1092,14 +1092,47 @@ namespace Plugin {
             Core::JSON::ArrayType<Systems> KeySystems;
         };
 
+            class AsyncInitThread {
+                public:
+                AsyncInitThread(OCDMImplementation& parent)
+                    : _parent(parent)
+                    , _worker(*this)
+                {
+                }
+                ~AsyncInitThread() {
+                }
+
+                void Start()
+                {
+                    _worker.Submit();
+                }
+
+                AsyncInitThread(const AsyncInitThread&) = delete;
+                AsyncInitThread& operator=(const AsyncInitThread&) = delete;
+
+                private:
+                void Dispatch()
+                {
+                    SYSLOG(Logging::Notification, (_T("OCDM Initializing async")));
+                    _parent.InitializeAsync();
+                }
+
+                private:
+                OCDMImplementation& _parent;
+                friend Core::ThreadPool::JobType<AsyncInitThread&>;
+                Core::WorkerPool::JobType<AsyncInitThread&> _worker;
+            };
+
     public:
         OCDMImplementation()
             : _entryPoint(nullptr)
             , _engine()
             , _service(nullptr)
+            , _shell(nullptr)
             , _compliant(false)
             , _systemToFactory()
             , _systemLibraries()
+            , _thread(*this)
         {
             TRACE(Trace::Information, (_T("Constructing OCDMImplementation Service: %p"), this));
         }
@@ -1124,18 +1157,30 @@ namespace Plugin {
     public:
         uint32_t Initialize(PluginHost::IShell* service) override
         {
+            uint32_t result = Core::ERROR_NONE;
+
+            _shell = service;
+
+            _shell->AddRef();
+            _thread.Start();
+
+            return (result);
+        }
+
+
+        uint32_t InitializeAsync()
+        {
             uint32_t result = Core::ERROR_OPENING_FAILED;
 
             // On activation subscribe, on deactivation un-subscribe
-            PluginHost::ISubSystem* subSystem = service->SubSystems();
-
+            PluginHost::ISubSystem* subSystem = _shell->SubSystems();
             ASSERT(subSystem != nullptr);
 
             // Start loading the configured factories
             Config config;
-            config.FromString(service->ConfigLine());
+            config.FromString(_shell->ConfigLine());
 
-            const string locator(service->DataPath() + config.Location.Value());
+            const string locator(_shell->DataPath() + config.Location.Value());
 
             // Before we start loading the mapping of the Keys to the factories, load the factories :-)
             Core::Directory entry(locator.c_str(), _T("*.drm"));
@@ -1191,7 +1236,7 @@ namespace Plugin {
                     //now handle the configuration
                     if (factory != factories.end()) {
                         const string configuration(index.Current().Configuration.Value());
-                        factory->second.Factory->Initialize(service, configuration);
+                        factory->second.Factory->Initialize(_shell, configuration);
                     }
                 }
 
@@ -1210,7 +1255,7 @@ namespace Plugin {
 
             _entryPoint = Core::Service<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
-            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, service->ProxyStubPath(), _engine);
+            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
             if (_service != nullptr) {
 
@@ -1234,8 +1279,12 @@ namespace Plugin {
                     }
                 }
             }
+
+            _shell->Release();
+
             return (result);
         }
+
         void Deinitialize(PluginHost::IShell* service) override {
             std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
 
@@ -1244,12 +1293,12 @@ namespace Plugin {
             while (factory != _systemToFactory.end()) {
                 std::list<CDMi::ISystemFactory*>::iterator index(std::find(deinitialized.begin(), deinitialized.end(), factory->second.Factory));
 
-                if(index == deinitialized.end()){ 
+                if(index == deinitialized.end()){
                     TRACE(Trace::Information, (_T("Deinitializing factory(%p) for key system %s"), factory->second.Factory, factory->second.Factory->KeySystem()));
                     factory->second.Factory->Deinitialize(service);
                     deinitialized.push_back(factory->second.Factory);
                 }
-                
+
                 factory++;
             }
         }
@@ -1405,12 +1454,14 @@ namespace Plugin {
         Exchange::IAccessorOCDM* _entryPoint;
         Core::ProxyType<RPC::InvokeServer> _engine;
         ExternalAccess* _service;
+        PluginHost::IShell* _shell;
         bool _compliant;
         std::map<const std::string, SystemFactory> _systemToFactory;
         Blacklist _systemBlacklistedCodecRegexps;
         Blacklist _systemBlacklistedMediaTypeRegexps;
         std::list<Core::Library> _systemLibraries;
         std::list<string> _keySystems;
+        AsyncInitThread _thread;
     };
 
     SERVICE_REGISTRATION(OCDMImplementation, 1, 0);
