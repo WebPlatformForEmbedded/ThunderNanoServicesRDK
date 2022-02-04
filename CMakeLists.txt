@@ -27,6 +27,7 @@ option(PLUGIN_MONITOR "Include Monitor plugin" OFF)
 option(PLUGIN_OPENCDMI "Include OpenCDMi plugin" OFF)
 option(PLUGIN_PACKAGER "Include Packager plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
+option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
 option(PLUGIN_WARNINGREPORTINGCONTROL "Include WarningReportingControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
@@ -68,6 +69,10 @@ if(PLUGIN_SECURITYAGENT)
     add_subdirectory(SecurityAgent)
 endif()
 
+if(PLUGIN_TRACECONTROL)
+    add_subdirectory(TraceControl)
+endif()
+
 if(PLUGIN_WARNINGREPORTINGCONTROL)
     add_subdirectory(WarningReportingControl)
 endif()
@@ -76,4 +81,6 @@ if(PLUGIN_WEBKITBROWSER)
     add_subdirectory(WebKitBrowser)
 endif()
 
-
+if(PLUGIN_MESSAGE_CONTROL)
+    add_subdirectory(MessageControl)
+endif()
