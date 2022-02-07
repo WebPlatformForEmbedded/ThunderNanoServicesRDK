@@ -26,12 +26,18 @@ namespace WPEFramework {
 namespace Plugin {
 
     class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier {
+    private:
+        static constexpr const TCHAR* SerialInfoPath = "/sys/firmware/devicetree/base/serial-number";
+
     public:
         DeviceImplementation()
+            : _firmwareVersion()
+            , _identifier()
         {
             bcm_host_init();
 
             UpdateFirmwareVersion(_firmwareVersion);
+            UpdateDeviceIdentifier(_identifier);
         }
 
         DeviceImplementation(const DeviceImplementation&) = delete;
@@ -43,9 +49,14 @@ namespace Plugin {
 
     public:
         // IIdentifier interface
-        uint8_t Identifier(const uint8_t, uint8_t*) const override
+        uint8_t Identifier(const uint8_t length, uint8_t* buffer) const override
         {
-            return 0;
+            uint8_t ret = 0;
+            if (_identifier.length()) {
+                ret = (_identifier.length() > length ? length : _identifier.length());
+                ::memcpy(buffer, _identifier.c_str(), ret);
+            }
+            return ret;
         }
         string Architecture() const override
         {
@@ -79,7 +90,16 @@ namespace Plugin {
                 }
             }
         }
-
+        inline void UpdateDeviceIdentifier(string& identifier) const
+        {
+            WPEFramework::Core::File serialFile(SerialInfoPath);
+            if (serialFile.Open(true) == true) {
+                uint8_t serialInfo[serialFile.Size()];
+                uint32_t size = serialFile.Read(serialInfo, static_cast<uint32_t>(sizeof(serialInfo)));
+                identifier.assign(reinterpret_cast<char*>(serialInfo), size);
+                identifier.erase(0, identifier.find_first_not_of('0'));
+            }
+        }
         void Command(const char request[], string& value) const
         {
             char buffer[512];
@@ -107,6 +127,7 @@ namespace Plugin {
 
     private:
         string _firmwareVersion;
+        string _identifier;
     };
 
     SERVICE_REGISTRATION(DeviceImplementation, 1, 0);

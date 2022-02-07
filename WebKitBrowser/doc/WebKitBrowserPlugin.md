@@ -1,18 +1,19 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.WebKit_Browser_Plugin"></a>
-# WebKit Browser Plugin
+<a name="head.WebKitBrowser_Plugin"></a>
+# WebKitBrowser Plugin
 
 **Version: 1.0**
 
 **Status: :black_circle::black_circle::black_circle:**
 
-WebKitBrowser plugin for Thunder framework.
+A WebKitBrowser plugin for Thunder framework.
 
 ### Table of Contents
 
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
+- [Interfaces](#head.Interfaces)
 - [Methods](#head.Methods)
 - [Properties](#head.Properties)
 - [Notifications](#head.Notifications)
@@ -61,7 +62,7 @@ The table below provides and overview of terms and abbreviations used in this do
 <a name="head.Description"></a>
 # Description
 
-The WebKitBrowser plugin provides web browsing functionality based on the WebKit engine.
+The `WebKitBrowser` plugin provides web browsing functionality based on the WebKit engine.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
@@ -93,37 +94,133 @@ The table below lists configuration options of the plugin.
 | configuration?.secure | boolean | <sup>*(optional)*</sup> If false, every domain can access any other domain, otherwise fill in fields in whitelist definition table |
 | configuration?.whitelist | object | <sup>*(optional)*</sup>  |
 | configuration?.whitelist?.origin | string | <sup>*(optional)*</sup> Origin domain allowed to access domains in domain |
-| configuration?.whitelist?.domain | array | <sup>*(optional)*</sup>  |
-| configuration?.whitelist?.domain[#] | string | <sup>*(optional)*</sup> Domain allowed to access from origin |
+| configuration?.whitelist?.domain | array | <sup>*(optional)*</sup> Domain allowed to access from origin |
+| configuration?.whitelist?.domain[#] | string | <sup>*(optional)*</sup>  |
 | configuration?.whitelist?.subdomain | string | <sup>*(optional)*</sup> whether it is also OK to access subdomains of domains listed in domain |
 | configuration?.localstorageenabled | boolean | <sup>*(optional)*</sup> Controls the local storage availability |
-| configuration?.logtosystemconsoleenabled | boolean | <sup>*(optional)*</sup> Enable page logging to system console (stderr) |
+| configuration?.logtosystemconsoleenabled | boolean | <sup>*(optional)*</sup> Enable page loging to system console (stderr) |
 | configuration?.watchdogchecktimeoutinseconds | number | <sup>*(optional)*</sup> How often to check main event loop for responsiveness (0 - disable) |
 | configuration?.watchdoghangthresholdtinseconds | number | <sup>*(optional)*</sup> The amount of time to give a process to recover before declaring a hang state |
 | configuration?.loadblankpageonsuspendenabled | boolean | <sup>*(optional)*</sup> Load 'about:blank' before suspending the page |
+
+<a name="head.Interfaces"></a>
+# Interfaces
+
+This plugin implements the following interfaces:
+
+- [WebKitBrowser.json](https://github.com/rdkcentral/ThunderInterfaces/tree/master/interfaces/WebKitBrowser.json)
 
 <a name="head.Methods"></a>
 # Methods
 
 The following methods are provided by the WebKitBrowser plugin:
 
-WebBrowser interface methods:
-
-| Method | Description |
-| :-------- | :-------- |
-| [collectgarbage](#method.collectgarbage) | Initiate garbage collection |
-
 WebKitBrowser interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [delete](#method.delete) | Removes contents of a directory from the persistent storage |
+| [bridgeevent](#method.bridgeevent) | Sends a legacy `$badger` event |
+| [bridgereply](#method.bridgereply) | A response for legacy `$badger` |
+| [collectgarbage](#method.collectgarbage) | Initiate garbage collection |
+| [delete](#method.delete) | Removes the contents of a directory recursively from the persistent storage |
 
+
+<a name="method.bridgeevent"></a>
+## *bridgeevent [<sup>method</sup>](#head.Methods)*
+
+Sends a legacy `$badger` event.
+
+### Events
+
+ No Events.
+
+### Parameters
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| params | string | A base64 encoded JSON string response to be delivered to the `window.$badger.event(handlerId, json)` method |
+
+### Result
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| result | null | Always null |
+
+### Example
+
+#### Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.bridgeevent",
+    "params": "..."
+}
+```
+
+#### Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": null
+}
+```
+
+<a name="method.bridgereply"></a>
+## *bridgereply [<sup>method</sup>](#head.Methods)*
+
+A response for legacy `$badger`.
+
+### Events
+
+ No Events.
+
+### Parameters
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| params | string | A base64 encoded JSON string response to be delivered to the `$badger.callback(pid, success, json)` method |
+
+### Result
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| result | null | Always null |
+
+### Example
+
+#### Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.bridgereply",
+    "params": "..."
+}
+```
+
+#### Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": null
+}
+```
 
 <a name="method.collectgarbage"></a>
 ## *collectgarbage <sup>method</sup>*
 
 Initiate garbage collection.
+
+### Events
+
+ No Events.
 
 ### Parameters
 
@@ -142,7 +239,7 @@ This method takes no parameters.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.collectgarbage"
 }
 ```
@@ -152,26 +249,26 @@ This method takes no parameters.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "result": null
 }
 ```
 
 <a name="method.delete"></a>
-## *delete <sup>method</sup>*
+## *delete [<sup>method</sup>](#head.Methods)*
 
-Removes contents of a directory from the persistent storage.
+Removes the contents of a directory recursively from the persistent storage.
 
-### Description
+### Events
 
-Use this method to recursively delete contents of a directory
+ No Events.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params.path | string | Path to directory (within the persistent storage) to delete contents of |
+| params.path | string | Path to directory (within the persistent storage) from which to delete contents |
 
 ### Result
 
@@ -192,7 +289,7 @@ Use this method to recursively delete contents of a directory
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.delete",
     "params": {
         "path": ".cache/wpe/disk-cache"
@@ -205,7 +302,7 @@ Use this method to recursively delete contents of a directory
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "result": null
 }
 ```
@@ -215,145 +312,25 @@ Use this method to recursively delete contents of a directory
 
 The following properties are provided by the WebKitBrowser plugin:
 
-WebBrowser interface properties:
-
-| Property | Description |
-| :-------- | :-------- |
-| [url](#property.url) | Page loaded in the browser |
-| [visibility](#property.visibility) | Browser window visibility state |
-| [fps](#property.fps) <sup>RO</sup> | Current framerate the browser is rendering at |
-| [useragent](#property.useragent) | UserAgent string used by the browser |
-| [localstorageenabled](#property.localstorageenabled) | Controls the local storage availability |
-| [httpcookieacceptpolicy](#property.httpcookieacceptpolicy) | HTTP cookies accept policy |
-| [bridgereply](#property.bridgereply) <sup>WO</sup> | Response for legacy $badger |
-| [bridgeevent](#property.bridgeevent) <sup>WO</sup> | Send legacy $badger event |
-
 WebKitBrowser interface properties:
 
 | Property | Description |
 | :-------- | :-------- |
-| [languages](#property.languages) | User preferred languages |
+| [fps](#property.fps) <sup>RO</sup> | Current number of frames-per-second the browser is rendering |
 | [headers](#property.headers) | Headers to send on all requests that the browser makes |
-
-StateControl interface properties:
-
-| Property | Description |
-| :-------- | :-------- |
+| [httpcookieacceptpolicy](#property.httpcookieacceptpolicy) | HTTP cookies accept policy |
+| [languages](#property.languages) | User preferred languages |
+| [localstorageenabled](#property.localstorageenabled) | Local storage availability |
 | [state](#property.state) | Running state of the service |
+| [url](#property.url) | URL loaded in the browser |
+| [useragent](#property.useragent) | `UserAgent` string used by the browser |
+| [visibility](#property.visibility) | Current browser visibility |
 
-
-<a name="property.url"></a>
-## *url <sup>property</sup>*
-
-Provides access to the page loaded in the browser.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | Loaded URL |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.url"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "https://example.com"
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.url",
-    "params": "https://example.com"
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.visibility"></a>
-## *visibility <sup>property</sup>*
-
-Provides access to the browser window visibility state.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | Visiblity state (must be one of the following: *Hidden*, *Visible*) |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.visibility"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "Hidden"
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.visibility",
-    "params": "Hidden"
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
 
 <a name="property.fps"></a>
-## *fps <sup>property</sup>*
+## *fps [<sup>property</sup>](#head.Properties)*
 
-Provides access to the current framerate the browser is rendering at.
+Provides access to the current number of frames-per-second the browser is rendering.
 
 > This property is **read-only**.
 
@@ -361,7 +338,7 @@ Provides access to the current framerate the browser is rendering at.
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| (property) | integer | Current FPS |
+| (property) | number | Current number of frames-per-second the browser is rendering |
 
 ### Example
 
@@ -370,7 +347,7 @@ Provides access to the current framerate the browser is rendering at.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.fps"
 }
 ```
@@ -380,308 +357,23 @@ Provides access to the current framerate the browser is rendering at.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": 0
-}
-```
-
-<a name="property.useragent"></a>
-## *useragent <sup>property</sup>*
-
-Provides access to the userAgent string used by the browser.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | UserAgent value |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.useragent"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "Mozilla/5.0 (Linux; x86_64 GNU/Linux) AppleWebKit/601.1 (KHTML, like Gecko) Version/8.0 Safari/601.1 WP"
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.useragent",
-    "params": "Mozilla/5.0 (Linux; x86_64 GNU/Linux) AppleWebKit/601.1 (KHTML, like Gecko) Version/8.0 Safari/601.1 WP"
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.localstorageenabled"></a>
-## *localstorageenabled <sup>property</sup>*
-
-Provides access to the controls the local storage availability.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | boolean | Controls the local storage availability |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.localstorageenabled"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": false
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.localstorageenabled",
-    "params": false
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.httpcookieacceptpolicy"></a>
-## *httpcookieacceptpolicy <sup>property</sup>*
-
-Provides access to the HTTP cookies accept policy.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | HTTP Cookie Accept Policy Type (must be one of the following: *Always*, *Never*, *OnlyFromMainDocumentDomain*, *ExclusivelyFromMainDocumentDomain*) |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.httpcookieacceptpolicy"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "always"
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.httpcookieacceptpolicy",
-    "params": "always"
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.bridgereply"></a>
-## *bridgereply <sup>property</sup>*
-
-Provides access to the response for legacy $badger.
-
-> This property is **write-only**.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | base64 encoded JSON string response to be delivered to $badger.callback |
-
-### Example
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.bridgereply",
-    "params": ""
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.bridgeevent"></a>
-## *bridgeevent <sup>property</sup>*
-
-Provides access to the send legacy $badger event.
-
-> This property is **write-only**.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | base64 encoded JSON string response to be delivered to window.$badger.event |
-
-### Example
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.bridgeevent",
-    "params": ""
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
-}
-```
-
-<a name="property.languages"></a>
-## *languages <sup>property</sup>*
-
-Provides access to the user preferred languages.
-
-### Value
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | array | User preferred languages |
-| (property)[#] | string |  |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.languages"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": [
-        "en-US"
-    ]
-}
-```
-
-#### Set Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "WebKitBrowser.1.languages",
-    "params": [
-        "en-US"
-    ]
-}
-```
-
-#### Set Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": "null"
+    "id": 42,
+    "result": 30
 }
 ```
 
 <a name="property.headers"></a>
-## *headers <sup>property</sup>*
+## *headers [<sup>property</sup>](#head.Properties)*
 
 Provides access to the headers to send on all requests that the browser makes.
+
+### Description
+
+Use this property to send on all requests that the browser makes.
+
+### Events
+
+ No Events.
 
 ### Value
 
@@ -689,8 +381,8 @@ Provides access to the headers to send on all requests that the browser makes.
 | :-------- | :-------- | :-------- |
 | (property) | array | Headers to send on all requests that the browser makes |
 | (property)[#] | object |  |
-| (property)[#]?.name | string | <sup>*(optional)*</sup> Header name |
-| (property)[#]?.value | string | <sup>*(optional)*</sup> Header value |
+| (property)[#]?.name | string | <sup>*(optional)*</sup> The header name |
+| (property)[#]?.value | string | <sup>*(optional)*</sup> The header value |
 
 ### Example
 
@@ -699,7 +391,7 @@ Provides access to the headers to send on all requests that the browser makes.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.headers"
 }
 ```
@@ -709,7 +401,7 @@ Provides access to the headers to send on all requests that the browser makes.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "result": [
         {
             "name": "X-Forwarded-For",
@@ -724,7 +416,7 @@ Provides access to the headers to send on all requests that the browser makes.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.headers",
     "params": [
         {
@@ -740,15 +432,221 @@ Provides access to the headers to send on all requests that the browser makes.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.httpcookieacceptpolicy"></a>
+## *httpcookieacceptpolicy [<sup>property</sup>](#head.Properties)*
+
+Provides access to the HTTP cookies accept policy.
+
+### Description
+
+Use this property to accept HTTP cookie policy.
+
+### Events
+
+ No Events.
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | string | HTTP cookies accept policy (must be one of the following: *always*, *never*, *onlyfrommaindocumentdomain*, *exclusivelyfrommaindocumentdomain*) |
+
+### Errors
+
+| Code | Message | Description |
+| :-------- | :-------- | :-------- |
+| 22 | ```ERROR_UNKNOWN_KEY``` | Unknown policy |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.httpcookieacceptpolicy"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "always"
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.httpcookieacceptpolicy",
+    "params": "always"
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.languages"></a>
+## *languages [<sup>property</sup>](#head.Properties)*
+
+Provides access to the user preferred languages.
+
+### Description
+
+Use this property to return User preferred languages.
+
+### Events
+
+ No Events.
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | array | User preferred languages |
+| (property)[#] | string |  |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.languages"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": [
+        "en-US"
+    ]
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.languages",
+    "params": [
+        "en-US"
+    ]
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.localstorageenabled"></a>
+## *localstorageenabled [<sup>property</sup>](#head.Properties)*
+
+Provides access to the local storage availability.
+
+### Description
+
+Use this property to return Local storage availability.
+
+### Events
+
+ No Events.
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | boolean | Local storage availability |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.localstorageenabled"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": false
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.localstorageenabled",
+    "params": false
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
     "result": "null"
 }
 ```
 
 <a name="property.state"></a>
-## *state <sup>property</sup>*
+## *state [<sup>property</sup>](#head.Properties)*
 
 Provides access to the running state of the service.
+
+### Description
+
+Use this property to return the running state of the service.
+
+### Events
+| Event | Description | 
+| :----------- | :----------- |
+| `statechange`| Triggered if the state of the service changes.|
 
 Also see: [statechange](#event.statechange)
 
@@ -765,7 +663,7 @@ Also see: [statechange](#event.statechange)
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.state"
 }
 ```
@@ -775,7 +673,7 @@ Also see: [statechange](#event.statechange)
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "result": "resumed"
 }
 ```
@@ -785,7 +683,7 @@ Also see: [statechange](#event.statechange)
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
     "method": "WebKitBrowser.1.state",
     "params": "resumed"
 }
@@ -796,7 +694,213 @@ Also see: [statechange](#event.statechange)
 ```json
 {
     "jsonrpc": "2.0",
-    "id": 1234567890,
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.url"></a>
+## *url [<sup>property</sup>](#head.Properties)*
+
+Provides access to the URL loaded in the browser.
+
+### Description
+
+Use this property to load URL in the browser.
+
+### Events
+| Event | Description |
+| :----------- | :----------- |
+| `urlchange`| Triggered if the URL changes in the browser |
+ |`loadfinished`| Triggered if the `urlchange` event returns `true` as URL loaded successfully |
+ |`loadfailed`| Triggered if the `urlchange` event returns `false` as URL failed to load |
+
+Also see: [urlchange](#event.urlchange)
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | string | URL loaded in the browser |
+
+### Errors
+
+| Code | Message | Description |
+| :-------- | :-------- | :-------- |
+| 15 | ```ERROR_INCORRECT_URL``` | Incorrect URL given |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.url"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "https://www.google.com"
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.url",
+    "params": "https://www.google.com"
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.useragent"></a>
+## *useragent [<sup>property</sup>](#head.Properties)*
+
+Provides access to the `UserAgent` string used by the browser.
+
+### Description
+
+Use this property to return `UserAgent` string used by the browser.
+
+### Events
+
+ No Events.
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | string | `UserAgent` string used by the browser |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.useragent"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "Mozilla/5.0 (Linux; x86_64 GNU/Linux) AppleWebKit/601.1 (KHTML, like Gecko) Version/8.0 Safari/601.1 WP"
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.useragent",
+    "params": "Mozilla/5.0 (Linux; x86_64 GNU/Linux) AppleWebKit/601.1 (KHTML, like Gecko) Version/8.0 Safari/601.1 WP"
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.visibility"></a>
+## *visibility [<sup>property</sup>](#head.Properties)*
+
+Provides access to the current browser visibility.
+
+### Description
+
+Use this property to return visibilty status of current browser.
+
+### Events
+| Event | Description |
+| :----------- | :----------- |
+| `visibilitychange`| Triggered if the browser visibility changes.|
+
+Also see: [visibilitychange](#event.visibilitychange)
+
+### Value
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| (property) | string | Current browser visibility |
+
+### Errors
+
+| Code | Message | Description |
+| :-------- | :-------- | :-------- |
+| 2 | ```ERROR_UNAVAILABLE``` | Returned when the operation is unavailable |
+
+### Example
+
+#### Get Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.visibility"
+}
+```
+
+#### Get Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "visible"
+}
+```
+
+#### Set Request
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "method": "WebKitBrowser.1.visibility",
+    "params": "visible"
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
     "result": "null"
 }
 ```
@@ -808,40 +912,75 @@ Notifications are autonomous events, triggered by the internals of the implement
 
 The following events are provided by the WebKitBrowser plugin:
 
-WebBrowser interface events:
-
-| Event | Description |
-| :-------- | :-------- |
-| [loadfinished](#event.loadfinished) | Initial HTML document has been completely loaded and parsed |
-| [loadfailed](#event.loadfailed) | Browser failed to load page |
-| [urlchange](#event.urlchange) | Signals a URL change in the browser |
-| [visibilitychange](#event.visibilitychange) | Signals a visibility change of the browser |
-| [pageclosure](#event.pageclosure) | Notifies that the web page requests to close its window |
-
 WebKitBrowser interface events:
 
 | Event | Description |
 | :-------- | :-------- |
-| [bridgequery](#event.bridgequery) | A Base64 encoded JSON message from legacy $badger bridge |
+| [bridgequery](#event.bridgequery) | A Base64 encoded JSON message from legacy `$badger` bridge |
+| [loadfailed](#event.loadfailed) | Triggered when the browser fails to load a page |
+| [loadfinished](#event.loadfinished) | Triggered when the initial HTML document has been completely loaded and parsed |
+| [pageclosure](#event.pageclosure) | Triggered when the web page requests to close its window |
+| [statechange](#event.statechange) | Triggered when the state of the service changes |
+| [urlchange](#event.urlchange) | Triggered when the URL changes in the browser |
+| [visibilitychange](#event.visibilitychange) | Triggered when the browser visibility changes |
 
-StateControl interface events:
 
-| Event | Description |
-| :-------- | :-------- |
-| [statechange](#event.statechange) | Signals a state change of the service |
+<a name="event.bridgequery"></a>
+## *bridgequery [<sup>event</sup>](#head.Notifications)*
 
+A Base64 encoded JSON message from legacy `$badger` bridge.
 
-<a name="event.loadfinished"></a>
-## *loadfinished <sup>event</sup>*
+### Parameters
 
-Initial HTML document has been completely loaded and parsed.
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| params | string |  |
+
+### Example
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "client.events.1.bridgequery",
+    "params": "..."
+}
+```
+
+<a name="event.loadfailed"></a>
+## *loadfailed [<sup>event</sup>](#head.Notifications)*
+
+Triggered when the browser fails to load a page.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params.url | string | The URL that has been loaded |
+| params.url | string | The URL |
+
+### Example
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "client.events.1.loadfailed",
+    "params": {
+        "url": "https://example.com"
+    }
+}
+```
+
+<a name="event.loadfinished"></a>
+## *loadfinished [<sup>event</sup>](#head.Notifications)*
+
+Triggered when the initial HTML document has been completely loaded and parsed.
+
+### Parameters
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| params | object |  |
+| params.url | string | The URL |
 | params.httpstatus | integer | The response code of main resource request |
 
 ### Example
@@ -857,42 +996,60 @@ Initial HTML document has been completely loaded and parsed.
 }
 ```
 
-<a name="event.loadfailed"></a>
-## *loadfailed <sup>event</sup>*
+<a name="event.pageclosure"></a>
+## *pageclosure [<sup>event</sup>](#head.Notifications)*
 
-Browser failed to load page.
+Triggered when the web page requests to close its window.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.url | string | The URL that has been failed to load |
+This event carries no parameters.
 
 ### Example
 
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "client.events.1.loadfailed",
-    "params": {
-        "url": "https://example.com"
-    }
+    "method": "client.events.1.pageclosure"
 }
 ```
 
-<a name="event.urlchange"></a>
-## *urlchange <sup>event</sup>*
+<a name="event.statechange"></a>
+## *statechange [<sup>event</sup>](#head.Notifications)*
 
-Signals a URL change in the browser.
+Triggered when the state of the service changes.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params.url | string | The URL that has been loaded or requested |
-| params.loaded | boolean | loaded (true) or not (false) |
+| params.suspended | boolean | `true` if the service has entered a suspended state  or `false` if the service has entered a resumed state |
+
+### Example
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "client.events.1.statechange",
+    "params": {
+        "suspended": false
+    }
+}
+```
+
+<a name="event.urlchange"></a>
+## *urlchange [<sup>event</sup>](#head.Notifications)*
+
+Triggered when the URL changes in the browser.
+
+### Parameters
+
+| Name | Type | Description |
+| :-------- | :-------- | :-------- |
+| params | object |  |
+| params.url | string | The URL |
+| params.loaded | boolean | `true` if the URL has been loaded or `false` if the URL change has been requested |
 
 ### Example
 
@@ -908,16 +1065,16 @@ Signals a URL change in the browser.
 ```
 
 <a name="event.visibilitychange"></a>
-## *visibilitychange <sup>event</sup>*
+## *visibilitychange [<sup>event</sup>](#head.Notifications)*
 
-Signals a visibility change of the browser.
+Triggered when the browser visibility changes.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params.hidden | boolean | hidden (true) or visible (false) |
+| params.hidden | boolean | `true` if the browser has been hidden or `false` if the browser is made visible |
 
 ### Example
 
@@ -927,71 +1084,6 @@ Signals a visibility change of the browser.
     "method": "client.events.1.visibilitychange",
     "params": {
         "hidden": false
-    }
-}
-```
-
-<a name="event.pageclosure"></a>
-## *pageclosure <sup>event</sup>*
-
-Notifies that the web page requests to close its window.
-
-### Parameters
-
-This event carries no parameters.
-
-### Example
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "client.events.1.pageclosure"
-}
-```
-
-<a name="event.bridgequery"></a>
-## *bridgequery <sup>event</sup>*
-
-A Base64 encoded JSON message from legacy $badger bridge.
-
-> This API is **obsolete**. It is no longer recommended for use in new implementations.
-
-### Parameters
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | string |  |
-
-### Example
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "client.events.1.bridgequery",
-    "params": ""
-}
-```
-
-<a name="event.statechange"></a>
-## *statechange <sup>event</sup>*
-
-Signals a state change of the service.
-
-### Parameters
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.suspended | boolean | Determines if the service has entered suspended state (true) or resumed state (false) |
-
-### Example
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "client.events.1.statechange",
-    "params": {
-        "suspended": false
     }
 }
 ```

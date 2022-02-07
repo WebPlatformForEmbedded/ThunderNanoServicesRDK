@@ -19,6 +19,7 @@
  
 #include "DeviceIdentification.h"
 #include "IdentityProvider.h"
+#include <interfaces/IConfiguration.h>
 
 namespace WPEFramework {
 namespace Plugin {
@@ -34,6 +35,13 @@ namespace Plugin {
         _identifier = service->Root<PluginHost::ISubSystem::IIdentifier>(_connectionId, RPC::CommunicationTimeOut, _T("DeviceImplementation"));
 
         if (_identifier != nullptr) {
+
+            Exchange::IConfiguration* configure = _identifier->QueryInterface<Exchange::IConfiguration>();
+            if (configure != nullptr) {
+                configure->Configure(service);
+                configure->Release();
+            }
+
             _deviceId = GetDeviceId();
 
             if (_deviceId.empty() != true) {
