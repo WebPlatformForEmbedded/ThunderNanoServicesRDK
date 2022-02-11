@@ -1094,13 +1094,12 @@ namespace Plugin {
 
             class AsyncInitThread {
                 public:
-                AsyncInitThread(OCDMImplementation& parent)
+                explicit AsyncInitThread(OCDMImplementation& parent)
                     : _parent(parent)
                     , _worker(*this)
                 {
                 }
-                ~AsyncInitThread() {
-                }
+                ~AsyncInitThread() = default;
 
                 void Start()
                 {
@@ -1113,8 +1112,9 @@ namespace Plugin {
                 private:
                 void Dispatch()
                 {
-                    SYSLOG(Logging::Notification, (_T("OCDM Initializing async")));
-                    _parent.InitializeAsync();
+                    if (_parent.InitializeAsync() != Core::ERROR_NONE) {
+                        TRACE(Trace::Error, (_T("OCDM Async Intialization Failed")));
+                    }
                 }
 
                 private:
@@ -1170,7 +1170,7 @@ namespace Plugin {
 
         uint32_t InitializeAsync()
         {
-            uint32_t result = Core::ERROR_OPENING_FAILED;
+            uint32_t result = Core::ERROR_NONE;
 
             // On activation subscribe, on deactivation un-subscribe
             PluginHost::ISubSystem* subSystem = _shell->SubSystems();
@@ -1206,6 +1206,7 @@ namespace Plugin {
                     }
                 } else {
                     SYSLOG(Logging::Startup, (_T("Could not load factory [%s], error [%s]"), Core::File::FileNameExtended(entry.Current()).c_str(), library.Error().c_str()));
+                    result = Core::ERROR_OPENING_FAILED;
                 }
             }
 
@@ -1229,6 +1230,7 @@ namespace Plugin {
 
                             } else {
                                 SYSLOG(Logging::Startup, (_T("Required factory [%s], not found for [%s]"), system.c_str(), designator.c_str()));
+                                result = Core::ERROR_OPENING_FAILED;
                             }
                         }
                     }
@@ -1280,8 +1282,6 @@ namespace Plugin {
                 }
             }
 
-            _shell->Release();
-
             return (result);
         }
 
@@ -1301,6 +1301,8 @@ namespace Plugin {
 
                 factory++;
             }
+            _shell->Release();
+            _shell = nullptr;
         }
         virtual uint32_t Reset()
         {
