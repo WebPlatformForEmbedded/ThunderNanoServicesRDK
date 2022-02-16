@@ -1106,6 +1106,10 @@ namespace Plugin {
                     _worker.Submit();
                 }
 
+                void Stop()
+                {
+                    _worker.Revoke();
+                }
                 AsyncInitThread(const AsyncInitThread&) = delete;
                 AsyncInitThread& operator=(const AsyncInitThread&) = delete;
 
@@ -1136,6 +1140,7 @@ namespace Plugin {
         {
             TRACE(Trace::Information, (_T("Constructing OCDMImplementation Service: %p"), this));
         }
+
         virtual ~OCDMImplementation()
         {
             if (_service != nullptr) {
@@ -1166,7 +1171,6 @@ namespace Plugin {
 
             return (result);
         }
-
 
         uint32_t InitializeAsync()
         {
@@ -1301,9 +1305,11 @@ namespace Plugin {
 
                 factory++;
             }
+            _thread.Stop();
             _shell->Release();
             _shell = nullptr;
         }
+
         virtual uint32_t Reset()
         {
             return (Core::ERROR_NONE);
