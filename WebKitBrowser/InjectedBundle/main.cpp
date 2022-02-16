@@ -103,8 +103,12 @@ public:
         if (result != Core::ERROR_NONE) {
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
         } else {
-            // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
+// Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
+#ifdef __CORE_MESSAGING__
             Core::Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
+#else
+            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
+#endif
         }
         _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromWPEFramework();
     }
