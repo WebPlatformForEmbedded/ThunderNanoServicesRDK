@@ -1143,19 +1143,6 @@ namespace Plugin {
 
         virtual ~OCDMImplementation()
         {
-            if (_service != nullptr) {
-                delete _service;
-            }
-
-            if (_entryPoint != nullptr) {
-                _entryPoint->Release();
-            }
-
-            if (_engine.IsValid()) {
-                _engine.Release();
-            }
-            _systemLibraries.clear();
-
             TRACE(Trace::Information, (_T("Destructed OCDMImplementation Service: %p"), this));
         }
 
@@ -1305,6 +1292,20 @@ namespace Plugin {
 
                 factory++;
             }
+
+            if (_service != nullptr) {
+                delete _service;
+            }
+
+            if (_entryPoint != nullptr) {
+                _entryPoint->Release();
+            }
+
+            if (_engine.IsValid()) {
+                _engine.Release();
+            }
+            _systemLibraries.clear();
+
             _thread.Stop();
             _shell->Release();
             _shell = nullptr;
