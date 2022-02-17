@@ -19,6 +19,7 @@
 
 #include "MessageOutput.h"
 #include "Module.h"
+#include <functional>
 
 namespace WPEFramework {
 namespace {
@@ -183,13 +184,9 @@ namespace Plugin {
         void Dispatch()
         {
             _client.WaitForUpdates(Core::infinite);
-
-            auto messages = _client.Pop();
-            for (auto& message : messages) {
-                if (message.first.MessageMetaData().Type() != Core::Messaging::MetaData::MessageType::INVALID) {
-                    _outputDirector.Output(message.first, message.second.Origin());
-                }
-            }
+            _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+                _outputDirector.Output(info, message.Origin());
+            });
         }
 
         BEGIN_INTERFACE_MAP(MessageControlImplementation)

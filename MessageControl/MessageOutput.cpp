@@ -37,7 +37,10 @@ namespace Messaging {
 
         if (_abbreviated == true) {
             string time(now.ToTimeOnly(true));
-            _output << '[' << time.c_str() << ']' << '[' << info.MessageMetaData().Category() << "]: " << _deserializedMessage << std::endl;
+            _output << '[' << time.c_str() << ']' 
+                    << '[' << info.MessageMetaData().Module() << "]" 
+                    << '[' << info.MessageMetaData().Category() << "]: " 
+                    << _deserializedMessage << std::endl;
         } else {
             string time(now.ToRFC1123(true));
             _output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(info.FileName().c_str()) << ':' << info.LineNumber() << "] "
