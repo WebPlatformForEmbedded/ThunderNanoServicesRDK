@@ -28,8 +28,6 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_MESSAGECONTROL_AUTOSTART true CACHE STRING "Automatically start plugin")
-set(PLUGIN_MESSAGECONTROL_CONSOLE true CACHE STRING "Output to console (if running in foreground)")
-set(PLUGIN_MESSAGECONTROL_SYSLOG true CACHE STRING "Output to syslog")
 set(PLUGIN_MESSAGECONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
 set(PLUGIN_MESSAGECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")
