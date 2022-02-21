@@ -90,7 +90,8 @@ namespace Plugin {
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
 
     public:
-        uint32_t Configure(bool isBackground, bool abbreviate, bool outputToConsole, bool outputToSysLog, const string& outputFileName, const string& binding, uint32_t port) override
+        uint32_t Configure(const bool isBackground, const bool abbreviate, const bool outputToConsole,
+            const bool outputToSysLog, const string& outputFileName, const string& binding, const uint32_t port) override
         {
             uint32_t result = Core::ERROR_NONE;
 
@@ -129,7 +130,7 @@ namespace Plugin {
             _client.RemoveInstance(id);
         }
 
-        uint32_t EnableMessage(MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
+        uint32_t EnableMessage(const MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
         {
             Core::Messaging::MetaData metaData(static_cast<Core::Messaging::MetaData::MessageType>(type), categoryName, moduleName);
             _client.Enable(metaData, enable);

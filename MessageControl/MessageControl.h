@@ -55,9 +55,9 @@ namespace Plugin {
         public:
             explicit MessageOutputNotification(MessageControl& parent);
 
-            void ReceiveRawMessage(Exchange::IMessageControl::MessageType type, const string& category,
+            void ReceiveRawMessage(const Exchange::IMessageControl::MessageType type, const string& category,
                 const string& module, const string& fileName,
-                uint16_t lineNumber, uint64_t timestamp,
+                const uint16_t lineNumber, const uint64_t timestamp,
                 const string& message);
 
         private:
