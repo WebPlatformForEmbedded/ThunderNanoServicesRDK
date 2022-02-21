@@ -31,10 +31,44 @@ namespace Plugin {
         DeviceIdentification(const DeviceIdentification&) = delete;
         DeviceIdentification& operator=(const DeviceIdentification&) = delete;
 
+        class Notification : public RPC::IRemoteConnection::INotification {
+        public:
+            Notification(const Notification&) = delete;
+            Notification& operator=(const Notification&) = delete;
+
+            explicit Notification(DeviceIdentification* parent)
+                : _parent(*parent)
+            {
+                ASSERT(parent != nullptr);
+            }
+            virtual ~Notification()
+            {
+                TRACE(Trace::Information, (_T("DeviceIdentification::Notification destructed. Line: %d"), __LINE__));
+            }
+
+        public:
+            virtual void Activated(RPC::IRemoteConnection* /* connection */)
+            {
+            }
+            virtual void Deactivated(RPC::IRemoteConnection* connectionId)
+            {
+                _parent.Deactivated(connectionId);
+            }
+
+            BEGIN_INTERFACE_MAP(Notification)
+            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+            END_INTERFACE_MAP
+
+        private:
+            DeviceIdentification& _parent;
+        };
+
         DeviceIdentification()
-            : _deviceId()
+            : _service(nullptr)
+            , _deviceId()
             , _identifier(nullptr)
             , _connectionId(0)
+            , _notification(this)
         {
             RegisterAll();
         }
@@ -64,11 +98,15 @@ namespace Plugin {
         string GetDeviceId() const;
         void Info(JsonData::DeviceIdentification::DeviceidentificationData&) const;
 
+        void Deactivated(RPC::IRemoteConnection* connection);
+
     private:
+        PluginHost::IShell* _service;
         string _deviceId;
         PluginHost::ISubSystem::IIdentifier* _identifier;
 
         uint32_t _connectionId;
+         Core::Sink<Notification> _notification;
     };
 
 } // namespace Plugin
