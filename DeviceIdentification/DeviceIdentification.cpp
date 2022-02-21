@@ -54,6 +54,8 @@ namespace Plugin {
 
             _deviceId = GetDeviceId();
 
+            RegisterAll();
+
             if (_deviceId.empty() != true) {
                 service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, _identifier);
             }
@@ -63,6 +65,10 @@ namespace Plugin {
         }
         else {
             message = _T("DeviceIdentification plugin could not be instantiated.");
+        }
+
+        if (message.length() != 0) {
+            Deinitialize(service);
         }
 
         return message;
@@ -80,6 +86,9 @@ namespace Plugin {
         }
 
         if(_identifier != nullptr) {
+
+            UnregisterAll();
+
                // Stop processing:
             RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
 

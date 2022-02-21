@@ -41,16 +41,16 @@ namespace Plugin {
             {
                 ASSERT(parent != nullptr);
             }
-            virtual ~Notification()
+            ~Notification() override
             {
                 TRACE(Trace::Information, (_T("DeviceIdentification::Notification destructed. Line: %d"), __LINE__));
             }
 
         public:
-            virtual void Activated(RPC::IRemoteConnection* /* connection */)
+            void Activated(RPC::IRemoteConnection* /* connection */) override
             {
             }
-            virtual void Deactivated(RPC::IRemoteConnection* connectionId)
+            void Deactivated(RPC::IRemoteConnection* connectionId) override
             {
                 _parent.Deactivated(connectionId);
             }
@@ -70,13 +70,9 @@ namespace Plugin {
             , _connectionId(0)
             , _notification(this)
         {
-            RegisterAll();
         }
 
-        virtual ~DeviceIdentification()
-        {
-            UnregisterAll();
-        }
+        ~DeviceIdentification() override = default;
 
         BEGIN_INTERFACE_MAP(DeviceIdentification)
         INTERFACE_ENTRY(PluginHost::IPlugin)
@@ -86,9 +82,9 @@ namespace Plugin {
     public:
         //   IPlugin methods
         // -------------------------------------------------------------------------------------------------------
-        virtual const string Initialize(PluginHost::IShell* service) override;
-        virtual void Deinitialize(PluginHost::IShell* service) override;
-        virtual string Information() const override;
+        const string Initialize(PluginHost::IShell* service) override;
+        void Deinitialize(PluginHost::IShell* service) override;
+        string Information() const override;
 
     private:
         void RegisterAll();
