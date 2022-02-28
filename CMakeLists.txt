@@ -21,6 +21,7 @@ project(NanoServicesRDK)
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
 option(PLUGIN_LOCATIONSYNC "Include LocationSync plugin" OFF)
+option(PLUGIN_MESSAGECONTROL "Include MessageControl plugin" OFF)
 option(PLUGIN_MESSENGER "Include Messenger plugin" OFF)
 option(PLUGIN_MONITOR "Include Monitor plugin" OFF)
 option(PLUGIN_OPENCDMI "Include OpenCDMi plugin" OFF)
@@ -42,6 +43,10 @@ endif()
 
 if(PLUGIN_LOCATIONSYNC)
     add_subdirectory(LocationSync)
+endif()
+
+if(PLUGIN_MESSAGECONTROL)
+    add_subdirectory(MessageControl)
 endif()
 
 if(PLUGIN_MESSENGER)
@@ -74,4 +79,8 @@ endif()
 
 if(PLUGIN_WEBKITBROWSER)
     add_subdirectory(WebKitBrowser)
+endif()
+
+if(PLUGIN_MESSAGE_CONTROL)
+    add_subdirectory(MessageControl)
 endif()
