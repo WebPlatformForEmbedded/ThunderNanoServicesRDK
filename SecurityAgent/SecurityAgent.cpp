@@ -140,13 +140,14 @@ namespace Plugin {
 
         ASSERT(subSystem != nullptr);
 
-        _dispatcher.reset(nullptr);
-
         if (subSystem != nullptr) {
             subSystem->Set(PluginHost::ISubSystem::NOT_SECURITY, nullptr);
             subSystem->Release();
         }
         _acl.Clear();
+
+        _dispatcher.reset(nullptr);
+        _engine.Release();
     }
 
     /* virtual */ string SecurityAgent::Information() const
