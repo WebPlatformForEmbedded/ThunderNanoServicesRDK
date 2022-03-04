@@ -17,33 +17,15 @@
  * limitations under the License.
  */
 
-#include "Module.h"
-#include "NotifyWPEFrameworkGLib.h"
+#pragma once
+
+#include <wpe/webkit-web-extension.h>
 
 namespace WPEFramework {
 namespace JavaScript {
 namespace NotifyWPEFramework {
 
-void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
-{
-    if (webkit_frame_is_main_frame(frame) == false)
-        return;
-
-    JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
-
-    static const char wpeNotifyWPEFramework[] = "var wpe = {};\n"
-        "wpe.NotifyWPEFramework = function() {\n"
-        "  let retval = new Array;\n"
-        "  for (let i = 0; i < arguments.length; i++) {\n"
-        "    retval[i] = arguments[i];\n"
-        "  }\n"
-        "  window.webkit.messageHandlers.wpeNotifyWPEFramework.postMessage(retval);\n"
-        "}";
-    JSCValue* result = jsc_context_evaluate(jsContext, wpeNotifyWPEFramework, -1);
-    g_object_unref(result);
-
-    g_object_unref(jsContext);
-}
+void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
 
 }  // NotifyWPEFramework
 }  // JavaScript

@@ -36,11 +36,12 @@ namespace Plugin {
         Config config;
         config.FromString(service->ConfigLine());
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
-        _subSystem = service->SubSystems();
         _service = service;
-        _systemId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
-
+        _subSystem = service->SubSystems();
         ASSERT(_subSystem != nullptr);
+        if (_subSystem != nullptr) {
+            _subSystem->Register(&_notification);
+        }
 
         _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
@@ -62,7 +63,7 @@ namespace Plugin {
         ASSERT(_service == service);
         ASSERT(_implementation != nullptr);
         ASSERT(_deviceMetadataInterface != nullptr);
-        
+
         _implementation->Release();
         _deviceMetadataInterface->Release();
 
@@ -76,6 +77,7 @@ namespace Plugin {
             }
         }
 
+        _subSystem->Unregister(&_notification);
         _subSystem->Release();
         _subSystem = nullptr;
 
@@ -126,7 +128,7 @@ namespace Plugin {
             // TODO RB: I guess we should do something here to return other info (e.g. time) as well.
 
             result->ContentType = Web::MIMETypes::MIME_JSON;
-            result->Body(Core::proxy_cast<Web::IBody>(response));
+            result->Body(Core::ProxyType<Web::IBody>(response));
         } else {
             result->ErrorCode = Web::STATUS_BAD_REQUEST;
             result->Message = _T("Unsupported request for the [DeviceInfo] service.");
@@ -146,7 +148,10 @@ namespace Plugin {
         systemInfo.Totalram = singleton.GetTotalRam();
         systemInfo.Devicename = singleton.GetHostName();
         systemInfo.Cpuload = Core::NumberType<uint32_t>(static_cast<uint32_t>(singleton.GetCpuLoad())).Text();
-        systemInfo.Serialnumber = _systemId;
+
+        _adminLock.Lock();
+        systemInfo.Serialnumber = _deviceId;
+        _adminLock.Unlock();
     }
 
     void DeviceInfo::AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const
@@ -238,7 +243,7 @@ namespace Plugin {
         if (_deviceMetadataInterface->ModelName(localresult) == Core::ERROR_NONE) {
             metadatainfo.ModelName = localresult;
         }
-        
+
         uint16_t year = 0;
         if (_deviceMetadataInterface->ModelYear(year) == Core::ERROR_NONE) {
             metadatainfo.ModelYear = year;
@@ -255,7 +260,36 @@ namespace Plugin {
         if (_deviceMetadataInterface->PlatformName(localresult) == Core::ERROR_NONE) {
             metadatainfo.PlatformName = localresult;
         }
-        
+    }
+
+    void DeviceInfo::UpdateDeviceIdentifier()
+    {
+        if ((_subSystem != nullptr) &&
+            (_subSystem->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true)) {
+            string deviceId = GetDeviceId();
+            _adminLock.Lock();
+            _deviceId = deviceId;
+            _adminLock.Unlock();
+        }
+    }
+
+    string DeviceInfo::GetDeviceId() const
+    {
+        string deviceId;
+        const PluginHost::ISubSystem::IIdentifier* identifier(_subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
+        if (identifier != nullptr) {
+            uint8_t buffer[64];
+
+            buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
+                        ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
+
+            if (buffer[0] != 0) {
+                deviceId = Core::SystemInfo::Instance().Id(buffer, ~0);
+            }
+
+            identifier->Release();
+        }
+        return deviceId;
     }
 
 } // namespace Plugin

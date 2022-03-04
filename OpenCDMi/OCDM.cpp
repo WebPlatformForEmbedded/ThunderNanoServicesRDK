@@ -140,21 +140,24 @@ namespace Plugin {
 
         _opencdmi->Deinitialize(service);
 
-        _opencdmi->Release();
+        RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
-        if (_connectionId != 0) {
+        VARIABLE_IS_NOT_USED uint32_t result = _opencdmi->Release();
 
-            TRACE(Trace::Information, (_T("OCDM Plugin is not properly destructed. %d"), _connectionId));
+        // It should have been the last reference we are releasing,
+        // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+        // are leaking...
+        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
 
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+        // If this was running in a (container) proccess...
+        if (connection != nullptr) {
 
-            // The process can disappear in the meantime...
-            if (connection != nullptr) {
-
-                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
-                connection->Terminate();
-                connection->Release();
-            }
+            // Lets trigger the cleanup sequence for
+            // out-of-process code. Which will guard
+            // that unwilling processes, get shot if
+            // not stopped friendly :~)
+            connection->Terminate();
+            connection->Release();
         }
 
         PluginHost::ISubSystem* subSystem = service->SubSystems();

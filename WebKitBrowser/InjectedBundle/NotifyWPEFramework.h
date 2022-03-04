@@ -21,7 +21,7 @@
 #define __NOTIFYH
 
 #include "JavaScriptFunctionType.h"
-#include "Tags.h"
+#include "../Tags.h"
 
 namespace WPEFramework {
 namespace JavaScript {

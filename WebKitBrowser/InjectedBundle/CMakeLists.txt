@@ -23,42 +23,27 @@ find_package(securityagent QUIET)
 find_package(WPEWebKit REQUIRED)
 
 option(PLUGIN_AMAZON_HYBRID "Enable the Amazon Player interface (Hawaii) in the injected bundle and the creation of the Amazon tab" OFF)
-option(PLUGIN_SECURITYAGENT "Enable the Security Agent Features interface in javascript." OFF)
 option(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS "Enable AAMP JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 
 add_library(${MODULE_NAME} SHARED
     main.cpp
     WhiteListedOriginDomainsList.cpp
-    Tags.cpp
+    RequestHeaders.cpp
+    Utils.cpp
+    JavaScriptFunction.cpp
+    NotifyWPEFramework.cpp
+    Milestone.cpp
+    ClassDefinition.cpp
+    ../Tags.cpp
 )
-
-if(WEBKIT_GLIB_API)
-    target_sources(${MODULE_NAME} PRIVATE
-        MilestoneGLib.cpp
-        NotifyWPEFrameworkGLib.cpp
-        RequestHeadersGLib.cpp)
-else()
-    target_sources(${MODULE_NAME} PRIVATE         
-        RequestHeaders.cpp
-        Utils.cpp
-        JavaScriptFunction.cpp
-        NotifyWPEFramework.cpp
-        Milestone.cpp
-        ClassDefinition.cpp)
-endif()
 
 if(PLUGIN_AMAZON_HYBRID)
     target_sources(${MODULE_NAME} PRIVATE HawaiiMessage.cpp)
 endif()
 
 if(securityagent_FOUND)
-if(WEBKIT_GLIB_API)
-    target_sources(${MODULE_NAME} PRIVATE SecurityAgentGLib.cpp)
-else()
     target_sources(${MODULE_NAME} PRIVATE SecurityAgent.cpp)
-endif()
-    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_SECURITY_AGENT)
     target_link_libraries(${MODULE_NAME}
         PRIVATE 
             securityagent::securityagent)
@@ -66,23 +51,15 @@ endif()
 
 if(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS)
     find_package(AampJSBindings REQUIRED)
-if(WEBKIT_GLIB_API)
-    target_sources(${MODULE_NAME} PRIVATE AAMPJSBindingsGLib.cpp)
-else()
     target_sources(${MODULE_NAME} PRIVATE AAMPJSBindings.cpp)
-endif()
-    target_compile_definitions(${MODULE_NAME} PRIVATE  ENABLE_AAMP_JSBINDINGS)
+    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_AAMP_JSBINDINGS)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
         ${AAMP_JSBINDINGS_LIBRARIES})
 endif()
 
 if(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE)
-if(WEBKIT_GLIB_API)
-    target_sources(${MODULE_NAME} PRIVATE BridgeObjectGLib.cpp)
-else()
     target_sources(${MODULE_NAME} PRIVATE BridgeObject.cpp)
-endif()
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_BADGER_BRIDGE)
 endif()
 
@@ -99,9 +76,6 @@ if(WPE_WEBKIT_DEPRECATED_API)
     target_compile_definitions(${MODULE_NAME} PRIVATE WPE_WEBKIT_DEPRECATED_API)
 endif()
 
-if(WEBKIT_GLIB_API)
-    target_compile_definitions(${MODULE_NAME} PRIVATE WEBKIT_GLIB_API)
-endif()
 
 install(TARGETS ${MODULE_NAME} 
     DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${NAMESPACE}/WebKitBrowser

@@ -22,12 +22,7 @@
 
 #include "Module.h"
 
-#ifdef WEBKIT_GLIB_API
-#include <wpe/webkit-web-extension.h>
-typedef WebKitWebExtension* WKBundleRef;
-#else
 #include <WPE/WebKit.h>
-#endif
 
 #include <vector>
 

@@ -177,6 +177,11 @@ namespace Plugin {
                 return _progress;
             }
 
+            string AppName() const override
+            {
+                return (string());
+            }
+
             uint32_t ErrorCode() const override
             {
                 return _error;

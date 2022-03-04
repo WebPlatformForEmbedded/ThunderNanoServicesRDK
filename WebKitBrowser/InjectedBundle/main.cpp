@@ -23,29 +23,6 @@
 #include <memory>
 #include <syslog.h>
 
-#ifdef WEBKIT_GLIB_API
-
-#include <wpe/webkit-web-extension.h>
-#include "../BrowserConsoleLog.h"
-
-#include "Tags.h"
-#include "MilestoneGLib.h"
-#include "NotifyWPEFrameworkGLib.h"
-#include "RequestHeadersGLib.h"
-#ifdef ENABLE_SECURITY_AGENT
-#include "SecurityAgentGLib.h"
-#endif
-#if defined(ENABLE_BADGER_BRIDGE)
-#include "BridgeObjectGLib.h"
-#endif
-#if defined(ENABLE_AAMP_JSBINDINGS)
-#include "AAMPJSBindingsGLib.h"
-#endif
-
-using namespace WPEFramework;
-
-#else
-
 #include <WPE/WebKit.h>
 #include <WPE/WebKit/WKBundleFrame.h>
 #include <WPE/WebKit/WKBundlePage.h>
@@ -88,8 +65,6 @@ std::string GetURL() {
 
 } } }
 
-#endif
-
 #include "WhiteListedOriginDomainsList.h"
 using WebKit::WhiteListedOriginDomainsList;
 
@@ -128,42 +103,14 @@ public:
         if (result != Core::ERROR_NONE) {
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
         } else {
-            // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
-            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
-        }
-#ifdef WEBKIT_GLIB_API
-        _bundle = WEBKIT_WEB_EXTENSION(g_object_ref(bundle));
-
-        const char *uid;
-        const char *whitelist;
-        gboolean logToSystemConsoleEnabled;
-        g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &logToSystemConsoleEnabled);
-
-        /*
-         * Note: It doesn't work and needs to be resolved.
-        _scriptWorld = webkit_script_world_new_with_name(uid);
-        g_signal_connect(_scriptWorld, "window-object-cleared",
-                G_CALLBACK(windowObjectClearedCallback), nullptr);
-        */
-
-        g_signal_connect(webkit_script_world_get_default(),
-                "window-object-cleared", G_CALLBACK(windowObjectClearedCallback),
-                nullptr);
-
-        if (logToSystemConsoleEnabled == TRUE) {
-            g_signal_connect(bundle, "page-created", G_CALLBACK(pageCreatedCallback), this);
-        }
-
-        if (whitelist != nullptr) {
-            _whiteListedOriginDomainPairs =
-                    WhiteListedOriginDomainsList::RequestFromWPEFramework(
-                            whitelist);
-            WhiteList(bundle);
-        }
+// Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
+#ifdef __CORE_MESSAGING__
+            Core::Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
 #else
-        _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromWPEFramework();
+            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
 #endif
-
+        }
+        _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromWPEFramework();
     }
 
     void Deinitialize()
@@ -171,16 +118,6 @@ public:
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
-        if (_engine.IsValid() == true) {
-            _engine.Release();
-        }
-
-#ifdef WEBKIT_GLIB_API
-        /*
-        g_object_unref(_scriptWorld);
-        */
-        g_object_unref(_bundle);
-#endif
         Core::Singleton::Dispose();
     }
 
@@ -191,68 +128,6 @@ public:
             _whiteListedOriginDomainPairs->AddWhiteListToWebKit(bundle);
         }
     }
-
-#ifdef WEBKIT_GLIB_API
-
-private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page, WebKitFrame* frame)
-    {
-        JavaScript::Milestone::InjectJS(world, frame);
-        JavaScript::NotifyWPEFramework::InjectJS(world, frame);
-
-#ifdef  ENABLE_SECURITY_AGENT
-        JavaScript::SecurityAgent::InjectJS(world, frame);
-#endif
-
-#ifdef  ENABLE_BADGER_BRIDGE
-        JavaScript::BridgeObject::InjectJS(world, page, frame);
-#endif
-
-#ifdef  ENABLE_AAMP_JSBINDINGS
-        JavaScript::AAMP::LoadJSBindings(world, frame);
-#endif
-
-    }
-    static void pageCreatedCallback(WebKitWebExtension*, WebKitWebPage* page, PluginHost* host)
-    {
-        g_signal_connect(page, "console-message-sent",
-                G_CALLBACK(consoleMessageSentCallback), nullptr);
-        g_signal_connect(page, "user-message-received",
-                G_CALLBACK(userMessageReceivedCallback), nullptr);
-        g_signal_connect(page, "send-request",
-                G_CALLBACK(sendRequestCallback), nullptr);
-    }
-    static void consoleMessageSentCallback(WebKitWebPage* page, WebKitConsoleMessage* message)
-    {
-        string messageString = Core::ToString(webkit_console_message_get_text(message));
-        uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
-
-        TRACE_GLOBAL(BrowserConsoleLog, (messageString, line, 0));
-    }
-    static gboolean userMessageReceivedCallback(WebKitWebPage* page, WebKitUserMessage* message)
-    {
-        const char* name = webkit_user_message_get_name(message);
-        if (g_strcmp0(name, Tags::Headers) == 0) {
-            WebKit::SetRequestHeaders(page, message);
-        }
-#if defined(ENABLE_BADGER_BRIDGE)
-        else if ((g_strcmp0(name, Tags::BridgeObjectReply) == 0)
-                || (g_strcmp0(name, Tags::BridgeObjectEvent) == 0)) {
-            JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
-        }
-#endif
-        return true;
-    }
-    static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
-    {
-        WebKit::ApplyRequestHeaders(page, request);
-        return false;
-    }
-
-    WKBundleRef _bundle;
-    WebKitScriptWorld* _scriptWorld;
-
-#endif
 
 private:
     Core::ProxyType<RPC::InvokeServerType<2, 0, 4> > _engine;
@@ -269,18 +144,6 @@ __attribute__((destructor)) static void unload()
 {
     _wpeFrameworkClient.Deinitialize();
 }
-
-#ifdef WEBKIT_GLIB_API
-
-// Declare module name for tracer.
-MODULE_NAME_DECLARATION(BUILD_REFERENCE)
-
-G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(WebKitWebExtension* extension, GVariant* userData)
-{
-    _wpeFrameworkClient.Initialize(extension, userData);
-}
-
-#else
 
 // Adds class to JS world.
 static void InjectInJSWorld(ClassDefinition& classDef, WKBundleFrameRef frame, WKBundleScriptWorldRef scriptWorld)
@@ -463,7 +326,7 @@ static WKBundlePageUIClientV4 s_pageUIClient = {
         uint32_t columnNumber, WKStringRef url, const void* clientInfo) {
         auto prepareMessage = [&]() {
             string messageString = WebKit::Utils::WKStringToString(message);
-            const uint16_t maxStringLength = Trace::TRACINGBUFFERSIZE - 1;
+            const uint16_t maxStringLength = Core::Messaging::MessageUnit::DataSize - 1;
             if (messageString.length() > maxStringLength) {
                 messageString = messageString.substr(0, maxStringLength);
             }
@@ -533,7 +396,7 @@ static WKBundleClientV1 s_bundleClient = {
 // Declare module name for tracer.
 MODULE_NAME_DECLARATION(BUILD_REFERENCE)
 
-void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
+EXTERNAL void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
 {
     g_Bundle = bundle;
 
@@ -541,7 +404,5 @@ void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
 
     WKBundleSetClient(bundle, &s_bundleClient.base);
 }
-
-#endif
 
 }

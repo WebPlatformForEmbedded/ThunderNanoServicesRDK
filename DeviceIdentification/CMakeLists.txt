@@ -30,6 +30,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_DEVICEIDENTIFICATION_AUTOSTART "true" CACHE STRING "Automatically start DeviceIdentification plugin")
+set(PLUGIN_DEVICEIDENTIFICATION_INTERFACE_NAME "eth0" CACHE STRING "Ethernet Card name which has to be associated for the Raw Device Id creation")
 option(PLUGIN_DEVICEIDENTIFICATION_USE_MFR "Get device identification details using MFR library" OFF)
 
 find_package(NEXUS QUIET)
@@ -50,7 +51,11 @@ if (PLUGIN_DEVICEIDENTIFICATION_USE_MFR AND MFRFWLIBS_FOUND)
             Implementation/MFR/MFR.cpp)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
-            mfrfwlibs::mfrfwlibs)
+            MFRFWLibs::MFRFWLibs)
+elseif (BUILD_BROADCOM)
+    target_sources(${MODULE_NAME}
+        PRIVATE
+            Implementation/Broadcom/Broadcom.cpp)
 elseif (NEXUS_FOUND)
     find_package(NXCLIENT REQUIRED)
     target_link_libraries(${MODULE_NAME} 
@@ -63,11 +68,11 @@ elseif (NEXUS_FOUND)
                 ${DEVICEIDENTIFICATION_IMPLEMENTATION_PATH}/Nexus.cpp)
     else()
         include(GetExternalCode)
-        set(DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION "master" CACHE STRING "DeviceIdentification implementation version")
+        set(DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION "master" CACHE STRING "DeviceIdentification implementation version: commit_id_or_tag_or_branch_name")
         set(DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY "https://code.rdkcentral.com/r/soc/broadcom/components/rdkcentral/thundernanoservices/DeviceIdentification" CACHE STRING "DeviceIdentification implementation repository")
         GetExternalCode(
             GIT_REPOSITORY ${DEVICEIDENTIFICATION_IMPLEMENTATION_REPOSITORY}
-            GIT_TAG ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
+            GIT_VERSION ${DEVICEIDENTIFICATION_IMPLEMENTATION_VERSION}
             SOURCE_DIR "Implementation/Nexus"
         )
         target_sources(${MODULE_NAME}
@@ -86,13 +91,14 @@ elseif (BUILD_AMLOGIC)
         PRIVATE
             Implementation/Amlogic/Amlogic.cpp)
 elseif (BUILD_REALTEK)
-	target_sources(${MODULE_NAME}
+        target_sources(${MODULE_NAME}
         PRIVATE
             Implementation/Realtek/Realtek.cpp)
 elseif(UNIX AND NOT APPLE)
     target_sources(${MODULE_NAME}
         PRIVATE
             Implementation/Linux/Linux.cpp)
+    set(GENERIC_DEVICEIDENTIFIATION ON)
 else ()
     message(FATAL_ERROR "There is no platform backend for device identifier plugin")
 endif()
