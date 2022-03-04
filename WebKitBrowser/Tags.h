@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #pragma once
 
 namespace WPEFramework {
@@ -32,4 +32,3 @@ extern const char* const BridgeObjectEvent;
 extern const char* const Headers;
 
 } } ;
-

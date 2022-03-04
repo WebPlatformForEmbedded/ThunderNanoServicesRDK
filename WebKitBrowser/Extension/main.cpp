@@ -45,6 +45,10 @@
 #include "AAMPJSBindings.h"
 #endif
 
+#if defined(ENABLE_FIREBOLTOS_ENDPOINT)
+#include "FireboltOSEndpoint.h"
+#endif
+
 using namespace WPEFramework;
 
 static Core::NodeId GetConnectionNode()
@@ -149,6 +153,9 @@ private:
         JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
+#ifdef  ENABLE_FIREBOLTOS_ENDPOINT
+        JavaScript::FireboltOSEndpoint::InjectJS(world, frame);
+#endif
     }
     static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
                                     WebKitWebPage* page,
@@ -187,12 +194,12 @@ private:
             JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
         }
 #endif
-        return true;
+        return TRUE;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
     {
         WebKit::ApplyRequestHeaders(page, request);
-        return false;
+        return FALSE;
     }
 
 #ifdef  ENABLE_AAMP_JSBINDINGS
