@@ -241,7 +241,7 @@ namespace Plugin {
         if (path.empty() == false) {
             string fullPath = _persistentStoragePath + path;
             Core::Directory dir(fullPath.c_str());
-            if (!dir.Destroy(true)) {
+            if (!dir.Destroy()) {
                 TRACE(Trace::Error, (_T("Failed to delete %s\n"), fullPath.c_str()));
                 result = Core::ERROR_GENERAL;
             }
