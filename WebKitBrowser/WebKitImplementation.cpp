@@ -1377,7 +1377,6 @@ static GSourceFuncs _handlerIntervention =
         uint32_t Identifier(string& id) const override
         {
 
-            uint32_t status = Core::ERROR_UNAVAILABLE;
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
             if (subSystem) {
                 const PluginHost::ISubSystem::IIdentifier* identifier(subSystem->Get<PluginHost::ISubSystem::IIdentifier>());

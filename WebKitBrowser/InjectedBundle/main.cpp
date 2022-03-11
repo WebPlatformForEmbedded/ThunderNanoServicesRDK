@@ -96,7 +96,7 @@ public:
     }
 
 public:
-    void Initialize(WKBundleRef bundle, const void* userData = nullptr)
+    void Initialize(WKBundleRef)
     {
         // We have something to report back, do so...
         uint32_t result = _comClient->Open(RPC::CommunicationTimeOut);
