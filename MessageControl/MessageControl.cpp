@@ -342,6 +342,7 @@ namespace Plugin {
 
     MessageControl::MessageControl()
         : _connectionId(0)
+        , _service(nullptr)
         , _observer(*this)
         , _outputNotification(*this)
         , _comSink(*this)
@@ -349,18 +350,21 @@ namespace Plugin {
         , _fullOutputFilePath(_T(""))
         , _maxExportConnections(1)
     {
-        RegisterAll();
-    }
-
-    MessageControl::~MessageControl()
-    {
-        UnregisterAll();
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
-        string message;
+        ASSERT(_control == nullptr);
+        ASSERT(_service == nullptr);
+        ASSERT(_connectionId == 0);
+
+        string message(EMPTY_STRING);
+
+        _service = service;
+        _service->AddRef();
+        _service->Register(&_observer);
+        _service->Register(&_comSink);
 
         Config config;
         config.FromString(service->ConfigLine());
@@ -370,8 +374,8 @@ namespace Plugin {
         _control = service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
         if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
-
         } else {
+            RegisterAll();
             if (_control->Configure(service->Background(),
                     config.Abbreviated.Value(),
                     config.Console.Value(),
@@ -382,11 +386,13 @@ namespace Plugin {
                 != Core::ERROR_NONE) {
                 message = _T("MessageControl plugin could not be instantiated.");
             } else {
-                service->Register(&_observer);
-                service->Register(&_comSink);
                 _webSocketExporter.reset(new WebSocketExporter(_maxExportConnections));
                 _control->RegisterOutputNotification(&_outputNotification);
             }
+        }
+
+        if(message.length() != 0) {
+            Deinitialize(service);
         }
 
         return message;
@@ -394,16 +400,34 @@ namespace Plugin {
 
     void MessageControl::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT(service != nullptr);
-        ASSERT(_control != nullptr);
+        ASSERT(service == _service);
+
         service->Unregister(&_observer);
         service->Unregister(&_comSink);
 
-        if (_control != nullptr) {
+        if (_connectionId != 0) {
+            ASSERT(_control != nullptr);
+            UnregisterAll();
             _control->UnregisterOutputNotification(&_outputNotification);
-            _control->Release();
+
+            _RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+            VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
             _control = nullptr;
+            // It should have been the last reference we are releasing,
+            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+            // are leaking...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+             // The process can disappear in the meantime...
+            if (connection != nullptr) {
+                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
+                connection->Terminate();
+                connection->Release();
+            }
         }
+
+        _service->Release();
+        _service = nullptr;
         _connectionId = 0;
     }
 
@@ -422,6 +446,10 @@ namespace Plugin {
     {
         ASSERT(_control != nullptr);
         _control->UnregisterConnection(id);
+        if (_connectionId == id) {
+            ASSERT(_service != nullptr);
+            Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_service, PluginHost::IShell::DEACTIVATED, PluginHost::IShell::FAILURE));
+        }
     }
 
     void MessageControl::OnRevoke(const Exchange::IMessageControl::INotification* remote)

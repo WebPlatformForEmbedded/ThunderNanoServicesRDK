@@ -121,7 +121,7 @@ namespace Plugin {
         MessageControl& operator=(const MessageControl&) = delete;
 
         MessageControl();
-        ~MessageControl() override;
+        ~MessageControl() override = default;
 
         BEGIN_INTERFACE_MAP(MessageControl)
         INTERFACE_ENTRY(PluginHost::IPlugin)
@@ -153,6 +153,7 @@ namespace Plugin {
         void Deactivated(const uint32_t id);
 
         uint32_t _connectionId;
+        PluginHost::IShell* _service;
         Exchange::IMessageControl* _control;
         Core::Sink<Observer> _observer;
         Core::Sink<MessageOutputNotification> _outputNotification;
