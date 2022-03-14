@@ -176,7 +176,6 @@ namespace Plugin {
         void SocketPortInfo(JsonData::DeviceInfo::SocketinfoData& socketPortInfo) const;
         void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
         void MetadataInfo(JsonData::DeviceInfo::MetadataData& response) const;
-        string GetDeviceId() const;
         void UpdateDeviceIdentifier();
         void Deactivated(RPC::IRemoteConnection* connection);
 
