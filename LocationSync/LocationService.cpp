@@ -324,9 +324,7 @@ namespace Plugin {
         return (index < (sizeof(g_domainFactory) / sizeof(DomainConstructor)) ? &(g_domainFactory[index]) : nullptr);
     }
 
-#ifdef __WINDOWS__
-#pragma warning(disable : 4355)
-#endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
     LocationService::LocationService(Core::IDispatchType<void>* callback)
         : BaseClass(1, g_Factory, false, Core::NodeId(), Core::NodeId(), 256, 1024)
         , _adminLock()
@@ -347,9 +345,7 @@ namespace Plugin {
         , _request(Core::ProxyType<Web::Request>::Create())
     {
     }
-#ifdef __WINDOWS__
-#pragma warning(default : 4355)
-#endif
+POP_WARNING()
 
     LocationService::~LocationService() /* override */
     {
