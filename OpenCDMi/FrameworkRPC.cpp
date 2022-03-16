@@ -447,9 +447,7 @@ namespace Plugin {
                 };
 
             public:
-                #ifdef __WINDOWS__
-                #pragma warning(disable : 4355)
-                #endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                 SessionImplementation(
                     AccessorOCDM* parent,
                     const std::string keySystem,
@@ -502,9 +500,7 @@ namespace Plugin {
                     _mediaKeySession->Run(&_sink);
                     TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
                 }
-                #ifdef __WINDOWS__
-                #pragma warning(default : 4355)
-                #endif
+POP_WARNING()
 
                 virtual ~SessionImplementation()
                 {

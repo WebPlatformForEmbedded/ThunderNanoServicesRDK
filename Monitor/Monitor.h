@@ -657,9 +657,7 @@ namespace Plugin {
             MonitorObjects(const MonitorObjects&) = delete;
             MonitorObjects& operator=(const MonitorObjects&) = delete;
 
-#ifdef __WINDOWS__
-#pragma warning(disable : 4355)
-#endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
             MonitorObjects(Monitor* parent)
                 : _adminLock()
                 , _monitor()
@@ -668,9 +666,6 @@ namespace Plugin {
                 , _parent(*parent)
             {
             }
-#ifdef __WINDOWS__
-#pragma warning(default : 4355)
-#endif
             virtual ~MonitorObjects()
             {
                 ASSERT(_monitor.size() == 0);
@@ -1007,18 +1002,14 @@ namespace Plugin {
         };
 
     public:
-#ifdef __WINDOWS__
-#pragma warning(disable : 4355)
-#endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Monitor()
             : _skipURL(0)
             , _monitor(Core::Service<MonitorObjects>::Create<MonitorObjects>(this))
         {
             RegisterAll();
         }
-#ifdef __WINDOWS__
-#pragma warning(default : 4355)
-#endif
+POP_WARNING()
         virtual ~Monitor()
         {
             UnregisterAll();
