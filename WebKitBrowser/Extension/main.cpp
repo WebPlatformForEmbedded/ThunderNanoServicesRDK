@@ -136,7 +136,7 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
