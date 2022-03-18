@@ -130,7 +130,7 @@ namespace Plugin {
         RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
         // Stop processing of the browser:
-        VARIABLE_IS_NOT_USED uint32_t result = _browser->Release(); 
+        VARIABLE_IS_NOT_USED uint32_t result = _browser->Release();
 
         // It should have been the last reference we are releasing,
         // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
@@ -142,7 +142,7 @@ namespace Plugin {
             // Lets trigger a cleanup sequence for
             // out-of-process code. Which will guard
             // that unwilling processes, get shot if
-            // not stopped friendly :~) 
+            // not stopped friendly :~)
             connection->Terminate();
             connection->Release();
         }
@@ -241,7 +241,7 @@ namespace Plugin {
         if (path.empty() == false) {
             string fullPath = _persistentStoragePath + path;
             Core::Directory dir(fullPath.c_str());
-            if (!dir.Destroy(true)) {
+            if (!dir.Destroy()) {
                 TRACE(Trace::Error, (_T("Failed to delete %s\n"), fullPath.c_str()));
                 result = Core::ERROR_GENERAL;
             }

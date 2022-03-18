@@ -1377,7 +1377,6 @@ static GSourceFuncs _handlerIntervention =
         uint32_t Identifier(string& id) const override
         {
 
-            uint32_t status = Core::ERROR_UNAVAILABLE;
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
             if (subSystem) {
                 const PluginHost::ISubSystem::IIdentifier* identifier(subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
@@ -2242,16 +2241,16 @@ static GSourceFuncs _handlerIntervention =
                 }, this, nullptr);
             }
 
-            if (_config.Transparent.Value() == true) {
-                WebKitColor transparentColor{0, 0, 0, 0};
-                webkit_web_view_set_background_color(_view, &transparentColor);
-            }
-
             auto* userContentManager = webkit_web_view_get_user_content_manager(_view);
             // webkit_user_content_manager_register_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
             g_signal_connect(userContentManager, "script-message-received::wpeNotifyWPEFramework",
                 reinterpret_cast<GCallback>(wpeNotifyWPEFrameworkMessageReceivedCallback), this);
             webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
+
+            if (_config.Transparent.Value() == true) {
+                WebKitColor transparent { 0, 0, 0, 0};
+                webkit_web_view_set_background_color(_view, &transparent);
+            }
 
             g_signal_connect(_view, "decide-policy", reinterpret_cast<GCallback>(decidePolicyCallback), this);
             g_signal_connect(_view, "notify::uri", reinterpret_cast<GCallback>(uriChangedCallback), this);

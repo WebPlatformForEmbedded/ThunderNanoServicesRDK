@@ -17,18 +17,17 @@
  * limitations under the License.
  */
 
-#include "Tags.h"
+#pragma once
 
-namespace WPEFramework {
+#ifndef MODULE_NAME
+#define MODULE_NAME Plugin_MessageControl
+#endif
 
-namespace Tags {
+#include <interfaces/IMessageControl.h>
+#include <messaging/messaging.h>
+#include <plugins/plugins.h>
+#include <interfaces/json/JsonData_MessageControl.h>
 
-const char* const Config = "Config.";
-const char* const Notification = "Notification";
-const char* const URL = "URL";
-const char* const BridgeObjectQuery = "BridgeObjectQuery";
-const char* const BridgeObjectReply = "BridgeObjectReply";
-const char* const BridgeObjectEvent = "BridgeObjectEvent";
-const char* const Headers = "Headers";
 
-} } ;
+#undef EXTERNAL
+#define EXTERNAL

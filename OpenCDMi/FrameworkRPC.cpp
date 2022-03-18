@@ -283,7 +283,7 @@ namespace Plugin {
                                 uint8_t keyIdLength = 0;
                                 const uint8_t* keyIdData = KeyId(keyIdLength);
                                 uint8_t *payloadBuffer = Buffer();
-                                CDMi::EncryptionPattern pattern = {0};
+                                CDMi::EncryptionPattern pattern = {0, 0};
                                 EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
                                 
                                 int cr = 0;
@@ -397,7 +397,7 @@ namespace Plugin {
                         ASSERT (buffer != nullptr);
 
                         Exchange::ISession::KeyStatus key;
-                        CommonEncryptionData::KeyId keyId(CommonEncryptionData::COMMON, buffer, length);
+                        CommonEncryptionData::KeyId keyId(static_cast<CommonEncryptionData::systemType>(0), buffer, length);
 
                         TRACE(Trace::Information, ("OnKeyStatusUpdate(%s)", keyMessage));
 
@@ -447,9 +447,7 @@ namespace Plugin {
                 };
 
             public:
-                #ifdef __WINDOWS__
-                #pragma warning(disable : 4355)
-                #endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                 SessionImplementation(
                     AccessorOCDM* parent,
                     const std::string keySystem,
@@ -502,9 +500,7 @@ namespace Plugin {
                     _mediaKeySession->Run(&_sink);
                     TRACE(Trace::Information, (_T("Constructed the Session Server side: %p"), this));
                 }
-                #ifdef __WINDOWS__
-                #pragma warning(default : 4355)
-                #endif
+POP_WARNING()
 
                 virtual ~SessionImplementation()
                 {

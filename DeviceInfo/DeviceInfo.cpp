@@ -36,22 +36,23 @@ namespace Plugin {
         Config config;
         config.FromString(service->ConfigLine());
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
-        _service = service;
         _subSystem = service->SubSystems();
+
         ASSERT(_subSystem != nullptr);
+
         if (_subSystem != nullptr) {
+            _service = service;
             _subSystem->Register(&_notification);
-        }
+            _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
-        _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
-
-        if (_implementation == nullptr) {
-            _service = nullptr;
-            SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
-        } else {
-            _implementation->Configure(_service);
-            _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
-            ASSERT(_deviceMetadataInterface != nullptr);
+            if (_implementation == nullptr) {
+                _service = nullptr;
+                SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
+            } else {
+                _implementation->Configure(_service);
+                _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
+                ASSERT(_deviceMetadataInterface != nullptr);
+            }
         }
 
         // On success return empty, to indicate there is no error text.
@@ -264,32 +265,23 @@ namespace Plugin {
 
     void DeviceInfo::UpdateDeviceIdentifier()
     {
-        if ((_subSystem != nullptr) &&
-            (_subSystem->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true)) {
-            string deviceId = GetDeviceId();
-            _adminLock.Lock();
-            _deviceId = deviceId;
-            _adminLock.Unlock();
-        }
-    }
+        ASSERT(_subSystem != nullptr);
 
-    string DeviceInfo::GetDeviceId() const
-    {
-        string deviceId;
-        const PluginHost::ISubSystem::IIdentifier* identifier(_subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
-        if (identifier != nullptr) {
-            uint8_t buffer[64];
+        if ((_deviceId.empty() == true) && (_subSystem->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true)) {
 
-            buffer[0] = static_cast<const PluginHost::ISubSystem::IIdentifier*>(identifier)
-                        ->Identifier(sizeof(buffer) - 1, &(buffer[1]));
+            const PluginHost::ISubSystem::IIdentifier* identifier(_subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
 
-            if (buffer[0] != 0) {
-                deviceId = Core::SystemInfo::Instance().Id(buffer, ~0);
+            if (identifier != nullptr) {
+                uint8_t buffer[64];
+
+                if ((buffer[0] = identifier->Identifier(sizeof(buffer) - 1, &(buffer[1]))) != 0) {
+                    _adminLock.Lock();
+                    _deviceId = Core::SystemInfo::Instance().Id(buffer, ~0);
+                    _adminLock.Unlock();
+                }
+                identifier->Release();
             }
-
-            identifier->Release();
         }
-        return deviceId;
     }
 
 } // namespace Plugin

@@ -45,6 +45,10 @@
 #include "AAMPJSBindings.h"
 #endif
 
+#if defined(ENABLE_FIREBOLTOS_ENDPOINT)
+#include "FireboltOSEndpoint.h"
+#endif
+
 using namespace WPEFramework;
 
 static Core::NodeId GetConnectionNode()
@@ -82,8 +86,12 @@ public:
         if (result != Core::ERROR_NONE) {
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
         } else {
-            // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
+// Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
+#ifdef __CORE_MESSAGING__
+            Core::Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
+#else
             Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
+#endif
         }
 
         _extension = WEBKIT_WEB_EXTENSION(g_object_ref(extension));
@@ -128,7 +136,7 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
@@ -145,6 +153,9 @@ private:
         JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
+#ifdef  ENABLE_FIREBOLTOS_ENDPOINT
+        JavaScript::FireboltOSEndpoint::InjectJS(world, frame);
+#endif
     }
     static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
                                     WebKitWebPage* page,
@@ -183,12 +194,12 @@ private:
             JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
         }
 #endif
-        return true;
+        return TRUE;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
     {
         WebKit::ApplyRequestHeaders(page, request);
-        return false;
+        return FALSE;
     }
 
 #ifdef  ENABLE_AAMP_JSBINDINGS

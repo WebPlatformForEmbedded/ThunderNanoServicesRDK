@@ -27,9 +27,7 @@ namespace Plugin {
     static Core::ProxyPoolType<Web::Response> responseFactory(4);
     static Core::ProxyPoolType<Web::JSONBodyType<LocationSync::Data>> jsonResponseFactory(4);
 
-#ifdef __WINDOWS__
-#pragma warning(disable : 4355)
-#endif
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
     LocationSync::LocationSync()
         : _skipURL(0)
         , _source()
@@ -38,9 +36,7 @@ namespace Plugin {
     {
         RegisterAll();
     }
-#ifdef __WINDOWS__
-#pragma warning(default : 4355)
-#endif
+POP_WARNING()
 
     LocationSync::~LocationSync() /* override */
     {
