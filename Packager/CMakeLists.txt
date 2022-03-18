@@ -67,6 +67,6 @@ configure_file(
         @ONLY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/opkg.conf
-        DESTINATION "/usr/share/${NAMESPACE}/${PLUGIN_NAME}")
+        DESTINATION "/usr/share/${NAMESPACE}/${PROJECT_NAME}")
 
 write_config()
