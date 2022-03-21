@@ -32,6 +32,7 @@ set(PLUGIN_LOCATIONSYNC_URI "location.webplatformforembedded.org" CACHE STRING "
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
+find_package(${NAMESPACE}Definitions REQUIRED)
 
 add_library(${MODULE_NAME} SHARED 
     Module.cpp
@@ -47,7 +48,8 @@ set_target_properties(${MODULE_NAME} PROPERTIES
 target_link_libraries(${MODULE_NAME} 
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
-        ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
+        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
 
 install(TARGETS ${MODULE_NAME} 
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
