@@ -405,8 +405,7 @@ namespace Plugin {
         service->Unregister(&_observer);
         service->Unregister(&_comSink);
 
-        if (_connectionId != 0) {
-            ASSERT(_control != nullptr);
+        if (_control != nullptr) {
             UnregisterAll();
             _control->UnregisterOutputNotification(&_outputNotification);
 

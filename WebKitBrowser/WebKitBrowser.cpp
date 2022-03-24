@@ -98,13 +98,17 @@ namespace Plugin {
         // Make sure we get no longer get any notifications, we are deactivating..
         _service->Unregister(&_notification);
 
-        if(_connectionId != 0) {
+        if(_browser != nullptr) {
             Exchange::JWebBrowser::Unregister(*this);
             UnregisterAll();
-            ASSERT(_browser != nullptr);
             _browser->Unregister(&_notification);
 
             PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
+            // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
+            if (stateControl != nullptr) {
+                stateControl->Unregister(&_notification);
+                stateControl->Release();
+            }
 
             if(_memory != nullptr) {
                 _memory->Release();
@@ -113,11 +117,6 @@ namespace Plugin {
             if(_application != nullptr) {
                 _application->Release();
                 _application = nullptr;
-            }
-            // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
-            if (stateControl != nullptr) {
-                stateControl->Unregister(&_notification);
-                stateControl->Release();
             }
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));

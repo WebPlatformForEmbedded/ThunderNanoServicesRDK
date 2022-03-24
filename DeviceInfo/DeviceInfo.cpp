@@ -84,16 +84,15 @@ namespace Plugin {
             _subSystem = nullptr;
         }
 
-        if(_connectionId != 0){
-            ASSERT(_implementation != nullptr);
+        if(_implementation != nullptr){
             UnregisterAll();
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
             if(_deviceMetadataInterface != nullptr){
                 _deviceMetadataInterface->Release();
                 _deviceMetadataInterface = nullptr;
             }
 
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
             VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
             _implementation = nullptr;
             // It should have been the last reference we are releasing,

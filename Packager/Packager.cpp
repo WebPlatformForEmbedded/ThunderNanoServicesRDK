@@ -68,8 +68,7 @@ namespace {
 
         _service->Unregister(&_notification);
 
-        if(_connectionId != 0) {
-            ASSERT(_implementation != nullptr);
+        if(_implementation != nullptr) {
             Unregister(kInstallMethodName);
             Unregister(kSynchronizeMethodName);
 

@@ -135,9 +135,8 @@ namespace Plugin {
 
         _service->Unregister(&_notification);
 
-        if(_connectionId != 0) {
+        if(_opencdmi != nullptr) {
             UnregisterAll();
-            ASSERT(_opencdmi != nullptr);
             _opencdmi->Deinitialize(service);
 
             if(_memory != nullptr) {

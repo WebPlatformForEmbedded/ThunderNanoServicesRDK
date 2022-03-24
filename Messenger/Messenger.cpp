@@ -66,8 +66,7 @@ namespace Plugin {
 
         _service->Unregister(&_notification);
 
-        if(_connectionId != 0) {
-            ASSERT(_roomAdmin != nullptr);
+        if(_roomAdmin != nullptr) {
             UnregisterAll();
             // Exit all the rooms (if any) that were joined by this client
             for (auto& room : _roomIds) {
@@ -75,12 +74,10 @@ namespace Plugin {
             }
 
             _roomIds.clear();
-
             _roomAdmin->Unregister(this);
             _rooms.clear();
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-
             VARIABLE_IS_NOT_USED uint32_t result = _roomAdmin->Release();
             _roomAdmin = nullptr;
             // It should have been the last reference we are releasing,
