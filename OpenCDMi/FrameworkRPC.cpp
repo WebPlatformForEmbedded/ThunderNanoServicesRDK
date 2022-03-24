@@ -1293,6 +1293,7 @@ namespace Plugin {
                 factory++;
             }
 
+            _thread.Stop();
             if (_service != nullptr) {
                 delete _service;
             }
@@ -1306,7 +1307,6 @@ namespace Plugin {
             }
             _systemLibraries.clear();
 
-            _thread.Stop();
             _shell->Release();
             _shell = nullptr;
         }
