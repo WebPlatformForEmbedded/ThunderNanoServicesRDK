@@ -61,8 +61,8 @@ set(PLUGIN_WEBKITBROWSER_MSEBUFFERS "audio:2m,video:15m,text:1m" CACHE STRING "M
 set(PLUGIN_WEBKITBROWSER_DISKCACHE "0" CACHE STRING "Disk Cache")
 set(PLUGIN_WEBKITBROWSER_XHRCACHE "true" CACHE STRING "XHR Cache")
 set(PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY "Extension" CACHE STRING "Directory to store extension libraries")
-set(PLUGIN_WEBKITBROWSER_LOCALSTORAGE "" CACHE STRING "HTML5 local storage path")
-set(PLUGIN_WEBKITBROWSER_COOKIESTORAGE "" CACHE STRING "Browser cookie storage path")
+set(PLUGIN_WEBKITBROWSER_LOCALSTORAGE "%persistentpath%" CACHE STRING "HTML5 local storage path")
+set(PLUGIN_WEBKITBROWSER_COOKIESTORAGE "%persistentpath%" CACHE STRING "Browser cookie storage path")
 set(PLUGIN_WEBKITBROWSER_WINDOWCLOSE "false" CACHE STRING "Allow window close")
 set(PLUGIN_WEBKITBROWSER_WEBGL "true" CACHE STRING "Enable WebGL")
 set(PLUGIN_WEBKITBROWSER_RESOLUTION "720p" CACHE STRING "Browser resolution")
@@ -134,6 +134,7 @@ set(PLUGIN_AMAZON_MODE "Local" CACHE STRING "Controls if the plugin should run i
 set(PLUGIN_AMAZON_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Amazon App")
 set(PLUGIN_AMAZON_WEBINSPECTOR_ADDRESS "0.0.0.0:9999" CACHE STRING "IP:Port for WebInspector of Amazon")
 set(PLUGIN_AMAZON_LOCALSTORAGE_ENABLE "true" CACHE STRING "Enable LocalStorage of Amazon")
+set(PLUGIN_WEBKITBROWSER_DISKCACHEDIR "%persistentpath%DiskCache" CACHE STRING "Disk Cache directory in persistent path")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
