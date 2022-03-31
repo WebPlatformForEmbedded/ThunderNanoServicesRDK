@@ -281,53 +281,39 @@ namespace Plugin {
             self->_inProgress.Install->SetState(Exchange::IPackager::INSTALLED);
             self->NotifyStateChange();
             self->_inProgress.Install->SetAppName(progress->pkg->local_filename);
-            string mfilename = self->GetMetadataFile(self->_inProgress.Install->AppName());
-            string callsign = self->GetCallsign(mfilename);
-            if(!callsign.empty()) {
+            string callsign = self->GetCallsignFromMetaDataFile(self->_inProgress.Install->AppName());
+            if (!callsign.empty()) {
                 self->DeactivatePlugin(callsign);
             }
         }
     }
 #endif
 
-    string PackagerImplementation::GetMetadataFile(const string& appName)
-    {
-        char *dnld_loc = opkg_config->cache_dir;
-        string mfilename = string(dnld_loc) + "/" + appName + "/etc/apps/" + appName + "_package.json";
-        return mfilename;
-    }
-
-    string PackagerImplementation::GetCallsign(const string& mfilename)
+    string PackagerImplementation::GetCallsignFromMetaDataFile(const string& appName)
     {
         string callsign = "";
-        TRACE(Trace::Information, (_T("[RDM]: Metadata is %s"),mfilename.c_str()));
-        Core::File file(mfilename);
-        if(file.Open()) {
-            JsonObject parameters;
-            if(parameters.IElement::FromFile(file)) {
-                if(parameters.HasLabel("type")) {
-                    string type = parameters["type"].String();
-                    if( 0 == type.compare("plugin")) {
-                        if(parameters.HasLabel("callsign")) {
-                            callsign = parameters["callsign"].String();
-                        }
-                        else {
+        string metaDataFileName = (string(opkg_config->cache_dir) + "/" + appName + string(AppPath) + appName + string(PackageJSONFile));
+        TRACE(Trace::Information, (_T("[RDM]: Metadata is %s"), metaDataFileName.c_str()));
+        Core::File metaDataFile(metaDataFileName);
+        if (metaDataFile.Open()) {
+            MetaData metaData;
+            Core::OptionalType<Core::JSON::Error> error;
+            if (metaData.IElement::FromFile(metaDataFile, error)) {
+                if (error.IsSet() == true) {
+                    TRACE(Trace::Error, (_T("Parsing failed with %s"), ErrorDisplayMessage(error.Value()).c_str()));
+                } else {
+                    if ((metaData.Type.IsSet() == true) && (metaData.Type.Value() == PackagerImplementation::PackageType::PLUGIN)) {
+                        if (metaData.Callsign.IsSet() == true) {
+                            callsign = metaData.Callsign.Value();
+                        } else {
                             TRACE(Trace::Information, (_T("[RDM]: callsign missing in metadata")));
                         }
-                    }
-                    else {
-                        TRACE(Trace::Information, (_T("[RDM]: Package does not contain thunder plugin")));
+                    } else {
+                        TRACE(Trace::Information, (_T("[RDM]: MetaData file does not contain plugin type")));
                     }
                 }
-                else {
-                    TRACE(Trace::Information, (_T("[RDM]: Metadata type not found")));
-                }
             }
-            else {
-                TRACE(Trace::Error, (_T("[RDM]: Error in reading the file")));
-            }
-        }
-        else {
+        } else {
             TRACE(Trace::Error, (_T("[RDM]: Error in opening the file")));
         }
         return callsign;
@@ -335,31 +321,34 @@ namespace Plugin {
 
     void PackagerImplementation::DeactivatePlugin(const string& callsign)
     {
-        ASSERT(callsign.empty() == false);
         ASSERT(_service != nullptr);
-        TRACE(Trace::Information, (_T("[RDM]: callsign from metadata is %s"), callsign.c_str()));
-        PluginHost::IShell* dlPlugin = _service->QueryInterfaceByCallsign<PluginHost::IShell>(callsign);
+        ASSERT(callsign.empty() == false);
 
-        if (dlPlugin == nullptr) {
-            TRACE(Trace::Error, (_T("[RDM]: Plugin %s is not configured in this setup"), callsign.c_str()));
-        }
-        else {
-            PluginHost::IShell::state currentState(dlPlugin->State());
-            if (currentState != PluginHost::IShell::UNAVAILABLE) {
-                TRACE(Trace::Information, (_T("[RDM]: Plugin %s is not in Unavailable state. Hence, not deactivating it"),callsign.c_str()));
-            }
-            else {
-                TRACE(Trace::Information, (_T("[RDM]: Plugin %s is in Unavailable state"), callsign.c_str()));
-                uint32_t result = dlPlugin->Deactivate(PluginHost::IShell::REQUESTED);
+        TRACE(Trace::Information, (_T("[RDM]: callsign from metadata is %s"), callsign.c_str()));
+        PluginHost::IShell* plugin = _service->QueryInterfaceByCallsign<PluginHost::IShell>(callsign);
+
+        if (plugin != nullptr) {
+            PluginHost::IShell::state currentState(plugin->State());
+            if ((currentState == PluginHost::IShell::ACTIVATED) || (currentState == PluginHost::IShell::ACTIVATION) || (currentState == PluginHost::IShell::PRECONDITION)) {
+                TRACE(Trace::Information, (_T("[RDM]: Plugin %s is activated state, so deactivating"), callsign.c_str()));
+                uint32_t result = plugin->Deactivate(PluginHost::IShell::REQUESTED);
                 if (result == Core::ERROR_NONE) {
                     TRACE(Trace::Information, (_T("[RDM]: %s moved to Deactivated state"), callsign.c_str()));
                 }
                 else {
                     TRACE(Trace::Error, (_T("[RDM]: Failed to move %s to Deactivated state"), callsign.c_str()));
                 }
+            } else if (currentState == PluginHost::IShell::UNAVAILABLE) {
+                TRACE(Trace::Information, (_T("[RDM]: Plugin %s is unavailable"), callsign.c_str()));
             }
+            else {
+                TRACE(Trace::Information, (_T("[RDM]: Plugin %s is already in deactivated state"), callsign.c_str()));
+            }
+
+            plugin->Release();
+        } else {
+            TRACE(Trace::Error, (_T("[RDM]: Plugin %s is not configured in this setup"), callsign.c_str()));
         }
-        dlPlugin->Release();
     }
 
     void PackagerImplementation::NotifyStateChange()
@@ -434,4 +423,8 @@ namespace Plugin {
     }
 
 }  // namespace Plugin
+ENUM_CONVERSION_BEGIN(Plugin::PackagerImplementation::PackageType)
+    { Plugin::PackagerImplementation::PackageType::NONE, _TXT("none") },
+    { Plugin::PackagerImplementation::PackageType::PLUGIN, _TXT("plugin") },
+ENUM_CONVERSION_END(Plugin::PackagerImplementation::PackageType);
 }  // namespace WPEFramework

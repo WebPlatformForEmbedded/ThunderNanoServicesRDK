@@ -33,10 +33,17 @@ namespace WPEFramework {
 namespace Plugin {
 
     class PackagerImplementation : public Exchange::IPackager {
-    public:
-        PackagerImplementation(const PackagerImplementation&) = delete;
-        PackagerImplementation& operator=(const PackagerImplementation&) = delete;
+    private:
+        static constexpr const TCHAR* AppPath = _T("/etc/apps/");
+        static constexpr const TCHAR* PackageJSONFile = _T("_package.json");
 
+    public:
+        enum PackageType {
+            NONE,
+            PLUGIN
+        };
+
+    public:
         class EXTERNAL Config : public Core::JSON::Container {
         public:
             Config()
@@ -66,6 +73,7 @@ namespace Plugin {
             Config(const Config&) = delete;
             Config& operator=(const Config&) = delete;
 
+        public:
             Core::JSON::String  ConfigFile;
             Core::JSON::String  TempDir;
             Core::JSON::String  CacheDir;
@@ -75,6 +83,35 @@ namespace Plugin {
             Core::JSON::Boolean NoSignatureCheck;
             Core::JSON::Boolean AlwaysUpdateFirst;
         };
+
+        class MetaData : public Core::JSON::Container {
+        public:
+             MetaData()
+                 : Core::JSON::Container()
+                 , Callsign()
+                 , Type(NONE)
+             {
+                 Add(_T("callsign"), &Callsign);
+                 Add(_T("type"), &Type);
+             }
+             MetaData(const MetaData& copy)
+                 : Core::JSON::Container()
+                 , Callsign(copy.Callsign)
+                 , Type(copy.Type)
+             {
+                 Add(_T("callsign"), &Callsign);
+                 Add(_T("type"), &Type);
+             }
+             ~MetaData() override = default;
+
+        public:
+             Core::JSON::String Callsign;
+             Core::JSON::EnumType<PackageType> Type;
+        };
+
+    public:
+        PackagerImplementation(const PackagerImplementation&) = delete;
+        PackagerImplementation& operator=(const PackagerImplementation&) = delete;
 
         PackagerImplementation()
             : _adminLock()
@@ -87,10 +124,10 @@ namespace Plugin {
             , _alwaysUpdateFirst(false)
             , _volatileCache(false)
             , _opkgInitialized(false)
+            , _service(nullptr)
             , _worker(this)
             , _isUpgrade(false)
             , _isSyncing(false)
-            , _service(nullptr)
         {
         }
 
@@ -207,9 +244,10 @@ namespace Plugin {
 
             void SetAppName(const TCHAR path[])
             {
-                string _pathname = Core::File::PathName(string(path));
-                string _dirname = _pathname.substr(0,_pathname.size()-1);
-                _appname = Core::File::FileName(_dirname);
+                string pathName = Core::File::PathName(string(path));
+                if (pathName.empty() == false) {
+                    _appname = Core::File::FileName(string(pathName.c_str(), pathName.size() - 1));
+                }
             }
 
             void SetError(uint32_t err)
@@ -292,8 +330,7 @@ namespace Plugin {
 #if !defined (DO_NOT_USE_DEPRECATED_API)
         static void InstallationProgessNoLock(const _opkg_progress_data_t* progress, void* data);
 #endif
-        string GetMetadataFile(const string& appName);
-        string GetCallsign(const string& mfilename);
+        string GetCallsignFromMetaDataFile(const string& appName);
         void DeactivatePlugin(const string& callsign);
         void NotifyStateChange();
         void NotifyRepoSynced(uint32_t status);
