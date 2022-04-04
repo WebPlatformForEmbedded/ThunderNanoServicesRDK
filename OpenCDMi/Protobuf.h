@@ -70,8 +70,8 @@ namespace Protobuf {
         }
 
     private:
-        bool _set;
         T _value;
+        bool _set;
     }; // class ValueElementType
 
     template<typename T>

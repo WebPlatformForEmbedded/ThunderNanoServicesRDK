@@ -32,7 +32,7 @@ namespace FireboltOSEndpoint {
 
 static char* OnGetEndpoint(gpointer userData)
 {
-    WebKitFrame* frame = reinterpret_cast<WebKitFrame*>(userData);
+    VARIABLE_IS_NOT_USED WebKitFrame* frame = reinterpret_cast<WebKitFrame*>(userData);
 
     string thunderAccess;
     if ( !Core::SystemInfo::GetEnvironment(_T("THUNDER_ACCESS"), thunderAccess) )
