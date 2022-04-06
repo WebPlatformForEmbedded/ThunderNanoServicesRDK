@@ -1,0 +1,20 @@
+from json_helper import *
+
+config = JSON()
+
+config.add("autostart", @PLUGIN_DEVICEINFO_AUTOSTART@)
+
+configuration = JSON()
+configuration.add_non_empty("modelName", "@PLUGIN_DEVICEINFO_MODELNAME@") #key-value will be added only if value not empty
+configuration.add_non_empty("modelYear", @PLUGIN_DEVICEINFO_MODELYEAR@)
+configuration.add_non_empty("systemIntegratorName", "@PLUGIN_DEVICEINFO_SYSTEMINTEGRATORNAME@")
+configuration.add_non_empty("friendlyName", "@PLUGIN_DEVICEINFO_FRIENDLYNAME@")
+configuration.add_non_empty("platformName", "@PLUGIN_DEVICEINFO_PLATFORMNAME@")
+
+root = JSON()
+root.add_non_empty("mode", "Off")
+
+configuration.add_non_empty("root", root)
+
+config.configuration = configuration
+
