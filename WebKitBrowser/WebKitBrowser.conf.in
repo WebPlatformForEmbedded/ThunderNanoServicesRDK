@@ -2,71 +2,75 @@ from json_helper import *
 
 config = JSON()
 
-config.precondition = ["Graphics"]
+precondition = ["Graphics"]
 if JSON.to_bool("@PLUGIN_WEBSERVER@"):
-    config.precondition.append("WebSource")
+    precondition.append("WebSource")
+config.add("precondition",precondition)
 
-config.add("autostart", @PLUGIN_WEBKITBROWSER_AUTOSTART@)
-config.add("resumed", @PLUGIN_WEBKITBROWSER_RESUMED@)
+config.add("autostart", "@PLUGIN_WEBKITBROWSER_AUTOSTART@")
+config.add("resumed", "@PLUGIN_WEBKITBROWSER_RESUMED@")
 
 config.add_non_empty("persistentpathpostfix", "@PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX@")
 
 configuration = JSON()
 
-configuration.url = "@PLUGIN_WEBKITBROWSER_STARTURL@"
+configuration.add("url", "@PLUGIN_WEBKITBROWSER_STARTURL@")
 configuration.add_non_empty("useragent", "@PLUGIN_WEBKITBROWSER_USERAGENT@")
 
 if not JSON.to_bool("@WEBKIT_GLIB_API@"):
-    configuration.injectedbundle = "libWPEInjectedBundle@CMAKE_SHARED_LIBRARY_SUFFIX@"
+    configuration.add("injectedbundle", "libWPEInjectedBundle@CMAKE_SHARED_LIBRARY_SUFFIX@")
 else:
-    configuration.extensiondir = "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@"
+    configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 
-configuration.add("transparent", @PLUGIN_WEBKITBROWSER_TRANSPARENT@)
-configuration.compositor = "noaa"
-configuration.inspector = "@PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS@"
-configuration.fps = true
-configuration.cursor = false
-configuration.touch = false
-configuration.msebuffers = "@PLUGIN_WEBKITBROWSER_MSEBUFFERS@"
-configuration.add("thunderdecryptorpreference", @PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE@)
-configuration.memoryprofile = "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@"
-configuration.memorypressure = "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE@"
-configuration.mediacontenttypesrequiringhardwaresupport = "@PLUGIN_WEBKITBROWSER_MEDIA_CONTENT_TYPES_REQUIRING_HARDWARE_SUPPORT@"
-configuration.add("mediadiskcache", @PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@)
+configuration.add("transparent", "@PLUGIN_WEBKITBROWSER_TRANSPARENT@")
+configuration.add("compositor", "noaa")
+configuration.add("inspector", "@PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS@")
+configuration.add("fps", "true")
+configuration.add("cursor", "false")
+configuration.add("touch", "false")
+configuration.add("msebuffers", "@PLUGIN_WEBKITBROWSER_MSEBUFFERS@")
+configuration.add("thunderdecryptorpreference", "@PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE@")
+configuration.add("memoryprofile", "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@")
+configuration.add("memorypressure", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE@")
+configuration.add("mediacontenttypesrequiringhardwaresupport",
+                    "@PLUGIN_WEBKITBROWSER_MEDIA_CONTENT_TYPES_REQUIRING_HARDWARE_SUPPORT@")
+configuration.add("mediadiskcache", "@PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@")
 configuration.add_non_empty("diskcachedir", "@PLUGIN_WEBKITBROWSER_DISKCACHEDIR@")
-configuration.diskcache = "@PLUGIN_WEBKITBROWSER_DISKCACHE@"
-configuration.add("xhrcache",@PLUGIN_WEBKITBROWSER_XHRCACHE@)
-configuration.add("webgl",@PLUGIN_WEBKITBROWSER_WEBGL@)
-configuration.threadedpainting = @PLUGIN_WEBKITBROWSER_THREADEDPAINTING@
-configuration.add_non_empty("height", @PLUGIN_WEBKITBROWSER_HEIGHT@)
-configuration.add_non_empty("width", @PLUGIN_WEBKITBROWSER_WIDTH@)
+configuration.add("diskcache", "@PLUGIN_WEBKITBROWSER_DISKCACHE@")
+configuration.add("xhrcache", "@PLUGIN_WEBKITBROWSER_XHRCACHE@")
+configuration.add("webgl", "@PLUGIN_WEBKITBROWSER_WEBGL@")
+configuration.add("threadedpainting", "@PLUGIN_WEBKITBROWSER_THREADEDPAINTING@")
+configuration.add_non_empty("height", "@PLUGIN_WEBKITBROWSER_HEIGHT@")
+configuration.add_non_empty("width", "@PLUGIN_WEBKITBROWSER_WIDTH@")
 configuration.add_non_empty("injectedbundle", "@PLUGIN_WEBKITBROWSER_INJECTEBLE_BUNDLE@")
 configuration.add_non_empty("clientidentifier", "@PLUGIN_WEBKITBROWSER_CLIENTIDENTIFIER@")
-configuration.add("localstorageenabled", @PLUGIN_WEBKITBROWSER_LOCALSTORAGE_ENABLE@)
+configuration.add("localstorageenabled", "@PLUGIN_WEBKITBROWSER_LOCALSTORAGE_ENABLE@")
 configuration.add_non_empty("localstorage", "@PLUGIN_WEBKITBROWSER_LOCALSTORAGE@")
 configuration.add_non_empty("cookiestorage", "@PLUGIN_WEBKITBROWSER_COOKIESTORAGE@")
-configuration.add_non_empty("windowclose", @PLUGIN_WEBKITBROWSER_WINDOWCLOSE@)
+
+if JSON.to_bool("@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@"):
+    configuration.add("windowclose", "@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@")
+
 configuration.add_non_empty("execpath", "@PLUGIN_WEBKITBROWSER_ALTERNATIVE_EXEC_PATH@")
 configuration.add_non_empty("proxy", "@PLUGIN_WEBKITBROWSER_HTTP_PROXY@")
 configuration.add_non_empty("proxyexclusion", "@PLUGIN_WEBKITBROWSER_HTTP_PROXY_EXCLUSION@")
 configuration.add_non_empty("clientcert", "@PLUGIN_WEBKITBROWSER_CLIENT_CERT@")
 configuration.add_non_empty("clientcertkey", "@PLUGIN_WEBKITBROWSER_CLIENT_CERT_KEY@")
-configuration.add_non_empty("logtosystemconsoleenabled", @PLUGIN_WEBKITBROWSER_LOGTOSYSTEMCONSOLE@)
-configuration.add_non_empty("secure", @PLUGIN_WEBKITBROWSER_SECURE@)
-configuration.watchdogchecktimeoutinseconds = 10
-configuration.watchdoghangthresholdtinseconds = 60
+configuration.add_non_empty("logtosystemconsoleenabled", "@PLUGIN_WEBKITBROWSER_LOGTOSYSTEMCONSOLE@")
+configuration.add_non_empty("secure", "@PLUGIN_WEBKITBROWSER_SECURE@")
+configuration.add("watchdogchecktimeoutinseconds", 10)
+configuration.add("watchdoghangthresholdtinseconds", 60)
 
 root = JSON()
-root.mode = "@PLUGIN_WEBKITBROWSER_MODE@"
-root.locator = "lib@PLUGIN_WEBKITBROWSER_IMPLEMENTATION@.so"
-root.add_non_empty("user", @PLUGIN_WEBKITBROWSER_USER@)
+root.add("mode", "@PLUGIN_WEBKITBROWSER_MODE@")
+root.add("locator", "lib@PLUGIN_WEBKITBROWSER_IMPLEMENTATION@.so")
+root.add_non_empty("user", "@PLUGIN_WEBKITBROWSER_USER@")
 root.add_non_empty("group", "@PLUGIN_WEBKITBROWSER_GROUP@")
-configuration.add_non_empty("root", root)
+configuration.add("root", root)
 
 javascript = JSON()
-javascript.useJIT = JSON.to_bool("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@")
-javascript.useDFG = JSON.to_bool("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@")
-configuration.javascript = javascript
+javascript.add("useJIT", JSON.to_bool("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@"))
+javascript.add("useDFG", JSON.to_bool("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@"))
+configuration.add("javascript", javascript)
 
-
-config.configuration = configuration
+config.add("configuration", configuration)
