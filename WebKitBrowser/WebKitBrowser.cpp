@@ -335,35 +335,33 @@ namespace WebKitBrowser {
         ProcessMemoryObserverImpl(const ProcessMemoryObserverImpl&) = delete;
         ProcessMemoryObserverImpl& operator=(const ProcessMemoryObserverImpl&) = delete;
 
-        uint32_t Resident(uint64_t& resident) const override {
-            resident = _info.Resident();
-            return Core::ERROR_NONE;
+        uint64_t Resident() const override {
+            return _info.Resident();
         }
 
-        uint32_t Allocated(uint64_t& allocated) const override {
-            allocated = _info.Allocated();
-            return Core::ERROR_NONE;
+        uint64_t Allocated() const override {
+            return _info.Allocated();
         }
 
-        uint32_t Shared(uint64_t& shared) const override {
-            shared = _info.Shared();
-            return Core::ERROR_NONE;
+        uint64_t Shared() const override {
+            return _info.Shared();
         }
 
-        uint32_t IsOperational(bool& operational) const override {
-            operational = _info.IsActive();
-            return Core::ERROR_NONE;
+        uint8_t Processes() const override {
+            return 0; // webkit and network process do now spawn mew children
+        } 
+
+        bool IsOperational() const override {
+            return _info.IsActive();
         }
 
-        uint32_t Identifier(uint32_t& id) const override {
+        uint32_t Identifier() const override {
             static_assert(sizeof(Core::process_t) <= sizeof(uint32_t), "PId type size too big to fit in IProcessMemory::ID");
-            id = _info.Id();
-            return Core::ERROR_NONE;
+            return _info.Id();
         }
 
-        uint32_t Name(string& name) const override {
-            name = _info.Name();
-            return Core::ERROR_NONE;
+        string Name() const override {
+            return _info.Name();
         }
 
         BEGIN_INTERFACE_MAP(ProcessMemoryObserverImpl)

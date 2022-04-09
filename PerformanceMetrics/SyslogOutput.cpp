@@ -338,9 +338,9 @@ public:
 
             uint64_t resident = 0;
             if( _processmemory != nullptr ) {
-                _processmemory->Resident(resident);
-                uint32_t pid = 0;
-                if( _processmemory->Identifier(pid) == Core::ERROR_NONE ) {
+                resident = _processmemory->Resident();
+                uint32_t pid = _processmemory->Identifier();
+                if( pid != 0 ) {
                     metrics.StatmLine(GetProcessStatmLine(pid));
                 }
             } else if ( _memory != nullptr ) {
@@ -389,7 +389,7 @@ private:
 
         uint32_t pid = 0;
         if( _processmemory != nullptr ) {
-            _processmemory->Identifier(pid);
+            pid = _processmemory->Identifier();
         }
         output.ProcessPID = pid;
 
