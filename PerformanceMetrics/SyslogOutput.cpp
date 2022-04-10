@@ -307,7 +307,7 @@ public:
 
     void LoadFinished(const string& URL, const int32_t, const bool success, const uint32_t totalsuccess, const uint32_t totalfailed) override 
     {
-        if( ( URL != aboutBlankURL ) && ( _timeIdleFirstStart > 0 ) ) {
+        if( ( URL != startURL ) && ( _timeIdleFirstStart > 0 ) ) {
             _adminLock.Lock();
             URLLoadedMetrics metrics(_urloadmetrics);
             _adminLock.Unlock();
@@ -325,7 +325,7 @@ public:
 
     void URLChange(const string& URL, const bool) override 
     {
-        if( ( URL != aboutBlankURL ) && ( _timeIdleFirstStart > 0 ) ) {
+        if( ( URL != startURL ) && ( _timeIdleFirstStart > 0 ) ) {
             URLLoadedMetrics metrics;
             Core::SystemInfo::MemorySnapshot snapshot = Core::SystemInfo::Instance().TakeMemorySnapshot();
             metrics.Total(snapshot.Total());

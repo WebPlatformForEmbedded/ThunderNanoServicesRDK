@@ -87,7 +87,7 @@ namespace Plugin {
         ASSERT(_observable.IsValid() == false);
     }
 
-    constexpr char PerformanceMetrics::IBrowserMetricsLogger::aboutBlankURL[];
+    constexpr char PerformanceMetrics::IBrowserMetricsLogger::startURL[];
 
 }
 }

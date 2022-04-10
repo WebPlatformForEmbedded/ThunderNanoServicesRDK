@@ -118,7 +118,7 @@ namespace Plugin {
 
         struct IBrowserMetricsLogger : public IStateMetricsLogger {
         public:
-            static constexpr char aboutBlankURL[] = _T("about:blank");
+            static constexpr char startURL[] = _T("about:blank");
 
             virtual void LoadFinished(const string& URL, const int32_t httpstatus, const bool success, const uint32_t totalsuccess, const uint32_t totalfailed) = 0;
             virtual void URLChange(const string& URL, const bool loaded) = 0;
@@ -368,7 +368,7 @@ namespace Plugin {
 
             void LoadFinished(const string& URL) override 
             {
-                if( URL != IBrowserMetricsLogger::aboutBlankURL ) {
+                if( URL != IBrowserMetricsLogger::startURL ) {
                     ++_nbrloaded;
                 }
                 Logger().LoadFinished(URL, 0, true, _nbrloaded, 0);
@@ -449,14 +449,14 @@ namespace Plugin {
 
             void LoadFinished(const string& URL, const int32_t httpstatus) override
             {
-                if( URL != IBrowserMetricsLogger::aboutBlankURL ) {
+                if( URL != IBrowserMetricsLogger::startURL ) {
                     ++_nbrloadedsuccess;
                 }
                 Logger().LoadFinished(URL, httpstatus, true, _nbrloadedsuccess, _nbrloadedfailed);
             }
             void LoadFailed(const string& URL) override
             {
-                if( URL != IBrowserMetricsLogger::aboutBlankURL ) {
+                if( URL != IBrowserMetricsLogger::startURL ) {
                     ++_nbrloadedfailed;
                 }
                 Logger().LoadFinished(URL, 0, false, _nbrloadedsuccess, _nbrloadedfailed);
