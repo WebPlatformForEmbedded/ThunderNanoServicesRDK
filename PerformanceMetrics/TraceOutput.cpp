@@ -182,17 +182,20 @@ public:
 
     void LoadFinished(const string& URL, const int32_t, const bool success, const uint32_t totalsuccess, const uint32_t totalfailed) override 
     {
-        uint64_t rss = 0;
-        if( _memory != nullptr ) {
-            rss = _memory->Resident();
+        if( ( URL != startURL ) ) {
+
+            uint64_t rss = 0;
+            if( _memory != nullptr ) {
+                rss = _memory->Resident();
+            }
+            TRACE(Trace::Metric, (_T("Browser %s page loaded [%s] %s, total success[%u], total failure[%u], RSS: %llu"), 
+                                        _callsign.c_str(), 
+                                        URL.c_str(),
+                                        (success == true ? _T("successfully") : _T("unsuccessfully")),
+                                        totalsuccess,
+                                        totalfailed,
+                                        rss));
         }
-        TRACE(Trace::Metric, (_T("Browser %s page loaded [%s] %s, total success[%u], total failure[%u], RSS: %llu"), 
-                                    _callsign.c_str(), 
-                                    URL.c_str(),
-                                    (success == true ? _T("successfully") : _T("unsuccessfully")),
-                                    totalsuccess,
-                                    totalfailed,
-                                    rss));
     }
 
     void URLChange(const string&, const bool) override 
