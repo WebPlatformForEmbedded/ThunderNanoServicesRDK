@@ -38,7 +38,7 @@ namespace {
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
         _service->Register(&_notification);
 
-        string result(EMPTY_STRING);
+        string result;
         _implementation = _service->Root<Exchange::IPackager>(_connectionId, 2000, _T("PackagerImplementation"));
         if (_implementation == nullptr) {
             result = _T("Couldn't create PACKAGER instance ");

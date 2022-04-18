@@ -34,7 +34,7 @@ namespace Plugin {
         ASSERT(service != nullptr);
         ASSERT(_connectionId == 0);
 
-        string message(EMPTY_STRING);
+        string message;
         Config config;
         config.FromString(service->ConfigLine());
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
@@ -55,12 +55,14 @@ namespace Plugin {
                 message = _T("DeviceInfo could not be instantiated");
                 SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
             } else {
-                RegisterAll();
                 _implementation->Configure(_service);
                 _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
                 if(_deviceMetadataInterface == nullptr) {
                     message = _T("DeviceInfo MetaData Interface could not be instantiated");
+                } else {
+                    RegisterAll()
                 }
+
             }
         }
 
@@ -85,9 +87,9 @@ namespace Plugin {
         }
 
         if(_implementation != nullptr){
-            UnregisterAll();
 
             if(_deviceMetadataInterface != nullptr){
+                UnregisterAll();
                 _deviceMetadataInterface->Release();
                 _deviceMetadataInterface = nullptr;
             }

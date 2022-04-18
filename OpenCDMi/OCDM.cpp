@@ -136,13 +136,15 @@ namespace Plugin {
         _service->Unregister(&_notification);
 
         if(_opencdmi != nullptr) {
-            UnregisterAll();
-            _opencdmi->Deinitialize(service);
 
             if(_memory != nullptr) {
                 _memory->Release();
                 _memory = nullptr;
             }
+
+            _opencdmi->Deinitialize(service);
+
+            UnregisterAll();
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 

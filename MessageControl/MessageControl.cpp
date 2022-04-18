@@ -359,7 +359,7 @@ namespace Plugin {
         ASSERT(_service == nullptr);
         ASSERT(_connectionId == 0);
 
-        string message(EMPTY_STRING);
+        string message;
 
         _service = service;
         _service->AddRef();
@@ -408,6 +408,7 @@ namespace Plugin {
         if (_control != nullptr) {
             UnregisterAll();
             _control->UnregisterOutputNotification(&_outputNotification);
+            _webSocketExporter.reset();
 
             _RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 

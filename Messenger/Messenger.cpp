@@ -31,7 +31,7 @@ namespace Plugin {
 
     /* virtual */ const string Messenger::Initialize(PluginHost::IShell* service)
     {
-        string message(EMPTY_STRING);
+        string message;
 
         ASSERT(service != nullptr);
         ASSERT(_service == nullptr);
@@ -67,7 +67,6 @@ namespace Plugin {
         _service->Unregister(&_notification);
 
         if(_roomAdmin != nullptr) {
-            UnregisterAll();
             // Exit all the rooms (if any) that were joined by this client
             for (auto& room : _roomIds) {
                 room.second->Release();
@@ -76,6 +75,7 @@ namespace Plugin {
             _roomIds.clear();
             _roomAdmin->Unregister(this);
             _rooms.clear();
+            UnregisterAll();
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
             VARIABLE_IS_NOT_USED uint32_t result = _roomAdmin->Release();

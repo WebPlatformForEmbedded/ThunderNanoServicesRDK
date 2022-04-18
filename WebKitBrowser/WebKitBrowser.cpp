@@ -27,7 +27,7 @@ namespace Plugin {
 
     /* virtual */ const string WebKitBrowser::Initialize(PluginHost::IShell* service)
     {
-        string message(EMPTY_STRING);
+        string message;
         ASSERT(service != nullptr);
         ASSERT(_service == nullptr);
         ASSERT(_browser == nullptr);
@@ -48,8 +48,6 @@ namespace Plugin {
         _browser = service->Root<Exchange::IWebBrowser>(_connectionId, 2000, _T("WebKitImplementation"));
 
         if (_browser != nullptr) {
-            RegisterAll();
-            Exchange::JWebBrowser::Register(*this, _browser);
 
             PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
 
@@ -60,6 +58,9 @@ namespace Plugin {
             } else {
                 _application = _browser->QueryInterface<Exchange::IApplication>();
                 if (_application != nullptr) {
+                    RegisterAll();
+                    Exchange::JWebBrowser::Register(*this, _browser);
+
                     _browser->Register(&_notification);
 
                     const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
@@ -99,9 +100,6 @@ namespace Plugin {
         _service->Unregister(&_notification);
 
         if(_browser != nullptr) {
-            Exchange::JWebBrowser::Unregister(*this);
-            UnregisterAll();
-            _browser->Unregister(&_notification);
 
             PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
             // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
@@ -115,6 +113,9 @@ namespace Plugin {
                 _memory = nullptr;
             }
             if(_application != nullptr) {
+                Exchange::JWebBrowser::Unregister(*this);
+                UnregisterAll()
+                _browser->Unregister(&_notification);
                 _application->Release();
                 _application = nullptr;
             }
