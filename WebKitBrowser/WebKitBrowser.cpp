@@ -114,7 +114,7 @@ namespace Plugin {
             }
             if(_application != nullptr) {
                 Exchange::JWebBrowser::Unregister(*this);
-                UnregisterAll()
+                UnregisterAll();
                 _browser->Unregister(&_notification);
                 _application->Release();
                 _application = nullptr;

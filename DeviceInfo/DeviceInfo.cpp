@@ -60,7 +60,7 @@ namespace Plugin {
                 if(_deviceMetadataInterface == nullptr) {
                     message = _T("DeviceInfo MetaData Interface could not be instantiated");
                 } else {
-                    RegisterAll()
+                    RegisterAll();
                 }
 
             }
