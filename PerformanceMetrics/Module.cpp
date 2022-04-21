@@ -16,22 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+#include "Module.h"
 
-#pragma once
-
-#include <WPE/WebKit.h>
-#include <WPE/WebKit/WKBundleFrame.h>
-
-namespace WPEFramework {
-namespace JavaScript {
-namespace AAMP {
-
-void LoadJSBindings(WKBundleFrameRef frame);
-
-void UnloadJSBindings(WKBundleFrameRef frame);
-
-void SetHttpHeaders(const char * headerJson);
-
-}  // namespace AAMP
-}  // namespace JavaScript
-}  // namespace WPEFramework
+MODULE_NAME_DECLARATION(BUILD_REFERENCE)

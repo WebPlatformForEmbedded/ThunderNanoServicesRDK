@@ -316,39 +316,92 @@ namespace WebKitBrowser {
         _T("WPEWebProcess")
     };
 
-    static constexpr uint16_t RequiredChildren = (sizeof(mandatoryProcesses) / sizeof(mandatoryProcesses[0]));
-    class MemoryObserverImpl : public Exchange::IMemory {
-    private:
-        MemoryObserverImpl();
-        MemoryObserverImpl(const MemoryObserverImpl&);
-        MemoryObserverImpl& operator=(const MemoryObserverImpl&);
+    class ProcessMemoryObserverImpl : public Exchange::IProcessMemory {
+    public:
+        explicit ProcessMemoryObserverImpl(Core::process_t id)
+            : Exchange::IProcessMemory()
+            , _info(id)
+        { 
+        }
+        ~ProcessMemoryObserverImpl() override = default;
 
+        ProcessMemoryObserverImpl(const ProcessMemoryObserverImpl&) = delete;
+        ProcessMemoryObserverImpl& operator=(const ProcessMemoryObserverImpl&) = delete;
+
+        uint64_t Resident() const override {
+            return _info.Resident();
+        }
+
+        uint64_t Allocated() const override {
+            return _info.Allocated();
+        }
+
+        uint64_t Shared() const override {
+            return _info.Shared();
+        }
+
+        uint8_t Processes() const override {
+            return 0; // webkit and network process do now spawn mew children
+        } 
+
+        bool IsOperational() const override {
+            return _info.IsActive();
+        }
+
+        uint32_t Identifier() const override {
+            static_assert(sizeof(Core::process_t) <= sizeof(uint32_t), "PId type size too big to fit in IProcessMemory::ID");
+            return _info.Id();
+        }
+
+        string Name() const override {
+            return _info.Name();
+        }
+
+        BEGIN_INTERFACE_MAP(ProcessMemoryObserverImpl)
+        INTERFACE_ENTRY(Exchange::IProcessMemory)
+        END_INTERFACE_MAP
+
+    private:
+        Core::ProcessInfo _info;
+    };
+
+    static constexpr uint16_t RequiredChildren = (sizeof(mandatoryProcesses) / sizeof(mandatoryProcesses[0]));
+    class MemoryObserverImpl : public Exchange::IMemory, public  Exchange::IMemoryExtended {
+    private:
         enum { TYPICAL_STARTUP_TIME = 10 }; /* in Seconds */
     public:
         MemoryObserverImpl(const RPC::IRemoteConnection* connection)
             : _main(connection == nullptr ? Core::ProcessInfo().Id() : connection->RemoteId())
             , _children(_main.Id())
-            , _startTime(connection == nullptr ? 0 : Core::Time::Now().Add(TYPICAL_STARTUP_TIME * 1000).Ticks())
-        { // IsOperation true till calculated time (microseconds)
+            , _startTime(connection == nullptr ? 0 : Core::Time::Now().Add(TYPICAL_STARTUP_TIME * 1000).Ticks()) // IsOperation true till calculated time (microseconds)
+            , _adminLock()
+        { 
         }
-        ~MemoryObserverImpl() = default;
+        ~MemoryObserverImpl() override = default;
 
-    public:
+        MemoryObserverImpl(const MemoryObserverImpl&) = delete;
+        MemoryObserverImpl& operator=(const MemoryObserverImpl&) = delete;
+
         uint64_t Resident() const override
         {
+
             uint32_t result(0);
 
             if (_startTime != 0) {
+               _adminLock.Lock();
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
 
+                Core::ProcessInfo::Iterator children(_children);
+
+                _adminLock.Unlock();
+
                 result = _main.Resident();
 
-                _children.Reset();
-
-                while (_children.Next() == true) {
-                    result += _children.Current().Resident();
+                children.Reset();
+                while (children.Next() == true) {
+                    result += children.Current().Resident();
                 }
             }
 
@@ -359,19 +412,23 @@ namespace WebKitBrowser {
             uint32_t result(0);
 
             if (_startTime != 0) {
+                _adminLock.Lock();
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
 
+                Core::ProcessInfo::Iterator children(_children);
+
+                _adminLock.Unlock();
+
                 result = _main.Allocated();
 
-                _children.Reset();
-
-                while (_children.Next() == true) {
-                    result += _children.Current().Allocated();
+                children.Reset();
+                while (children.Next() == true) {
+                    result += children.Current().Allocated();
                 }
             }
-
+            
             return (result);
         }
         uint64_t Shared() const override
@@ -379,16 +436,20 @@ namespace WebKitBrowser {
             uint32_t result(0);
 
             if (_startTime != 0) {
+                _adminLock.Lock();
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
 
+                Core::ProcessInfo::Iterator children(_children);
+
+                _adminLock.Unlock();
+
                 result = _main.Shared();
 
-                _children.Reset();
-
-                while (_children.Next() == true) {
-                    result += _children.Current().Shared();
+                children.Reset();
+                while (children.Next() == true) {
+                    result += children.Current().Shared();
                 }
             }
 
@@ -397,8 +458,12 @@ namespace WebKitBrowser {
         uint8_t Processes() const override
         {
             // Refresh the children list !!!
+            _adminLock.Lock();
             _children = Core::ProcessInfo::Iterator(_main.Id());
-            return ((_startTime == 0) || (_main.IsActive() == true) ? 1 : 0) + _children.Count();
+            uint32_t nbrchildren = _children.Count();
+            _adminLock.Unlock();
+
+            return ((_startTime == 0) || (_main.IsActive() == true) ? 1 : 0) + nbrchildren;
         }
         bool IsOperational() const override
         {
@@ -410,20 +475,24 @@ namespace WebKitBrowser {
                 // In the end we check if all bits are 0, what means all mandatory processes are still running.
                 requiredProcesses = (0xFFFFFFFF >> (32 - RequiredChildren));
 
+                _adminLock.Lock();
                 if (_children.Count() < RequiredChildren) {
                     // Refresh the children list !!!
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
-                //!< If there are less children than in the the mandatoryProcesses struct, we are done and return false.
-                if (_children.Count() >= RequiredChildren) {
+                Core::ProcessInfo::Iterator children(_children);
+                _adminLock.Unlock();
 
-                    _children.Reset();
+                //!< If there are less children than in the the mandatoryProcesses struct, we are done and return false.
+                if (children.Count() >= RequiredChildren) {
+
+                    children.Reset();
 
                     //!< loop over all child processes as long as we are operational.
-                    while ((requiredProcesses != 0) && (true == _children.Next())) {
+                    while ((requiredProcesses != 0) && (true == children.Next())) {
 
                         uint8_t count(0);
-                        string name(_children.Current().Name());
+                        string name(children.Current().Name());
 
                         while ((count < RequiredChildren) && (name != mandatoryProcesses[count])) {
                             ++count;
@@ -431,7 +500,7 @@ namespace WebKitBrowser {
 
                         //<! this is a mandatory process and if its still active reset its bit in requiredProcesses.
                         //   If not we are not completely operational.
-                        if ((count < RequiredChildren) && (_children.Current().IsActive() == true)) {
+                        if ((count < RequiredChildren) && (children.Current().IsActive() == true)) {
                             requiredProcesses &= (~(1 << count));
                         }
                     }
@@ -441,8 +510,49 @@ namespace WebKitBrowser {
             return (((requiredProcesses == 0) || (true == IsStarting())) && (true == _main.IsActive()));
         }
 
+        uint32_t Processes(RPC::IStringIterator*& processnames) const override {
+            _adminLock.Lock();
+            if (_children.Count() < RequiredChildren) {
+                // Refresh the children list !!!
+                _children = Core::ProcessInfo::Iterator(_main.Id());
+            }
+            Core::ProcessInfo::Iterator children(_children);
+            _adminLock.Unlock();
+
+            std::list<string> processes;
+            children.Reset();
+            while (children.Next() == true) {
+                processes.push_back(children.Current().Name());
+            }
+
+            processnames = Core::Service<RPC::StringIterator>::Create<RPC::IStringIterator>(processes);
+
+            return Core::ERROR_NONE;
+        }
+
+        uint32_t Process(const string& processname, Exchange::IProcessMemory*& process) const override {
+            uint32_t result = Core::ERROR_UNAVAILABLE;
+            process = nullptr;
+
+            _adminLock.Lock();
+            Core::ProcessInfo::Iterator children(_children);
+            _adminLock.Unlock();
+
+            children.Reset();
+            while( children.Next() == true ) {
+                if( children.Current().Name() == processname ) {
+                    process = Core::Service<ProcessMemoryObserverImpl>::Create<Exchange::IProcessMemory>(children.Current().Id());
+                    result = Core::ERROR_NONE;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
         BEGIN_INTERFACE_MAP(MemoryObserverImpl)
         INTERFACE_ENTRY(Exchange::IMemory)
+        INTERFACE_ENTRY(Exchange::IMemoryExtended)
         END_INTERFACE_MAP
 
     private:
@@ -455,6 +565,7 @@ namespace WebKitBrowser {
         Core::ProcessInfo _main;
         mutable Core::ProcessInfo::Iterator _children;
         uint64_t _startTime; // !< Reference for monitor
+        mutable Core::CriticalSection _adminLock; // note IMemory could be used from multiple threads (plugins)!!
     };
 
     Exchange::IMemory* MemoryObserver(const RPC::IRemoteConnection* connection)

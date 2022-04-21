@@ -68,10 +68,7 @@ namespace Plugin {
         Messenger(const Messenger&) = delete;
         Messenger& operator=(const Messenger&) = delete;
 
-#ifdef __WINDOWS__
-#pragma warning(disable : 4355)
-#endif
-
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Messenger()
             : PluginHost::JSONRPCSupportsEventStatus(std::bind(&Messenger::CheckToken, this,
                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3))
@@ -83,9 +80,7 @@ namespace Plugin {
             , _notification(this)
         {
         }
-#ifdef __WINDOWS__
-#pragma warning(default : 4355)
-#endif
+POP_WARNING()
 
         ~Messenger() override = default;
 

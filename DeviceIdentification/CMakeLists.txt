@@ -30,6 +30,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_DEVICEIDENTIFICATION_AUTOSTART "true" CACHE STRING "Automatically start DeviceIdentification plugin")
+set(PLUGIN_DEVICEIDENTIFICATION_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_DEVICEIDENTIFICATION_INTERFACE_NAME "eth0" CACHE STRING "Ethernet Card name which has to be associated for the Raw Device Id creation")
 option(PLUGIN_DEVICEIDENTIFICATION_USE_MFR "Get device identification details using MFR library" OFF)
 
@@ -91,7 +92,7 @@ elseif (BUILD_AMLOGIC)
         PRIVATE
             Implementation/Amlogic/Amlogic.cpp)
 elseif (BUILD_REALTEK)
-        target_sources(${MODULE_NAME}
+    target_sources(${MODULE_NAME}
         PRIVATE
             Implementation/Realtek/Realtek.cpp)
 elseif(UNIX AND NOT APPLE)
