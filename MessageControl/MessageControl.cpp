@@ -363,8 +363,6 @@ namespace Plugin {
 
         _service = service;
         _service->AddRef();
-        _service->Register(&_observer);
-        _service->Register(&_comSink);
 
         Config config;
         config.FromString(service->ConfigLine());
@@ -376,6 +374,10 @@ namespace Plugin {
             message = _T("MessageControl plugin could not be instantiated.");
         } else {
             RegisterAll();
+
+            _service->Register(&_observer);
+            _service->Register(&_comSink);
+
             if (_control->Configure(service->Background(),
                     config.Abbreviated.Value(),
                     config.Console.Value(),
@@ -402,11 +404,12 @@ namespace Plugin {
     {
         ASSERT(service == _service);
 
-        service->Unregister(&_observer);
-        service->Unregister(&_comSink);
-
         if (_control != nullptr) {
             UnregisterAll();
+
+            service->Unregister(&_observer);
+            service->Unregister(&_comSink);
+
             _control->UnregisterOutputNotification(&_outputNotification);
             _webSocketExporter.reset();
 
