@@ -1277,6 +1277,8 @@ namespace Plugin {
         }
 
         void Deinitialize(PluginHost::IShell* service) override {
+            _thread.Stop();
+
             std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
 
             std::list<CDMi::ISystemFactory*> deinitialized;
@@ -1293,7 +1295,6 @@ namespace Plugin {
                 factory++;
             }
 
-            _thread.Stop();
             if (_service != nullptr) {
                 delete _service;
             }
