@@ -410,7 +410,7 @@ namespace Plugin {
             _control->UnregisterOutputNotification(&_outputNotification);
             _webSocketExporter.reset();
 
-            _RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
             VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
             _control = nullptr;
