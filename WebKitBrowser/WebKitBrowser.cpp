@@ -28,14 +28,15 @@ namespace Plugin {
     /* virtual */ const string WebKitBrowser::Initialize(PluginHost::IShell* service)
     {
         string message;
-
+        ASSERT(service != nullptr);
         ASSERT(_service == nullptr);
         ASSERT(_browser == nullptr);
         ASSERT(_memory == nullptr);
         ASSERT(_application == nullptr);
+        ASSERT(_connectionId == 0);
 
-        _connectionId = 0;
         _service = service;
+        _service->AddRef();
         _skipURL = _service->WebPrefix().length();
 
         _persistentStoragePath = _service->PersistentPath();
@@ -47,55 +48,45 @@ namespace Plugin {
         _browser = service->Root<Exchange::IWebBrowser>(_connectionId, 2000, _T("WebKitImplementation"));
 
         if (_browser != nullptr) {
+
             PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
 
             // We see that sometimes the WPE implementation crashes before it reaches this point, than there is
             // no StateControl. Cope with this situation.
             if (stateControl == nullptr) {
-                _browser->Release();
-                _browser = nullptr;
-
+                message = _T("WebKitBrowser StateControl could not be Obtained.");
             } else {
                 _application = _browser->QueryInterface<Exchange::IApplication>();
                 if (_application != nullptr) {
+                    RegisterAll();
+                    Exchange::JWebBrowser::Register(*this, _browser);
+
                     _browser->Register(&_notification);
 
                     const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
-                    _memory = WPEFramework::WebKitBrowser::MemoryObserver(connection);
-                    ASSERT(_memory != nullptr);
-                    if (connection != nullptr) {
+                    if(connection != nullptr) {
+                        _memory = WPEFramework::WebKitBrowser::MemoryObserver(connection);
+                        ASSERT(_memory != nullptr);
                         connection->Release();
                     }
 
                     if (stateControl->Configure(_service) != Core::ERROR_NONE) {
-                        if (_memory != nullptr) {
-                            _memory->Release();
-                            _memory = nullptr;
-                        }
-                        _application->Release();
-                        _application = nullptr;
-                        _browser->Unregister(&_notification);
-                        _browser->Release();
-                        _browser = nullptr;
+                        message = _T("WebKitBrowser Implementation could not be Configured.");
                     } else {
                         stateControl->Register(&_notification);
                     }
-                    stateControl->Release();
                 } else {
-                    stateControl->Release();
-                    _browser->Release();
-                    _browser = nullptr;
+                    message = _T("WebKitBrowser Application interface could not be obtained");
                 }
+                stateControl->Release();
             }
         }
-
-        if (_browser == nullptr) {
+        else {
             message = _T("WebKitBrowser could not be instantiated.");
-            _service->Unregister(&_notification);
-            _service = nullptr;
-        } else {
-            RegisterAll();
-            Exchange::JWebBrowser::Register(*this, _browser);
+        }
+
+        if(message.length() != 0){
+            Deinitialize(service);
         }
 
         return message;
@@ -104,53 +95,55 @@ namespace Plugin {
     /* virtual */ void WebKitBrowser::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         ASSERT(_service == service);
-        ASSERT(_browser != nullptr);
-        ASSERT(_application != nullptr);
-        ASSERT(_memory != nullptr);
-
-        if (_browser == nullptr)
-            return;
 
         // Make sure we get no longer get any notifications, we are deactivating..
         _service->Unregister(&_notification);
-        _browser->Unregister(&_notification);
-        _memory->Release();
-        _application->Release();
-        Exchange::JWebBrowser::Unregister(*this);
-        UnregisterAll();
 
-        PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
+        if(_browser != nullptr) {
 
-        // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
-        if (stateControl != nullptr) {
-            stateControl->Unregister(&_notification);
-            stateControl->Release();
+            PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
+            // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
+            if (stateControl != nullptr) {
+                stateControl->Unregister(&_notification);
+                stateControl->Release();
+            }
+
+            if(_memory != nullptr) {
+                _memory->Release();
+                _memory = nullptr;
+            }
+            if(_application != nullptr) {
+                Exchange::JWebBrowser::Unregister(*this);
+                UnregisterAll();
+                _browser->Unregister(&_notification);
+                _application->Release();
+                _application = nullptr;
+            }
+
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+            // Stop processing of the browser:
+            VARIABLE_IS_NOT_USED uint32_t result = _browser->Release();
+            _browser = nullptr;
+            // It should have been the last reference we are releasing,
+            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+            // are leaking...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+            // If this was running in a (container) process...
+            if (connection != nullptr) {
+                // Lets trigger a cleanup sequence for
+                // out-of-process code. Which will guard
+                // that unwilling processes, get shot if
+                // not stopped friendly :~)
+                connection->Terminate();
+                connection->Release();
+            }
         }
 
-        RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-
-        // Stop processing of the browser:
-        VARIABLE_IS_NOT_USED uint32_t result = _browser->Release();
-
-        // It should have been the last reference we are releasing,
-        // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-        // are leaking...
-        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-        // If this was running in a (container) process...
-        if (connection != nullptr) {
-            // Lets trigger a cleanup sequence for
-            // out-of-process code. Which will guard
-            // that unwilling processes, get shot if
-            // not stopped friendly :~)
-            connection->Terminate();
-            connection->Release();
-        }
-
+        _service->Release();
         _service = nullptr;
-        _browser = nullptr;
-        _application = nullptr;
-        _memory = nullptr;
+        _connectionId = 0;
     }
 
     /* virtual */ string WebKitBrowser::Information() const
