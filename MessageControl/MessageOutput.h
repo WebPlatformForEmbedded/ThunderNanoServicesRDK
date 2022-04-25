@@ -81,7 +81,7 @@ namespace Messaging {
         Core::File _file;
     };
 
-    class EXTERNAL JSONOutput : public IMessageOutput {
+    class JSONOutput : public IMessageOutput {
     public:
         class Data : public Core::JSON::Container {
 
