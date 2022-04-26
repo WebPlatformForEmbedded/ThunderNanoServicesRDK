@@ -89,7 +89,7 @@ namespace Plugin {
                 _job.Submit();
             }
 
-            void Activated(RPC::IRemoteConnection* process) override {
+            void Activated(RPC::IRemoteConnection* process VARIABLE_IS_NOT_USED) override {
             }
 
             void Deactivated(RPC::IRemoteConnection* process) override {
