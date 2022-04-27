@@ -389,7 +389,7 @@ namespace Protobuf {
         {
             bool valid = true;
             for (auto const& entry : _elements) {
-                const IElement* const& element = entry.second.element;
+                VARIABLE_IS_NOT_USED const IElement* const& element = entry.second.element;
                 ASSERT(element != nullptr);
                 if ((entry.second.required == true) && (entry.second.element->IsSet() == false)) {
                     valid = false;

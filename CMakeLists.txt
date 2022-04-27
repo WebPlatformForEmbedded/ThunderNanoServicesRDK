@@ -24,6 +24,7 @@ option(PLUGIN_LOCATIONSYNC "Include LocationSync plugin" OFF)
 option(PLUGIN_MESSAGECONTROL "Include MessageControl plugin" OFF)
 option(PLUGIN_MESSENGER "Include Messenger plugin" OFF)
 option(PLUGIN_MONITOR "Include Monitor plugin" OFF)
+option(PLUGIN_PERFORMANCEMETRICS "Include PerformanceMetrics plugin" OFF)
 option(PLUGIN_OPENCDMI "Include OpenCDMi plugin" OFF)
 option(PLUGIN_PACKAGER "Include Packager plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
@@ -57,6 +58,10 @@ endif()
 
 if(PLUGIN_MONITOR)
     add_subdirectory(Monitor)
+endif()
+
+if(PLUGIN_PERFORMANCEMETRICS)
+    add_subdirectory(PerformanceMetrics)
 endif()
 
 if(PLUGIN_OPENCDMI)

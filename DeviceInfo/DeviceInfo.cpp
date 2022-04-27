@@ -32,45 +32,76 @@ namespace Plugin {
         ASSERT(_subSystem == nullptr);
         ASSERT(_implementation == nullptr);
         ASSERT(service != nullptr);
+        ASSERT(_connectionId == 0);
 
+        string message;
         Config config;
         config.FromString(service->ConfigLine());
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
+        _service = service;
+        _service->AddRef();
+        _service->Register(&_notification);
         _subSystem = service->SubSystems();
 
-        ASSERT(_subSystem != nullptr);
-
-        if (_subSystem != nullptr) {
-            _service = service;
+        if (_subSystem == nullptr) {
+            message = _T("DeviceInfo Susbsystem could not be obtained");
+        } else {
+            _subSystem->AddRef();
             _subSystem->Register(&_notification);
+
             _implementation = _service->Root<Exchange::IDeviceCapabilities>(_connectionId, 2000, _T("DeviceInfoImplementation"));
 
             if (_implementation == nullptr) {
-                _service = nullptr;
+                message = _T("DeviceInfo could not be instantiated");
                 SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
             } else {
                 _implementation->Configure(_service);
                 _deviceMetadataInterface = _implementation->QueryInterface<Exchange::IDeviceMetadata>();
-                ASSERT(_deviceMetadataInterface != nullptr);
+                if(_deviceMetadataInterface == nullptr) {
+                    message = _T("DeviceInfo MetaData Interface could not be instantiated");
+                } else {
+                    RegisterAll();
+                }
+
             }
         }
 
+        if(message.length() != 0) {
+            Deinitialize(service);
+        }
+
         // On success return empty, to indicate there is no error text.
-        return (_implementation != nullptr) ? EMPTY_STRING : _T("Could not retrieve System Information.");
+        return message;
     }
 
     /* virtual */ void DeviceInfo::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         ASSERT(_service == service);
-        ASSERT(_implementation != nullptr);
-        ASSERT(_deviceMetadataInterface != nullptr);
 
-        _implementation->Release();
-        _deviceMetadataInterface->Release();
+        _service->Unregister(&_notification);
 
-        if (_connectionId != 0) {
+        if(_subSystem != nullptr) {
+            _subSystem->Unregister(&_notification);
+            _subSystem->Release();
+            _subSystem = nullptr;
+        }
+
+        if(_implementation != nullptr){
+
+            if(_deviceMetadataInterface != nullptr){
+                UnregisterAll();
+                _deviceMetadataInterface->Release();
+                _deviceMetadataInterface = nullptr;
+            }
+
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-            // The process can disappear in the meantime...
+            VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
+            _implementation = nullptr;
+            // It should have been the last reference we are releasing,
+            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+            // are leaking...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+             // The process can disappear in the meantime...
             if (connection != nullptr) {
                 // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
                 connection->Terminate();
@@ -78,11 +109,9 @@ namespace Plugin {
             }
         }
 
-        _subSystem->Unregister(&_notification);
-        _subSystem->Release();
-        _subSystem = nullptr;
-
+        _service->Release();
         _service = nullptr;
+        _connectionId = 0;
     }
 
     /* virtual */ string DeviceInfo::Information() const
@@ -284,5 +313,13 @@ namespace Plugin {
         }
     }
 
+    void DeviceInfo::Deactivated(RPC::IRemoteConnection* connection)
+    {
+        if (_connectionId == connection->Id()) {
+
+            ASSERT(_service != nullptr);
+            Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_service, PluginHost::IShell::DEACTIVATED, PluginHost::IShell::FAILURE));
+        }
+    }
 } // namespace Plugin
 } // namespace WPEFramework

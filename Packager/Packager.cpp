@@ -34,6 +34,7 @@ namespace {
         ASSERT (service != nullptr);
 
         _service = service;
+        _service->AddRef();
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
         _service->Register(&_notification);
 
@@ -43,11 +44,21 @@ namespace {
             result = _T("Couldn't create PACKAGER instance ");
 
         } else {
+            Register<Params, void>(kInstallMethodName, [this](const Params& params) -> uint32_t {
+                return this->_implementation->Install(params.Package.Value(), params.Version.Value(),
+                                                                 params.Architecture.Value());
+            });
+            Register<void, void>(kSynchronizeMethodName, [this]() -> uint32_t {
+                return this->_implementation->SynchronizeRepository();
+            });
             if (_implementation->Configure(_service) != Core::ERROR_NONE) {
                 result = _T("Couldn't initialize PACKAGER instance");
             }
         }
 
+        if(result.length() != 0){
+            Deinitialize(service);
+        }
         return (result);
     }
 
@@ -57,27 +68,33 @@ namespace {
 
         _service->Unregister(&_notification);
 
-        RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+        if(_implementation != nullptr) {
+            Unregister(kInstallMethodName);
+            Unregister(kSynchronizeMethodName);
 
-        VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
-        // It should have been the last reference we are releasing,
-        // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-        // are leaking ...
-        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+            VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
+             _implementation = nullptr;
+            // It should have been the last reference we are releasing,
+            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+            // are leaking ...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
 
-        // If this was running in a (container) process ...
-        if (connection != nullptr) {
-            // Lets trigger the cleanup sequence for
-            // out-of-process code. Will will guard
-            // that unwilling processes, get shot if
-            // not stopped friendly :~)
-            connection->Terminate();
-            connection->Release();
+            // If this was running in a (container) process ...
+            if (connection != nullptr) {
+                // Lets trigger the cleanup sequence for
+                // out-of-process code. Will will guard
+                // that unwilling processes, get shot if
+                // not stopped friendly :~)
+                connection->Terminate();
+                connection->Release();
+            }
         }
-
+        _service->Release();
         _service = nullptr;
-        _implementation = nullptr;
+        _connectionId = 0;
+
     }
 
     string Packager::Information() const
