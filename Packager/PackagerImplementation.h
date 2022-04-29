@@ -43,8 +43,7 @@ namespace Plugin {
             PLUGIN
         };
 
-    public:
-        class EXTERNAL Config : public Core::JSON::Container {
+        class Config : public Core::JSON::Container {
         public:
             Config()
                 : Core::JSON::Container()
