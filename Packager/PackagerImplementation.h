@@ -33,10 +33,17 @@ namespace WPEFramework {
 namespace Plugin {
 
     class PackagerImplementation : public Exchange::IPackager {
-    public:
-        PackagerImplementation(const PackagerImplementation&) = delete;
-        PackagerImplementation& operator=(const PackagerImplementation&) = delete;
+    private:
+        static constexpr const TCHAR* AppPath = _T("/etc/apps/");
+        static constexpr const TCHAR* PackageJSONFile = _T("_package.json");
 
+    public:
+        enum PackageType {
+            NONE,
+            PLUGIN
+        };
+
+    public:
         class EXTERNAL Config : public Core::JSON::Container {
         public:
             Config()
@@ -66,6 +73,7 @@ namespace Plugin {
             Config(const Config&) = delete;
             Config& operator=(const Config&) = delete;
 
+        public:
             Core::JSON::String  ConfigFile;
             Core::JSON::String  TempDir;
             Core::JSON::String  CacheDir;
@@ -75,6 +83,35 @@ namespace Plugin {
             Core::JSON::Boolean NoSignatureCheck;
             Core::JSON::Boolean AlwaysUpdateFirst;
         };
+
+        class MetaData : public Core::JSON::Container {
+        public:
+             MetaData()
+                 : Core::JSON::Container()
+                 , Callsign()
+                 , Type(NONE)
+             {
+                 Add(_T("callsign"), &Callsign);
+                 Add(_T("type"), &Type);
+             }
+             MetaData(const MetaData& copy)
+                 : Core::JSON::Container()
+                 , Callsign(copy.Callsign)
+                 , Type(copy.Type)
+             {
+                 Add(_T("callsign"), &Callsign);
+                 Add(_T("type"), &Type);
+             }
+             ~MetaData() override = default;
+
+        public:
+             Core::JSON::String Callsign;
+             Core::JSON::EnumType<PackageType> Type;
+        };
+
+    public:
+        PackagerImplementation(const PackagerImplementation&) = delete;
+        PackagerImplementation& operator=(const PackagerImplementation&) = delete;
 
         PackagerImplementation()
             : _adminLock()
@@ -87,6 +124,7 @@ namespace Plugin {
             , _alwaysUpdateFirst(false)
             , _volatileCache(false)
             , _opkgInitialized(false)
+            , _service(nullptr)
             , _worker(this)
             , _isUpgrade(false)
             , _isSyncing(false)
@@ -179,7 +217,7 @@ namespace Plugin {
 
             string AppName() const override
             {
-                return (string());
+                return _appname;
             }
 
             uint32_t ErrorCode() const override
@@ -204,6 +242,14 @@ namespace Plugin {
                 _progress = progress;
             }
 
+            void SetAppName(const TCHAR path[])
+            {
+                string pathName = Core::File::PathName(string(path));
+                if (pathName.empty() == false) {
+                    _appname = Core::File::FileName(string(pathName.c_str(), pathName.size() - 1));
+                }
+            }
+
             void SetError(uint32_t err)
             {
                 TRACE(Trace::Information, (_T("Setting error to %d"), err));
@@ -214,6 +260,7 @@ namespace Plugin {
             Exchange::IPackager::state _state = Exchange::IPackager::IDLE;
             uint32_t _error = 0u;
             uint8_t _progress = 0u;
+            string _appname;
         };
 
         struct InstallationData {
@@ -283,6 +330,8 @@ namespace Plugin {
 #if !defined (DO_NOT_USE_DEPRECATED_API)
         static void InstallationProgessNoLock(const _opkg_progress_data_t* progress, void* data);
 #endif
+        string GetCallsignFromMetaDataFile(const string& appName);
+        void DeactivatePlugin(const string& callsign);
         void NotifyStateChange();
         void NotifyRepoSynced(uint32_t status);
         void BlockingInstallUntilCompletionNoLock();
@@ -300,6 +349,7 @@ namespace Plugin {
         bool _alwaysUpdateFirst;
         bool _volatileCache;
         bool _opkgInitialized;
+        PluginHost::IShell* _service;
         std::vector<Exchange::IPackager::INotification*> _notifications;
         InstallationData _inProgress;
         InstallThread _worker;
