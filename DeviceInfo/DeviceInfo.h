@@ -41,9 +41,7 @@ namespace Plugin {
                 Add(_T("sockets"), &Sockets);
             }
 
-            virtual ~Data()
-            {
-            }
+            ~Data() override = default;
 
         public:
             Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData> Addresses;
@@ -52,7 +50,7 @@ namespace Plugin {
         };
 
     private:
-        class Notification : public PluginHost::ISubSystem::INotification {
+        class Notification : public PluginHost::ISubSystem::INotification, public RPC::IRemoteConnection::INotification {
         private:
             class Job {
             public:
@@ -78,7 +76,8 @@ namespace Plugin {
             Notification& operator=(const Notification&) = delete;
 
             explicit Notification(DeviceInfo& parent)
-                : _job(parent) {
+                : _parent(parent)
+                , _job(parent) {
             }
             ~Notification() override {
                 _job.Revoke();
@@ -90,11 +89,20 @@ namespace Plugin {
                 _job.Submit();
             }
 
+            void Activated(RPC::IRemoteConnection* process VARIABLE_IS_NOT_USED) override {
+            }
+
+            void Deactivated(RPC::IRemoteConnection* process) override {
+                _parent.Deactivated(process);
+            }
+
             BEGIN_INTERFACE_MAP(Notification)
                 INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
+                INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
             END_INTERFACE_MAP
 
         private:
+            DeviceInfo& _parent;
             Core::WorkerPool::JobType<Job> _job;
         };
 
@@ -129,13 +137,9 @@ namespace Plugin {
             , _adminLock()
             , _notification(*this)
         {
-            RegisterAll();
         }
 
-        virtual ~DeviceInfo()
-        {
-            UnregisterAll();
-        }
+        ~DeviceInfo() override = default;
 
         BEGIN_INTERFACE_MAP(DeviceInfo)
         INTERFACE_ENTRY(PluginHost::IPlugin)
@@ -173,6 +177,7 @@ namespace Plugin {
         void CapabilitiesInfo(JsonData::DeviceInfo::CapabilitiesData& response) const;
         void MetadataInfo(JsonData::DeviceInfo::MetadataData& response) const;
         void UpdateDeviceIdentifier();
+        void Deactivated(RPC::IRemoteConnection* connection);
 
     private:
         uint8_t _skipURL;

@@ -19,19 +19,14 @@
 
 #pragma once
 
-#include <WPE/WebKit.h>
-#include <WPE/WebKit/WKBundleFrame.h>
+#include <wpe/webkit-web-extension.h>
 
 namespace WPEFramework {
 namespace JavaScript {
-namespace AAMP {
+namespace IIdentifier {
 
-void LoadJSBindings(WKBundleFrameRef frame);
+void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC::CommunicatorClient>& _comClient);
 
-void UnloadJSBindings(WKBundleFrameRef frame);
-
-void SetHttpHeaders(const char * headerJson);
-
-}  // namespace AAMP
-}  // namespace JavaScript
-}  // namespace WPEFramework
+}  // IIdentifier
+}  // JavaScript
+}  // WPEFramework

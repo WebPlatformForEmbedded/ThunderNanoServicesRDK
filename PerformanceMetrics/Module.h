@@ -16,22 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #pragma once
+#ifndef MODULE_NAME
+#define MODULE_NAME Plugin_PerformanceMetrics
+#endif
 
-#include <WPE/WebKit.h>
-#include <WPE/WebKit/WKBundleFrame.h>
+#include <plugins/plugins.h>
 
-namespace WPEFramework {
-namespace JavaScript {
-namespace AAMP {
-
-void LoadJSBindings(WKBundleFrameRef frame);
-
-void UnloadJSBindings(WKBundleFrameRef frame);
-
-void SetHttpHeaders(const char * headerJson);
-
-}  // namespace AAMP
-}  // namespace JavaScript
-}  // namespace WPEFramework
+#undef EXTERNAL
+#define EXTERNAL

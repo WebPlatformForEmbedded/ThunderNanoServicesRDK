@@ -666,6 +666,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                 , _parent(*parent)
             {
             }
+POP_WARNING()
             virtual ~MonitorObjects()
             {
                 ASSERT(_monitor.size() == 0);

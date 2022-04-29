@@ -33,6 +33,37 @@ namespace Plugin {
     class Messenger : public PluginHost::IPlugin
                     , public Exchange::IRoomAdministrator::INotification
                     , public PluginHost::JSONRPCSupportsEventStatus {
+    private:
+        class Notification : public RPC::IRemoteConnection::INotification {
+        public:
+            Notification() = delete;
+            Notification(const Notification&) = delete;
+            Notification& operator=(const Notification&) = delete;
+
+            explicit Notification(Messenger* parent)
+                : _parent(*parent)
+            {
+                ASSERT(parent != nullptr);
+            }
+            ~Notification() override = default;
+
+        public:
+            virtual void Activated(RPC::IRemoteConnection*)
+            {
+            }
+            virtual void Deactivated(RPC::IRemoteConnection* connection)
+            {
+                _parent.Deactivated(connection);
+            }
+
+            BEGIN_INTERFACE_MAP(Notification)
+            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+            END_INTERFACE_MAP
+
+        private:
+            Messenger& _parent;
+        };
+
     public:
         Messenger(const Messenger&) = delete;
         Messenger& operator=(const Messenger&) = delete;
@@ -46,20 +77,17 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
             , _roomAdmin(nullptr)
             , _roomIds()
             , _adminLock()
+            , _notification(this)
         {
-            RegisterAll();
         }
 POP_WARNING()
 
-        ~Messenger()
-        {
-            UnregisterAll();
-        }
+        ~Messenger() override = default;
 
         // IPlugin methods
-        virtual const string Initialize(PluginHost::IShell* service) override;
-        virtual void Deinitialize(PluginHost::IShell* service) override;
-        virtual string Information() const override  { return { }; }
+        const string Initialize(PluginHost::IShell* service) override;
+        void Deinitialize(PluginHost::IShell* service) override;
+        string Information() const override  { return { }; }
 
         // Notification handling
         class MsgNotification : public Exchange::IRoomAdministrator::IRoom::IMsgNotification {
@@ -73,7 +101,7 @@ POP_WARNING()
             { /* empty */ }
 
             // IRoom::Notification methods
-            virtual void Message(const string& senderName, const string& message) override
+            void Message(const string& senderName, const string& message) override
             {
                 ASSERT(_messenger != nullptr);
                 _messenger->MessageHandler(_roomId, senderName, message);
@@ -101,13 +129,13 @@ POP_WARNING()
             { /* empty */}
 
             // IRoom::ICallback methods
-            virtual void Joined(const string& userName) override
+            void Joined(const string& userName) override
             {
                 ASSERT(_messenger != nullptr);
                 _messenger->UserJoinedHandler(_roomId, userName);
             }
 
-            virtual void Left(const string& userName) override
+            void Left(const string& userName) override
             {
                 ASSERT(_messenger != nullptr);
                 _messenger->UserLeftHandler(_roomId, userName);
@@ -173,6 +201,7 @@ POP_WARNING()
         }
 
     private:
+        void Deactivated(RPC::IRemoteConnection* connection);
         string GenerateRoomId(const string& roomName, const string& userName);
         bool SubscribeUserUpdate(const string& roomId, bool subscribe);
 
@@ -194,6 +223,7 @@ POP_WARNING()
         std::set<string> _rooms;
         std::map<string, std::list<string>> _roomACL;
         mutable Core::CriticalSection _adminLock;
+        Core::Sink<Notification> _notification;
     }; // class Messenger
 
 } // namespace Plugin

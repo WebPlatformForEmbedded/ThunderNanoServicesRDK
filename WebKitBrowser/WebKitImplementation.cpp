@@ -1711,7 +1711,8 @@ static GSourceFuncs _handlerIntervention =
 
             // Disk Cache Dir
             if (_config.DiskCacheDir.Value().empty() == false) {
-               Core::SystemInfo::SetEnvironment(_T("XDG_CACHE_HOME"), _config.DiskCacheDir.Value(), !environmentOverride);
+                _config.DiskCacheDir = _service->Substitute(_config.DiskCacheDir.Value());
+                Core::SystemInfo::SetEnvironment(_T("XDG_CACHE_HOME"), _config.DiskCacheDir.Value(), !environmentOverride);
             }
 
             if (_config.XHRCache.Value() == false) {
@@ -1720,7 +1721,12 @@ static GSourceFuncs _handlerIntervention =
 
             // Enable cookie persistent storage
             if (_config.CookieStorage.Value().empty() == false) {
+                _config.CookieStorage = _service->Substitute(_config.CookieStorage.Value());
                 Core::SystemInfo::SetEnvironment(_T("WPE_SHELL_COOKIE_STORAGE"), _T("1"), !environmentOverride);
+            }
+
+            if (_config.LocalStorage.Value().empty() == false) {
+                _config.LocalStorage = _service->Substitute(_config.LocalStorage.Value());
             }
 
             // Use cairo noaa compositor
@@ -1730,11 +1736,15 @@ static GSourceFuncs _handlerIntervention =
 
             // WebInspector
             if (_config.Inspector.Value().empty() == false) {
+#ifdef WEBKIT_GLIB_API
+                Core::SystemInfo::SetEnvironment(_T("WEBKIT_INSPECTOR_HTTP_SERVER"), _config.Inspector.Value(), !environmentOverride);
+#else
                 if (_config.Automation.Value()) {
                     Core::SystemInfo::SetEnvironment(_T("WEBKIT_INSPECTOR_SERVER"), _config.Inspector.Value(), !environmentOverride);
                 } else {
                     Core::SystemInfo::SetEnvironment(_T("WEBKIT_LEGACY_INSPECTOR_SERVER"), _config.Inspector.Value(), !environmentOverride);
                 }
+#endif
             }
 
             // RPI mouse support
@@ -2141,7 +2151,7 @@ static GSourceFuncs _handlerIntervention =
             } else {
                 gchar* wpeStoragePath;
                 if (_config.LocalStorage.IsSet() == true && _config.LocalStorage.Value().empty() == false) {
-                    wpeStoragePath = g_build_filename(_service->Substitute(_config.LocalStorage.Value()).c_str(), "wpe", "local-storage", nullptr);
+                    wpeStoragePath = g_build_filename(_config.LocalStorage.Value().c_str(), "wpe", "local-storage", nullptr);
                 } else {
                     wpeStoragePath = g_build_filename(g_get_user_cache_dir(), "wpe", "local-storage", nullptr);
                 }
@@ -2149,7 +2159,7 @@ static GSourceFuncs _handlerIntervention =
 
                 gchar* wpeDiskCachePath;
                 if (_config.DiskCacheDir.IsSet() == true && _config.DiskCacheDir.Value().empty() == false) {
-                    wpeDiskCachePath = g_build_filename(_service->Substitute(_config.DiskCacheDir.Value()).c_str(), "wpe", "disk-cache", nullptr);
+                    wpeDiskCachePath = g_build_filename(_config.DiskCacheDir.Value().c_str(), "wpe", "disk-cache", nullptr);
                 } else {
                     wpeDiskCachePath = g_build_filename(g_get_user_cache_dir(), "wpe", "disk-cache", nullptr);
                 }
@@ -2172,7 +2182,7 @@ static GSourceFuncs _handlerIntervention =
             if (!webkit_web_context_is_ephemeral(wkContext)) {
                 gchar* cookieDatabasePath;
                 if (_config.CookieStorage.IsSet() == true && _config.CookieStorage.Value().empty() == false) {
-                    cookieDatabasePath = g_build_filename(_service->Substitute(_config.CookieStorage.Value()).c_str(), "cookies.db", nullptr);
+                    cookieDatabasePath = g_build_filename(_config.CookieStorage.Value().c_str(), "cookies.db", nullptr);
                 } else {
                     cookieDatabasePath = g_build_filename(g_get_user_cache_dir(), "cookies.db", nullptr);
                 }
