@@ -1,8 +1,4 @@
-from json_helper import *
-
-config = JSON()
-
-config.add("autostart", "@PLUGIN_DEVICEINFO_AUTOSTART@")
+autostart = "@PLUGIN_DEVICEINFO_AUTOSTART@"
 
 configuration = JSON()
 configuration.add_non_empty("modelName", "@PLUGIN_DEVICEINFO_MODELNAME@")
@@ -15,6 +11,4 @@ root = JSON()
 root.add_non_empty("mode", "Off")
 
 configuration.add_non_empty("root", root)
-
-config.add("configuration", configuration)
 
