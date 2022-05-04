@@ -308,6 +308,31 @@ namespace WPEFramework {
                 // We did what we needed to do in the Deintialize.
             }
 
+            void WebBridge::Close(const uint32_t channelId) /* override */ {
+
+                _adminLock.Lock();
+
+                ObserverMap::iterator index = _observers.begin();
+
+                while (index != _observers.end()) {
+                    ObserverList::iterator loop(index->second.begin());
+
+                    while (loop != index->second.end()) {
+                        if (loop->Id() != channelId) {
+                            loop++;
+                        }
+                        else {
+                            loop = index->second.erase(loop);
+                        }
+                    }
+
+                    index++;
+                }
+
+                _adminLock.Unlock();
+            }
+
+
             // -------------------------------------------------------------------------------------------------------
             //   IWebSocket methods
             // -------------------------------------------------------------------------------------------------------
