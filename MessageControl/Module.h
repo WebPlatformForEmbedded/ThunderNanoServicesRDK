@@ -23,9 +23,11 @@
 #define MODULE_NAME Plugin_MessageControl
 #endif
 
-#include <interfaces/IMessageControl.h>
 #include <messaging/messaging.h>
 #include <plugins/plugins.h>
+#include <definitions/definitions.h>
+
+#include <interfaces/IMessageControl.h>
 #include <interfaces/json/JsonData_MessageControl.h>
 
 
