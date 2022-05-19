@@ -36,28 +36,26 @@ namespace OCDM {
                 : _main(connection  == 0 ? Core::ProcessInfo().Id() : connection->RemoteId())
             {
             }
-            ~MemoryObserverImpl()
-            {
-            }
+            ~MemoryObserverImpl() = default;
 
         public:
-            virtual uint64_t Resident() const
+            uint64_t Resident() const override
             {
                 return _main.Resident();
             }
-            virtual uint64_t Allocated() const
+            uint64_t Allocated() const override
             {
                 return _main.Allocated();
             }
-            virtual uint64_t Shared() const
+            uint64_t Shared() const override
             {
                 return _main.Shared();
             }
-            virtual uint8_t Processes() const
+            uint8_t Processes() const override
             {
                 return (IsOperational() ? 1 : 0);
             }
-            virtual bool IsOperational() const
+            bool IsOperational() const override
             {
                 return _main.IsActive();
             }
@@ -87,12 +85,14 @@ namespace Plugin {
     {
         string message;
 
+        ASSERT(service != nullptr);
         ASSERT(_service == nullptr);
         ASSERT(_memory == nullptr);
         ASSERT(_opencdmi == nullptr);
+        ASSERT(_connectionId == 0);
 
-        _connectionId = 0;
         _service = service;
+        _service->AddRef();
         _skipURL = static_cast<uint8_t>(_service->WebPrefix().length());
 
         // Register the Process::Notification stuff. The Remote process might die before we get a
@@ -103,9 +103,8 @@ namespace Plugin {
 
         if (_opencdmi == nullptr) {
             message = _T("OCDM could not be instantiated.");
-            _service->Unregister(&_notification);
-            _service = nullptr;
         } else {
+            RegisterAll();
             _opencdmi->Initialize(_service);
 
             ASSERT(_connectionId != 0);
@@ -120,10 +119,11 @@ namespace Plugin {
             }
             else {
                 message = _T("OCDM crashed at initialize!");
-                _opencdmi = nullptr;
-                _service->Unregister(&_notification);
-                _service = nullptr;
             }
+        }
+
+        if(message.length() != 0) {
+            Deinitialize(service);
         }
 
         return message;
@@ -132,48 +132,53 @@ namespace Plugin {
     /*virtual*/ void OCDM::Deinitialize(PluginHost::IShell* service)
     {
         ASSERT(_service == service);
-        ASSERT(_memory != nullptr);
-        ASSERT(_opencdmi != nullptr);
 
         _service->Unregister(&_notification);
-        _memory->Release();
 
-        _opencdmi->Deinitialize(service);
+        if(_opencdmi != nullptr) {
 
-        RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+            if(_memory != nullptr) {
+                _memory->Release();
+                _memory = nullptr;
+            }
 
-        VARIABLE_IS_NOT_USED uint32_t result = _opencdmi->Release();
+            _opencdmi->Deinitialize(service);
 
-        // It should have been the last reference we are releasing,
-        // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-        // are leaking...
-        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+            UnregisterAll();
 
-        // If this was running in a (container) proccess...
-        if (connection != nullptr) {
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
-            // Lets trigger the cleanup sequence for
-            // out-of-process code. Which will guard
-            // that unwilling processes, get shot if
-            // not stopped friendly :~)
-            connection->Terminate();
-            connection->Release();
+            VARIABLE_IS_NOT_USED uint32_t result = _opencdmi->Release();
+            _opencdmi = nullptr;
+            // It should have been the last reference we are releasing,
+            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+            // are leaking...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+            // If this was running in a (container) proccess...
+            if (connection != nullptr) {
+
+                // Lets trigger the cleanup sequence for
+                // out-of-process code. Which will guard
+                // that unwilling processes, get shot if
+                // not stopped friendly :~)
+                connection->Terminate();
+                connection->Release();
+            }
         }
 
         PluginHost::ISubSystem* subSystem = service->SubSystems();
 
-        ASSERT(subSystem != nullptr);
-
         if (subSystem != nullptr) {
-            ASSERT(subSystem->IsActive(PluginHost::ISubSystem::DECRYPTION) == true);
-            subSystem->Set(PluginHost::ISubSystem::NOT_DECRYPTION, nullptr);
-            subSystem->Release();
+            if(subSystem->IsActive(PluginHost::ISubSystem::DECRYPTION) == true) {
+                subSystem->Set(PluginHost::ISubSystem::NOT_DECRYPTION, nullptr);
+                subSystem->Release();
+            }
         }
 
-        // Deinitialize what we initialized..
-        _memory = nullptr;
-        _opencdmi = nullptr;
+        _service->Release();
         _service = nullptr;
+        _connectionId = 0;
     }
 
     /* virtual */ string OCDM::Information() const

@@ -1,0 +1,2359 @@
+[33mcommit f64c0ae79506ae6d64ec34290f09db40b537be65[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Merge: d794f09 fcd7888
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Mon Mar 21 18:03:38 2022 +0100
+
+    Merge pull request #142 from WebPlatformForEmbedded/development/TimeZoneOverride
+    
+    [LocationSync] add option to override timezone
+
+[33mcommit d794f09bd783b1027a5bae9a69dcf401ce454da6[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Sat Mar 19 09:50:45 2022 +0100
+
+    [WINDOWS] Update windows project files to cope with the new WARNING SUPPRESSION macros. (#144)
+
+[33mcommit bfdac252d8f628d015e493b76ac165b0bbe3460e[m
+Merge: 34e0a14 d2a624f
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri Mar 18 08:54:08 2022 +0100
+
+    Merge pull request #143 from WebPlatformForEmbedded/development/packager-install-fix
+    
+    Packager: install path fix
+
+[33mcommit d2a624f67fee90f907ee626dd7d99094ead99cb5[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Thu Mar 17 23:19:35 2022 -0700
+
+    Packager: install path fix
+
+[33mcommit fcd78881e564efa3bd6e146c00631b9686285865[m[33m ([m[1;31morigin/development/TimeZoneOverride[m[33m, [m[1;32mdevelopment/TimeZoneOverride[m[33m)[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Thu Mar 17 14:38:34 2022 +0100
+
+    [LocationSync] add option to override timezone
+
+[33mcommit 34e0a1446d62d57f861b108d9f2d42373a887384[m
+Merge: a3e302d 2dae518
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Thu Mar 17 08:34:19 2022 +0100
+
+    Merge pull request #141 from WebPlatformForEmbedded/development/warning-removal
+    
+    Warning: removed Wunused-parameter warning
+
+[33mcommit 2dae51868f9c6cb632181704e08f4ead2c7e71a0[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Thu Mar 17 00:12:48 2022 -0700
+
+    Warning: removed Wunused-parameter warning
+
+[33mcommit a3e302d9b5808c556352e45ab469795877009689[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed Mar 16 20:11:35 2022 +0530
+
+    Warning: used PUSH/POP macro (#140)
+
+[33mcommit 30b03ac0083f4b6765e330000ebf0916a7fcbb29[m
+Author: Łukasz Iwan <46877317+lukiwa@users.noreply.github.com>
+Date:   Tue Mar 15 18:08:27 2022 +0100
+
+    [MessageControl] Do not show nulls when config options not set (#132)
+
+[33mcommit 5443aef39dee0dbebd820462156b8e523dc2da82[m
+Author: sebaszm <45654185+sebaszm@users.noreply.github.com>
+Date:   Tue Mar 15 18:07:46 2022 +0100
+
+    [OpenCDMi] Improve Widevine/PlayReady PSSH parsing (#130)
+
+[33mcommit 561af64ec2cca48e8c3e1977907e93538982f9d7[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Mar 15 15:06:16 2022 +0530
+
+    DeviceIdentification: Add config option for MODE configuration (#139)
+
+[33mcommit 9129868160ed1a9003f524fee4e433b5b1b8385b[m
+Merge: d6d81aa 4ca803b
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri Mar 11 14:26:51 2022 +0100
+
+    Merge pull request #137 from WebPlatformForEmbedded/development/warning
+    
+    Warning: remove warning due to Wunused-parameter
+
+[33mcommit 4ca803bd81191572c85430caf8d099810975645f[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Fri Mar 11 05:21:31 2022 -0800
+
+    WebkitBrowser: remove userdata param from Initialize for InjectedBundle
+
+[33mcommit bd9f47b7c32aa1c403476a84f28f2601bd8b67aa[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Fri Mar 11 03:53:30 2022 -0800
+
+    Warning: remove warning due to Wunused-parameter
+
+[33mcommit d6d81aaf58e6b51351b3efab5204ac8913a89f7c[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Mar 9 18:27:17 2022 +0100
+
+    [DEVICEINFO] Cleanup, remove unnessecary casting.
+
+[33mcommit 05fac6654bbf57dfcab5756f7936de672f69c376[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Mon Mar 7 14:58:21 2022 +0530
+
+    WebKitBrowser: align Destroy interface to avoid compile issue (#135)
+
+[33mcommit c4f1caa71f2040fef70d63b258047e5de933f72b[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Mar 4 12:14:12 2022 +0100
+
+    [WEBBRIDGE] Add feature to forward the context of a call to the JavascriptWorld [none/added/wrapped]
+
+[33mcommit d3ec7394bd5ddb1bdc60dd91eb178b424dc7865b[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Mar 4 12:06:31 2022 +0100
+
+    [WINDOWS] Move to a new VisualStudio.
+
+[33mcommit 12768568050ece59ea6c8f64223327299e993a03[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Mar 4 16:18:33 2022 +0530
+
+    Packager: sync up with rdk repo (#88)
+    
+    * Packager: minor cleanup
+    
+    * Packager: Removed PackagerEXImplementation
+
+[33mcommit 16ea3fd5605cff8de547398ca4da24c3c8c0c49c[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Mar 4 16:14:49 2022 +0530
+
+    SecurityAgent: release engine after use (#134)
+
+[33mcommit acc88893cdadaa0373df8169278d8b3428430276[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Mar 4 16:12:48 2022 +0530
+
+    WebKitBrowser: syncup from rdkservices (#133)
+
+[33mcommit 670ea71de0b98068461b5669d400415fdde3c7d4[m
+Author: Łukasz Iwan <46877317+lukiwa@users.noreply.github.com>
+Date:   Mon Feb 28 16:27:49 2022 +0100
+
+    [TraceControl][MessageControl] Introduce MessageControl plugin to handle Logging and Tracing messages (#127)
+    
+    * Basic plugin retrieving messages. Debug prints present
+    
+    * Renamed to MessageManager, using ThreadPool
+    
+    * Get dispatcher info from env. Added basic printing of incoming message
+    
+    * Removed debug prints
+    
+    * Use splitted version of message unit and message client
+    
+    * Use bare Thread. Plugin is now closing
+    
+    * Use hidden constans from Core::MessageUnit
+    
+    * Renamed plugin
+    
+    * Change way of getting the Messages via Pop
+    
+    * Allow lower layer to synchronize, use MessageMetaData class for checking type of message
+    
+    * Change, since metadata is returned as reference
+    
+    * Added class responsible for proper routing  diffrent messages
+    
+    * Add more outputs, update config, pass volatile path in configuration
+    
+    * Move traceassembler and interfaces to the Thunder
+    
+    * Toggle messages using JSONRPC
+    
+    * Allow plugin to retreive information about the available  categories and pass it via JSONRPC
+    
+    * Adjust to a new interface
+    
+    * Adjust to use messaging components from new namespace. Add outputs to the namespace
+    
+    * COMRPC cannot be used in the notification. Need to use diffrent thread
+    
+    * Use diffrent configuration method
+    
+    * Change according to namespace changes
+    
+    * Accept JSON-RPC status requests giving only type of message
+    
+    * Change name of iterator
+    
+    * Added websocket output, adapted after removing IAssembler interface
+    
+    * Reading all messages on notification. Outputs are bound to specific message type
+    
+    * Adopted WebKit plugin to the new messaging system
+    
+    * Make options off by default. Sort options alphabetically
+    
+    * Add maxexportconnection settings to config. Read it on the plugin's framework side
+    
+    * Move configuration reading to inprocess part. Report config params in jsonrpc status call. Change configure method
+    
+    * Remove old trace control plugin
+    
+    * Add documentation for MessageControl plugin
+    
+    * Licensing
+    
+    * Added UDP output, changed documentation and make outputs in director shared ptrs
+    
+    * Rename MessageControl
+    
+    * Revert "Remove old trace control plugin"
+    
+    This reverts commit 40d2a28e1d8efd814c778e70856628fb898b1fab.
+    
+    * Support both messaging and tracing in WebKitPlugin
+    
+    * Use a callback to output messages. Do not take memory by list of messages
+    
+    * Do not output to file by default
+    
+    * Do not set default output options in the config, they are negotiated on the plugin startup
+    
+    * Be consitent in the constness of the input params
+
+[33mcommit 38172866b54c8e50f3b85772500b4e4375aa5dce[m
+Merge: 707fa53 22c7c07
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Mon Feb 21 22:24:19 2022 +0100
+
+    Merge pull request #131 from WebPlatformForEmbedded/development/CleanupDeactivation
+    
+    [DeviceIdent] Cleanup Deactivation
+
+[33mcommit 22c7c076c182157917951c192e27132f14320c32[m[33m ([m[1;31morigin/development/CleanupDeactivation[m[33m, [m[1;32mdevelopment/CleanupDeactivation[m[33m)[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Mon Feb 21 21:37:43 2022 +0100
+
+    [Multiple] More cleanup
+
+[33mcommit eeab2cb6fac7840f2661b7d23c25ed75d16b1e62[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Mon Feb 21 19:24:32 2022 +0100
+
+    [DeviceIdent] Cleanup Deactivation
+
+[33mcommit 707fa53bcf6f1c684ee7b217cce54c47f910a51c[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 2 15:30:10 2022 +0530
+
+    Modified to compile SecurityAgent plugin with -fno-gnu-unique flag. (#100)
+    
+    * Modified to compile SecurityAgent plugin with -fno-gnu-unique flag.
+    
+    * Added comment for the compilation flag as suggested.
+
+[33mcommit 7ec67fca62ab6bb680b677b82ee7ed199e93189b[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed Feb 2 15:28:00 2022 +0530
+
+    SubSystem Release added (#128)
+
+[33mcommit cbecdf94d4bc44c434702c54cc04d8d86df912d6[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Feb 1 22:09:46 2022 +0530
+
+    DeviceIdentification: Linux: Try for a valid Physical interface, if interface is not configured (#124)
+    
+    * DeviceIdentification: Linux: Try for a valid Physical interface, if interface is not configured
+    
+    * DeviceIdentification: Linux: Trace error added interface not available case
+    
+    * DeviceIdentification: interface name flag renamed
+    
+    * DeviceIdentification:Linux : Use AdapterObserver to get interface activated notification and use Exchange::IConfiguration instead PluginHost::IConfigure
+
+[33mcommit 19dc403f09dbdc64e38581be47047a99e2b3f222[m
+Merge: 6f55853 91ca4f1
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Thu Jan 20 16:15:13 2022 +0100
+
+    Merge pull request #125 from WebPlatformForEmbedded/development/METROL-434
+    
+    WebkitBrowser: Sync-up from rdkservices repo and  Extension Directory configuration support added
+
+[33mcommit 91ca4f19d44717a3dd8f9988fefc39cc8cdb9f88[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Thu Jan 20 07:13:51 2022 -0800
+
+    Allow mixed content
+
+[33mcommit 5449f8235d4a01611481d641891d8cdca089f6b4[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Thu Jan 20 02:13:22 2022 -0800
+
+    WebkitBrowser: Cleanup of redundant files/flags from Injected bundle
+
+[33mcommit c74db6038e6fbc5fa0880eeec0a69d3ed81d041e[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Wed Jan 19 23:42:11 2022 -0800
+
+    WebkitBrowser: Extension Directory configuration support added
+
+[33mcommit fa33eff42fe4a362f435c78c1e811b5e9b1d8bb9[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Wed Jan 19 23:33:19 2022 -0800
+
+    WebkitBrowser: InjectedBundle: Add EXTERNAL to resolve symbol issue at visibility=hidden
+
+[33mcommit 63eb34877ad34e4a420a784e59d9b22c94cdf0cf[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Wed Jan 19 20:14:21 2022 -0800
+
+    WebKit: Syncup changes from rdkcentral:repo
+
+[33mcommit 6f55853ae747a6cf5ac7634e1d59774d498a5e85[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Jan 18 13:34:18 2022 +0530
+
+    DeviceIdentification: Linux implementation changes (#123)
+
+[33mcommit dc8cfaec9507731adb782c1360b070aced2eaabf[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Jan 18 08:55:26 2022 +0100
+
+    Development/jsonrpc deferred (#122)
+    
+    * [JSONRPC] Use the ne validation hadler with the deferred state.
+    
+    * [WEBBRIDGE] Add the webbridge, it is now a metrological ownd plugin in the RDK.
+
+[33mcommit c2ccb32c1a7a2eaec786bb100ea5c0bae5876b75[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Jan 18 13:22:40 2022 +0530
+
+    DeviceIdentification & DeviceInfo: Plugin updated to set and get identifier (#119)
+    
+    * DeviceIdentification:RPI: Implementation added for Identifier
+    
+    * DeviceInfo: Read Device Identifier from Subsystem
+    
+    * DeviceInfo: UpdateDeviceIdentifier once get susbystem notifications
+    
+    * DeviceIdentification: Linux implementation added: not tested
+    
+    DeviceIdentification: Linux implementation added: not tested
+
+[33mcommit e1d6ec8dc6270addc21768404d3698d091e52e01[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Jan 18 08:39:00 2022 +0100
+
+    [JSONRPC] Use the ne validation hadler with the deferred state. (#121)
+
+[33mcommit c8682ba3c71bf92677b4209baefa2f84195866e6[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Thu Jan 13 15:41:32 2022 +0100
+
+    [JSONRPC] Use the ne validation hadler with the deferred state. (#120)
+
+[33mcommit 919ecc5526201fa7acffa4100757a6416c26af1e[m
+Merge: a74f507 9103471
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Thu Jan 6 18:03:07 2022 +0100
+
+    Merge pull request #118 from WebPlatformForEmbedded/development/compile-fix
+    
+    Packager: add definition for virtual function
+
+[33mcommit 9103471ccac8a021cb3410b931ebcb5c2c6d22ee[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Thu Jan 6 07:07:40 2022 -0800
+
+    Packager: add definition for virtual function
+
+[33mcommit a74f507795a6bf0e164de3c303d36b588064125b[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Thu Dec 30 12:43:26 2021 +0100
+
+    [WORKERPOOL] Schedule method on JobType's is obsolete. (#117)
+    
+    * [WORKERPOOL] Schedule method on JobType's is obsolete.
+    Jobs have now a more eleborated state, so the use of schedule is now misleading as
+    in the same time someone might have scheduled or submitted it, the reschedule is
+    more expected than a schedule. So lets change all Schedules -> Reschedule.
+    
+    * [SYNC] Update the webkitBrowser Schedule -> Reschedule.
+
+[33mcommit 1fdc4a092a6c59827212f98c2dff2ffd84b00689[m
+Author: sramani-metro <71630728+sramani-metro@users.noreply.github.com>
+Date:   Thu Dec 23 17:56:46 2021 +0530
+
+    Dev/set timezone (#116)
+    
+    * Set the Time zone
+    
+    * Remove time.h
+
+[33mcommit e8d9ae398eaae9a6eb0a8b4bf0a032dc510f150e[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Thu Dec 23 17:41:37 2021 +0530
+
+    Modified Monitor plugin to alter SYSLOG statement to use Logging Category instead of Trace category. (#105)
+
+[33mcommit e5f9c6bee2a980c274a2a0e7712e6b38356ed771[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Thu Dec 23 17:40:24 2021 +0530
+
+    Modified WebKitBrowser plugin config to load InjectedBundle (#102)
+    
+    * Modified WebKitBrowser plugin config to load InjectedBundle
+    
+    * Modified WebKitBrowser plugin to check console enable flag at different place.
+    
+    * Modified to load InjectedBundle if configured.
+    
+    * Modified WebKitBrowser (glib) to use correct WebInspector env variable.
+
+[33mcommit fef15d3828e74f0b3ccf51302a9e07f620afc3cc[m
+Author: modeveci <o.deveci@metrological.com>
+Date:   Thu Dec 23 13:09:04 2021 +0100
+
+    [WebkitBrowser]: add new webkit glib api for transparent config (#104)
+
+[33mcommit 8acdb5d4c8e85e5b04c2a519dd4f4eefcc546fe3[m
+Merge: fff6a80 a86bfba
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Sat Nov 27 13:32:10 2021 +0100
+
+    Merge pull request #115 from WebPlatformForEmbedded/development/OCDMAlignment
+    
+    [OCDM] Adapt the COMRPC interfaces to work with the proper (maximum l…
+
+[33mcommit a86bfba94c0fe6f20a74b88ca99865607055288d[m[33m ([m[1;31morigin/development/OCDMAlignment[m[33m)[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Nov 26 23:20:58 2021 +0100
+
+    [OCDM] Adapt the COMRPC interfaces to work with the proper (maximum length) that can
+    be used on the COMRPC boundaries <64K per field.
+
+[33mcommit fff6a80b0b49e2df36f3e587e81f302f1b1156ff[m
+Merge: 307c59c 443434f
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Tue Nov 23 15:44:28 2021 +0100
+
+    Merge pull request #114 from WebPlatformForEmbedded/development/packager-compile-fix
+    
+    Compile fix due to typo error
+
+[33mcommit 443434f979bea7ac1009fdd371a46b018d44fb5f[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Tue Nov 23 06:42:38 2021 -0800
+
+    Compile fix due to typo error
+
+[33mcommit 307c59c69daaf862d26f72afd04921f12577e491[m
+Author: Michał Bugno <62062195+Michal-Bugno@users.noreply.github.com>
+Date:   Mon Nov 8 09:20:08 2021 +0100
+
+    Fix missing endif() statement in Apps.json (#113)
+
+[33mcommit 9d2b4b430f4afcc9691246bf8ab7cbeb1d4d69db[m
+Merge: 7db0150 5bcd900
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Sun Nov 7 12:04:08 2021 +0100
+
+    Merge pull request #110 from WebPlatformForEmbedded/development/METROL369
+    
+    [development/METROL369]: Change the Deinitialize order of out-of-proc…
+
+[33mcommit 7db0150647679be6993e0020eec8b617829149ef[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Nov 5 09:07:30 2021 +0100
+
+    Make sure it is valid CMake (and thus works :-) )
+    
+    @artur-gebicz-ml / @Michal-Bugno did you actually compile the stuff before pushing it?
+
+[33mcommit 5bcd9004b5efa7aec86e3fa5b4b647237ff5addf[m
+Author: brainstem123 <c.custers@metrological.com>
+Date:   Thu Nov 4 15:10:35 2021 +0100
+
+    [development/METROL369]: Suppress unused variable warning in non-debug build.
+
+[33mcommit be0f6001d577882d71bcdc828fd2960205bfa0b3[m
+Author: Michał Bugno <62062195+Michal-Bugno@users.noreply.github.com>
+Date:   Wed Nov 3 15:22:08 2021 +0100
+
+    Enable setting of ptsoffset, DFG and JIT (#109)
+    
+    * Switch off JIT and DFG for Apps
+    * Fix javascript settings in Apps
+    * Enable setting ptsoffset in Apps and YT
+    * Set ptsoffset as the cached option
+    * Remove ptsoffset cached option
+    * Add ptsoffset cache option with default value set to 0
+
+[33mcommit da8d917e18b6b2ba7268439a7bb6fa478ab1a27e[m
+Merge: 0bf19d5 87fb691
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Tue Nov 2 12:55:35 2021 +0100
+
+    Merge pull request #111 from WebPlatformForEmbedded/development/webkit-compile-fix
+    
+    WebKitBrowser:YouTube :missing endif added
+
+[33mcommit 87fb69109884233fec72923e2ce188305ab4e94b[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Tue Nov 2 04:52:55 2021 -0700
+
+    WebKitBrowser:YouTube :missing endif added
+
+[33mcommit 5aa224e1cd5691976df7f1f2903ff45e21daec8d[m
+Author: brainstem123 <c.custers@metrological.com>
+Date:   Tue Nov 2 11:07:16 2021 +0100
+
+    [development/METROL369]: Reorder getting IPC connection pointer and the release of the resources
+
+[33mcommit d7a5ce18566e6a1ea468f1e33c82cdc4d1e0f6bc[m
+Author: brainstem123 <c.custers@metrological.com>
+Date:   Mon Nov 1 10:04:11 2021 +0100
+
+    [development/METROL369]: Change the Deinitialize order of out-of-process if applicable.
+
+[33mcommit 0bf19d572d6cb26950eb95e12aab6b397e8d2670[m
+Author: Michał Bugno <62062195+Michal-Bugno@users.noreply.github.com>
+Date:   Fri Oct 29 15:06:05 2021 +0200
+
+    Add ability to set YT resolution and Apps msebuffers (#108)
+    
+    * Add ability to set YT resolution and Apps msebuffers
+    * Make YT resolution and Apps msebuffers cached cmake options
+    * Get default msebuffers value for apps from webkit
+
+[33mcommit b17917ad6113d5991514f8e684254e9e53f9e1d7[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Oct 26 17:26:42 2021 +0530
+
+    CMake: Add explicit message for find_library case based on REQUIRED/QUIETLY flag (#106)
+
+[33mcommit f7ed978beeee3117fcbb30354e47f40da060f23a[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Oct 26 09:14:02 2021 +0530
+
+    FindPackage.cmake:Added support to handle REQUIRED and QUIET (#103)
+
+[33mcommit d69cbd511fb82db258b950c090ef085aad3a83e8[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Mon Oct 25 14:01:49 2021 +0530
+
+    [WARNING] Create a warning free build (#99)
+
+[33mcommit c195b466b976ce8d722080549882bbeea59255ed[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Oct 15 15:20:08 2021 +0530
+
+    GetExternalCode: Use GIT_VERSION instead GIT_TAG to checkout branch/tag/hash (#98)
+    
+    * GetExternalCode: Use GIT_VERSION instead GIT_TAG to checkout branch/tag/hash
+    
+    * GetExternalCode: Update Version info comment with more details
+
+[33mcommit 818ef552dea848441eb784a3a29c493dd1b82816[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Oct 6 13:38:41 2021 +0200
+
+    [WINDOWS] Make it properly compile under windows. (#97)
+
+[33mcommit d851fdb03185b2056698fd3947f24a563976b7fe[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Oct 5 16:35:32 2021 +0530
+
+    Modified DeviceInfo plugin to return error if attr is not available. (#96)
+
+[33mcommit 8d22e12ab4383ac263ffbea2bb19758be349c3bd[m
+Merge: 01cf2fa 2ef33f7
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Mon Oct 4 14:13:45 2021 +0200
+
+    Merge pull request #95 from lukiwa/development/METROL-359
+    
+    [WarningReporting] Wrap decrypt call with duration warning
+
+[33mcommit 2ef33f793ee659e8b510660a84fa700a912685e4[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Oct 1 15:51:52 2021 +0200
+
+    [WarningReporting] Typo fix
+
+[33mcommit bbea525cdeafcede3a45023f9b1e81ce0b659b04[m
+Merge: 58f13ca 01cf2fa
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Oct 1 15:49:51 2021 +0200
+
+    Merge branch 'master' into development/METROL-359
+
+[33mcommit 01cf2faa3561ec0c8aad9f8032cc7a941da2cb62[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Oct 1 15:22:57 2021 +0530
+
+    DeviceIdentification: Add Broadcom Implementation support (#94)
+
+[33mcommit d5c48ca49cab8d9187a0fc64784973742cddc0dd[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Oct 1 14:51:03 2021 +0530
+
+    Deviceidentification: syncope from rdkservice plugin version (#89)
+    
+    * Amlogic: Update chipset name: refer rdkservices-PR: 1116
+    
+    * DeviceIdentification: minor cleanups
+
+[33mcommit de48da49a8a5a9b9710bb49604459078bbca2cbf[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Oct 1 14:49:19 2021 +0530
+
+    LocationSync: check availability of internet and location pointer before usage (#92)
+
+[33mcommit 41e283df2f9b4b8049472063da1638387c5e04cf[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Oct 1 14:48:53 2021 +0530
+
+    WebKitBrowser: Kill unresposinve suspended web process faster changes and config PERSISTENTPATHPOSTFIX changes from RDK (#93)
+
+[33mcommit 58f13cad98e6119b0f92211ca861850f2da4a8ea[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Wed Sep 29 14:42:29 2021 +0200
+
+    [WarningReporting] Wrap decrypt call with duration warning
+
+[33mcommit 2eaa5462e55e612a4526514c089ef7b95c84ae9c[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Sep 29 09:06:13 2021 +0200
+
+    [proxy_cast] Remove proxy_cast in favour of the constructor.
+
+[33mcommit ffd6fd556cc8008229be5798e5f9f2d3f767e6ce[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Sep 28 17:13:06 2021 +0530
+
+    Modified DeviceInfo plugin config to add extra attributes. (#91)
+
+[33mcommit 4015b038bffdeb77ec204b298b2f99e687474293[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Sep 28 02:39:33 2021 +0530
+
+    Messenger: syncup changes from rdkservices (#85)
+
+[33mcommit 1791afa4aa37d9957b464969b1fca41005b5295c[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Sep 28 02:37:49 2021 +0530
+
+    Modified to compile OCDM plugin with -fno-gnu-unique flag. (#84)
+
+[33mcommit 2d9c329538f2af418745149af38a3a28d36ad83b[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Sep 28 02:20:34 2021 +0530
+
+    DeviceInfo: minor alignement (#90)
+
+[33mcommit abf0ba1ccd0593e6c6360e4c4a0742d744db25f0[m
+Merge: 2727b41 3de1043
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Wed Sep 22 08:47:22 2021 +0200
+
+    Merge pull request #86 from WebPlatformForEmbedded/development/rdkservice-changes-syncup/securityagent
+    
+    SecurityAgent: syncup changes from rdkservices
+
+[33mcommit 3de1043066df83dbd211c6e6a963a50955ec4506[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Tue Sep 21 23:02:39 2021 -0700
+
+    SecurityAgent: correct wrong map usage to kv
+
+[33mcommit 21a3c161ae52ea92c68cff15499eef0599cede04[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Tue Sep 21 07:02:34 2021 -0700
+
+    SecurityAgent: syncup changes from rdkservices
+
+[33mcommit 2727b417124c917df5a23f9e09dc0f12389e8cd2[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue Sep 21 12:33:41 2021 +0530
+
+    remove redundant comments (#83)
+    
+    * remove redundant comments
+    
+    * HTMLAPP: corrected MODE variable name
+
+[33mcommit 1ec837f9def6c91e32026c2aedc3e5a0a3f52ac0[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Mon Sep 20 17:57:14 2021 +0530
+
+    OUTOFPROCESS flag moved to deprecated flag and added MODE flag (#82)
+
+[33mcommit 6bca511135d2a171caa594917612d02ae6b07eb0[m
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri Sep 10 16:45:37 2021 +0200
+
+    [OCDM] Fix private Interface map
+    
+    Changing in place as it breaks the build
+
+[33mcommit c67b9ed5118f486a0775bbf6cffd889d327b448b[m
+Author: sramani-metro <71630728+sramani-metro@users.noreply.github.com>
+Date:   Mon Sep 6 17:24:58 2021 +0530
+
+    Add Support to pass the Encryption Scheme and Pattern to DRM. (#75)
+
+[33mcommit 1a74ac5a2c03e2a313232c28e64b6a36ed3fc265[m
+Merge: 429dea8 93a68aa
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri Aug 27 10:55:35 2021 +0200
+
+    Merge pull request #79 from lukiwa/development/warning-reporting-shortened-messages-fix
+    
+    [WarningReporting] For abbreviated messages use identifier instead of file + line
+
+[33mcommit 93a68aa46d1656def03261b2fab15c734dcf8182[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Aug 26 14:45:44 2021 +0200
+
+    [WarningReporting] For abbreviated messages use identifier instead of file + line
+
+[33mcommit 429dea8124310df9b7ca12436cd8a4e2521c607c[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Aug 10 11:19:14 2021 +0200
+
+    Revert "Fix a memory leak by releasing the Clear content buffer"
+    
+    This reverts commit bca00f9fb80930c258046fccb885f76ab9e347d4.
+
+[33mcommit 788e86566f5de15d8cf3f1b350128f2b7b67affd[m
+Merge: 3417568 c9b4c12
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Mon Aug 9 11:21:44 2021 +0200
+
+    Merge branch 'master' of github.com:WebPlatformForEmbedded/ThunderNanoServicesRDK into R3
+
+[33mcommit c9b4c1253a379f30c64e5e132fcab6a212a5ab7b[m
+Merge: 92404d9 7cbe2ed
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Thu Aug 5 13:47:54 2021 +0200
+
+    Merge pull request #76 from WebPlatformForEmbedded/development/METROL-341
+    
+    Use config 'mode' to set process mode instead 'outofprocess' config
+
+[33mcommit 92404d9f344f3e654bc852e023dc5b9d3b3468ec[m
+Merge: eb03b7b 284cb53
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Thu Aug 5 12:56:33 2021 +0200
+
+    Merge pull request #77 from WebPlatformForEmbedded/development/webkit-interface-name-change
+    
+    WebKitBrowser: renamed BridgeQueryResponse to BridgeQuery
+
+[33mcommit 284cb53046cf878d2ec3bfa99babbbcc49af9521[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Thu Aug 5 05:45:02 2021 +0000
+
+    WebKitBrowser: renamed BridgeQueryResponse to BridgeQuery
+
+[33mcommit 7cbe2edc5719ca1ad60af8c787930148aab27bbe[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Aug 3 09:58:51 2021 +0000
+
+    Use config 'mode' to set process mode instead 'outofprocess' config
+
+[33mcommit e675cc515e715cc75300a194fb689b55877ec150[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Aug 3 09:16:12 2021 +0000
+
+    Config file sytel updated make uniform
+
+[33mcommit eb03b7bef06648a782cc27c3ab7cd0197057c62f[m
+Author: Artur Gebicz <a.gebicz@metrological.com>
+Date:   Fri Jul 30 08:52:33 2021 +0000
+
+    Pass ProxyStub path in the ExternalAccess
+    
+    This solves finding proxy/stubs for external
+    components using ocdm interfaces/ocdm clientlib.
+    Previously apps like WebKit couldn't find proper
+    proxy/stub thus resulting in broken DRM playback
+    in the webkitbrowser
+
+[33mcommit 341756887ce92521f20d1503eb41b1fc2930b65d[m
+Author: Artur Gebicz <a.gebicz@metrological.com>
+Date:   Fri Jul 30 08:52:33 2021 +0000
+
+    Pass ProxyStub path in the ExternalAccess
+    
+    This solves finding proxy/stubs for external
+    components using ocdm interfaces/ocdm clientlib.
+    Previously apps like WebKit couldn't find proper
+    proxy/stub thus resulting in broken DRM playback
+    in the webkitbrowser
+
+[33mcommit 464be271397c1d8128faed35d3aaa5c89a404dd8[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Jul 26 21:04:52 2021 +0200
+
+    [TRACECONTROL] Fixing the removal of the Accpet on the preparation for GCC 5.3.
+
+[33mcommit b42958cf3e9375c3a5a43fdba3e07cbea682a734[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Jul 26 21:04:52 2021 +0200
+
+    [TRACECONTROL] Fixing the removal of the Accpet on the preparation for GCC 5.3.
+
+[33mcommit 7d50019938686de740c2b6ad1c95328d7f0284a6[m
+Merge: 1bfa036 e050f84
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Jul 26 16:17:02 2021 +0200
+
+    Merge remote-tracking branch 'origin/master' into R3
+
+[33mcommit e050f84a8e7539dcb97b62c69e6a79cbe31938b6[m
+Author: artur-gebicz-ml <a.gebicz@metrological.com>
+Date:   Mon Jul 26 15:58:39 2021 +0200
+
+    Don't use std::make_pair (#74)
+    
+    Seems like std::make_pair is not fully
+    implemented on GCC <= 5.4.0 resulting in the
+    compilation errors. This is changed to use
+    piecewise_construct as in other places in the
+    framework.
+
+[33mcommit 4b6e8d7aa1b853ecb7db2de7336bf6cfc890de9b[m
+Merge: d769c39 ba33806
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Sun Jul 25 12:33:58 2021 +0200
+
+    Merge pull request #73 from WebPlatformForEmbedded/fix/fix-rpi-device-implementation
+    
+    fix-rpi-device-implementation
+
+[33mcommit ba338065e6fa9cbf0480de421c1b3f35f2233934[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Jul 23 14:52:49 2021 +0200
+
+    fix-rpi-device-implementation
+
+[33mcommit d769c391b2e7c7f4f43b6065413bd0f8377563f4[m
+Author: artur-gebicz-ml <a.gebicz@metrological.com>
+Date:   Thu Jul 22 07:47:50 2021 +0200
+
+    Support old version of the wpe-webkit.pc (#72)
+
+[33mcommit 0bb1a14d5a1422abfe9d154e57cf159dbef14c1f[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Jul 21 22:49:36 2021 +0200
+
+    [DEVICEINFO] Match that what you register with what you unregister :-)
+
+[33mcommit a429a260990e01797bc1616930f9266c2831923a[m
+Merge: 8f53d26 9a5d14e
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Jul 16 15:00:28 2021 +0200
+
+    Merge pull request #69 from lukiwa/development/warning-reporting-control
+    
+    [WarningReporting] Create plugin to gather and manage warnings and output them to proper channels
+
+[33mcommit 8f53d26e65ff78b000efa2cd33c525e2f72f994d[m
+Merge: 7a11c67 c32efad
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Jul 16 14:59:31 2021 +0200
+
+    Merge pull request #71 from WebPlatformForEmbedded/fix/implement-PluginHost--IPlugin--INotification--Unavailable
+    
+    implement-PluginHost--IPlugin--INotification--Unavailable
+
+[33mcommit c32efadf1003447a11fc042c567ba5a7e6d10e7d[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Jul 16 14:49:46 2021 +0200
+
+    implement-PluginHost--IPlugin--INotification--Unavailable
+
+[33mcommit 9a5d14ea13a6d873e4f3e52142cb87769dc7bc1d[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 15 10:25:38 2021 +0200
+
+    Update doc
+
+[33mcommit a8228c6cf91bd738078ea4d4e323a18b69329b94[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 15 10:25:28 2021 +0200
+
+    Definitions for config variables
+
+[33mcommit 534c58a3bedea98e7fb16167b68c050a999010d3[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 15 10:24:54 2021 +0200
+
+    Store warnings in volatile path
+
+[33mcommit 7a11c67732a0d22b086d298a02cd01eaf7f540b1[m
+Merge: 4fd364b 4795215
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Jul 13 15:59:23 2021 +0200
+
+    Merge pull request #68 from WebPlatformForEmbedded/development/UpdateWindows
+    
+    [OCDM] Update for Windows build
+
+[33mcommit 4fd364b493e8509e8a730b91e97a923746269e00[m
+Author: Artur Gebicz <a.gebicz@metrological.com>
+Date:   Tue Jul 13 13:28:57 2021 +0200
+
+    Add mse buffers config option for UX and YT
+
+[33mcommit 1647193c79438775fd0d85085e592fa03b6c5fec[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Jul 9 01:45:02 2021 -0700
+
+    Fix Cmake, Add some comments, cleanup, improve warning messages, use abbrevieted by default
+
+[33mcommit 47952155beb9f3710ab5377d3d8bdb0b030c3976[m
+Author: MFransen69 <m.fransen@metrological.com>
+Date:   Sun Jul 11 20:29:09 2021 +0200
+
+    [OCDM] Update for Windows build
+
+[33mcommit a1e79f3b96f666a8f3a2e33664ce67f1a029078a[m
+Merge: ff25902 9f003d1
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Wed Jul 7 16:30:01 2021 +0200
+
+    Merge pull request #66 from WebPlatformForEmbedded/Metrol_313_RemoveDependency_services_clientLib
+    
+    Metrol 313 remove dependency between services & client lib
+
+[33mcommit 9f003d10cf650d9868f5fd43208f39d9cbd4c62a[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue Jul 6 08:48:38 2021 +0200
+
+    after review :remove WPEFramework
+
+[33mcommit ff2590254a7f0116cfed62677c7c76c2caa9e09b[m
+Merge: 58c6259 b8db0d6
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Mon Jul 5 17:00:13 2021 +0200
+
+    Merge pull request #67 from WebPlatformForEmbedded/development/WebKitJsonCleanup
+    
+    [WebKit] JSON RPC Cleanup
+
+[33mcommit b8db0d6b78059a15f5b1b49e0bd75827648bb6a6[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Mon Jul 5 16:53:51 2021 +0200
+
+    [WebKit] JSON RPC Cleanup
+
+[33mcommit ae022f07d9385142e176ea79abf080ca359689c5[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Jul 2 01:32:30 2021 -0700
+
+    Update documentation
+
+[33mcommit 53e38d0f9eb70c73b03c7b994cdd4812441e2b99[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Thu Jul 1 16:18:04 2021 +0200
+
+    Moving all the OCDM  scoped interfaces  into the new one: Exchange
+
+[33mcommit 9f47b528c0fb1567ce0e21124d282fc2f4347a0f[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 1 02:37:54 2021 -0700
+
+    Update CMakeLists
+
+[33mcommit 33b536c5022773253099dc1dc120d4cdaf55597c[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 1 02:21:19 2021 -0700
+
+    Add option to display only warnings
+
+[33mcommit 73d6a356b2843fe80e93a7bf079b35a56eb38f31[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 1 01:46:39 2021 -0700
+
+    Moved WebSocketExporter inside Plugin namespace, formatted code, fixed warnings
+
+[33mcommit 22abd194bce9b5051e0facf6e85615aeb226075e[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jul 1 01:36:01 2021 -0700
+
+    Storing outputs in list, websocket exporter is stored in member variable
+
+[33mcommit 8a6c56cdc0ce8a45fc83ab44946f86a8bb3bb97b[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed Jun 30 13:02:45 2021 +0200
+
+    remove dependency with ClientLib
+
+[33mcommit 860c00cfc51a0b61943500893bcfed4520086c0a[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Jun 29 02:35:33 2021 -0700
+
+    No need to dynamic_cast
+
+[33mcommit 58c625963f495f1ede847d86cc63928cc616e7e1[m
+Merge: 8a9c3d4 044c781
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Jun 25 13:52:30 2021 +0200
+
+    Merge pull request #65 from WebPlatformForEmbedded/dev/drm-decrypt-remove-const
+    
+    [OpenCDMi] Release clear content buffer only if in-place decryption i…
+
+[33mcommit 044c781515fcfae90396d0e48131d2ea0b3dc50e[m
+Author: Santhosh Ramani <s.ramani@metrological.com>
+Date:   Fri Jun 25 16:14:47 2021 +0530
+
+    [OpenCDMi] Release clear content buffer only if in-place decryption is not used
+
+[33mcommit 8a9c3d44f6585a9c43337ab99b482514e57492bb[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Jun 22 22:19:06 2021 +0200
+
+    [DEVICEINFO] Fixes in case the DeviceInfo, out-of-process, can not be started.
+
+[33mcommit 5c89d68263677aa3e17e41348bdb83d00729a7e2[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Jun 21 14:16:40 2021 +0200
+
+    [WARNINGS] Fix warnings reported by windows.
+
+[33mcommit 28c68161823ca242c3faf98f5636d0dab99642fd[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Jun 21 12:01:48 2021 +0200
+
+    [WARNINGS] Get a warning free build.
+
+[33mcommit 1bfa036c04a5267a43bbcf09634cb0448c9ed641[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Wed May 26 04:03:45 2021 -0700
+
+    [SecurityAgent] TokenDispatcher now uses RPC::Communicator instead of IPCServer - allowing multiple connections
+
+[33mcommit 4a79cac3637885c16bbaa98fec9855fff817c9b7[m
+Merge: a78d700 a42b245
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Sun Jun 20 21:59:58 2021 +0200
+
+    Merge pull request #64 from WebPlatformForEmbedded/development/cmake_source_dir_to_list_dir
+    
+    cmake SOURCE_DIR changed to LIST_DIR
+
+[33mcommit 8fc89423803a8f341c8887b99a25c9f4cd1ae7bb[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Jun 18 05:43:55 2021 -0700
+
+    WebSocketExporter now derives from IWarningReportingMedia. TraceChannelOutput derives from WarningReportingJSONOutput
+
+[33mcommit a42b245eda1a90f189fa03cc9a157b608314805d[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Jun 18 12:00:33 2021 +0000
+
+    removed some warnigs
+
+[33mcommit 9f636512a6cf07ed6cd585b7befcb7a95ab7d5bc[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Fri Jun 18 04:12:52 2021 -0700
+
+    Added JSON Output (via Websockets)
+
+[33mcommit 67bc69132a5adc4150d84d78fa35da17a114a328[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Jun 18 10:48:59 2021 +0000
+
+    FindCmake moved to plugins cmake except common cmake and CMAKE_CURRENT_SOURCE_DIR changed to CMAKE_CURRENT_LIST_DIR
+
+[33mcommit a022cf918f3ef6e2d965426057d27ea60899a502[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jun 17 02:58:47 2021 -0700
+
+    Added output to file
+
+[33mcommit fd15894fe08fdc4a73bade15df759602ff95f641[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Jun 10 01:07:31 2021 -0700
+
+    Changed map to unordered_map. Storing Source object not as pointer inside map
+
+[33mcommit 54e2b454260077dd7b640550f53f4e0491aaad4f[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Jun 8 07:06:50 2021 -0700
+
+    Basic WarningReporting done - outputting to console/syslog. Changed raw pointers to unique_ptr, whiles to range loops
+
+[33mcommit a78d700c88ad97a7171fd7352a41d4371296b7af[m
+Merge: 183330e a04f3ea
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Wed Jun 16 23:06:15 2021 +0200
+
+    Merge pull request #63 from WebPlatformForEmbedded/development/webkit-cmake-changes
+    
+    WebKitBrowser: depending cmake moved inside plugin cmake location
+
+[33mcommit a04f3eacecb72f05383c72781074eb5bef794f5a[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Wed Jun 16 17:00:08 2021 +0000
+
+    WebKitBrowser: depending cmake moved inside plugin cmake location
+
+[33mcommit e253e56261855b7d54e47a2002dabd301bfa642a[m
+Author: Santhosh Ramani <s.ramani@metrological.com>
+Date:   Wed Jun 16 12:18:35 2021 +0530
+
+    Fix a memory leak by releasing the Clear content buffer
+
+[33mcommit a9c541eb9554fb9df36377be6f5a1aaf79c4e059[m
+Author: Santhosh Ramani <s.ramani@metrological.com>
+Date:   Wed Jun 16 16:50:19 2021 +0530
+
+    Revert "Merge pull request #62 from WebPlatformForEmbedded/dev/fix-decrypted-buffer-leak"
+    
+    This reverts commit ca5e4345c51946102c7ea4add3bf10e64b85784f.
+
+[33mcommit ca5e4345c51946102c7ea4add3bf10e64b85784f[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Jun 16 09:59:32 2021 +0200
+
+    Merge pull request #62 from WebPlatformForEmbedded/dev/fix-decrypted-buffer-leak
+    
+    Fix a memory leak by releasing the Clear content buffer
+
+[33mcommit 183330efc29bfca7e3d99c5ad4f7e5a6f61abaab[m
+Merge: 6f21aac 07be2ea
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Wed Jun 16 10:03:15 2021 +0200
+
+    Merge pull request #49 from WebPlatformForEmbedded/development/METROL-247
+    
+    [METRO-247] WebSocketExporter to allow and handle multiple connections
+
+[33mcommit 6f21aac52adb762ff8e0896a3c1285dc17368709[m
+Merge: c569b0e bca00f9
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Jun 16 09:59:32 2021 +0200
+
+    Merge pull request #62 from WebPlatformForEmbedded/dev/fix-decrypted-buffer-leak
+    
+    Fix a memory leak by releasing the Clear content buffer
+
+[33mcommit bca00f9fb80930c258046fccb885f76ab9e347d4[m
+Author: Santhosh Ramani <s.ramani@metrological.com>
+Date:   Wed Jun 16 12:18:35 2021 +0530
+
+    Fix a memory leak by releasing the Clear content buffer
+
+[33mcommit 07be2eadbbdf2e437d33ff05c617d40df2854788[m
+Author: Vinod Sathyaseelan <vinod_sathyaseelan@comcast.com>
+Date:   Tue Jun 15 19:43:27 2021 -0700
+
+    Addressed the review comments. Code restructuring is also done
+
+[33mcommit c569b0e09e7477232940b5834344a21fe681a89f[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Jun 11 11:24:29 2021 +0200
+
+    [SECURITYAGENT] Also clear (delete) the dispatcher at shutdown.
+
+[33mcommit dfe360b2a1c4eae5ecbdbfbefd8d9c29fc8e6e71[m
+Merge: 3e8c8eb ed9594c
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Jun 11 10:41:00 2021 +0200
+
+    Merge pull request #60 from lukiwa/development/security-agent-ipc-upgrade
+    
+    [SecurityAgent] TokenDispatcher now accepts multiple connections
+
+[33mcommit 3e8c8eb1f9701f3b0578240d5d6b6c2d459c4cea[m
+Merge: 1c8c3ef eabaa0e
+Author: artur-gebicz-ml <a.gebicz@metrological.com>
+Date:   Mon Jun 7 11:25:27 2021 +0200
+
+    Merge pull request #61 from WebPlatformForEmbedded/development/packager
+    
+    FindLibOPKG.cmake: Library variable name corrected
+
+[33mcommit eabaa0e2a308845d0df4466f1179ddcf8e8c416a[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Mon Jun 7 08:11:42 2021 +0000
+
+    FindLibOPKG.cmake: Library variable correction + usage in cmake updates
+
+[33mcommit 44c0ce4e02572b5d63d768acb507318be29ad394[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Jun 4 05:44:19 2021 +0000
+
+    FindLibOPKG.cmake: Library variable name corrected
+
+[33mcommit 1c8c3ef304433382f5c65305850235f8a24d0d16[m
+Merge: 1be8dff 17b29c7
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri May 28 20:24:47 2021 +0200
+
+    Merge pull request #57 from WebPlatformForEmbedded/Metrol-275
+    
+    Metrol 275
+
+[33mcommit 17b29c7014037464f271a9f3d9a0d56c04d86baa[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Thu May 27 20:41:49 2021 +0200
+
+    Metrol-275 :initalize pointer and data members
+
+[33mcommit 257cc2b9814006bad69a87b76d204231d68dbe0e[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Thu May 27 17:31:02 2021 +0200
+
+    Metrol-275: better initialization + adding an interface aggregate
+
+[33mcommit 3403263ac2c3d1c6b90f8491ecbb82413d38d3da[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed May 26 15:00:34 2021 +0200
+
+    Metrol-275: moving an interaface into a data member + small intialization
+
+[33mcommit ed9594ccd45f2537da9a1f25350f8f834d8fa17c[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Wed May 26 04:03:45 2021 -0700
+
+    [SecurityAgent] TokenDispatcher now uses RPC::Communicator instead of IPCServer - allowing multiple connections
+
+[33mcommit 53abceeae041aa8dc30e7fc1f8268b06f2afa5f7[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue May 25 13:31:48 2021 +0200
+
+    Metrol-275:update the documentation + change the year type into 16bits
+
+[33mcommit 1be8dff113689424555541680ec5d3786ed7e68f[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri May 21 20:07:30 2021 +0530
+
+    Packager: typo correction in the function name (#58)
+
+[33mcommit 0143c2718c533a5468e2ee48980677a39258a0b7[m
+Merge: aefc318 10f15e0
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri May 21 10:14:36 2021 +0200
+
+    Merge pull request #59 from WebPlatformForEmbedded/development/modulename-fix
+    
+    ModuleName typo corrected for DeviceIdentifcaiton, SecurityAgent and …
+
+[33mcommit 10f15e0a54d50f5a009b3413074aea2c8dc6a465[m
+Author: Haseena Sainul <h.sainul@metrological.com>
+Date:   Fri May 21 01:07:26 2021 -0700
+
+    ModuleName typo corrected for DeviceIdentifcaiton, SecurityAgent and InjectedBundle
+
+[33mcommit 3df0679a1be1d73b79fbb07b904cb90ef7d0fc8c[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed May 19 15:53:39 2021 +0200
+
+    Add jsonRPC calls to deviceinfo new metadata.
+
+[33mcommit aefc318b470b41ad8ea0858c01292970f1e8e8af[m
+Merge: e69eab1 d29ec93
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue May 18 18:20:35 2021 +0200
+
+    Merge pull request #55 from WebPlatformForEmbedded/development/webkit-assert-fix
+    
+    WebKitBrowser: init _application to avoid garbage value
+
+[33mcommit e69eab1bb0610decade843bc3aa18c9958ca5579[m
+Merge: 799465f e7d59ef
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue May 18 18:20:00 2021 +0200
+
+    Merge pull request #53 from WebPlatformForEmbedded/development/OpenCDMi
+    
+    Modified OCDM.config to add Widevine persistent storage location.
+
+[33mcommit 799465f78301cde45776cb5e75754d7e6450c15a[m
+Merge: 206c949 47af75c
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue May 18 15:37:50 2021 +0200
+
+    Merge pull request #56 from WebPlatformForEmbedded/development/add-ocdm-config-options
+    
+    OpenCDM: update config
+
+[33mcommit 47af75c83af00c469ac621f85ae24c131151f9f5[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Tue May 18 12:53:26 2021 +0200
+
+    OpenCDM: update config
+
+[33mcommit 335f3cd2ca5cf9b2a5637a115be3d08ff2b309e2[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue May 18 12:18:29 2021 +0200
+
+    add function to extract model name, model year, system integrator name, friendly name and platform name.
+
+[33mcommit d29ec93396d48e7f693599ae0ab61e2410b878e7[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri May 14 07:23:53 2021 +0000
+
+    WebKitBrowser: init _application to avoid garbage value
+
+[33mcommit 206c9497232ccc25ee0bd311830eee000b5149b1[m[33m ([m[1;33mtag: R3.1[m[33m)[m
+Merge: 2cb8a24 f2b4a81
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri May 7 14:08:23 2021 +0200
+
+    Merge pull request #54 from WebPlatformForEmbedded/fix/OpenCDMi-config-fixes
+    
+    OpenCDMi: fix json config
+
+[33mcommit f2b4a8198562dc1b15a16503baa908c38def9b72[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri May 7 13:52:53 2021 +0200
+
+    OpenCDMi: fix json config
+
+[33mcommit 2cb8a2433ed66a577ecc2fad6dc488a44d7246bf[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Thu May 6 18:20:00 2021 +0530
+
+    OpenCDMi: Config update/cleanup (#48)
+    
+    * OpenCDMi: Config update/cleanup
+
+[33mcommit 683fa90d7f5b5ae75761ca0900888579d6e7e2a2[m
+Author: Vinod Sathyaseelan <vinod_sathyaseelan@comcast.com>
+Date:   Wed May 5 09:16:40 2021 -0700
+
+    resolved merge conflict with master
+
+[33mcommit e7d59ef5793fa9e617bf9bfa88d651122e3b3825[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed May 5 23:20:30 2021 +0530
+
+    Modified OCDM.config to add Widevine persistent storage location.
+
+[33mcommit e5365cc04e48dd90e5816de744e167659c94d471[m
+Merge: 1791132 b3ccabf
+Author: Vinod Sathyaseelan <vinod_sathyaseelan@comcast.com>
+Date:   Wed May 5 09:14:47 2021 -0700
+
+    Merge branch 'master' into development/METROL-247
+
+[33mcommit 179113290a17e28a8bd4785494d4519ab413e2a2[m
+Author: Vinod Sathyaseelan <vinod_sathyaseelan@comcast.com>
+Date:   Wed May 5 09:14:40 2021 -0700
+
+    Moved defines from TraceControl.config to the main CMakeLists.txt
+
+[33mcommit b3ccabf7f8835cfd86b5717ef3ed180c7e0d8b86[m
+Merge: 2b163df 666a0cf
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed May 5 16:30:04 2021 +0200
+
+    Merge pull request #50 from WebPlatformForEmbedded/development/HangDetector
+    
+    Modified WebKitBrowser plugin to enable Hang Detection for GLib code.
+
+[33mcommit 2b163dfdb256136d12519aed6314f689f19fe5e0[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed May 5 14:21:55 2021 +0530
+
+    Monitor: minor format changes (#51)
+
+[33mcommit f73612911c35b54f1149307b0d93fa93bf1d00a4[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed May 5 14:21:37 2021 +0530
+
+    WebKitBrowser: Browser settings cleanup/updates (#52)
+    
+    * WebKitBrowser: Browser settings cleanup/updates
+
+[33mcommit 934a9beb66f5fb379856b51f44141018a962ea25[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 19:47:14 2021 +0530
+
+    webkit sync with rdkservices config changes (#40)
+    
+    * WebKitBrowser: sync up with rdkservices config changes
+
+[33mcommit a2eeee775710133a9646c676371b3a33dec9c5c1[m
+Merge: 765b02a 2fa8895
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Tue May 4 14:30:24 2021 +0200
+
+    Merge pull request #39 from WebPlatformForEmbedded/development/WebKitjsonrpc
+    
+    [WebKit] json rpc interface compatible
+
+[33mcommit 765b02a986e8f32c77427aad17a3973618cb1869[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:45:21 2021 +0530
+
+    Packager: Cleanup (#47)
+    
+    * Packager: Cleanup
+
+[33mcommit 3c11cb41fac5e38325b45f2922c8f18615b63823[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:44:55 2021 +0530
+
+    SecurityAgent: Cleanup (#46)
+    
+    * SecurityAgent: Cleanup
+
+[33mcommit 992f1ff6f9f597a0066a2917f28057b717050ec0[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:44:38 2021 +0530
+
+    TraceControl: Cleanup (#45)
+    
+    * TraceControl: Cleanup
+
+[33mcommit 2e31889275b0035e1744cbc314fdc24cb2f3eceb[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:44:17 2021 +0530
+
+    Messenger: Cleanup (#44)
+    
+    * Messenger: Cleanup
+
+[33mcommit 8887aac7cdbfeed48af7154f7c9ce26f60f67d59[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:43:44 2021 +0530
+
+    DeviceInfo: Cleanup (#43)
+    
+    * DeviceInfo: Cleanup
+
+[33mcommit 1828a1cb2d74b749f4287bfeeeb5f2d4e2c1e3e4[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:43:23 2021 +0530
+
+    LocationSync: Cleanup (#42)
+    
+    * LocationSync: Cleanup
+
+[33mcommit 503062feb0d79b1b090f668936024aaf5bf1d704[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Tue May 4 17:43:04 2021 +0530
+
+    DeviceIdentification: Cleanup (#41)
+    
+    * DeviceIdentification: Cleanup
+
+[33mcommit 6f15d9666117477636e54f876c3354f90c024864[m
+Author: Vinod Sathyaseelan <vinod_sathyaseelan@comcast.com>
+Date:   Mon May 3 10:46:15 2021 -0700
+
+    [METRO-247] WebSocketExporter to allow and handle multiple connections
+    
+    - Reason for change :  Enhancement
+          Current implementation of WebSocketExporter handle only one connection.
+    
+    - Solution :
+          Clean up WebSocketExporter.
+          Add attaching multiple channels.
+
+[33mcommit 666a0cfd61bd20d79c76d2fb1ddb9b4528ce8565[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon May 3 22:31:50 2021 +0530
+
+    Modified to terminate web process using API webkit_web_view_terminate_web_process().
+
+[33mcommit 95bdc78d2bc7055c4c634e2092cef1f6b1efcdd4[m
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed Apr 28 15:09:28 2021 +0530
+
+    Monitor: config cleanup (#37)
+    
+    * Monitor: config cleanup, Amazon config added, checking older config values for backward compatibility
+
+[33mcommit e5019335bea028886a70b82c24dee67073200c3b[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Apr 21 23:52:32 2021 +0530
+
+    Modified WebKitBrowser plugin to enable Hang Detection for GLib code.
+
+[33mcommit 9fad6f6c2cd0ba8460acf6d9fa864d218cd66441[m
+Merge: 968f253 88f0b94
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Apr 16 18:00:53 2021 +0200
+
+    Merge pull request #35 from WebPlatformForEmbedded/dev/change-sleep-to-yield
+    
+    Change SleepMs(0) to std::this_thread::yield()
+
+[33mcommit 968f253678e35bfce8e51b2bf20d44682b974d98[m
+Merge: e9aca26 f79d8d4
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Apr 16 17:59:25 2021 +0200
+
+    Merge pull request #38 from WebPlatformForEmbedded/development/fix-semicolon-print
+    
+    configs: make sure to encode semicolon so cmake will not create a list out of it
+
+[33mcommit 2fa88959add0cae293b87699178fe6e61f67cc68[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Fri Apr 16 16:10:03 2021 +0200
+
+    [WebKit] json rpc interface compatible
+
+[33mcommit f79d8d48d2eaf73b393e8f4cd70bf6f997fd781c[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Thu Apr 15 18:58:02 2021 +0200
+
+    configs: make sure to encode semicolon so cmake will not create a list out of it
+
+[33mcommit e9aca26a69908d86f4995e1cc0d015b084aaa25b[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Apr 7 11:33:42 2021 +0200
+
+    [SECUTIRYAGENT] Make sure it compiles agains R3.
+
+[33mcommit 88f0b9400590f07156ace6bde4e6fde4b9e1888c[m
+Author: Santhosh Ramani <s.ramani@metrological.com>
+Date:   Tue Mar 30 17:43:09 2021 +0530
+
+    Change SleepMs(0) to std::this_thread::yield()
+
+[33mcommit f086d57f464c83f272d1ce9c1598612f1e8f6c40[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Mar 26 21:09:00 2021 +0100
+
+    {WPEWEBKIT] Added the Utils file to the wrong librray. Corrected.
+
+[33mcommit 602e4eb7d4c78d954730d30c27217ca974d5aa62[m
+Merge: 572073d b033248
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 26 17:46:09 2021 +0100
+
+    Merge pull request #34 from WebPlatformForEmbedded/fix/wpe-2.28
+    
+    WebKitBrowser: exclude utils for glib api
+
+[33mcommit b0332485ab3608679ff475a8e6130ec7f10caee6[m
+Author: bram oosterhuis <mail@bybram.com>
+Date:   Fri Mar 26 15:36:35 2021 +0000
+
+    WebKitBrowser: exclude utils for glib api
+
+[33mcommit 572073d269bff2ad29974201aa827ce28414fd30[m
+Merge: 61ffd3c 3ff61a0
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 26 14:53:44 2021 +0100
+
+    Merge pull request #33 from WebPlatformForEmbedded/fix/missing-symbol-utils
+    
+    WebKitBrowser: add Utils.cpp
+
+[33mcommit 3ff61a099cdbfb7bf4ef883f386359fc330a7e13[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Mar 26 14:52:19 2021 +0100
+
+    WebKitBrowser: add Utils.cpp
+
+[33mcommit 61ffd3c4c040f9ffa57f7e9552a4c4fa3599813e[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Mar 26 14:05:29 2021 +0100
+
+    [WARNING] Also in release we want to have a warning free build ;-)
+
+[33mcommit 5b0ea64c131dce33857fbe5c4a464611ca566656[m
+Merge: 0b68cbf 594ebc6
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 26 13:50:04 2021 +0100
+
+    Merge pull request #32 from WebPlatformForEmbedded/development/WarningFree
+    
+    [WARNINGS] Create a warning free build
+
+[33mcommit 594ebc6acb6246245d77a745e32c49ce4205a712[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Mar 26 05:23:46 2021 +0530
+
+    Fix base construtor call warning
+
+[33mcommit 0b68cbfbd8da441696551381db798804e37bff22[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Mar 26 00:10:03 2021 +0100
+
+    [WARNING] Create a warning free buid
+
+[33mcommit ab29fbb8569f7fed035fa54b4bdaebad56978f22[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Mar 26 04:27:13 2021 +0530
+
+    [WARNINGS] Create a warning free build
+
+[33mcommit e4b05b30c9ba10b855daab1c7525c5cfbc22c94a[m
+Merge: d25cf60 1bd797d
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Mar 25 20:06:57 2021 +0100
+
+    Merge pull request #31 from WebPlatformForEmbedded/development/cmake-webkitbrowser
+    
+    WebKitBrowser: revist cmake
+
+[33mcommit 1bd797d3abc4166ef3ba61b5a11423ea0152bf5d[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Wed Mar 24 23:23:41 2021 +0100
+
+    WebKitBrowser: revist cmake
+
+[33mcommit d25cf602c64ac96a62679dd398cd5da5032315d5[m
+Merge: 31d0849 3446fb7
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Mar 25 13:51:35 2021 +0100
+
+    Merge pull request #27 from WebPlatformForEmbedded/development/SplitWebKitBrowser
+    
+    Modified to make WebKitBrowser glib code compile again.
+
+[33mcommit 31d0849be00fe48059d14748326c9dab367a4c91[m
+Merge: 5c311ef 416a361
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Mar 25 13:51:00 2021 +0100
+
+    Merge pull request #30 from WebPlatformForEmbedded/development/WarningReporting
+    
+    [WarnRep] Move to Core::Format
+
+[33mcommit 5c311ef2b357cee7ade4d2fb9d60f905a9e5b04d[m
+Merge: 860a4ea f47be7a
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 23 17:52:28 2021 +0100
+
+    Merge pull request #29 from WebPlatformForEmbedded/fix/TraceControl-format-not-a-string-literal-and-no-format-arguments
+    
+    TraceControl: fix error: format not a string literal and no format ar…
+
+[33mcommit f47be7acd5ad78555eb70193ce2aa918a9110e61[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Tue Mar 23 16:46:30 2021 +0100
+
+    TraceControl: fix error: format not a string literal and no format arguments
+
+[33mcommit 860a4ea3f557a633fc7ac9f6cc7ebe20df68853c[m
+Merge: abe533c 154fa78
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 23 16:06:55 2021 +0100
+
+    Merge pull request #28 from WebPlatformForEmbedded/fix/add-license
+    
+    adding the license of WPEFramework
+
+[33mcommit 154fa78708ddd3f6ead15d1378f3bd5afe383589[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Tue Mar 23 16:04:28 2021 +0100
+
+    adding the license of WPEFramework
+
+[33mcommit 3446fb786e0ee935f2ab30f76e7de2b29c17040d[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon Mar 22 13:54:12 2021 +0530
+
+    Modified to make WebKitBrowser glib code compile again.
+
+[33mcommit abe533cb95875d05c1f9e886f0088435252821e7[m
+Merge: bee7672 d7e1443
+Author: pwielders <pierre@wielders.net>
+Date:   Sun Mar 21 12:53:45 2021 +0100
+
+    Merge pull request #25 from WebPlatformForEmbedded/SplitWebKitBrowser
+    
+    [WEBKITBROWSER] Move the memory observer otherwise we have a dependen…
+
+[33mcommit d7e144312221453f4d3530358db1fa03b7ef11f5[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Sun Mar 21 12:51:50 2021 +0100
+
+    [WEBKITBROWSER] Move the memory observer otherwise we have a dependency issue :-)
+
+[33mcommit bee7672f5558a2f948a39e6d06fc55bd3b52e5a6[m
+Merge: cada78c a8f977c
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 19 21:30:33 2021 +0100
+
+    Merge pull request #20 from WebPlatformForEmbedded/development/webkit-syncup
+    
+    WebKitBrowser: sync-up code from rdkservices
+
+[33mcommit cada78c5de490ece3178a1b7acad74ec0d7f0751[m
+Merge: e9b060c b11540c
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 19 21:29:58 2021 +0100
+
+    Merge pull request #23 from WebPlatformForEmbedded/SplitWebKitBrowser
+    
+    Split web kit browser
+
+[33mcommit e9b060c4e2220f0f3c61dfbb5d990d05fab7d08d[m
+Merge: 4666c89 f71c8f0
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Mar 19 21:29:33 2021 +0100
+
+    Merge pull request #24 from WebPlatformForEmbedded/development/extended-IIdentifier
+    
+    DeviceIdentification: implement extended IIdentifier
+
+[33mcommit 416a361b65c151fa5db463b7dc9de8d715afc2e0[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Fri Mar 19 15:31:12 2021 +0100
+
+    [WarnRep] Dev 5
+
+[33mcommit b11540c10f405f3414830b2617c054bc0d984ad8[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Thu Mar 18 08:03:58 2021 -0700
+
+    Added a needed dependency
+
+[33mcommit f71c8f01a25f2ceda455a37edb4011fd60ae0cc4[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Thu Mar 18 15:34:46 2021 +0100
+
+    DeviceIdentification: implement extended IIdentifier
+
+[33mcommit a8f977cfbba94401b7e6f4d42202c54f5f69fe14[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Thu Mar 18 17:30:36 2021 +0530
+
+    WebKitBrowser: reverted cmake component name change
+
+[33mcommit a875b4d8ac2c374386531dd059bb145d96ab8384[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Wed Mar 17 19:35:00 2021 +0100
+
+    [SPLIT] Split the WPWWebKitBrowser in two portions.
+
+[33mcommit 854a20957a4ca76da1e1d896f7cc90048581f02f[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed Mar 17 05:27:52 2021 -0700
+
+    fixed the merge conflict
+
+[33mcommit fc2f1a9504c99e4b2d43a191b97c94b1602de264[m
+Merge: 8188d0e 4666c89
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed Mar 17 05:17:26 2021 -0700
+
+    Merge branch 'master' into SplitWebKitBrowser
+
+[33mcommit 8188d0e43ff184c532f117e768030a7c96bed3ea[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed Mar 17 03:45:50 2021 -0700
+
+    fix small typo error
+
+[33mcommit eb1e5357a3fb13a703042e1af3fadc75413fca8b[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Wed Mar 17 03:40:50 2021 -0700
+
+    add namespace to the lib name
+
+[33mcommit 4666c89e5b7599b52b6b5caac29150c05932a607[m
+Merge: 122529f 5f1ccfd
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 16 21:21:04 2021 +0100
+
+    Merge pull request #18 from WebPlatformForEmbedded/development/ocdm-cleanup
+    
+    OpenCDM: release engine after use
+
+[33mcommit 122529f31e495bb832ba8268d01f03e0068f4834[m
+Merge: d985f05 3968766
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 16 21:19:57 2021 +0100
+
+    Merge pull request #7 from WebPlatformForEmbedded/development/InjectedBundle
+    
+    Modified WebKitBrowser InjectedBundle to inject JS for SecurityAgent.
+
+[33mcommit d985f05d1865b2544b4dd1676e94bd90aa115bd3[m
+Merge: 23e70ce cfcdeee
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 16 21:16:22 2021 +0100
+
+    Merge pull request #21 from WebPlatformForEmbedded/development/add-generic-linux-implementation
+    
+    DeviceIdentification: add generic linux implementation
+
+[33mcommit 23e70ceefd89b67646ed61dc433a84b17f394495[m
+Merge: 6dbed78 30b7212
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Mar 16 21:11:47 2021 +0100
+
+    Merge pull request #19 from WebPlatformForEmbedded/development/webkit-cleanup
+    
+    InjectedBundle: release engine after use
+
+[33mcommit a49d01b355e20f6daa90da09019fe1d61afd976a[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue Mar 16 08:19:26 2021 -0700
+
+    Fixed an accidently local changes committed.
+
+[33mcommit 3b8c0e53d02fecefd5a737333eb53bc6f55c2944[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue Mar 16 08:16:38 2021 -0700
+
+    InjectedBundle had a dependency on webkit
+
+[33mcommit cae8e6cb76b2a0e95aa1bd2b8613f61916319bcb[m
+Author: wissem <golliwissem@hotmail.com>
+Date:   Tue Mar 16 08:11:07 2021 -0700
+
+    Moving WekbitImplementation into a separate lib
+
+[33mcommit cfcdeeea4cdd37fa39cf81b628f9ac40cc081b2b[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Mar 12 09:39:16 2021 +0100
+
+    DeviceIdentification: add generic linux implementation
+
+[33mcommit 0969e51f05f7188779174f55e7bf9e1e0f86c22f[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Thu Mar 11 19:57:00 2021 +0530
+
+    WebKitBrowser: sync-up code from rdkservices
+
+[33mcommit 3968766bba1daf7eb427d2ea7f6691a9635f7f3b[m
+Merge: 7e8a6b6 dcc61c8
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Mar 9 11:59:44 2021 +0530
+
+    Merge branch 'master' into development/InjectedBundle
+
+[33mcommit 30b72125ce812329cb1b08892e93280590234e62[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Mon Mar 8 21:21:59 2021 +0530
+
+    InjectedBundle: release engine after use
+
+[33mcommit 5f1ccfd6d0c2f3e537e4a18d3c3e50226372e0c5[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Mon Mar 8 21:19:52 2021 +0530
+
+    OpenCDM: release engine after use
+
+[33mcommit 6dbed786a950c1a4a8f9161de2fc66b29e9a807e[m
+Merge: dcc61c8 95a4e37
+Author: Bram Oosterhuis <bram.oosterhuis.nl@gmail.com>
+Date:   Mon Mar 8 14:01:01 2021 +0100
+
+    Merge pull request #17 from WebPlatformForEmbedded/development/cmake-projects
+    
+    cmake: make all plugins independed projects
+
+[33mcommit 95a4e3770f6a8668b5477f9cc258bfc6b3fcd4ce[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Sat Mar 6 00:14:33 2021 +0100
+
+    cmake: fix project VERSION policy error
+
+[33mcommit 9a5cbbddb443916ee07eff47b7c54e4211ef46ef[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Mar 5 13:26:03 2021 +0100
+
+    cmake: simplify write_config
+
+[33mcommit 40c1359a64ed2ba4c74097bc9fac5061c0a2efe6[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Fri Mar 5 12:18:44 2021 +0100
+
+    cmake: fix plugin config writing
+
+[33mcommit 5a7714a6b94f995145a21a9f07b547b1b5582594[m
+Author: Bram Oosterhuis <mail@bybram.com>
+Date:   Thu Mar 4 23:07:22 2021 +0100
+
+    cmake: make all plugins independed projects
+
+[33mcommit 7e8a6b60b8b96dd58ba9f1da9675df0786a95440[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Mar 3 16:23:12 2021 +0530
+
+    Modified to load AAMP JS bindings.
+
+[33mcommit 4e7101fa8385be239ae24b81fe43f02a3bf27aac[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon Mar 1 20:44:18 2021 +0530
+
+    Modified to add implementation for bridgequery notification.
+
+[33mcommit dcc61c86dce8295cd4f37ffa9d6055391c2610aa[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Mar 1 12:01:00 2021 +0100
+
+    [WINDOWS] Updated Project Files
+
+[33mcommit e82d4285c6abc923df3aeb466e088bb08fde83a6[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Thu Feb 25 22:53:41 2021 +0100
+
+    [DeviceInfo] fix warning
+
+[33mcommit ac4b2acb36d84ee4263aa2d17e13dd49c6ffdff4[m
+Merge: 10eeb11 4860ef1
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Feb 25 11:10:40 2021 +0100
+
+    Merge pull request #15 from lukiwa/development/DeviceCapabilities
+    
+    [DeviceInfo] Extended plugin to gather information about the device capabilities from the config file
+
+[33mcommit 10eeb114a2b4d49e9a4386c67ac417f5af84bb06[m
+Merge: c5cd685 9e7e936
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Feb 25 10:37:33 2021 +0100
+
+    Merge pull request #14 from WebPlatformForEmbedded/development/garbagecleanup
+    
+    Webkit: call GabageCollect from gmain loop
+
+[33mcommit c5cd6850ea396174c38557ca2ba3f7883f0c73b0[m
+Merge: 22acad2 06950a1
+Author: pwielders <pierre@wielders.net>
+Date:   Thu Feb 25 10:36:21 2021 +0100
+
+    Merge pull request #16 from WebPlatformForEmbedded/development/TraceWebExport
+    
+    Development/trace web export
+
+[33mcommit 06950a19544df805a08d6a7047b14e2f963f7a9d[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Wed Feb 24 18:30:54 2021 +0100
+
+    [TraceControl] more cleanup
+
+[33mcommit 0374428cd8bbdbcdfab8499b212254208c86339e[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Wed Feb 24 18:07:31 2021 +0100
+
+    [TraceControl] cleanup
+
+[33mcommit 22acad2d8a5a839c3e6f793617ba2b70ebcddf9c[m
+Merge: 8bd4f8a 382a9c0
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Wed Feb 24 17:08:43 2021 +0100
+
+    Merge pull request #13 from WebPlatformForEmbedded/development/PluginNotificationOoP
+    
+    [PLUGINS] Adapt to the new IPlugin::notification structure.
+
+[33mcommit 8fdd2c619c85f5abb99049cfbbd86ebef166471b[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Tue Feb 23 23:24:02 2021 +0100
+
+    [TraceControl] How did this compile...
+
+[33mcommit 5f9b1c05eeb009d9ac398368c57e32b594a0686e[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Tue Feb 23 23:16:17 2021 +0100
+
+    [TraceControl] add WebExport
+
+[33mcommit 382a9c0e1a0199780ebc5f6325d510f390b6c1c6[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Tue Feb 23 20:30:16 2021 +0100
+
+    [WINDOWS] Update the filter files for windows.
+
+[33mcommit 4860ef163f05621f1cc1bcc49b92a6213ea5c71d[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Feb 23 02:11:20 2021 -0800
+
+    Moved enum conversion to definitions
+
+[33mcommit 0588d5d687dbea50d063e00b818b49c6b1659dd4[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Feb 23 01:45:17 2021 -0800
+
+    Changed stbcapabilities to capabilites. Changed all occurenced of STB to device (in documentation)
+
+[33mcommit a6228ab2e8ead2afb94a47d51575ab95d85b1333[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 15 00:58:35 2020 -0800
+
+    Cleaned config default
+
+[33mcommit f0870c9ae6beb1455b1a052811d25b5ac413177f[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Dec 10 03:56:08 2020 -0800
+
+    Removed debug trace
+
+[33mcommit b200d21e501d42f2b284d39120faad9a03a3f692[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 8 02:04:43 2020 -0800
+
+    Updated documentation
+
+[33mcommit 163653394a24ec2d96e5537180f59ff4b53cb29f[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 8 02:04:31 2020 -0800
+
+    Removed test method
+
+[33mcommit fecca192d05316fdbb87296e0df91a59adcfd19b[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Thu Dec 3 02:35:41 2020 -0800
+
+    Finished working on json rpc for stb properties
+
+[33mcommit c2bb87eee7a461680e5939d77014c0bf37171dce[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 07:42:51 2020 -0800
+
+    Added json rpc method, working on enabling all properties in this json rpc method
+
+[33mcommit 2cc6c91f853ba2be9760de7e73eacc56f0bcb438[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 07:40:24 2020 -0800
+
+    Added missing error return values
+
+[33mcommit e19d3b0e5537118fa144c4b8f6cd59ee142bb9ae[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 05:34:11 2020 -0800
+
+    Fixed test method
+
+[33mcommit a06967028a9294c6c8e2018cd2f0dcaac543e82e[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 05:14:46 2020 -0800
+
+    Changed test method and .config to test changes
+
+[33mcommit 2afdceb72aa2e7c2d55909f29097eb3ba7d9eb2d[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 05:14:19 2020 -0800
+
+    Implemented hdcp support method, cec support + renamed methods
+
+[33mcommit af9fd8c04797f25fd8e704d2d1e8989c7fc608f9[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Dec 1 04:04:49 2020 -0800
+
+    Plugin is working in process now
+
+[33mcommit 72b546bb9d7de596da4245658c720dcaa422e01c[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Mon Nov 30 04:55:42 2020 -0800
+
+    Add test .config file entries
+
+[33mcommit abc345149995ba7635495fb27e5ebb0a3886fed9[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Mon Nov 30 04:23:15 2020 -0800
+
+    Created test method for implementation
+
+[33mcommit 437ed5e1e75e5956acf59651451b584967ff84b2[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Mon Nov 30 04:22:40 2020 -0800
+
+    Bugfix and removed traces
+
+[33mcommit 970da0cee28f8d518d7dbf522a0acc41441ae4d3[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Mon Nov 30 02:45:00 2020 -0800
+
+    Implemented interface methods, added enum to string conversion
+
+[33mcommit 4a16152109a46c28c134de225ee199ea37d938e6[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Nov 24 05:23:58 2020 -0800
+
+    Add availability to launch Implementation
+
+[33mcommit 51c7860e3bcbbeb2d1bc6ea08fba787f30a6e2c7[m
+Author: Lukasz Iwan <l.iwan@metrological.com>
+Date:   Tue Nov 24 04:19:13 2020 -0800
+
+    Created Implementation classes, working on implementing interface methods
+
+[33mcommit 9e7e936c9f94876850b2d686fea5f747ed19b562[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Feb 23 08:49:59 2021 +0530
+
+    Webkit: call GabageCollect from gmain loop
+
+[33mcommit 8bd4f8ae70b5c05752f96612fd42ac6b80b57f94[m
+Merge: 676ed0a e4f8c04
+Author: pwielders <pierre@wielders.net>
+Date:   Mon Feb 22 21:35:59 2021 +0100
+
+    Merge pull request #12 from WebPlatformForEmbedded/development/METROL-234
+    
+    WebkitBrowser: CollectGarbage implemented for glib based implementation
+
+[33mcommit 68d2a53957c535861e14a9244a37768a65121839[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Mon Feb 22 21:32:21 2021 +0100
+
+    [PLUGINS] Adapt to the new IPlugin::notification structure.
+
+[33mcommit 255cdf5e641fa9ef662a235ab5c2586ce9bef751[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Feb 23 01:39:42 2021 +0530
+
+    Modified to invoke js code for bridgereply & bridgeevent methods
+
+[33mcommit 676ed0ad5921a01ad891f06d1d99ec56f438b5fc[m
+Merge: b0bd2f2 2c235b8
+Author: pwielders <pierre@wielders.net>
+Date:   Mon Feb 22 12:16:13 2021 +0100
+
+    Merge pull request #2 from WebPlatformForEmbedded/development/OPKGFixNames
+    
+    [OPKG] fix names
+
+[33mcommit 01cba8849f7955fc89a2ae066185ecc25bf72a65[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon Feb 22 13:53:45 2021 +0530
+
+    Modified to add custom js wpe.NotifyWPEFramework.
+
+[33mcommit e4f8c04fd151985936cd27ad51232072d53a14e3[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Fri Feb 19 18:17:41 2021 +0530
+
+    WebkitBrowser: CollectGarbage implemented for glib based implementation
+
+[33mcommit b0bd2f21d04e0628a43fe5e69aa8b0ebdd718d11[m
+Merge: 8a2f23d aff52c7
+Author: pwielders <pierre@wielders.net>
+Date:   Wed Feb 17 20:41:37 2021 +0100
+
+    Merge pull request #11 from WebPlatformForEmbedded/development/ocdm-istypesupported-fix
+    
+    OpenCDM: return true if the type is supported
+
+[33mcommit 9bb1843771f4f896737431da1c0b62475e197c4e[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 17 20:15:32 2021 +0530
+
+    Modified to enable bridgereply & bridgeevent methods
+
+[33mcommit 041869162fd1f4e1a41ec63fe7f6c34d6a30e86f[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 17 19:06:09 2021 +0530
+
+    Modified to use Tags message types while sending message to WebKitWebPage.
+
+[33mcommit 81984d5666278564a2f5a678449495f5ee7496b1[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 17 17:22:14 2021 +0530
+
+    Modified to set / remove request headers.
+
+[33mcommit 08080b72eb8c02d2090011f2fa25b025e10e1867[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 17 00:28:25 2021 +0530
+
+    Modified to move Milestone & SecurityAgent GLib code to separate files.
+
+[33mcommit c8c73cc7aa5ff1c2748db057a82c128e955066d3[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Tue Feb 16 22:51:23 2021 +0530
+
+    Modified to set / get headers property.
+
+[33mcommit aff52c787960ee57d1481e22ddb898a8ea747965[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Feb 16 21:28:43 2021 +0530
+
+    OpenCDM: return true if the type is supported
+
+[33mcommit 8a2f23d68ddea094520d7df9cdc6e031deb8b8c6[m
+Merge: baac3b3 fd14455
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Feb 16 12:57:15 2021 +0100
+
+    Merge pull request #10 from WebPlatformForEmbedded/development/LocationSyncTrace
+    
+    LocationSync: change TRACE_LX to TRACE()
+
+[33mcommit fd1445591d7234340a711a1b74d78648977e8341[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Feb 16 16:44:48 2021 +0530
+
+    LocationSync: change TRACE_LX to TRACE()
+
+[33mcommit 79e563a7aa5a68b4429f7bcd3edf8a7f3912ec1c[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon Feb 15 19:30:35 2021 +0530
+
+    Modified to set / get cookie accept policy.
+
+[33mcommit 1915305cc3c3633c8d7fd97a1feb191a71726c29[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Thu Feb 11 13:26:30 2021 +0530
+
+    Modified to set / get localstorageenabled property.
+
+[33mcommit 261c8565f2e689ae33e07b18a35b008bd7d203be[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Thu Feb 11 12:37:49 2021 +0530
+
+    Modified to set / get UserAgent & Languages properties.
+
+[33mcommit dd8296e17f95c6f1b8d142dc0bdde29a60157475[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Wed Feb 10 23:44:34 2021 +0530
+
+    Minor fix for wpeNotifyWPEFramework script message handler.
+
+[33mcommit baac3b3c06c93c8ce3f8a1b5bdd03d0caf31a3c6[m
+Merge: bb8038d e204568
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Wed Feb 10 13:10:05 2021 +0530
+
+    Merge pull request #4 from WebPlatformForEmbedded/development/LatLongFix
+    
+    [LAT/LONG] Fix the issue in the latitude/longitude parsing and passin…
+
+[33mcommit e204568d5e3d66359188c22739e0e6f82c481a30[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Wed Feb 10 11:48:54 2021 +0530
+
+    LocationSync: minor cleanups
+
+[33mcommit bb8038d79500099155f7bd2b7fd648696e68d7d6[m
+Merge: ff81101 52f3973
+Author: pwielders <pierre@wielders.net>
+Date:   Tue Feb 9 15:40:35 2021 +0100
+
+    Merge pull request #8 from WebPlatformForEmbedded/development/monitor-preconditions
+    
+    Monitor: Add Time in the precondition list if TimeSync plugin is availabe
+
+[33mcommit 52f39735bff5d5539b4b70a76d148d1cabb57526[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Tue Feb 9 15:54:24 2021 +0530
+
+    Monitor: Add Time in the precondition list if TimeSync plugin is available
+
+[33mcommit ff81101af6daca2e6840b46e4125fb731f7dbbfb[m
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Mon Feb 8 12:22:03 2021 +0100
+
+    Update README.md
+
+[33mcommit 96c7de5377351d7688cbb46cefa92ea64b1e5668[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Mon Feb 8 12:24:47 2021 +0530
+
+    Call Close before checking the IsClosed
+
+[33mcommit 4afea5fd3dd73242b47d82d51a66787ee6a11ae5[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Mon Feb 8 10:59:49 2021 +0530
+
+    Modified WebKitBrowser InjectedBundle to inject JS for SecurityAgent.
+
+[33mcommit 8c9e53a2fcb01c9ca3e4c441adf68cf11e12eef1[m
+Merge: 7f9abca 612466f
+Author: HaseenaSainul <41037131+HaseenaSainul@users.noreply.github.com>
+Date:   Fri Feb 5 21:23:56 2021 +0530
+
+    Merge pull request #3 from WebPlatformForEmbedded/development/webkit-collect-garbage
+    
+    WebkitBrowser: Add GarbageCollection support
+
+[33mcommit 7f9abca3fdd2e1554289cfbdcc94f163bb48ba5f[m
+Merge: 53ef194 e49e897
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Feb 5 15:44:04 2021 +0100
+
+    Merge pull request #6 from WebPlatformForEmbedded/Development/CallSignOnNotification
+    
+    [NOTIFICATIONS] The plugin notification now passes the callsign with …
+
+[33mcommit e49e89703b0aac16e383bd80ae0ed6cb1c385abd[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Feb 5 15:42:26 2021 +0100
+
+    [NOTIFICATIONS] The plugin notification now passes the callsign with the interface. Adapt interface.
+
+[33mcommit 53ef1940c7b6896750787e3c36d220b5f72021f5[m
+Merge: a690181 39796a6
+Author: pwielders <pierre@wielders.net>
+Date:   Fri Feb 5 15:37:38 2021 +0100
+
+    Merge pull request #5 from WebPlatformForEmbedded/Development/NonHappydayShutdown
+    
+    [COSMETIC] Cleanup, constructors of the Memory objects according to t…
+
+[33mcommit 39796a6d7075f2b120d5b5e81ca2e9bcfb9e1e60[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Feb 5 15:36:00 2021 +0100
+
+    [COSMETIC] Cleanup, constructors of the Memory objects according to the new guidelines.
+
+[33mcommit 7094c7a9000886d66619363f7c87715ea018d7a2[m
+Author: Pierre Wielders <pierre@wielders.net>
+Date:   Fri Feb 5 15:23:43 2021 +0100
+
+    [LAT/LONG] Fix the issue in the latitude/longitude parsing and passing on to Thunder.
+
+[33mcommit 612466fe0f10c3015484e319255a17cf66b9b9bb[m
+Author: HaseenaSainul <h.sainul@metrological.com>
+Date:   Thu Feb 4 09:22:50 2021 +0530
+
+    WebkitBrowser: Add GarbageCollection support
+
+[33mcommit 2c235b818c64e78c28c7627523288b1fdf9f5e32[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Mon Jan 25 17:35:40 2021 +0100
+
+    [OPKG] fix names
+
+[33mcommit a69018168069609bc91e2dab2b516fb6839d103c[m[33m ([m[1;33mtag: R2-v1.2[m[33m)[m
+Author: Marcel Fransen <m.fransen@metrological.com>
+Date:   Sat Jan 23 15:36:15 2021 +0100
+
+    [Cmake] fix
+
+[33mcommit 92ac3da83d27dbcddbdb20577b7f245cebb2595c[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Sat Jan 23 01:44:59 2021 +0530
+
+    Added STORAGE_DIRECTORY to CMakeLists.txt.
+
+[33mcommit 6a67e7f4ed5cdf7dbe3eff78d82c55a364c16311[m
+Merge: 0f92397 8212146
+Author: MFransen69 <39826971+MFransen69@users.noreply.github.com>
+Date:   Fri Jan 22 14:12:38 2021 +0100
+
+    Merge pull request #1 from WebPlatformForEmbedded/development/initial-update
+    
+    Initial commit.
+
+[33mcommit 82121465035a6c6070203a7eeeff69595055b86d[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Fri Jan 22 15:29:15 2021 +0530
+
+    Initial commit.
+
+[33mcommit 0f92397ecb00ec629d7552da53eece36f477515c[m
+Author: Neeraj Deshpande <n.deshpande@metrological.com>
+Date:   Fri Jan 22 13:47:01 2021 +0530
+
+    Added README.

@@ -36,26 +36,36 @@ namespace {
         Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
         return result;
     }
+
+    uint16_t DispatcherSocketPort()
+    {
+        uint16_t result = 0;
+        string socketPort;
+
+        if (Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_SOCKETPORT_ENV, socketPort) == true) {
+            result = Core::NumberType<uint16_t>(socketPort.c_str(), static_cast<uint32_t>(socketPort.length()), NumberBase::BASE_DECIMAL).Value();
+        }
+
+        return (result);
+    }
 }
 
 namespace Plugin {
 
     class MessageControlImplementation : public Exchange::IMessageControl {
-        class WorkerThread : private Core::Thread {
+    private:
+        class WorkerThread : public Core::Thread {
         public:
+            WorkerThread() = delete;
+            WorkerThread(const WorkerThread&) = delete;
+            WorkerThread& operator= (const WorkerThread&) = delete;
+
             WorkerThread(MessageControlImplementation& parent)
                 : Core::Thread()
                 , _parent(parent)
             {
             }
-            void Start()
-            {
-                Thread::Run();
-            }
-            void Stop()
-            {
-                Thread::Block();
-            }
+            ~WorkerThread() override = default;
 
         private:
             uint32_t Worker() override
@@ -67,6 +77,7 @@ namespace Plugin {
                 return Core::infinite;
             }
 
+        private:
             MessageControlImplementation& _parent;
         };
 
@@ -75,13 +86,14 @@ namespace Plugin {
             : _dispatcherIdentifier(DispatcherIdentifier())
             , _dispatcherBasePath(DispatcherBasePath())
             , _worker(*this)
-            , _client(_dispatcherIdentifier, _dispatcherBasePath)
+            , _client(_dispatcherIdentifier, _dispatcherBasePath, DispatcherSocketPort())
         {
         }
         ~MessageControlImplementation() override
         {
             _worker.Stop();
             _client.SkipWaiting();
+            _worker.Wait(Core::Thread::STOPPED, Core::infinite);
 
             _client.ClearInstances();
         }
@@ -113,7 +125,7 @@ namespace Plugin {
             _client.AddInstance(0);
             _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
             _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
-            _worker.Start();
+            _worker.Run();
 
             //check if data is already available
             _client.SkipWaiting();

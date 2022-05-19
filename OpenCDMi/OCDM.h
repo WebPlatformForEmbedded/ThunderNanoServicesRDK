@@ -30,25 +30,19 @@ namespace Plugin {
 
     class OCDM : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
     private:
-        OCDM(const OCDM&) = delete;
-        OCDM& operator=(const OCDM&) = delete;
 
         class Notification : public RPC::IRemoteConnection::INotification {
-
-        private:
+        public:
             Notification() = delete;
             Notification(const Notification&) = delete;
             Notification& operator=(const Notification&) = delete;
 
-        public:
             explicit Notification(OCDM* parent)
                 : _parent(*parent)
             {
                 ASSERT(parent != nullptr);
             }
-            ~Notification()
-            {
-            }
+            ~Notification() override = default;
 
         public:
             virtual void Activated(RPC::IRemoteConnection*)
@@ -69,10 +63,6 @@ namespace Plugin {
 
     public:
         class Data : public Core::JSON::Container {
-        private:
-            Data(const Data&) = delete;
-            Data& operator=(const Data&) = delete;
-
         public:
             class System : public Core::JSON::Container {
             private:
@@ -108,9 +98,7 @@ namespace Plugin {
                     Add(_T("name"), &Name);
                     Add(_T("designators"), &Designators);
                 }
-                virtual ~System()
-                {
-                }
+                ~System() override = default;
 
             public:
                 Core::JSON::String Name;
@@ -129,34 +117,35 @@ namespace Plugin {
             };
 
         public:
+            Data(const Data&) = delete;
+            Data& operator=(const Data&) = delete;
             Data()
                 : Core::JSON::Container()
             {
                 Add(_T("systems"), &Systems);
             }
-            ~Data()
-            {
-            }
+            ~Data() = default;
 
         public:
             Core::JSON::ArrayType<System> Systems;
         };
 
     public:
+        OCDM(const OCDM&) = delete;
+        OCDM& operator=(const OCDM&) = delete;
+
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         OCDM()
-            : _service(nullptr)
+            : _connectionId(0)
+            , _service(nullptr)
             , _opencdmi(nullptr)
             , _memory(nullptr)
             , _notification(this)
         {
-            RegisterAll();
         }
 POP_WARNING()
-        virtual ~OCDM()
-        {
-            UnregisterAll();
-        }
+
+        ~OCDM() override = default;
 
     public:
         BEGIN_INTERFACE_MAP(OCDM)
@@ -177,22 +166,22 @@ POP_WARNING()
         // If there is an error, return a string describing the issue why the initialisation failed.
         // The Service object is *NOT* reference counted, lifetime ends if the plugin is deactivated.
         // The lifetime of the Service object is guaranteed till the deinitialize method is called.
-        virtual const string Initialize(PluginHost::IShell* service);
+        const string Initialize(PluginHost::IShell* service) override;
 
         // The plugin is unloaded from the webbridge. This is call allows the module to notify clients
         // or to persist information if needed. After this call the plugin will unlink from the service path
         // and be deactivated. The Service object is the same as passed in during the Initialize.
         // After theis call, the lifetime of the Service object ends.
-        virtual void Deinitialize(PluginHost::IShell* service);
+        void Deinitialize(PluginHost::IShell* service) override;
 
         // Returns an interface to a JSON struct that can be used to return specific metadata information with respect
         // to this plugin. This Metadata can be used by the MetData plugin to publish this information to the ouside world.
-        virtual string Information() const;
+        string Information() const override;
 
         //  IWeb methods
         // -------------------------------------------------------------------------------------------------------
-        virtual void Inbound(Web::Request& request);
-        virtual Core::ProxyType<Web::Response> Process(const Web::Request& request);
+        void Inbound(Web::Request& request) override;
+        Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
 
     private:
         void Deactivated(RPC::IRemoteConnection* process);

@@ -37,6 +37,10 @@
 #include "SecurityAgent.h"
 #endif
 
+#if defined(ENABLE_IIDENTIFIER)
+#include "IIdentifier.h"
+#endif
+
 #if defined(ENABLE_BADGER_BRIDGE)
 #include "BridgeObject.h"
 #endif
@@ -106,7 +110,7 @@ public:
           webkit_script_world_get_default(),
           "window-object-cleared",
           G_CALLBACK(windowObjectClearedCallback),
-          nullptr);
+          this);
 
         g_signal_connect(
           extension,
@@ -136,13 +140,17 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame, VARIABLE_IS_NOT_USED PluginHost* host)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
 
 #ifdef  ENABLE_SECURITY_AGENT
         JavaScript::SecurityAgent::InjectJS(world, frame);
+#endif
+
+#ifdef  ENABLE_IIDENTIFIER
+        JavaScript::IIdentifier::InjectJS(world, frame, host->_comClient);
 #endif
 
 #ifdef  ENABLE_BADGER_BRIDGE
