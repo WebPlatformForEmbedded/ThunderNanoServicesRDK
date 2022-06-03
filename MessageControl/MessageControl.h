@@ -20,74 +20,12 @@
 #pragma once
 
 #include "Module.h"
+#include "MessageOutput.h"
 
 namespace WPEFramework {
 namespace Plugin {
-    class WebSocketExporter;
-
     class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
-        class Observer : public RPC::IRemoteConnection::INotification {
-        public:
-            explicit Observer(MessageControl& parent);
-
-            void Activated(RPC::IRemoteConnection* connection) override;
-            void Deactivated(RPC::IRemoteConnection* connection) override;
-
-        private:
-            friend class Core::ThreadPool::JobType<Observer&>;
-
-            void Dispatch();
-
-            BEGIN_INTERFACE_MAP(Observer)
-            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
-            END_INTERFACE_MAP
-
-            Core::CriticalSection _adminLock;
-            MessageControl& _parent;
-
-            std::list<uint32_t> _activationIds;
-            std::list<uint32_t> _deactivationIds;
-            Core::WorkerPool::JobType<Observer&> _job;
-        };
-
-        class MessageOutputNotification : public Exchange::IMessageControl::INotification {
-        public:
-            explicit MessageOutputNotification(MessageControl& parent);
-
-            void ReceiveRawMessage(const Exchange::IMessageControl::MessageType type, const string& category,
-                const string& module, const string& fileName,
-                const uint16_t lineNumber, const uint64_t timestamp,
-                const string& message);
-
-        private:
-            BEGIN_INTERFACE_MAP(MessageOutputNotification)
-            INTERFACE_ENTRY(Exchange::IMessageControl::INotification)
-            END_INTERFACE_MAP
-
-            MessageControl& _parent;
-        };
-
-        class ComNotificationSink : public PluginHost::IShell::ICOMLink::INotification {
-        public:
-            ComNotificationSink() = delete;
-            explicit ComNotificationSink(MessageControl& parent);
-
-            ~ComNotificationSink() override = default;
-            ComNotificationSink(const ComNotificationSink&) = delete;
-            ComNotificationSink& operator=(const ComNotificationSink&) = delete;
-
-            BEGIN_INTERFACE_MAP(Notification)
-            INTERFACE_ENTRY(PluginHost::IShell::ICOMLink::INotification)
-            END_INTERFACE_MAP
-
-            void CleanedUp(const Core::IUnknown*, const uint32_t) override;
-            void Revoked(const Core::IUnknown* remote, const uint32_t interfaceId) override;
-
-        private:
-            MessageControl& _parent;
-        };
-
         class Config : public Core::JSON::Container {
         private:
             class NetworkNode : public Core::JSON::Container {
@@ -97,12 +35,32 @@ namespace Plugin {
                 ~NetworkNode() = default;
 
             public:
+                Core::NodeId NodeId() const {
+                    return (Core::NodeId(Binding.Value().c_str(), Port.Value()));
+                }
+
+            public:
                 Core::JSON::DecUInt16 Port;
                 Core::JSON::String Binding;
             };
 
         public:
-            Config();
+            Config()
+                : Core::JSON::Container()
+                , Console(false)
+                , SysLog(false)
+                , FileName()
+                , Abbreviated(true)
+                , MaxExportConnections(Publishers::WebSocketOutput::DefaultMaxConnections)
+                , Remote()
+            {
+                Add(_T("console"), &Console);
+                Add(_T("syslog"), &SysLog);
+                Add(_T("filepath"), &FileName);
+                Add(_T("abbreviated"), &Abbreviated);
+                Add(_T("maxexportconnections"), &MaxExportConnections);
+                Add(_T("remote"), &Remote);
+            }
             ~Config() = default;
 
             Config(const Config&) = delete;
@@ -115,6 +73,323 @@ namespace Plugin {
             Core::JSON::DecUInt16 MaxExportConnections;
             NetworkNode Remote;
         };
+        class MessageDispatcher {
+        private:
+            using OutputMap = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::shared_ptr<Messaging::IMessageOutput>>>;
+
+            class Observer 
+                : public RPC::IRemoteConnection::INotification
+                , public Exchange::IMessageControl::ICallback {
+            private:
+                enum state {
+                    ATTACHING,
+                    DETACHING,
+                    OBSERVING
+                };
+                using ObservingMap = std::unordered_map<uint32_t, state>;
+
+            public:
+                Observer() = delete;
+                Observer(const Observer&) = delete;
+                Observer& operator= (const Observer&) = delete;
+
+                explicit Observer(MessageDispatcher& parent) 
+                    : _parent(parent)
+                    , _adminLock()
+                    , _observing()
+                    , _job(*this) {
+                }
+                ~Observer() override {
+                    _job.Revoke();
+                }
+
+            public:
+                //
+                // Exchange::IMessageControl::INotification
+                // ----------------------------------------------------------
+                void Message(const Exchange::IMessageControl::MessageType type, const string& category,
+                    const string& module, const string& fileName,
+                    const uint16_t lineNumber, const uint64_t timestamp,
+                    const string& message) override {
+
+                    //yikes, recreating stuff from received pieces
+                    Messaging::TextMessage textMessage(message);
+                    Core::Messaging::Information info(static_cast<Core::Messaging::MetaData::MessageType>(type), category, module, fileName, lineNumber, timestamp);
+                    _parent.Output(info, &textMessage);
+                }
+
+                //
+                // RPC::IRemoteConnection::INotification
+                // ----------------------------------------------------------
+                void Activated(RPC::IRemoteConnection* connection) override {
+
+                    uint32_t id = connection->Id();
+
+                    _adminLock.Lock();
+
+                    // Seems the ID is already in here, thats odd, and impossible :-)
+                    ObservingMap::iterator index = _observing.find(id);
+
+                    if (index == _observing.end()) {
+                        _observing.emplace(std::piecewise_construct,
+                            std::make_tuple(id),
+                            std::make_tuple(state::ATTACHING));
+                    }
+                    else if (index->second == state::DETACHING) {
+                        index->second = state::OBSERVING;
+                    }
+
+                    _adminLock.Unlock();
+
+                    _job.Submit();
+                }
+                void Deactivated(RPC::IRemoteConnection* connection) override {
+
+                    uint32_t id = connection->Id();
+
+                    _adminLock.Lock();
+
+                    // Seems the ID is already in here, thats odd, and impossible :-)
+                    ObservingMap::iterator index = _observing.find(id);
+
+                    if (index != _observing.end()) {
+                        if (index->second == state::ATTACHING) {
+                            _observing.erase(index);
+                        }
+                        else if (index->second == state::OBSERVING) {
+                            _observing.emplace(std::piecewise_construct,
+                                std::make_tuple(id),
+                                std::make_tuple(state::DETACHING));
+                        }
+                    }
+
+                    _adminLock.Unlock();
+
+                    _job.Submit();
+                }
+
+                BEGIN_INTERFACE_MAP(Observer)
+                    INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+                    INTERFACE_ENTRY(Exchange::IMessageControl::ICallback)
+                END_INTERFACE_MAP
+
+            private:
+                friend class Core::ThreadPool::JobType<Observer&>;
+
+                void Dispatch()
+                {
+                    _adminLock.Lock();
+
+                    ObservingMap::iterator index = _observing.begin();
+
+                    while (index != _observing.end()) {
+                        if (index->second == state::ATTACHING) {
+                            index->second = state::OBSERVING;
+                            _parent.Attach(index->first);
+                            index++;
+                        }
+                        else if (index->second == state::DETACHING) {
+                            _parent.Detach(index->first);
+                            index = _observing.erase(index);
+                        }
+                        else {
+                            index++;
+                        }
+                    }
+
+                    _adminLock.Unlock();
+                }
+
+            private:
+                MessageDispatcher& _parent;
+                Core::CriticalSection _adminLock;
+                ObservingMap _observing;
+                Core::WorkerPool::JobType<Observer&> _job;
+            };
+
+        public:
+            MessageDispatcher(const MessageDispatcher&) = delete;
+            MessageDispatcher& operator=(const MessageDispatcher&) = delete;
+
+            MessageDispatcher()
+                : _adminLock()
+                , _outputDirector()
+                , _webSocketExporter()
+                , _control(nullptr)
+                , _observer(*this)
+                , _connectionId(0)
+                , _service(nullptr) {
+            }
+            ~MessageDispatcher() = default;
+
+        public:
+            string Initialize(PluginHost::IShell* service, Config& config)
+            {
+                string result;
+
+                _service = service;
+                _service->AddRef();
+
+                _service->Register(&_observer);
+
+                // Lets see if we can create the Message catcher...
+                _control = _service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
+
+                if (_control == nullptr) {
+                    result = _T("MessageControl plugin could not be instantiated.");
+                }
+                else if (_control->Configure(&_observer) != Core::ERROR_NONE) {
+                    result = _T("MessageControl plugin could not be configured.");
+                }
+                else {
+                    if ((service->Background() == false) && (((config.SysLog.IsSet() == false) && (config.Console.IsSet() == false)) || (config.Console.Value() == true))) {
+                        Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(config.Abbreviated.Value()));
+                    }
+                    if ((service->Background() == true) && (((config.SysLog.IsSet() == false) && (config.Console.IsSet() == false)) || (config.SysLog.Value() == true))) {
+                        Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(config.Abbreviated.Value()));
+                    }
+                    if (config.FileName.Value().empty() == false) {
+                        config.FileName = service->VolatilePath() + config.FileName.Value();
+
+                        Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(config.Abbreviated.Value(), config.FileName.Value()));
+                    }
+                    if ((config.Remote.Binding.Value().empty() == false) && (config.Remote.Port.Value() != 0)) {
+                        std::shared_ptr<Messaging::IMessageOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(config.Remote.NodeId()));
+                        Announce(Core::Messaging::MetaData::MessageType::TRACING, output);
+                        Announce(Core::Messaging::MetaData::MessageType::LOGGING, output);
+                    }
+
+                    _webSocketExporter.Initialize(service, config.MaxExportConnections.Value());
+                }
+
+                return result;
+            }
+            void Deinitialize()
+            {
+                _service->Unregister(&_observer);
+
+                _adminLock.Lock();
+
+                _outputDirector.clear();
+                _webSocketExporter.Deinitialize();
+
+                _adminLock.Unlock();
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+                VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
+                _control = nullptr;
+
+                // It should have been the last reference we are releasing,
+                // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // The process can disappear in the meantime...
+                if (connection != nullptr) {
+                    // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
+                    connection->Terminate();
+                    connection->Release();
+                }
+                _service->Release();
+                _service = nullptr;
+
+                _connectionId = 0;
+            }
+            uint32_t MaxConnections() const {
+                return (_webSocketExporter.MaxConnections());
+            }
+            bool Subscribe(const uint32_t id) {
+                return (_webSocketExporter.Attach(id));
+            }
+            void Unsubscribe(const uint32_t id) {
+                _webSocketExporter.Detach(id);
+            }
+            Core::ProxyType<Core::JSON::IElement> Command()
+            {
+                return (_webSocketExporter.Command());
+            }
+            Core::ProxyType<Core::JSON::IElement> Received(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element)
+            {
+                return (_webSocketExporter.Received(ID, element));
+            }
+
+            uint32_t Enable(
+                const Exchange::IMessageControl::MessageType type,
+                const string& moduleName,
+                const string& categoryName,
+                const bool enable) {
+                ASSERT(_control != nullptr);
+                return (_control->Enable(type, moduleName, categoryName, enable));
+            }
+
+            uint32_t Setting(
+                const bool initialize,
+                Exchange::IMessageControl::MessageType& type /* @out */,
+                string& category /* @out */,
+                string& module /* @out */,
+                bool& enabled /* @out */) {
+                ASSERT(_control != nullptr);
+                return (_control->Setting(initialize, type, category, module, enabled));
+            }
+
+        private:
+            void Announce(Core::Messaging::MetaData::MessageType type, const std::shared_ptr<Messaging::IMessageOutput>& output) {
+
+                _adminLock.Lock();
+
+                OutputMap::iterator index = _outputDirector.find(type);
+
+                if (index == _outputDirector.end()) {
+                    index = _outputDirector.emplace(std::piecewise_construct,
+                        std::make_tuple(type),
+                        std::make_tuple()).first;
+                }
+
+                index->second.emplace_back(output);
+
+                _adminLock.Unlock();
+            }
+            void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) {
+                // Time to start sending it to all interested parties...
+                _adminLock.Lock();
+
+                OutputMap::iterator index = _outputDirector.find(info.MessageMetaData().Type());
+                if (index != _outputDirector.end()) {
+                    for (const auto& entry : index->second) {
+                        entry->Output(info, message);
+                    }
+                }
+
+                _webSocketExporter.Output(info, message);
+
+                _adminLock.Unlock();
+            }
+            void Attach(const uint32_t id) {
+                _adminLock.Lock();
+                _control->Attach(id);
+                _adminLock.Unlock();
+            }
+            void Detach(const uint32_t id) {
+                _adminLock.Lock();
+                _control->Detach(id);
+                _adminLock.Unlock();
+
+                if (id == _connectionId) {
+                    ASSERT(_service != nullptr);
+                    Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_service, PluginHost::IShell::DEACTIVATED, PluginHost::IShell::FAILURE));
+                }
+            }
+
+        private:
+            Core::CriticalSection _adminLock;
+            OutputMap _outputDirector;
+            Publishers::WebSocketOutput _webSocketExporter;
+            Exchange::IMessageControl* _control;
+            Core::Sink<Observer> _observer;
+            uint32_t _connectionId;
+            PluginHost::IShell* _service;
+        };
 
     public:
         MessageControl(const MessageControl&) = delete;
@@ -124,11 +399,10 @@ namespace Plugin {
         ~MessageControl() override = default;
 
         BEGIN_INTERFACE_MAP(MessageControl)
-        INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_ENTRY(PluginHost::IDispatcher)
-        INTERFACE_ENTRY(PluginHost::IPluginExtended)
-        INTERFACE_ENTRY(PluginHost::IWebSocket)
-        INTERFACE_AGGREGATE(Exchange::IMessageControl, _control)
+            INTERFACE_ENTRY(PluginHost::IPlugin)
+            INTERFACE_ENTRY(PluginHost::IDispatcher)
+            INTERFACE_ENTRY(PluginHost::IPluginExtended)
+            INTERFACE_ENTRY(PluginHost::IWebSocket)
         END_INTERFACE_MAP
 
     public:
@@ -148,20 +422,8 @@ namespace Plugin {
         uint32_t endpoint_status(const JsonData::MessageControl::StatusParamsData& params, JsonData::MessageControl::StatusResultData& response);
 
     private:
-        void OnRevoke(const Exchange::IMessageControl::INotification* remote);
-        void Activated(const uint32_t id);
-        void Deactivated(const uint32_t id);
-
-        uint32_t _connectionId;
-        PluginHost::IShell* _service;
-        Exchange::IMessageControl* _control;
-        Core::Sink<Observer> _observer;
-        Core::Sink<MessageOutputNotification> _outputNotification;
-        Core::Sink<ComNotificationSink> _comSink;
-        std::unique_ptr<WebSocketExporter> _webSocketExporter;
+        MessageDispatcher _dispatcher;
         Config _config;
-        string _fullOutputFilePath;
-        uint16_t _maxExportConnections;
     };
 
 } // namespace Plugin

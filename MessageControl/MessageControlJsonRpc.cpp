@@ -51,11 +51,8 @@ namespace Plugin {
     uint32_t MessageControl::endpoint_set(const MessageInfo& params)
     {
         uint32_t result = Core::ERROR_NONE;
-        if (_control != nullptr) {
-            auto state = params.State.Value() == StateType::ENABLED ? true : false;
-            result = _control->EnableMessage(static_cast<Exchange::IMessageControl::MessageType>(params.Type.Value()), params.Module.Value(), params.Category.Value(), state);
-        }
-        return result;
+        auto state = params.State.Value() == StateType::ENABLED ? true : false;
+        return(_dispatcher.Enable(static_cast<Exchange::IMessageControl::MessageType>(params.Type.Value()), params.Module.Value(), params.Category.Value(), state));
     }
 
     // Method: status - Retrieves general information
@@ -73,18 +70,18 @@ namespace Plugin {
         bool initialize = true;
 
         if (!params.IsSet()) {
-            response.Console = _config.Console.Value();
-            response.Syslog = _config.SysLog.Value();
-            response.FileNameOutput = _fullOutputFilePath;
-            response.Abbreviated = _config.Abbreviated.Value();
-            response.Maxexportconnections = _maxExportConnections;
+            response.Console = _config.Console;
+            response.Syslog = _config.SysLog;
+            response.FileNameOutput = _config.FileName;
+            response.Abbreviated = _config.Abbreviated;
+            response.Maxexportconnections = _dispatcher.MaxConnections();;
             if (_config.Remote.IsSet()) {
-                response.Remote.Binding = _config.Remote.Binding.Value();
-                response.Remote.Port = _config.Remote.Port.Value();
+                response.Remote.Binding = _config.Remote.Binding;
+                response.Remote.Port = _config.Remote.Port;
             }
         }
 
-        while (_control->ActiveMessages(initialize, type, module, category, enabled) == Core::ERROR_NONE) {
+        while (_dispatcher.Setting(initialize, type, module, category, enabled) == Core::ERROR_NONE) {
             if (!params.IsSet()) {
                 add = true;
             } else {
