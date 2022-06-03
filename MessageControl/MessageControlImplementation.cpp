@@ -121,6 +121,10 @@ namespace Plugin {
 
             _worker.Run();
 
+            // TODO: Seems this "creates" the doorbell, that shouldbe doneby the constructor,
+            // Something to check and fix.
+            _client.SkipWaiting();
+
             return result;
         }
 
