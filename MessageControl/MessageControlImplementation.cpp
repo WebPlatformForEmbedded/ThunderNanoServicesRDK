@@ -181,7 +181,8 @@ namespace Plugin {
     private:
         void Dispatch()
         {
-            // _client.WaitForUpdates(Core::infinite);
+            _client.WaitForUpdates(Core::infinite);
+
             _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
                 string rawMessage;
                 message->ToString(rawMessage);
