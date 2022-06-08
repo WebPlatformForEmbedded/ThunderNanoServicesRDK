@@ -2,50 +2,50 @@ autostart = "@PLUGIN_OPENCDMI_AUTOSTART@"
 
 precondition = ["Provisioning"]
 
-if to_bool("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
-    to_bool("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
-    to_bool("@PLUGIN_OPENCDMI_NAGRA@") :
+if boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
+    boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
+    boolean("@PLUGIN_OPENCDMI_NAGRA@") :
     precondition.append("WebSource")
 
 configuration = JSON()
 
 systems = []
 
-if to_bool("@PLUGIN_OPENCDMI_CLEARKEY@"):
+if boolean("@PLUGIN_OPENCDMI_CLEARKEY@"):
     keysystem = JSON()
     keysystem.add("name", "ClearKey")
     keysystem.add("designators", [ "org.chromium.externalclearkey", "org.w3.clearkey" ])
     systems.append(keysystem)
 
 
-if to_bool("@PLUGIN_OPENCDMI_PLAYREADY@") or \
-    to_bool("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
-    to_bool("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
-    to_bool("@PLUGIN_OPENCDMI_PLAYREADY_VGDRM@") :
+if boolean("@PLUGIN_OPENCDMI_PLAYREADY@") or \
+    boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
+    boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
+    boolean("@PLUGIN_OPENCDMI_PLAYREADY_VGDRM@") :
     keysystem = JSON()
     keysystem.add("name",  "PlayReady")
     keysystem.add("designators", ["com.youtube.playready", "com.microsoft.playready", "com.netflix.playready"])
     conf = JSON()
-    conf.add_non_empty("metering", "@PLUGIN_OPENCDMI_PLAYREADY_METERING_CERTIFICATE@")
-    conf.add_non_empty("read-dir", "@PLUGIN_OCDM_PLAYREADY_READ_DIR@")
-    conf.add_non_empty("store-location", "@PLUGIN_OCDM_PLAYREADY_STORE_LOCATION@")
-    conf.add_non_empty("certificatelabel", "@PLUGIN_OPENCDMI_PLAYREADY_CERTIFICATE_LABEL@")
+    conf.add("metering", "@PLUGIN_OPENCDMI_PLAYREADY_METERING_CERTIFICATE@")
+    conf.add("read-dir", "@PLUGIN_OCDM_PLAYREADY_READ_DIR@")
+    conf.add("store-location", "@PLUGIN_OCDM_PLAYREADY_STORE_LOCATION@")
+    conf.add("certificatelabel", "@PLUGIN_OPENCDMI_PLAYREADY_CERTIFICATE_LABEL@")
     keysystem.add("configuration", conf)
     systems.append(keysystem)
 
 
-if to_bool("@PLUGIN_OPENCDMI_WIDEVINE@") or to_bool("@OPENCDMI_WIDEVINE_NEXUS_SVP@"):
+if boolean("@PLUGIN_OPENCDMI_WIDEVINE@") or boolean("@OPENCDMI_WIDEVINE_NEXUS_SVP@"):
     keysystem = JSON()
     keysystem.add("name", "WideVine")
     keysystem.add("designators", [ "com.widevine.alpha" ])
     conf = JSON()
     conf.add("certificate", "@PLUGIN_OPENCDMI_WIDEVINE_DEVICE_CERTIFICATE@")
-    conf.add_non_empty("keybox", "@PLUGIN_OPENCDMI_WIDEVINE_KEYBOX@")
-    conf.add_non_empty("storagelocation", "@PLUGIN_OPENCDMI_WIDEVINE_STORAGE_LOCATION@")
+    conf.add("keybox", "@PLUGIN_OPENCDMI_WIDEVINE_KEYBOX@")
+    conf.add("storagelocation", "@PLUGIN_OPENCDMI_WIDEVINE_STORAGE_LOCATION@")
     keysystem.add("configuration", conf)
     systems.append(keysystem)
 
-if to_bool("@PLUGIN_OPENCDMI_NAGRA@"):
+if boolean("@PLUGIN_OPENCDMI_NAGRA@"):
     keysystem = JSON()
     keysystem.add("name", "NagraSystem")
     keysystem.add("designators", [ "com.nagra.system" ])
@@ -60,17 +60,17 @@ if to_bool("@PLUGIN_OPENCDMI_NAGRA@"):
     keysystem.add("designators", [ "com.nagra.connect" ])
     systems.append(keysystem)
 
-if to_bool("@PLUGIN_OPENCDMI_NCAS@"):
+if boolean("@PLUGIN_OPENCDMI_NCAS@"):
     keysystem = JSON()
     keysystem.add("name", "Ncas")
     keysystem.add("designators", [ "com.ncas.alpha" ])
     systems.append(keysystem)
 
-configuration.add_non_empty("systems", systems)
+configuration.add("systems", systems)
 
 root = JSON()
 root.add("mode", "@PLUGIN_OPENCDMI_MODE@")
-root.add_non_empty("user", "@PLUGIN_OPENCDMI_USER@")
-root.add_non_empty("group", "@PLUGIN_OPENCDMI_GROUP@")
+root.add("user", "@PLUGIN_OPENCDMI_USER@")
+root.add("group", "@PLUGIN_OPENCDMI_GROUP@")
 configuration.add("root", root)
 
