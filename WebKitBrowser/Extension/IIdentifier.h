@@ -19,17 +19,14 @@
 
 #pragma once
 
-#ifndef MODULE_NAME
-#define MODULE_NAME Plugin_MessageControl
-#endif
+#include <wpe/webkit-web-extension.h>
 
-#include <messaging/messaging.h>
-#include <plugins/plugins.h>
-#include <interfaces/definitions.h>
+namespace WPEFramework {
+namespace JavaScript {
+namespace IIdentifier {
 
-#include <interfaces/IMessageControl.h>
-#include <interfaces/json/JsonData_MessageControl.h>
+void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC::CommunicatorClient>& _comClient);
 
-
-#undef EXTERNAL
-#define EXTERNAL
+}  // IIdentifier
+}  // JavaScript
+}  // WPEFramework

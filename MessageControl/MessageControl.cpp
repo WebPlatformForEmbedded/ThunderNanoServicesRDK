@@ -254,7 +254,7 @@ namespace Plugin {
         _adminLock.Lock();
 
         while (_activationIds.size() > 0) {
-            _parent.Activated(_deactivationIds.back());
+            _parent.Activated(_activationIds.back());
             _activationIds.pop_back();
         }
 
@@ -343,6 +343,7 @@ namespace Plugin {
     MessageControl::MessageControl()
         : _connectionId(0)
         , _service(nullptr)
+        , _control(nullptr)
         , _observer(*this)
         , _outputNotification(*this)
         , _comSink(*this)

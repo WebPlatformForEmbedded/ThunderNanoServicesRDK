@@ -202,6 +202,8 @@ POP_WARNING()
             void Activate(PluginHost::IShell* service) override;
             //! ==================================== CALLED ON THREADPOOL THREAD ======================================
             void Deactivate() override;
+            //! ==================================== CALLED ON THREADPOOL THREAD ======================================
+            void Close(const uint32_t id) override;
 
             // IPluginExtended
             // -------------------------------------------------------------------------------------------------------
