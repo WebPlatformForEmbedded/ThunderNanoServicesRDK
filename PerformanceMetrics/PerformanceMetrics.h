@@ -63,17 +63,17 @@ namespace Plugin {
             }
             ~Notification() override = default;
 
-            void Activated (const string& callsign, PluginHost::IShell* service) override
+            void Activated (const string&, PluginHost::IShell* service) override
             {
                 ASSERT(service != nullptr);
 
-                _parent.PluginActivated(*service, callsign);
+                _parent.PluginActivated(*service);
             }
-            void Deactivated (const string& callsign, PluginHost::IShell* service) override
+            void Deactivated (const string&, PluginHost::IShell* service) override
             {
                 ASSERT(service != nullptr);
 
-                _parent.PluginDeactivated(*service, callsign);
+                _parent.PluginDeactivated(*service);
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
@@ -142,8 +142,8 @@ namespace Plugin {
             virtual void Initialize() = 0;
             virtual void Deinitialize() = 0;
 
-            virtual void Activated(PluginHost::IShell&, const string& callsign) = 0;
-            virtual void Deactivated(PluginHost::IShell&, const string& callsign) = 0;
+            virtual void Activated(PluginHost::IShell&) = 0;
+            virtual void Deactivated(PluginHost::IShell&) = 0;
         };
 
         class CallsignPerfMetricsHandler : public IPerfMetricsHandler
@@ -184,18 +184,19 @@ namespace Plugin {
                 }
             }
 
-            void Activated(PluginHost::IShell& service, const string& callsign) override
+            void Activated(PluginHost::IShell& service) override
             {
-                if( callsign == _callsign ) {
+                if( service.Callsign() == _callsign ) {
                     ASSERT(_observable.IsValid() == false);
 
                     CreateObservable(service);
                     _observable->Activated(service);
                 }
             }
-            void Deactivated(PluginHost::IShell& service, const string& callsign) override
+            
+            void Deactivated(PluginHost::IShell& service) override
             {
-                if( callsign == _callsign ) {
+                if( service.Callsign() == _callsign ) {
                     ASSERT(_observable.IsValid() == true);
 
                     _observable->Deactivated(service);
@@ -252,26 +253,26 @@ namespace Plugin {
                 _observers.clear();
             }
 
-            void Activated(PluginHost::IShell& service, const string& callsign) override
+            void Activated(PluginHost::IShell& service) override
             {
                 if( service.ClassName() == Classname() ) {
                     _adminLock.Lock();
                     auto result =_observers.emplace(std::piecewise_construct,
-                                       std::forward_as_tuple(callsign),
-                                       std::forward_as_tuple(callsign));
+                                       std::forward_as_tuple(service.Callsign()),
+                                       std::forward_as_tuple(service.Callsign()));
                     ASSERT( ( result.second == true ) && ( result.first != _observers.end() ) );
                     result.first->second.Initialize();
-                    result.first->second.Activated(service, callsign);
+                    result.first->second.Activated(service);
                     _adminLock.Unlock();
                 }
             }
-            void Deactivated(PluginHost::IShell& service, const string& callsign) override
+            void Deactivated(PluginHost::IShell& service) override
             {
                 if( service.ClassName() == Classname() ) {
                     _adminLock.Lock();
-                    auto it =_observers.find(callsign);
+                    auto it =_observers.find(service.Callsign());
                     if( it != _observers.end() ) {
-                        it->second.Deactivated(service, callsign);
+                        it->second.Deactivated(service);
                         it->second.Deinitialize();
                         _observers.erase(it);
                     }
@@ -677,8 +678,8 @@ POP_WARNING()
 
     private:
 
-        void PluginActivated(PluginHost::IShell& service, const string& callsign);
-        void PluginDeactivated(PluginHost::IShell& service, const string& callsign);
+        void PluginActivated(PluginHost::IShell& service);
+        void PluginDeactivated(PluginHost::IShell& service);
 
     private:
         Core::Sink<Notification> _notification;

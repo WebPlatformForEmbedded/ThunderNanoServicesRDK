@@ -72,18 +72,18 @@ namespace Plugin {
         return (_T(""));
     }
 
-    void PerformanceMetrics::PluginActivated(PluginHost::IShell& service, const string& callsign) 
+    void PerformanceMetrics::PluginActivated(PluginHost::IShell& service) 
     {
         ASSERT(_handler);
 
-        _handler->Activated(service, callsign);
+        _handler->Activated(service);
     }
 
-    void PerformanceMetrics::PluginDeactivated(PluginHost::IShell& service, const string& callsign) 
+    void PerformanceMetrics::PluginDeactivated(PluginHost::IShell& service) 
     {
         ASSERT(_handler);
 
-        _handler->Deactivated(service, callsign);
+        _handler->Deactivated(service);
     }
 
     void PerformanceMetrics::CallsignPerfMetricsHandler::CreateObservable(PluginHost::IShell& service)
