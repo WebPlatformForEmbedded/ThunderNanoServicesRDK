@@ -20,152 +20,84 @@
 #include "MessageOutput.h"
 
 namespace WPEFramework {
-namespace Messaging {
+namespace Publishers {
 
-    TextOutput::TextOutput(const bool abbreviated)
-        : _abbreviated(abbreviated)
+    string Text::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
     {
-    }
+        string deserializedMessage;
+        std::ostringstream output;
 
-    void TextOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
-    {
-        _output.str("");
-        _output.clear();
-
-        message->ToString(_deserializedMessage);
+        message->ToString(deserializedMessage);
         Core::Time now(info.TimeStamp());
 
         if (_abbreviated == true) {
             string time(now.ToTimeOnly(true));
-            _output << '[' << time.c_str() << ']' 
-                    << '[' << info.MessageMetaData().Module() << "]" 
-                    << '[' << info.MessageMetaData().Category() << "]: " 
-                    << _deserializedMessage << std::endl;
+            output << '[' << time.c_str() << ']' 
+                   << '[' << info.MessageMetaData().Module() << "]" 
+                   << '[' << info.MessageMetaData().Category() << "]: " 
+                   << deserializedMessage << std::endl;
         } else {
             string time(now.ToRFC1123(true));
-            _output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(info.FileName().c_str()) << ':' << info.LineNumber() << "] "
-                    << info.MessageMetaData().Category() << ": " << _deserializedMessage << std::endl;
+            output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(info.FileName().c_str()) << ':' << info.LineNumber() << "] "
+                   << info.MessageMetaData().Category() << ": " << deserializedMessage << std::endl;
         }
 
-        HandleTextMessage(_output.str());
+        return(output.str());
     }
 
-    void ConsoleOutput::HandleTextMessage(const string& message)
+    void ConsoleOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) /* override */
     {
-        std::cout << message;
+        std::cout << _convertor.Convert(info, message);
     }
 
-    void SyslogOutput::HandleTextMessage(const string& message)
+    void SyslogOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) /* override */
     {
 #ifndef __WINDOWS__
-        syslog(LOG_NOTICE, _T("%s"), message.c_str());
+        syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(info, message).c_str());
 #else
-        printf(_T("%s"), message.c_str());
+        printf(_T("%s"), _convertor.Convert(info, message).c_str());
 #endif
     }
 
-    FileOutput::FileOutput(bool abbreviate, const string& filepath)
-        : TextOutput(abbreviate)
-        , _file(filepath)
-    {
-        _file.Create();
-
-        if (!_file.IsOpen()) {
-            TRACE(Trace::Error, (_T("Could not open file <%s>. Outputting warnings to file unavailable."), filepath));
-        }
-    }
-    FileOutput::~FileOutput()
+    void FileOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
     {
         if (_file.IsOpen()) {
-            _file.Close();
+            string line = _convertor.Convert(info, message);
+            _file.Write(reinterpret_cast<const uint8_t*>(line.c_str()), static_cast<uint32_t>(line.length()));
         }
     }
-
-    void FileOutput::HandleTextMessage(const string& message)
+     
+    void JSON::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message, Data& data)
     {
-        if (_file.IsOpen()) {
-            _file.Write(reinterpret_cast<const uint8_t*>(message.c_str()), message.length());
-        }
-    }
+        ExtraOutputOptions options = _outputoptions;
 
-    JSONOutput::Data::Data()
-        : Core::JSON::Container()
-        , Time()
-        , Filename()
-        , Linenumber()
-        , Category()
-        , Module()
-        , Message()
-    {
-        Add(_T("time"), &Time);
-        Add(_T("filename"), &Filename);
-        Add(_T("linenumber"), &Linenumber);
-        Add(_T("category"), &Category);
-        Add(_T("module"), &Module);
-        Add(_T("message"), &Message);
-    }
+        if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PAUSED)) == 0) {
 
-    JSONOutput::JSONOutput(WPEFramework::PluginHost::Channel& channel)
-        : _exportChannel(channel)
-        , _outputoptions(ExtraOutputOptions::ALL)
-        , _paused(false)
-    {
-    }
-
-    bool JSONOutput::IsPaused() const
-    {
-        return _paused;
-    }
-
-    JSONOutput::ExtraOutputOptions JSONOutput::OutputOptions() const
-    {
-        return _outputoptions;
-    }
-
-    void JSONOutput::OutputOptions(const JSONOutput::ExtraOutputOptions outputoptions)
-    {
-        _outputoptions = outputoptions;
-    }
-
-    void JSONOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
-    {
-        if (!IsPaused()) {
-            ExtraOutputOptions options = _outputoptions;
-
-            WPEFramework::Core::ProxyType<Data> data = GetDataContainer();
-            data->Clear();
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                data->Time = WPEFramework::Core::Time::Now().ToRFC1123(true);
+                data.Time = Core::Time::Now().ToRFC1123(true);
             } else {
-                data->Time = WPEFramework::Core::Time::Now().ToTimeOnly(true);
+                data.Time = Core::Time::Now().ToTimeOnly(true);
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
-                data->Filename = info.FileName();
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
-                    data->Linenumber = info.LineNumber();
-                }
+                data.Filename = info.FileName();
+            }
+            if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
+                data.Linenumber = info.LineNumber();
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::MODULE)) != 0) {
-                data->Module = info.MessageMetaData().Module();
+                data.Module = info.MessageMetaData().Module();
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
-                data->Category = info.MessageMetaData().Category();
+                data.Category = info.MessageMetaData().Category();
             }
 
             string rawMessage;
             message->ToString(rawMessage);
-            data->Message = rawMessage;
-
-            HandleJsonMessage(data);
+            data.Message = rawMessage;
         }
-    }
-
-    void JSONOutput::HandleJsonMessage(const Core::ProxyType<Data>& jsondata)
-    {
-        _exportChannel.Submit(WPEFramework::Core::ProxyType<WPEFramework::Core::JSON::IElement>(jsondata));
     }
 
     //UDPOutput
@@ -224,51 +156,5 @@ namespace Messaging {
     {
         _output.Output(info, message);
     }
-
-    //DIRECTOR
-    void MessageDirector::AddOutput(Core::Messaging::MetaData::MessageType type, std::shared_ptr<Messaging::IMessageOutput> output)
-    {
-        _outputs[type].push_back(std::move(output));
-    }
-
-    void MessageDirector::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
-    {
-
-        for (const auto& output : _outputs[info.MessageMetaData().Type()]) {
-            output->Output(info, message);
-        }
-
-        for (const auto& notification : _notifications) {
-            string rawMessage;
-            message->ToString(rawMessage);
-
-            notification->ReceiveRawMessage(static_cast<Exchange::IMessageControl::MessageType>(info.MessageMetaData().Type()),
-                info.MessageMetaData().Category(),
-                info.MessageMetaData().Module(),
-                info.FileName(),
-                info.LineNumber(),
-                info.TimeStamp(),
-                rawMessage);
-        }
-    }
-
-    void MessageDirector::RegisterRawMessageNotification(Exchange::IMessageControl::INotification* notification)
-    {
-        if (notification != nullptr) {
-            if (std::find(_notifications.begin(), _notifications.end(), notification) == _notifications.end()) {
-                notification->AddRef();
-                _notifications.push_back(notification);
-            }
-        }
-    }
-    void MessageDirector::UnregisterRawMessageNotification(const Exchange::IMessageControl::INotification* notification)
-    {
-        auto it = std::find(_notifications.begin(), _notifications.end(), notification);
-        if (it != _notifications.end()) {
-            (*it)->Release();
-            _notifications.erase(it);
-        }
-    }
-
 }
 }
