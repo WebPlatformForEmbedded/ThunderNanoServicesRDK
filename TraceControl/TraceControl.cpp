@@ -320,7 +320,19 @@ ENUM_CONVERSION_BEGIN(Plugin::TraceControl::state)
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(TraceControl, 1, 0);
+    namespace {
+
+        static Metadata<TraceControl> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {} 
+        );
+    }
 
     // Declare the local trace iterator exposing the remote interface.
     /* static */ TraceControl::Observer::Source::LocalIterator TraceControl::Observer::Source::_localIterator;

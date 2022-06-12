@@ -25,7 +25,19 @@ namespace WPEFramework {
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(Messenger, 1, 0);
+    namespace {
+
+        static Metadata<Messenger> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {}
+        );
+    }
 
     // IPlugin methods
 

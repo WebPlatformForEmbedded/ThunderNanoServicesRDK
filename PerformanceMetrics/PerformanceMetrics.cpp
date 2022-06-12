@@ -22,7 +22,19 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(PerformanceMetrics, 1, 0);
+    namespace {
+
+        static Metadata<PerformanceMetrics> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {} 
+        );
+    }
 
     const string PerformanceMetrics::Initialize(PluginHost::IShell* service)
     {

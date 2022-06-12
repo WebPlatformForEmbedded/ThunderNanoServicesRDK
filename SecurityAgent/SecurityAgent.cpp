@@ -24,7 +24,19 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(SecurityAgent, 1, 0);
+    namespace {
+
+        static Metadata<SecurityAgent> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            { subsystem::SECURITY } 
+        );
+    }
 
     static Core::ProxyPoolType<Web::TextBody> textFactory(1);
 

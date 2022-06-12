@@ -31,7 +31,19 @@ namespace WPEFramework {
 
         namespace Plugin {
 
-            SERVICE_REGISTRATION(WebBridge, 1, 0);
+            namespace {
+
+                static Metadata<WebBridge> metadata(
+                    // Version
+                    1, 0, 0,
+                    // Preconditions
+                    {},
+                    // Terminations
+                    {},
+                    // Controls
+                    {} 
+                );
+            }
 
             class Registration : public Core::JSON::Container {
             public:

@@ -76,7 +76,19 @@ namespace OCDM {
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(OCDM, 1, 0);
+    namespace {
+
+        static Metadata<OCDM> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            { subsystem::PLATFORM, subsystem::PROVISIONING },
+            // Terminations
+            {},
+            // Controls
+            { subsystem::DECRYPTION }
+        );
+    }
 
     static Core::ProxyPoolType<Web::JSONBodyType<OCDM::Data>> jsonDataFactory(1);
     static Core::ProxyPoolType<Web::JSONBodyType<OCDM::Data::System>> jsonSystemFactory(1);

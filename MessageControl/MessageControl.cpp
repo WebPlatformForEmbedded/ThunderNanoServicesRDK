@@ -24,7 +24,19 @@ namespace WPEFramework {
 
     namespace Plugin {
 
-    SERVICE_REGISTRATION(MessageControl, 1, 0);
+    namespace {
+
+        static Metadata<MessageControl> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {}
+        );
+    }
     
     MessageControl::Config::NetworkNode::NetworkNode()
         : Core::JSON::Container()

@@ -23,7 +23,19 @@ namespace WPEFramework {
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(WebKitBrowser, 1, 0);
+    namespace {
+
+        static Metadata<WebKitBrowser> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            { subsystem::GRAPHICS },
+            // Terminations
+            {},
+            // Controls
+            {} 
+        );
+    }
 
     /* virtual */ const string WebKitBrowser::Initialize(PluginHost::IShell* service)
     {

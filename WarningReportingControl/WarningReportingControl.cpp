@@ -34,7 +34,20 @@ ENUM_CONVERSION_BEGIN(Plugin::WarningReportingControl::state)
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(WarningReportingControl, 1, 0);
+    namespace {
+
+        static Metadata<WarningReportingControl> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {} 
+        );
+    }
+
     Core::ProxyPoolType<Plugin::WarningReportingJSONOutput::Data> jsonExportDataFactory(2);
     constexpr uint16_t MAX_CONNECTIONS = 5;
 
