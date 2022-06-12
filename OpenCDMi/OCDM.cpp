@@ -82,7 +82,7 @@ namespace Plugin {
             // Version
             1, 0, 0,
             // Preconditions
-            { subsystem::PLATFORM, subsystem::PROVISIONING },
+            { subsystem::PROVISIONING },
             // Terminations
             {},
             // Controls
