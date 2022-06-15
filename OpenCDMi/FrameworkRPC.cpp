@@ -1072,12 +1072,14 @@ POP_WARNING()
                 , SharePath(_T("/tmp"))
                 , ShareSize(8 * 1024)
                 , KeySystems()
+                , Group()
             {
                 Add(_T("location"), &Location);
                 Add(_T("connector"), &Connector);
                 Add(_T("sharepath"), &SharePath);
                 Add(_T("sharesize"), &ShareSize);
                 Add(_T("systems"), &KeySystems);
+                Add(_T("group"), &Group);
             }
             ~Config()
             {
@@ -1089,6 +1091,7 @@ POP_WARNING()
             Core::JSON::String SharePath;
             Core::JSON::DecUInt32 ShareSize;
             Core::JSON::ArrayType<Systems> KeySystems;
+            Core::JSON::String Group;
         };
 
             class AsyncInitThread {
