@@ -555,6 +555,11 @@ POP_WARNING()
                         {
                             _buffer = new DataExchange(_mediaKeySession, bufferID, _parent.DefaultSize());
                             _adminLock.Unlock();
+                            
+                            if(_buffer->IsValid() == false){
+                                SYSLOG(Trace::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
+                            }
+
                             TRACE(Trace::Information, ("Server::Session::CreateSessionBuffer(%s,%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), BufferId().c_str(), this));
                         } else {
                             _adminLock.Unlock();
