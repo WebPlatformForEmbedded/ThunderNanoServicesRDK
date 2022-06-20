@@ -34,8 +34,6 @@ option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
 
-find_package(ConfigGenerator)
-
 if(PLUGIN_DEVICEIDENTIFICATION)
     add_subdirectory(DeviceIdentification)
 endif()
