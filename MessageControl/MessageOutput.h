@@ -352,9 +352,7 @@ namespace Publishers {
         bool Attach(const uint32_t id)
         {
             bool accepted = false;
-printf (" ----- %s ------ %d -------\n", __FUNCTION__, __LINE__);
             _lock.Lock();
-printf (" ----- %s ------ %d -------\n", __FUNCTION__, __LINE__);
 
             if (_channels.size() < _maxExportConnections) {
                 ChannelMap::iterator index = _channels.find(id);
@@ -368,9 +366,7 @@ printf (" ----- %s ------ %d -------\n", __FUNCTION__, __LINE__);
                 accepted = true;
             }
 
-printf (" ----- %s ------ %d -------\n", __FUNCTION__, __LINE__);
             _lock.Unlock();
-printf (" ----- %s ------ %d -------\n", __FUNCTION__, __LINE__);
 
             return accepted;
         }
