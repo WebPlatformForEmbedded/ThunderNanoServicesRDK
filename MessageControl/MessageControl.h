@@ -96,13 +96,26 @@ namespace Plugin {
                 : _parent(parent)
                 , _adminLock()
                 , _observing()
-                , _job(*this) {
+                , _job(*this)
+                , _observe(false) {
             }
             ~Observer() override {
                 _job.Revoke();
             }
 
         public:
+            void Enable(const bool enabled) {
+                _adminLock.Lock();
+
+                _observe = enabled;
+
+                _adminLock.Unlock();
+
+                if ((enabled == true) && (_observing.empty() == false)) {
+                    _job.Submit();
+                }
+            }    
+
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
@@ -179,20 +192,23 @@ namespace Plugin {
             {
                 _adminLock.Lock();
 
-                ObservingMap::iterator index = _observing.begin();
+                if (_observe == true) {
 
-                while (index != _observing.end()) {
-                    if (index->second == state::ATTACHING) {
-                        index->second = state::OBSERVING;
-                        _parent.Attach(index->first);
-                        index++;
-                    }
-                    else if (index->second == state::DETACHING) {
-                        _parent.Detach(index->first);
-                        index = _observing.erase(index);
-                    }
-                    else {
-                        index++;
+                    ObservingMap::iterator index = _observing.begin();
+
+                    while (index != _observing.end()) {
+                        if (index->second == state::ATTACHING) {
+                            index->second = state::OBSERVING;
+                            _parent.Attach(index->first);
+                            index++;
+                        }
+                        else if (index->second == state::DETACHING) {
+                            _parent.Detach(index->first);
+                            index = _observing.erase(index);
+                        }
+                        else {
+                            index++;
+                        }
                     }
                 }
 
@@ -204,6 +220,7 @@ namespace Plugin {
             Core::CriticalSection _adminLock;
             ObservingMap _observing;
             Core::WorkerPool::JobType<Observer&> _job;
+            bool _observe;
         };
 
     public:
@@ -239,7 +256,7 @@ namespace Plugin {
     private:
         void Announce(Core::Messaging::MetaData::MessageType type, const std::shared_ptr<Messaging::IMessageOutput>& output) {
 
-            _adminLock.Lock();
+            _outputLock.Lock();
 
             OutputMap::iterator index = _outputDirector.find(type);
 
@@ -251,11 +268,11 @@ namespace Plugin {
 
             index->second.emplace_back(output);
 
-            _adminLock.Unlock();
+            _outputLock.Unlock();
         }
         void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) {
             // Time to start sending it to all interested parties...
-            _adminLock.Lock();
+            _outputLock.Lock();
 
             OutputMap::iterator index = _outputDirector.find(info.MessageMetaData().Type());
             if (index != _outputDirector.end()) {
@@ -266,7 +283,7 @@ namespace Plugin {
 
             _webSocketExporter.Output(info, message);
 
-            _adminLock.Unlock();
+            _outputLock.Unlock();
         }
         void Attach(const uint32_t id) {
             _adminLock.Lock();
@@ -286,6 +303,7 @@ namespace Plugin {
 
     private:
         Core::CriticalSection _adminLock;
+        Core::CriticalSection _outputLock;
         Config _config;
         OutputMap _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
