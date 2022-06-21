@@ -24,7 +24,19 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(DeviceIdentification, 1, 0);
+    namespace {
+
+        static Metadata<DeviceIdentification> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {  subsystem::PLATFORM },
+            // Terminations
+            {},
+            // Controls
+            {}
+        );
+    }
 
     /* virtual */ const string DeviceIdentification::Initialize(PluginHost::IShell* service)
     {

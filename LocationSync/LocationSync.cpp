@@ -24,7 +24,19 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(LocationSync, 1, 0);
+    namespace {
+
+        static Metadata<LocationSync> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {  subsystem::NETWORK },
+            // Terminations
+            {},
+            // Controls
+            { subsystem::INTERNET, subsystem::LOCATION }
+        );
+    }
 
     static Core::ProxyPoolType<Web::Response> responseFactory(4);
     static Core::ProxyPoolType<Web::JSONBodyType<LocationSync::Data>> jsonResponseFactory(4);

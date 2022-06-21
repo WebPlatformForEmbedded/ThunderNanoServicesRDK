@@ -109,7 +109,7 @@ namespace Plugin {
 
         public:
             ExternalAccess(
-                const Core::NodeId& source, 
+                const Core::NodeId& source,
                 Exchange::IAccessorOCDM* parentInterface,
                 const string& proxyStubPath,
                 const Core::ProxyType<RPC::InvokeServer> & engine)
@@ -285,7 +285,7 @@ namespace Plugin {
                                 uint8_t *payloadBuffer = Buffer();
                                 CDMi::EncryptionPattern pattern = {0, 0};
                                 EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
-                                
+
                                 int cr = 0;
                                 REPORT_DURATION_WARNING(
                                     {
@@ -751,13 +751,13 @@ POP_WARNING()
 
                      // OKe we got a buffer machanism to transfer the raw data, now create
                      // the session.
-                     if (system->CreateMediaKeySession(keySystem, licenseType, 
-                                        initDataType.c_str(), initData, initDataLength, 
+                     if (system->CreateMediaKeySession(keySystem, licenseType,
+                                        initDataType.c_str(), initData, initDataLength,
                                         CDMData, CDMDataLength, &sessionInterface) == 0)
                      {
                          if (sessionInterface != nullptr)
                          {
-                                 SessionImplementation *newEntry = 
+                                 SessionImplementation *newEntry =
                                     Core::Service<SessionImplementation>::Create<SessionImplementation>(this,
                                                  keySystem, sessionInterface,
                                                 callback, &keyIds);
@@ -768,7 +768,7 @@ POP_WARNING()
                                  _adminLock.Lock();
 
                                  _sessionList.push_front(newEntry);
-                                
+
                                 if(false == keyIds.IsEmpty())
                                 {
                                     CommonEncryptionData::Iterator index(keyIds.Keys());
@@ -1091,50 +1091,86 @@ POP_WARNING()
             Core::JSON::ArrayType<Systems> KeySystems;
         };
 
+            class AsyncInitThread {
+                public:
+                explicit AsyncInitThread(OCDMImplementation& parent)
+                    : _parent(parent)
+                    , _worker(*this)
+                {
+                }
+                ~AsyncInitThread() = default;
+
+                void Start()
+                {
+                    _worker.Submit();
+                }
+
+                void Stop()
+                {
+                    _worker.Revoke();
+                }
+                AsyncInitThread(const AsyncInitThread&) = delete;
+                AsyncInitThread& operator=(const AsyncInitThread&) = delete;
+
+                private:
+                void Dispatch()
+                {
+                    if (_parent.InitializeAsync() != Core::ERROR_NONE) {
+                        TRACE(Trace::Error, (_T("OCDM Async Intialization Failed")));
+                    }
+                }
+
+                private:
+                OCDMImplementation& _parent;
+                friend Core::ThreadPool::JobType<AsyncInitThread&>;
+                Core::WorkerPool::JobType<AsyncInitThread&> _worker;
+            };
+
     public:
         OCDMImplementation()
             : _entryPoint(nullptr)
             , _engine()
             , _service(nullptr)
+            , _shell(nullptr)
             , _compliant(false)
             , _systemToFactory()
             , _systemLibraries()
+            , _thread(*this)
         {
             TRACE(Trace::Information, (_T("Constructing OCDMImplementation Service: %p"), this));
         }
+
         virtual ~OCDMImplementation()
         {
-            if (_service != nullptr) {
-                delete _service;
-            }
-
-            if (_entryPoint != nullptr) {
-                _entryPoint->Release();
-            }
-
-            if (_engine.IsValid()) {
-                _engine.Release();
-            }
-            _systemLibraries.clear();
-
             TRACE(Trace::Information, (_T("Destructed OCDMImplementation Service: %p"), this));
         }
 
     public:
         uint32_t Initialize(PluginHost::IShell* service) override
         {
-            uint32_t result = Core::ERROR_OPENING_FAILED;
+            uint32_t result = Core::ERROR_NONE;
+
+            _shell = service;
+
+            _shell->AddRef();
+            _thread.Start();
+
+            return (result);
+        }
+
+        uint32_t InitializeAsync()
+        {
+            uint32_t result = Core::ERROR_NONE;
 
             // On activation subscribe, on deactivation un-subscribe
-            PluginHost::ISubSystem* subSystem = service->SubSystems();
-
+            PluginHost::ISubSystem* subSystem = _shell->SubSystems();
             ASSERT(subSystem != nullptr);
 
             // Start loading the configured factories
             Config config;
-            config.FromString(service->ConfigLine());
+            config.FromString(_shell->ConfigLine());
 
-            const string locator(service->DataPath() + config.Location.Value());
+            const string locator(_shell->DataPath() + config.Location.Value());
 
             // Before we start loading the mapping of the Keys to the factories, load the factories :-)
             Core::Directory entry(locator.c_str(), _T("*.drm"));
@@ -1160,6 +1196,7 @@ POP_WARNING()
                     }
                 } else {
                     SYSLOG(Logging::Startup, (_T("Could not load factory [%s], error [%s]"), Core::File::FileNameExtended(entry.Current()).c_str(), library.Error().c_str()));
+                    result = Core::ERROR_OPENING_FAILED;
                 }
             }
 
@@ -1183,6 +1220,7 @@ POP_WARNING()
 
                             } else {
                                 SYSLOG(Logging::Startup, (_T("Required factory [%s], not found for [%s]"), system.c_str(), designator.c_str()));
+                                result = Core::ERROR_OPENING_FAILED;
                             }
                         }
                     }
@@ -1190,7 +1228,7 @@ POP_WARNING()
                     //now handle the configuration
                     if (factory != factories.end()) {
                         const string configuration(index.Current().Configuration.Value());
-                        factory->second.Factory->Initialize(service, configuration);
+                        factory->second.Factory->Initialize(_shell, configuration);
                     }
                 }
 
@@ -1209,7 +1247,7 @@ POP_WARNING()
 
             _entryPoint = Core::Service<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
-            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, service->ProxyStubPath(), _engine);
+            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
             if (_service != nullptr) {
 
@@ -1233,9 +1271,13 @@ POP_WARNING()
                     }
                 }
             }
+
             return (result);
         }
+
         void Deinitialize(PluginHost::IShell* service) override {
+            _thread.Stop();
+
             std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
 
             std::list<CDMi::ISystemFactory*> deinitialized;
@@ -1243,15 +1285,32 @@ POP_WARNING()
             while (factory != _systemToFactory.end()) {
                 std::list<CDMi::ISystemFactory*>::iterator index(std::find(deinitialized.begin(), deinitialized.end(), factory->second.Factory));
 
-                if(index == deinitialized.end()){ 
+                if(index == deinitialized.end()){
                     TRACE(Trace::Information, (_T("Deinitializing factory(%p) for key system %s"), factory->second.Factory, factory->second.Factory->KeySystem()));
                     factory->second.Factory->Deinitialize(service);
                     deinitialized.push_back(factory->second.Factory);
                 }
-                
+
                 factory++;
             }
+
+            if (_service != nullptr) {
+                delete _service;
+            }
+
+            if (_entryPoint != nullptr) {
+                _entryPoint->Release();
+            }
+
+            if (_engine.IsValid()) {
+                _engine.Release();
+            }
+            _systemLibraries.clear();
+
+            _shell->Release();
+            _shell = nullptr;
         }
+
         virtual uint32_t Reset()
         {
             return (Core::ERROR_NONE);
@@ -1404,12 +1463,14 @@ POP_WARNING()
         Exchange::IAccessorOCDM* _entryPoint;
         Core::ProxyType<RPC::InvokeServer> _engine;
         ExternalAccess* _service;
+        PluginHost::IShell* _shell;
         bool _compliant;
         std::map<const std::string, SystemFactory> _systemToFactory;
         Blacklist _systemBlacklistedCodecRegexps;
         Blacklist _systemBlacklistedMediaTypeRegexps;
         std::list<Core::Library> _systemLibraries;
         std::list<string> _keySystems;
+        AsyncInitThread _thread;
     };
 
     SERVICE_REGISTRATION(OCDMImplementation, 1, 0);

@@ -72,6 +72,7 @@ set_target_properties(${MODULE_NAME} PROPERTIES
 target_link_libraries(${MODULE_NAME}
     PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Core::${NAMESPACE}Core
         WPEWebKit::WPEWebKit)
 
 target_compile_definitions(${MODULE_NAME} PRIVATE WEBKIT_GLIB_API)

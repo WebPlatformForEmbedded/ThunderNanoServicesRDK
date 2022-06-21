@@ -22,7 +22,9 @@
 #include <functional>
 
 namespace WPEFramework {
+
 namespace {
+
     string DispatcherIdentifier()
     {
         string result;
@@ -62,17 +64,14 @@ namespace Plugin {
 
             WorkerThread(MessageControlImplementation& parent)
                 : Core::Thread()
-                , _parent(parent)
-            {
+                , _parent(parent) {
             }
             ~WorkerThread() override = default;
 
         private:
             uint32_t Worker() override
             {
-                if (Thread::IsRunning()) {
-                    _parent.Dispatch();
-                }
+                _parent.Dispatch();
 
                 return Core::infinite;
             }
@@ -80,14 +79,19 @@ namespace Plugin {
         private:
             MessageControlImplementation& _parent;
         };
-
     public:
+        MessageControlImplementation(const MessageControlImplementation&) = delete;
+        MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
+
         MessageControlImplementation()
-            : _dispatcherIdentifier(DispatcherIdentifier())
+            : _adminLock()
+            , _callback(nullptr)
+            , _dispatcherIdentifier(DispatcherIdentifier())
             , _dispatcherBasePath(DispatcherBasePath())
             , _worker(*this)
             , _client(_dispatcherIdentifier, _dispatcherBasePath, DispatcherSocketPort())
-        {
+            , _factory()
+            , _controls() {
         }
         ~MessageControlImplementation() override
         {
@@ -96,53 +100,45 @@ namespace Plugin {
             _worker.Wait(Core::Thread::STOPPED, Core::infinite);
 
             _client.ClearInstances();
+            
+            if (_callback != nullptr) {
+                _callback->Release();
+                _callback = nullptr;
+            }
         }
 
-        MessageControlImplementation(const MessageControlImplementation&) = delete;
-        MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
-
     public:
-        uint32_t Configure(const bool isBackground, const bool abbreviate, const bool outputToConsole,
-            const bool outputToSysLog, const string& outputFileName, const string& binding, const uint32_t port) override
+        uint32_t Configure(Exchange::IMessageControl::ICallback* callback) override
         {
             uint32_t result = Core::ERROR_NONE;
 
-            if ((!isBackground && !outputToConsole && !outputToSysLog) || (outputToConsole)) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::ConsoleOutput>(abbreviate));
-            }
-            if ((isBackground && !outputToConsole && !outputToSysLog) || (outputToSysLog)) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::SyslogOutput>(abbreviate));
-            }
-            if (!outputFileName.empty()) {
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Messaging::FileOutput>(abbreviate, outputFileName));
-            }
-            if (!binding.empty() && port != 0) {
-                auto udpOutput = std::make_shared<Messaging::UDPOutput>(Core::NodeId(binding.c_str(), port));
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::TRACING, udpOutput);
-                _outputDirector.AddOutput(Core::Messaging::MetaData::MessageType::LOGGING, udpOutput);
-            }
+            _callback = callback;
+            _callback->AddRef();
 
             _client.AddInstance(0);
             _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
             _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
+
             _worker.Run();
 
-            //check if data is already available
+            // TODO: Seems this "creates" the doorbell, that shouldbe doneby the constructor,
+            // Something to check and fix.
             _client.SkipWaiting();
 
             return result;
         }
 
-        void RegisterConnection(const uint32_t id) override
-        {
+        uint32_t Attach(const uint32_t id) override {
             _client.AddInstance(id);
-        }
-        void UnregisterConnection(const uint32_t id) override
-        {
-            _client.RemoveInstance(id);
+            return (Core::ERROR_NONE);
         }
 
-        uint32_t EnableMessage(const MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
+        uint32_t Detach(const uint32_t id) override {
+            _client.RemoveInstance(id);
+            return (Core::ERROR_NONE);
+        }
+
+        uint32_t Enable(const MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
         {
             Core::Messaging::MetaData metaData(static_cast<Core::Messaging::MetaData::MessageType>(type), categoryName, moduleName);
             _client.Enable(metaData, enable);
@@ -162,7 +158,7 @@ namespace Plugin {
          *                  ERROR_UNAVAILABLE: No more data available
          *                  
          */
-        uint32_t ActiveMessages(const bool initialize, MessageType& type, string& moduleName, string& categoryName, bool& enable) override
+        uint32_t Setting(const bool initialize, MessageType& type, string& moduleName, string& categoryName, bool& enable) override
         {
             uint32_t result = Core::ERROR_UNAVAILABLE;
 
@@ -171,35 +167,15 @@ namespace Plugin {
                 _controls = _client.Enabled();
             }
 
-            if (_controls.Count() > 0) {
-                bool hasNext = _controls.Next();
-                if (hasNext) {
-                    type = static_cast<MessageType>(_controls.Current().first.Type());
-                    moduleName = _controls.Current().first.Module();
-                    categoryName = _controls.Current().first.Category();
-                    enable = _controls.Current().second;
-                    result = Core::ERROR_NONE;
-                }
+            if (_controls.Next() == true) {
+                type = static_cast<MessageType>(_controls.Current().first.Type());
+                moduleName = _controls.Current().first.Module();
+                categoryName = _controls.Current().first.Category();
+                enable = _controls.Current().second;
+                result = Core::ERROR_NONE;
             }
 
             return result;
-        }
-
-        void RegisterOutputNotification(Exchange::IMessageControl::INotification* notification) override
-        {
-            _outputDirector.RegisterRawMessageNotification(notification);
-        }
-        void UnregisterOutputNotification(const Exchange::IMessageControl::INotification* notification) override
-        {
-            _outputDirector.UnregisterRawMessageNotification(notification);
-        }
-
-        void Dispatch()
-        {
-            _client.WaitForUpdates(Core::infinite);
-            _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
-                _outputDirector.Output(info, message.Origin());
-            });
         }
 
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
@@ -207,16 +183,36 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     private:
-        string _dispatcherIdentifier;
-        string _dispatcherBasePath;
+        void Dispatch()
+        {
+            _client.WaitForUpdates(Core::infinite);
+
+            _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+                string rawMessage;
+                message->ToString(rawMessage);
+
+                _callback->Message(static_cast<Exchange::IMessageControl::MessageType>(info.MessageMetaData().Type()),
+                    info.MessageMetaData().Category(),
+                    info.MessageMetaData().Module(),
+                    info.FileName(),
+                    info.LineNumber(),
+                    info.TimeStamp(),
+                    rawMessage);
+                });
+        }
+
+    private:
+        Core::CriticalSection _adminLock;
+        IMessageControl::ICallback* _callback;
+
+        const string _dispatcherIdentifier;
+        const string _dispatcherBasePath;
+
         WorkerThread _worker;
         Messaging::MessageClient _client;
-
         Messaging::TraceFactory _factory;
-        Messaging::MessageDirector _outputDirector;
-        Core::Messaging::ControlList::InformationIterator _controls;
 
-        Core::CriticalSection _adminLock;
+        Core::Messaging::ControlList::InformationIterator _controls;
     };
 
     SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);

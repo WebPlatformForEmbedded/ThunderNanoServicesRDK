@@ -27,7 +27,19 @@ namespace {
 
 }
 
-    SERVICE_REGISTRATION(Packager, 1, 0);
+    namespace {
+
+        static Metadata<Packager> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {}
+        );
+    }
 
     const string Packager::Initialize(PluginHost::IShell* service) {
         ASSERT (_service == nullptr);

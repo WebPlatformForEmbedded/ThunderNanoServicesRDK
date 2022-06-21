@@ -40,15 +40,15 @@ namespace Plugin {
             Config()
                 : Core::JSON::Container()
                 , ObservableCallsign()
+                , ObservableClassname()
             {
                 Add(_T("callsign"), &ObservableCallsign);
-            }
-            ~Config()
-            {
+                Add(_T("classname"), &ObservableClassname);
             }
 
         public:
             Core::JSON::String ObservableCallsign;
+            Core::JSON::String ObservableClassname;
         };
 
         class Notification : public PluginHost::IPlugin::INotification {
@@ -63,21 +63,17 @@ namespace Plugin {
             }
             ~Notification() override = default;
 
-            void Activated (const string& callsign, PluginHost::IShell* service) override
+            void Activated (const string&, PluginHost::IShell* service) override
             {
                 ASSERT(service != nullptr);
 
-                if( callsign == _parent.Callsign() ) {
-                    _parent.ObservableActivated(*service);
-                }
+                _parent.PluginActivated(*service);
             }
-            void Deactivated (const string& callsign, PluginHost::IShell* service) override
+            void Deactivated (const string&, PluginHost::IShell* service) override
             {
                 ASSERT(service != nullptr);
 
-                if( callsign == _parent.Callsign() ) {
-                    _parent.ObservableDeactivated(*service);
-                }
+                _parent.PluginDeactivated(*service);
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
@@ -138,6 +134,162 @@ namespace Plugin {
             virtual void Deactivated(PluginHost::IShell&) = 0;
         };
 
+    private:
+
+        struct IPerfMetricsHandler {
+            virtual ~IPerfMetricsHandler() = default;
+
+            virtual void Initialize() = 0;
+            virtual void Deinitialize() = 0;
+
+            virtual void Activated(PluginHost::IShell&) = 0;
+            virtual void Deactivated(PluginHost::IShell&) = 0;
+        };
+
+        class CallsignPerfMetricsHandler : public IPerfMetricsHandler
+        {
+        public:
+            CallsignPerfMetricsHandler(const string& callsign) 
+                : IPerfMetricsHandler()
+                , _callsign(callsign)
+                , _observable()
+            {
+            }
+
+            ~CallsignPerfMetricsHandler() override 
+            {
+                ASSERT(_observable.IsValid() == false);
+            }
+
+            CallsignPerfMetricsHandler(const CallsignPerfMetricsHandler&) = delete;
+            CallsignPerfMetricsHandler& operator=(const CallsignPerfMetricsHandler&) = delete;
+
+            const string& Callsign() const 
+            {
+                return _callsign;
+            }
+
+            void Initialize() override
+            {
+                ASSERT(_observable.IsValid() == false);
+            }
+
+            void Deinitialize() override
+            {
+                if( _observable.IsValid() == true ) {
+                    _observable->Disable();
+                    VARIABLE_IS_NOT_USED uint32_t result =_observable.Release(); 
+                    ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                    ASSERT(_observable.IsValid() == false);
+                }
+            }
+
+            void Activated(PluginHost::IShell& service) override
+            {
+                if( service.Callsign() == _callsign ) {
+                    ASSERT(_observable.IsValid() == false);
+
+                    CreateObservable(service);
+                    _observable->Activated(service);
+                }
+            }
+            
+            void Deactivated(PluginHost::IShell& service) override
+            {
+                if( service.Callsign() == _callsign ) {
+                    ASSERT(_observable.IsValid() == true);
+
+                    _observable->Deactivated(service);
+                    _observable->Disable();
+                    VARIABLE_IS_NOT_USED uint32_t result =_observable.Release(); 
+                    ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                    ASSERT(_observable.IsValid() == false);            
+                }
+            }
+
+        private:
+            void CreateObservable(PluginHost::IShell& service);
+
+        private:
+            string _callsign;
+            Core::ProxyType<IObservable> _observable;
+        };
+
+        class ClassnamePerfMetricsHandler : public IPerfMetricsHandler
+        {
+        public:
+            ClassnamePerfMetricsHandler(const string& classname) 
+                : IPerfMetricsHandler()
+                , _classname(classname)
+                , _observers()
+                , _adminLock()
+            {
+            }
+
+            ~ClassnamePerfMetricsHandler() override 
+            {
+                ASSERT(_observers.empty() == true);
+            }
+
+            ClassnamePerfMetricsHandler(const ClassnamePerfMetricsHandler&) = delete;
+            ClassnamePerfMetricsHandler& operator=(const ClassnamePerfMetricsHandler&) = delete;
+
+            const string& Classname() const 
+            {
+                return _classname;
+            }
+
+            void Initialize() override
+            {
+                ASSERT(_observers.empty() == true);
+            }
+
+            void Deinitialize() override
+            {
+                // no lock needed, no notification are possible here.
+                for( auto& observer : _observers ) {
+                    observer.second.Deinitialize();
+                }
+                _observers.clear();
+            }
+
+            void Activated(PluginHost::IShell& service) override
+            {
+                if( service.ClassName() == Classname() ) {
+                    _adminLock.Lock();
+                    auto result =_observers.emplace(std::piecewise_construct,
+                                       std::forward_as_tuple(service.Callsign()),
+                                       std::forward_as_tuple(service.Callsign()));
+                    ASSERT( ( result.second == true ) && ( result.first != _observers.end() ) );
+                    result.first->second.Initialize();
+                    result.first->second.Activated(service);
+                    _adminLock.Unlock();
+                }
+            }
+            void Deactivated(PluginHost::IShell& service) override
+            {
+                if( service.ClassName() == Classname() ) {
+                    _adminLock.Lock();
+                    auto it =_observers.find(service.Callsign());
+                    if( it != _observers.end() ) {
+                        it->second.Deactivated(service);
+                        it->second.Deinitialize();
+                        _observers.erase(it);
+                    }
+                    _adminLock.Unlock();
+                }
+            }
+
+        private:
+            using OberserverMap = std::unordered_map<string, CallsignPerfMetricsHandler>;
+
+            string _classname;
+            OberserverMap _observers;
+            mutable Core::CriticalSection _adminLock;
+        };
+
+    private:
+
         // we cannot make the Logger a static and get it via Instance or something similar as the Plugin (and therefore the library) 
         // might be used multipe times fot different callsigns and the they would share the same Logger instance (and Logger state)
         template<class LOGGERINTERFACE>
@@ -171,7 +323,7 @@ namespace Plugin {
             BasicObservable(const BasicObservable&) = delete;
             BasicObservable& operator=(const BasicObservable&) = delete;
 
-            BasicObservable(PerformanceMetrics& parent, PluginHost::IShell& service) 
+            BasicObservable(CallsignPerfMetricsHandler& parent, PluginHost::IShell& service) 
             : IObservable()
             , LoggerProxy<LOGGERINTERFACE>()
             , _parent(parent)
@@ -224,7 +376,7 @@ namespace Plugin {
                 return ( Core::Time::Now().Ticks() - ActivateTime() ) / Core::Time::MicroSecondsPerSecond;
             }
 
-            PerformanceMetrics& Parent() const
+            CallsignPerfMetricsHandler& Parent() const
             {
                 return _parent;
             }
@@ -234,7 +386,7 @@ namespace Plugin {
             }
 
         private: 
-            PerformanceMetrics& _parent;
+            CallsignPerfMetricsHandler& _parent;
             uint64_t _activatetime;
             PluginHost::IShell* _service;
         };
@@ -252,7 +404,7 @@ namespace Plugin {
             StateObservable(const StateObservable&) = delete;
             StateObservable& operator=(const StateObservable&) = delete;
 
-            StateObservable(PerformanceMetrics& parent, PluginHost::IShell& service, PluginHost::IStateControl* statecontrol) 
+            StateObservable(CallsignPerfMetricsHandler& parent, PluginHost::IShell& service, PluginHost::IStateControl* statecontrol) 
             : Base(parent, service)
             , PluginHost::IStateControl::INotification()
             , _statecontrol(statecontrol)
@@ -325,7 +477,7 @@ namespace Plugin {
             BrowserObservable(const BrowserObservable&) = delete;
             BrowserObservable& operator=(const BrowserObservable&) = delete;
 
-            BrowserObservable(PerformanceMetrics& parent, 
+            BrowserObservable(CallsignPerfMetricsHandler& parent, 
                               PluginHost::IShell& service, 
                               Exchange::IBrowser& browser,
                               PluginHost::IStateControl* statecontrol) 
@@ -403,7 +555,7 @@ namespace Plugin {
             WebBrowserObservable(const WebBrowserObservable&) = delete;
             WebBrowserObservable& operator=(const WebBrowserObservable&) = delete;
 
-            WebBrowserObservable(PerformanceMetrics& parent, 
+            WebBrowserObservable(CallsignPerfMetricsHandler& parent, 
                                  PluginHost::IShell& service, 
                                  Exchange::IWebBrowser& browser, 
                                  PluginHost::IStateControl* statecontrol) 
@@ -487,27 +639,20 @@ namespace Plugin {
 
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         PerformanceMetrics()
-            : PluginHost::IPlugin()
-            , _notification(*this)
-            , _observable()
+        : PluginHost::IPlugin()
+        , _notification(*this)
+        , _handler()
         {
         }
 POP_WARNING()
-        ~PerformanceMetrics() override 
-        {
-            ASSERT(_observable.IsValid() == false);
-        }
+        ~PerformanceMetrics() override = default;
 
-        PerformanceMetrics(const PerformanceMetrics&);
-        PerformanceMetrics& operator=(const PerformanceMetrics&);
+        PerformanceMetrics(const PerformanceMetrics&) = delete;
+        PerformanceMetrics& operator=(const PerformanceMetrics&) = delete;
 
         BEGIN_INTERFACE_MAP(PerformanceMetrics)
         INTERFACE_ENTRY(PluginHost::IPlugin)
         END_INTERFACE_MAP
-
-        const string& Callsign() const {
-            return _callsign;
-        }
 
     public:
         //  IPlugin methods
@@ -532,47 +677,13 @@ POP_WARNING()
         virtual string Information() const;
 
     private:
-        void ObservableActivated(PluginHost::IShell& service);
-        void ObservableDeactivated(PluginHost::IShell& service);
-    
-        void CreateObservable(PluginHost::IShell& service) 
-        {
-            Exchange::IWebBrowser* webbrowser = service.QueryInterface<Exchange::IWebBrowser>();
-            PluginHost::IStateControl* statecontrol = service.QueryInterface<PluginHost::IStateControl>();
 
-            if( webbrowser != nullptr ) {
-                TRACE(Trace::Information, (_T("Start oberserving %s as webbrowser"), Callsign().c_str()) );
-                _observable = Core::ProxyType<WebBrowserObservable<>>::Create(*this, service, *webbrowser, statecontrol);
-                webbrowser->Release();
-            } else {
-                Exchange::IBrowser* browser = service.QueryInterface<Exchange::IBrowser>();
-
-                if( browser != nullptr ) {
-                    TRACE(Trace::Information, (_T("Start oberserving %s as browser"), Callsign().c_str()) );
-                    _observable = Core::ProxyType<BrowserObservable<>>::Create(*this, service, *browser, statecontrol);
-                    browser->Release();
-                }
-                else if( statecontrol != nullptr ) {
-                    TRACE(Trace::Information, (_T("Start oberserving %s as statecontrol"), Callsign().c_str()) );
-                    _observable = Core::ProxyType<StateObservable<>>::Create(*this, service, statecontrol);
-                } else {
-                    TRACE(Trace::Information, (_T("Start oberserving %s as basic"), Callsign().c_str()) );
-                    _observable = Core::ProxyType<BasicObservable<>>::Create(*this, service);
-                }
-            }
-
-            ASSERT(_observable.IsValid() == true);
-            _observable->Enable();
-
-            if( statecontrol != nullptr ) {
-                statecontrol->Release();
-            }
-        };
+        void PluginActivated(PluginHost::IShell& service);
+        void PluginDeactivated(PluginHost::IShell& service);
 
     private:
-        string _callsign;
         Core::Sink<Notification> _notification;
-        Core::ProxyType<IObservable> _observable;
+        std::unique_ptr<IPerfMetricsHandler> _handler;
     };
 
 }
