@@ -58,6 +58,7 @@ namespace WPEFramework {
 
     MessageControl::MessageControl()
         : _adminLock()
+        , _outputLock()
         , _config()
         , _outputDirector()
         , _webSocketExporter()
@@ -111,6 +112,8 @@ namespace WPEFramework {
             }
 
             _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
+
+            _observer.Enable(true);
         }
 
         if(message.length() != 0) {
@@ -124,16 +127,18 @@ namespace WPEFramework {
     {
         ASSERT (_service == service);
 
+        _observer.Enable(false);
+
         UnregisterAll();
 
         _service->Unregister(&_observer);
 
-        _adminLock.Lock();
+        _outputLock.Lock();
 
         _outputDirector.clear();
         _webSocketExporter.Deinitialize();
 
-        _adminLock.Unlock();
+        _outputLock.Unlock();
 
         RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 

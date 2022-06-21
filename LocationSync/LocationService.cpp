@@ -325,7 +325,7 @@ namespace Plugin {
     }
 
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
-    LocationService::LocationService(Core::IDispatchType<void>* callback)
+    LocationService::LocationService(Core::IDispatch* callback)
         : BaseClass(1, g_Factory, false, Core::NodeId(), Core::NodeId(), 256, (1024 * 2))
         , _adminLock()
         , _state(IDLE)
