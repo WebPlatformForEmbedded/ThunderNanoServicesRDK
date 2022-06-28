@@ -555,6 +555,17 @@ POP_WARNING()
                         {
                             _buffer = new DataExchange(_mediaKeySession, bufferID, _parent.DefaultSize());
                             _adminLock.Unlock();
+                            
+                            ASSERT(_buffer != nullptr);
+
+                            if(_buffer->IsValid() == false){
+                                SYSLOG(Trace::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
+                            }
+                            
+                            if(_parent.Group().IsSet() == true){
+                                _buffer->Group(_parent.Group().Value());
+                            }                            
+
                             TRACE(Trace::Information, ("Server::Session::CreateSessionBuffer(%s,%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), BufferId().c_str(), this));
                         } else {
                             _adminLock.Unlock();
@@ -1011,6 +1022,9 @@ POP_WARNING()
 
                 _adminLock.Unlock();
             }
+            const Core::OptionalType<string>& Group() const {
+                return _parent.Group();
+            }
 
         private:
             OCDMImplementation& _parent;
@@ -1072,12 +1086,14 @@ POP_WARNING()
                 , SharePath(_T("/tmp"))
                 , ShareSize(8 * 1024)
                 , KeySystems()
+                , Group()
             {
                 Add(_T("location"), &Location);
                 Add(_T("connector"), &Connector);
                 Add(_T("sharepath"), &SharePath);
                 Add(_T("sharesize"), &ShareSize);
                 Add(_T("systems"), &KeySystems);
+                Add(_T("group"), &Group);
             }
             ~Config()
             {
@@ -1089,6 +1105,7 @@ POP_WARNING()
             Core::JSON::String SharePath;
             Core::JSON::DecUInt32 ShareSize;
             Core::JSON::ArrayType<Systems> KeySystems;
+            Core::JSON::String Group;
         };
 
             class AsyncInitThread {
@@ -1136,6 +1153,7 @@ POP_WARNING()
             , _systemToFactory()
             , _systemLibraries()
             , _thread(*this)
+            , _group()
         {
             TRACE(Trace::Information, (_T("Constructing OCDMImplementation Service: %p"), this));
         }
@@ -1243,6 +1261,10 @@ POP_WARNING()
 
             if (_systemToFactory.size() == 0) {
                 SYSLOG(Logging::Startup, (_T("No DRM factories specified. OCDM can not service any DRM requests.")));
+            }
+
+            if((config.Group.IsSet() == true) && (config.Group.Value().empty() == false)){
+                _group = config.Group.Value();
             }
 
             _entryPoint = Core::Service<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
@@ -1434,7 +1456,6 @@ POP_WARNING()
                 index++;
             }
         }
-
     public:
         // -------------------------------------------------------------------------------------------------------------
         // IDecryption methods
@@ -1460,6 +1481,10 @@ POP_WARNING()
             blacklist.insert(std::pair<const std::string, std::vector<std::string>>(system, elements));
         }
 
+        const Core::OptionalType<string>& Group() const {
+            return _group;
+        }
+
         Exchange::IAccessorOCDM* _entryPoint;
         Core::ProxyType<RPC::InvokeServer> _engine;
         ExternalAccess* _service;
@@ -1471,6 +1496,7 @@ POP_WARNING()
         std::list<Core::Library> _systemLibraries;
         std::list<string> _keySystems;
         AsyncInitThread _thread;
+        Core::OptionalType<string> _group;
     };
 
     SERVICE_REGISTRATION(OCDMImplementation, 1, 0);

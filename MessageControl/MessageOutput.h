@@ -352,7 +352,6 @@ namespace Publishers {
         bool Attach(const uint32_t id)
         {
             bool accepted = false;
-
             _lock.Lock();
 
             if (_channels.size() < _maxExportConnections) {
