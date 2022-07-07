@@ -122,7 +122,7 @@ POP_WARNING()
 
                 ASSERT(_locator != nullptr);
 
-                return (_locator != nullptr ? _locator->Probe(_source, _retries, _interval) : static_cast<uint32_t>(Core::ERROR_UNAVAILABLE));
+                return (_locator != nullptr ? _locator->Probe(_source, (_retries == 0 ? UINT32_MAX : _retries), _interval) : static_cast<uint32_t>(Core::ERROR_UNAVAILABLE));
             }
 
             void Dispatch() override
