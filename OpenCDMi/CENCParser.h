@@ -592,7 +592,7 @@ namespace Plugin {
             if ((wvpb2.FromBuffer(data, length) == true) && (wvpb2.IsValid() == true)) {
                 if (wvpb2.KeyIDs.IsSet() == true) {
                     for (auto const& keyID : wvpb2.KeyIDs.Elements()) {
-                        AddKeyId(KeyId(WIDEVINE, keyID.Value().data(), keyID.Value().size()));
+                        AddKeyId(KeyId(WIDEVINE, keyID.Value().data(), static_cast<uint8_t>(keyID.Value().size())));
                     }
                 } else {
                     TRACE(Trace::Information, (_T("No key IDs specified in Widevine PSSH data")));
