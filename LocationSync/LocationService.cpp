@@ -332,6 +332,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         , _remoteId()
         , _sourceNode()
         , _tryInterval(0)
+        , _retries(UINT32_MAX)
         , _callback(callback)
         , _publicIPAddress()
         , _timeZone()
@@ -383,7 +384,11 @@ POP_WARNING()
                     _state = ACTIVE;
 
                     // it runs till zero, so subtract by definition 1 :-)
-                    _retries = (retries - 1);
+                    // If retires is UINT32_MAX it means retry unlimited
+                    if (retries != UINT32_MAX) {
+                        _retries = (retries - 1);
+                    }
+
                     _tryInterval = retryTimeSpan * 1000; // Move from seconds to mS.
                     _request->Host = hostName;
                     _request->Verb = Web::Request::HTTP_GET;
@@ -547,7 +552,12 @@ POP_WARNING()
             _adminLock.Lock();
 
             if (_state == IPV4_INPROGRESS) {
-                _state = (_retries-- == 0 ? FAILED : ACTIVE);
+                if(_retries != UINT32_MAX) {
+                    _state = (_retries-- == 0 ? FAILED : ACTIVE);
+                }
+                else {
+                    _state = ACTIVE;
+                }
             }
 
             if ((_state != LOADED) && (_state != FAILED)) {
@@ -556,10 +566,10 @@ POP_WARNING()
 
                 if (remote.IsValid() == false) {
 
-                    TRACE(Trace::Warning, (_T("DNS resolving failed. Sleep for %d mS for attempt %d"), _tryInterval, _retries));
+                    TRACE(Trace::Warning, (_T("DNS resolving failed. Sleep for %d mS for attempt %u"), _tryInterval, _retries));
 
                     // Name resolving does not even work. Retry this after a few seconds, if we still can..
-                    if (_retries-- == 0)
+                    if (_retries != UINT32_MAX && _retries-- == 0)
                         _state = FAILED;
                     else
                         result = _tryInterval;
@@ -574,12 +584,12 @@ POP_WARNING()
 
                     if ((status == Core::ERROR_NONE) || (status == Core::ERROR_INPROGRESS)) {
 
-                        TRACE(Trace::Information, (_T("Sending out a network package on %s. Attempt: %d"), (remote.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), _retries));
+                        TRACE(Trace::Information, (_T("Sending out a network package on %s. Attempt: %u"), (remote.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), _retries));
 
                         // We need to get a response in the given time..
                         result = _tryInterval;
                     } else {
-                        TRACE(Trace::Warning, (_T("Failed on network %s. Reschedule for the next attempt: %d"), (remote.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), _retries));
+                        TRACE(Trace::Warning, (_T("Failed on network %s. Reschedule for the next attempt: %u"), (remote.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), _retries));
 
                         // Seems we could not open this connection, move on to the next attempt.
                         Close(0);

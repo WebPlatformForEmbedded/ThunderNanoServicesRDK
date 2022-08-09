@@ -28,7 +28,6 @@
     PRINT("%s:%d %s : %d\n", __FILE__, __LINE__, #x, result); \
 }
 
-using namespace std;
 using namespace WPEFramework;
 
 const char* JWTSecApi::MacGenerator::StorageDir = nullptr;
