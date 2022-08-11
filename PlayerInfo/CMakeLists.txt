@@ -1,7 +1,7 @@
 # If not stated otherwise in this file or this component's LICENSE file the
 # following copyright and licenses apply:
 #
-# Copyright 2020 Metrological
+# Copyright 2020 RDK Management
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 option(DOLBY_SUPPORT "Build the PlayerInfo with dolby support" OFF)
 set(PLUGIN_PLAYERINFO_AUTOSTART true CACHE STRING "Automatically start PlayerInfo plugin")
+set(PLUGIN_PLAYERINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
@@ -49,8 +50,6 @@ target_link_libraries(${MODULE_NAME}
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
-
-find_package(GStreamer REQUIRED)
 
 if (DOLBY_SUPPORT)
 
@@ -73,29 +72,32 @@ if (DOLBY_SUPPORT)
             PlayerInfoDolby)
 endif()
 
-if (USE_IARM)
-    find_package(DS REQUIRED)
-    find_package(IARMBus REQUIRED)
-    target_include_directories(${MODULE_NAME} PRIVATE
-        ${IARMBUS_INCLUDE_DIRS}
-        ${DS_INCLUDE_DIRS}
-        ../helpers)
-    target_link_libraries(${MODULE_NAME} PRIVATE
-        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-        ${IARMBUS_LIBRARIES}
-        ${DS_LIBRARIES})
-    target_sources(${MODULE_NAME}
-        PRIVATE
-            IARM/PlatformImplementation.cpp
-            ../helpers/utils.cpp)
-elseif (GSTREAMER_FOUND)
-    target_sources(${MODULE_NAME}
-        PRIVATE
-            GStreamer/PlatformImplementation.cpp)
-
+find_package(GStreamer REQUIRED)
+if (GSTREAMER_FOUND)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
             GStreamer::GStreamer)
+
+    if (USE_DEVICESETTINGS)
+        find_package(DS REQUIRED)
+        find_package(IARMBus REQUIRED)
+        target_include_directories(${MODULE_NAME} PRIVATE
+            ${IARMBUS_INCLUDE_DIRS}
+            ${DS_INCLUDE_DIRS}
+            ../helpers)
+        target_link_libraries(${MODULE_NAME} PRIVATE
+           ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+            ${IARMBUS_LIBRARIES}
+            ${DS_LIBRARIES})
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                DeviceSettings/PlatformImplementation.cpp)
+    else ()
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                GStreamer/PlatformImplementation.cpp)
+
+    endif ()
 endif ()
 
 install(TARGETS ${MODULE_NAME}

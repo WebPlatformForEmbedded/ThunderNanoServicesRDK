@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 Metrological
+ * Copyright 2020 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 
 #include "Module.h"
 #include <interfaces/json/JsonData_PlayerInfo.h>
-#include <interfaces/json/JPlayerProperties.h>
 #include <interfaces/json/JDolbyOutput.h>
+#include <interfaces/json/JPlayerProperties.h>
 
 namespace WPEFramework {
 namespace Plugin {
