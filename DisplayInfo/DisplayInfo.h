@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 Metrological
+ * Copyright 2020 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include <interfaces/json/JGraphicsProperties.h>
 #include <interfaces/json/JConnectionProperties.h>
 #include <interfaces/json/JHDRProperties.h>
+#include <interfaces/json/JDisplayProperties.h>
 #include <interfaces/IConfiguration.h>
 
 namespace WPEFramework {
@@ -63,6 +64,7 @@ namespace Plugin {
 
         private:
             DisplayInfo& _parent;
+            Exchange::IConnectionProperties* _client;
         };
 
     public:
@@ -75,6 +77,7 @@ namespace Plugin {
             , _graphicsProperties(nullptr)
             , _connectionProperties(nullptr)
             , _hdrProperties(nullptr)
+            , _displayProperties(nullptr)
             , _notification(this)
             , _service(nullptr)
         {
@@ -88,6 +91,7 @@ namespace Plugin {
         INTERFACE_AGGREGATE(Exchange::IGraphicsProperties, _graphicsProperties)
         INTERFACE_AGGREGATE(Exchange::IConnectionProperties, _connectionProperties)
         INTERFACE_AGGREGATE(Exchange::IHDRProperties, _hdrProperties)
+        INTERFACE_AGGREGATE(Exchange::IDisplayProperties, _displayProperties)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
         END_INTERFACE_MAP
 
@@ -114,6 +118,7 @@ namespace Plugin {
         Exchange::IGraphicsProperties* _graphicsProperties;
         Exchange::IConnectionProperties* _connectionProperties;
         Exchange::IHDRProperties* _hdrProperties;
+        Exchange::IDisplayProperties* _displayProperties;
         Core::Sink<Notification> _notification;
         PluginHost::IShell* _service;
     };

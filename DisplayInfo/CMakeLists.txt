@@ -1,7 +1,7 @@
 # If not stated otherwise in this file or this component's LICENSE file the
 # following copyright and licenses apply:
 #
-# Copyright 2020 Metrological
+# Copyright 2020 RDK Management
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ find_package(WPEFramework)
 project_version(1.0.0)
 
 set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
-
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -64,7 +63,13 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
 
-if (USE_IARM)
+if (PLUGIN_DISPLAYINFO_BCM_VERSION_MAJOR)
+    target_compile_definitions(${MODULE_NAME}
+        PRIVATE
+            DISPLAYINFO_BCM_VERSION_MAJOR=${PLUGIN_DISPLAYINFO_BCM_VERSION_MAJOR})
+endif()
+
+if (USE_DEVICESETTINGS)
     find_package(DS REQUIRED)
     find_package(IARMBus REQUIRED)
     target_include_directories(${MODULE_NAME} PRIVATE ${IARMBUS_INCLUDE_DIRS}
@@ -76,8 +81,22 @@ if (USE_IARM)
         ${DS_LIBRARIES})
     target_sources(${MODULE_NAME}
         PRIVATE
-            IARM/PlatformImplementation.cpp
-            ../helpers/utils.cpp)
+            DeviceSettings/PlatformImplementation.cpp)
+    if (BUILD_BROADCOM)
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                DeviceSettings/Broadcom/SoC_abstraction.cpp)
+    elseif (BUILD_REALTEK)
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                DeviceSettings/Realtek/SoC_abstraction.cpp
+                DeviceSettings/Realtek/kms.c)
+    elseif (BUILD_AMLOGIC)
+        target_sources(${MODULE_NAME}
+            PRIVATE
+            DeviceSettings/Amlogic/SoC_abstraction.cpp
+            DeviceSettings/Amlogic/kms.c)
+    endif()
 
 elseif (NXCLIENT_FOUND AND NEXUS_FOUND)
     if (DISPLAYINFO_IMPLEMENTATION_PATH)
@@ -109,6 +128,7 @@ elseif (BCM_HOST_FOUND)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
             BCM_HOST::BCM_HOST)
+
 elseif (LIBDRM_FOUND)
     target_sources(${MODULE_NAME}
         PRIVATE
