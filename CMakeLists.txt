@@ -20,6 +20,7 @@ project(NanoServicesRDK)
 
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
+option(PLUGIN_DISPLAYINFO "Include DisplayInfo plugin" OFF)
 option(PLUGIN_LOCATIONSYNC "Include LocationSync plugin" OFF)
 option(PLUGIN_MESSAGECONTROL "Include MessageControl plugin" OFF)
 option(PLUGIN_MESSENGER "Include Messenger plugin" OFF)
@@ -41,6 +42,10 @@ endif()
 
 if(PLUGIN_DEVICEINFO)
     add_subdirectory(DeviceInfo)
+endif()
+
+if(PLUGIN_DISPLAYINFO)
+    add_subdirectory(DisplayInfo)
 endif()
 
 if(PLUGIN_LOCATIONSYNC)
