@@ -664,7 +664,7 @@ namespace Plugin {
                 Add(_T("edidFilepath"), &edidFilepath);
                 Add(_T("hdcpLevelFilepath"), &hdcpLevelFilepath);
                 Add(_T("hdrLevelFilepath"), &hdrLevelFilepath);
-                Add(_T"gpuMemoryFile"), &gpuMemoryFile);
+                Add(_T("gpuMemoryFile"), &gpuMemoryFile);
                 Add(_T("gpuMemoryFreePattern"), &gpuMemoryFreePattern);
                 Add(_T("gpuMemoryTotalPattern"), &gpuMemoryTotalPattern);
                 Add(_T("gpuMemoryUnitMultiplier"), &gpuMemoryUnitMultiplier);
