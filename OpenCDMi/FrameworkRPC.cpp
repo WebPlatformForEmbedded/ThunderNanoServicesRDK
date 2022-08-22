@@ -325,7 +325,7 @@ namespace Plugin {
                                 sampleInfo.iv = const_cast<uint8_t *>(IVKey());
                                 sampleInfo.ivLength = IVKeyLength();
                                 sampleInfo.keyId = const_cast<uint8_t *>(KeyId(sampleInfo.keyIdLength));
-                                sampleInfo.subSample = const_cast<uint32_t *>(SubSamples());
+                                sampleInfo.subSample = const_cast<CDMi::SubSampleInfo *>(SubSamples());
                                 sampleInfo.subSampleCount = SubSampleLength();
 
                                 uint16_t width = 0, height = 0;
@@ -346,7 +346,6 @@ namespace Plugin {
                                     },
                                     WarningReporting::TooLongDecrypt
                                 );
-
 
                                 if ((cr == 0) && (clearContentSize != 0)) {
                                     if (clearContentSize != BytesWritten()) {
