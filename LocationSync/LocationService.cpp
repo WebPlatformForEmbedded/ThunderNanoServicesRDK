@@ -543,6 +543,7 @@ POP_WARNING()
     void LocationService::Dispatch()
     {
         uint32_t result = Core::infinite;
+        TRACE(Trace::Information, (_T("LocationService: job is dispatched")));
 
         if ((Close(100) != Core::ERROR_NONE) || (IsClosed() == false)) {
 
