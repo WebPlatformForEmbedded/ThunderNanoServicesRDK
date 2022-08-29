@@ -237,6 +237,43 @@ namespace Plugin {
                 SessionImplementation(const SessionImplementation&) = delete;
                 SessionImplementation& operator=(const SessionImplementation&) = delete;
 
+                class MediaStreamProperties : public CDMi::IStreamProperties {
+                public:
+                    MediaStreamProperties() = delete;
+                    MediaStreamProperties(const MediaStreamProperties&) = delete;
+                    MediaStreamProperties& operator=(const MediaStreamProperties&) = delete;
+                    MediaStreamProperties(uint16_t height, uint16_t width, CDMi::MediaType type, uint8_t initLength = 0)
+                        : _height(height)
+                        , _width(width)
+                        , _type(type)
+                        , _initLength(initLength)
+                    {
+                    }
+
+                    uint16_t GetHeight() const override
+                    {
+                        return (_height);
+                    }
+                    uint16_t GetWidth() const override
+                    {
+                        return (_width);
+                    }
+                    CDMi::MediaType GetMediaType() const override
+                    {
+                        return (_type);
+                    }
+                    uint8_t InitLength() const override
+                    {
+                        return (_initLength);
+                    }
+
+                private:
+                    uint16_t _height;
+                    uint16_t _width;
+                    CDMi::MediaType _type;
+                    uint8_t _initLength;
+                };
+
                 class DataExchange : public Exchange::DataExchange, public Core::Thread {
                 private:
                     DataExchange() = delete;
@@ -280,33 +317,35 @@ namespace Plugin {
                             RequestConsume(Core::infinite);
 
                             if (IsRunning() == true) {
-                                uint8_t keyIdLength = 0;
-                                const uint8_t* keyIdData = KeyId(keyIdLength);
                                 uint8_t *payloadBuffer = Buffer();
-                                CDMi::EncryptionPattern pattern = {0, 0};
-                                EncPattern(pattern.encrypted_blocks,pattern.clear_blocks);
+
+                                CDMi::SampleInfo sampleInfo;
+                                sampleInfo.scheme = static_cast<CDMi::EncryptionScheme>(EncScheme());
+                                EncPattern(sampleInfo.pattern.encrypted_blocks,sampleInfo.pattern.clear_blocks);
+                                sampleInfo.iv = const_cast<uint8_t *>(IVKey());
+                                sampleInfo.ivLength = IVKeyLength();
+                                sampleInfo.keyId = const_cast<uint8_t *>(KeyId(sampleInfo.keyIdLength));
+                                sampleInfo.subSample = const_cast<CDMi::SubSampleInfo *>(SubSamples());
+                                sampleInfo.subSampleCount = SubSampleLength();
+
+                                uint16_t width = 0, height = 0;
+                                uint8_t type = 0;
+                                MediaProperties(height, width, type);
+                                const MediaStreamProperties streamProperties(height, width, static_cast<CDMi::MediaType>(type));
 
                                 int cr = 0;
                                 REPORT_DURATION_WARNING(
                                     {
                                     cr = _mediaKeys->Decrypt(
-                                        _sessionKey,
-                                        _sessionKeyLength,
-                                        static_cast<CDMi::EncryptionScheme>(EncScheme()),
-                                        pattern,
-                                        IVKey(),
-                                        IVKeyLength(),
                                         payloadBuffer,
                                         BytesWritten(),
-                                        &clearContentSize,
                                         &clearContent,
-                                        keyIdLength,
-                                        keyIdData,
-                                        InitWithLast15());
+                                        &clearContentSize,
+                                        const_cast<CDMi::SampleInfo *>(&sampleInfo),
+                                        dynamic_cast<const CDMi::IStreamProperties *>(&streamProperties));
                                     },
                                     WarningReporting::TooLongDecrypt
                                 );
-
 
                                 if ((cr == 0) && (clearContentSize != 0)) {
                                     if (clearContentSize != BytesWritten()) {
