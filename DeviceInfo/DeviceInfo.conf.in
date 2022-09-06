@@ -1,0 +1,14 @@
+autostart = "@PLUGIN_DEVICEINFO_AUTOSTART@"
+
+configuration = JSON()
+configuration.add("modelName", "@PLUGIN_DEVICEINFO_MODELNAME@")
+configuration.add("modelYear", "@PLUGIN_DEVICEINFO_MODELYEAR@")
+configuration.add("systemIntegratorName", "@PLUGIN_DEVICEINFO_SYSTEMINTEGRATORNAME@")
+configuration.add("friendlyName", "@PLUGIN_DEVICEINFO_FRIENDLYNAME@")
+configuration.add("platformName", "@PLUGIN_DEVICEINFO_PLATFORMNAME@")
+
+root = JSON()
+root.add("mode", "Off")
+
+configuration.add("root", root)
+

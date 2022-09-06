@@ -1,0 +1,21 @@
+autostart = "@PLUGIN_DISPLAYINFO_AUTOSTART@"
+
+configuration = JSON()
+
+if boolean("@PLUGIN_DISPLAYINFO_USE_BEST_MODE@"):
+    configuration.add("useBestMode", "@PLUGIN_DISPLAYINFO_USE_BEST_MODE@")
+
+configuration.add("drmDeviceName", "@PLUGIN_DISPLAYINFO_DRM_DEVICE_NAME@")
+configuration.add("drmSubsystemPath", "@PLUGIN_DISPLAYINFO_EDID_FILEPATH@")
+configuration.add("hdcpLevelFilepath", "@PLUGIN_DISPLAYINFO_HDCP_LEVEL_FILEPATH@")
+configuration.add("hdrLevelFilepath", "@PLUGIN_DISPLAYINFO_HDR_LEVEL_FILEPATH@")
+configuration.add("gpuMemoryFile", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_FILE@")
+configuration.add("gpuMemoryFreePattern", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_FREE_PATTERN@")
+configuration.add("gpuMemoryTotalPattern", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_TOTAL_PATTERN@")
+configuration.add("gpuMemoryUnitMultiplier", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_UNIT_MULTIPLIER@")
+configuration.add("hdcplevel", "@PLUGIN_DISPLAYINFO_HDCP_LEVEL@")
+
+root = JSON()
+root.add("mode", "@PLUGIN_DISPLAYINFO_MODE@")
+configuration.add("root", root)
+
