@@ -1,0 +1,11 @@
+{
+  "$schema": "plugin.schema.json",
+  "info": {
+    "title": "PluginActivator Plugin",
+    "callsign": "PluginActivator",
+    "locator": "libWPEFrameworkPluginActivator.so",
+    "status": "alpha",
+    "description": "POC to demonstrate usage of new Initialized and Deinitialized calls.",
+    "version": "1.0"
+  }
+}
