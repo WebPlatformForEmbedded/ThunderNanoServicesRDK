@@ -121,12 +121,12 @@ namespace Plugin {
             // ----------------------------------------------------------
             void Message(const Exchange::IMessageControl::MessageType type, const string& category,
                 const string& module, const string& fileName,
-                const uint16_t lineNumber, const uint64_t timestamp,
-                const string& message) override {
+                const uint16_t lineNumber, const string& className,
+                const uint64_t timestamp, const string& message) override {
 
                 //yikes, recreating stuff from received pieces
                 Messaging::TextMessage textMessage(message);
-                Core::Messaging::Information info(static_cast<Core::Messaging::MetaData::MessageType>(type), category, module, fileName, lineNumber, timestamp);
+                Core::Messaging::Information info(static_cast<Core::Messaging::MetaData::MessageType>(type), category, module, fileName, lineNumber, className, timestamp);
                 _parent.Output(info, &textMessage);
             }
 

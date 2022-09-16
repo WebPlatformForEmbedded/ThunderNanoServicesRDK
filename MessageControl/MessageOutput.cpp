@@ -25,24 +25,30 @@ namespace Publishers {
     string Text::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
     {
         string deserializedMessage;
-        std::ostringstream output;
+        string output;
 
         message->ToString(deserializedMessage);
         Core::Time now(info.TimeStamp());
 
         if (_abbreviated == true) {
-            string time(now.ToTimeOnly(true));
-            output << '[' << time.c_str() << ']' 
-                   << '[' << info.MessageMetaData().Module() << "]" 
-                   << '[' << info.MessageMetaData().Category() << "]: " 
-                   << deserializedMessage << std::endl;
+            const string time(now.ToTimeOnly(true));
+            output = Core::Format("[%s]:[%s]:[%s]: %s\n",
+                    time.c_str(),
+                    info.MessageMetaData().Module().c_str(),
+                    info.MessageMetaData().Category().c_str(),
+                    deserializedMessage.c_str());
         } else {
-            string time(now.ToRFC1123(true));
-            output << '[' << time.c_str() << "]:[" << Core::FileNameOnly(info.FileName().c_str()) << ':' << info.LineNumber() << "] "
-                   << info.MessageMetaData().Category() << ": " << deserializedMessage << std::endl;
+            const string time(now.ToRFC1123(true));
+            output = Core::Format("[%s]:[%s:%u]:[%s]:[%s]: %s\n",
+                    time.c_str(),
+                    Core::FileNameOnly(info.FileName().c_str()),
+                    info.LineNumber(),
+                    info.ClassName().c_str(),
+                    info.MessageMetaData().Category().c_str(),
+                    deserializedMessage.c_str());
         }
 
-        return(output.str());
+        return (output);
     }
 
     void ConsoleOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) /* override */
@@ -66,10 +72,10 @@ namespace Publishers {
             _file.Write(reinterpret_cast<const uint8_t*>(line.c_str()), static_cast<uint32_t>(line.length()));
         }
     }
-     
+
     void JSON::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message, Data& data)
     {
-        ExtraOutputOptions options = _outputoptions;
+        ExtraOutputOptions options = _outputOptions;
 
         if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PAUSED)) == 0) {
 
@@ -80,10 +86,15 @@ namespace Publishers {
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
-                data.Filename = info.FileName();
+                data.FileName = info.FileName();
             }
+
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
-                data.Linenumber = info.LineNumber();
+                data.LineNumber = info.LineNumber();
+            }
+
+            if( (AsNumber(options) & AsNumber(ExtraOutputOptions::CLASSNAME) ) != 0 ) {
+                data.ClassName = info.ClassName();
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::MODULE)) != 0) {
@@ -115,7 +126,7 @@ namespace Publishers {
     {
         _adminLock.Lock();
 
-        uint16_t actualByteCount = _loaded > maxSendSize ? maxSendSize : _loaded;
+        uint16_t actualByteCount = (_loaded > maxSendSize ? maxSendSize : _loaded);
         memcpy(dataFrame, _sendBuffer, actualByteCount);
         _loaded = 0;
 

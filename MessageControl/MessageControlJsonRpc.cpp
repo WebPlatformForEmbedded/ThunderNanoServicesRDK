@@ -50,7 +50,6 @@ namespace Plugin {
     //  - ERROR_NONE: Success
     uint32_t MessageControl::endpoint_set(const MessageInfo& params)
     {
-        uint32_t result = Core::ERROR_NONE;
         auto state = params.State.Value() == StateType::ENABLED ? true : false;
         return(_control->Enable(static_cast<Exchange::IMessageControl::MessageType>(params.Type.Value()), params.Module.Value(), params.Category.Value(), state));
     }

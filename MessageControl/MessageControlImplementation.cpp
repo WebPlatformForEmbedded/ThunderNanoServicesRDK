@@ -192,6 +192,7 @@ namespace Plugin {
                     info.MessageMetaData().Module(),
                     info.FileName(),
                     info.LineNumber(),
+                    info.ClassName(),
                     info.TimeStamp(),
                     rawMessage);
                 });
