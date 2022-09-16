@@ -136,7 +136,8 @@ namespace Plugin {
 
         uint32_t Enable(const MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
         {
-            Core::Messaging::MetaData metaData(static_cast<Core::Messaging::MetaData::MessageType>(type), categoryName, moduleName);
+            Core::Messaging::MetaData metaData((type == MessageType::Logging? Core::Messaging::MetaData::MessageType::LOGGING : Core::Messaging::MetaData::MessageType::TRACING), 
+                categoryName, moduleName);
             _client.Enable(metaData, enable);
 
             return Core::ERROR_NONE;
@@ -164,7 +165,7 @@ namespace Plugin {
             }
 
             if (_controls.Next() == true) {
-                type = static_cast<MessageType>(_controls.Current().first.Type());
+                type = (_controls.Current().first.Type() == Core::Messaging::MetaData::MessageType::LOGGING? MessageType::Logging : MessageType::Tracing);
                 moduleName = _controls.Current().first.Module();
                 categoryName = _controls.Current().first.Category();
                 enable = _controls.Current().second;
@@ -187,7 +188,7 @@ namespace Plugin {
                 string rawMessage;
                 message->ToString(rawMessage);
 
-                _callback->Message(static_cast<Exchange::IMessageControl::MessageType>(info.MessageMetaData().Type()),
+                _callback->Message((info.MessageMetaData().Type() == Core::Messaging::MetaData::MessageType::LOGGING? MessageType::Logging : MessageType::Tracing),
                     info.MessageMetaData().Category(),
                     info.MessageMetaData().Module(),
                     info.FileName(),

@@ -126,7 +126,8 @@ namespace Plugin {
 
                 //yikes, recreating stuff from received pieces
                 Messaging::TextMessage textMessage(message);
-                Core::Messaging::Information info(static_cast<Core::Messaging::MetaData::MessageType>(type), category, module, fileName, lineNumber, className, timestamp);
+                Core::Messaging::Information info((type == Exchange::IMessageControl::MessageType::Logging? Core::Messaging::MetaData::MessageType::LOGGING : Core::Messaging::MetaData::MessageType::TRACING),
+                    category, module, fileName, lineNumber, className, timestamp);
                 _parent.Output(info, &textMessage);
             }
 
