@@ -54,7 +54,7 @@ namespace {
 
 namespace Plugin {
 
-    class MessageControlImplementation : public Exchange::IMessageControl {
+    class MessageControlImplementation : public Exchange::IMessageControl, public Exchange::IMessageControl::ICollect {
     private:
         class WorkerThread : public Core::Thread {
         public:
@@ -64,7 +64,8 @@ namespace Plugin {
 
             WorkerThread(MessageControlImplementation& parent)
                 : Core::Thread()
-                , _parent(parent) {
+                , _parent(parent)
+            {
             }
             ~WorkerThread() override = default;
 
@@ -73,12 +74,13 @@ namespace Plugin {
             {
                 _parent.Dispatch();
 
-                return Core::infinite;
+                return (Core::infinite);
             }
 
         private:
             MessageControlImplementation& _parent;
         };
+
     public:
         MessageControlImplementation(const MessageControlImplementation&) = delete;
         MessageControlImplementation& operator=(const MessageControlImplementation&) = delete;
@@ -91,92 +93,92 @@ namespace Plugin {
             , _worker(*this)
             , _client(_dispatcherIdentifier, _dispatcherBasePath, DispatcherSocketPort())
             , _factory()
-            , _controls() {
+        {
         }
+
         ~MessageControlImplementation() override
         {
-            _worker.Stop();
-            _client.SkipWaiting();
-            _worker.Wait(Core::Thread::STOPPED, Core::infinite);
-
-            _client.ClearInstances();
-            
             if (_callback != nullptr) {
+                _worker.Stop();
+                _client.SkipWaiting();
+                _worker.Wait(Core::Thread::STOPPED, Core::infinite);
+
+                _client.ClearInstances();
+
                 _callback->Release();
-                _callback = nullptr;
             }
         }
 
     public:
-        uint32_t Configure(Exchange::IMessageControl::ICallback* callback) override
+        uint32_t Configure(Exchange::IMessageControl::ICollect::ICallback* callback) override
         {
-            uint32_t result = Core::ERROR_NONE;
+            ASSERT(callback != nullptr);
 
-            _callback = callback;
-            _callback->AddRef();
+            _adminLock.Lock();
 
-            _client.AddInstance(0);
-            _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
-            _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
+            ASSERT(_callback == nullptr);
 
-            _worker.Run();
+            if (callback != nullptr) {
+                _callback = callback;
+                _callback->AddRef();
 
-            return result;
+                _client.AddInstance(0);
+                _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
+                _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
+
+                _worker.Run();
+            }
+
+            _adminLock.Unlock();
+
+            return (Core::ERROR_NONE);
         }
 
-        uint32_t Attach(const uint32_t id) override {
+        uint32_t Attach(const uint32_t id) override
+        {
+            _adminLock.Lock();
             _client.AddInstance(id);
+            _adminLock.Unlock();
+
             return (Core::ERROR_NONE);
         }
 
-        uint32_t Detach(const uint32_t id) override {
+        uint32_t Detach(const uint32_t id) override
+        {
+            _adminLock.Lock();
             _client.RemoveInstance(id);
+            _adminLock.Unlock();
+
             return (Core::ERROR_NONE);
         }
 
-        uint32_t Enable(const MessageType type, const string& moduleName, const string& categoryName, const bool enable) override
+        uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
-            Core::Messaging::MetaData metaData((type == MessageType::Logging? Core::Messaging::MetaData::MessageType::LOGGING : Core::Messaging::MetaData::MessageType::TRACING), 
-                categoryName, moduleName);
-            _client.Enable(metaData, enable);
+            _client.Enable({ToMessageType(type), category, module}, enabled);
 
-            return Core::ERROR_NONE;
+            return (Core::ERROR_NONE);
         }
 
-        /**
-         * @brief Retreive currently enabled messages information.
-         * 
-         * @param initialize should the data be fetch (first call)
-         * @param type type of the message
-         * @param moduleName module 
-         * @param categoryName category 
-         * @param enable is enabled
-         * @return uint32_t ERROR_NONE: Data still available in a list - one should call this method again (but with initialize = false)
-         *                  ERROR_UNAVAILABLE: No more data available
-         *                  
-         */
-        uint32_t Setting(const bool initialize, MessageType& type, string& moduleName, string& categoryName, bool& enable) override
+        uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
         {
-            uint32_t result = Core::ERROR_UNAVAILABLE;
+            std::list<Exchange::IMessageControl::Control> list;
+            Core::Messaging::ControlList::InformationStorage controlList;
 
-            if (initialize) {
-                _controls.Reset(0);
-                _controls = _client.Enabled();
+            _client.Controls(controlList);
+            for (auto const& e : controlList) {
+                list.push_back({ToMessageType(e.first.Type()), e.first.Category(), e.first.Module(), e.second});
             }
 
-            if (_controls.Next() == true) {
-                type = (_controls.Current().first.Type() == Core::Messaging::MetaData::MessageType::LOGGING? MessageType::Logging : MessageType::Tracing);
-                moduleName = _controls.Current().first.Module();
-                categoryName = _controls.Current().first.Category();
-                enable = _controls.Current().second;
-                result = Core::ERROR_NONE;
-            }
+            using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
+            controls = Core::Service<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
 
-            return result;
+            return (Core::ERROR_NONE);
         }
 
+    public:
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
         INTERFACE_ENTRY(Exchange::IMessageControl)
+        INTERFACE_ENTRY(Exchange::IMessageControl::ICollect)
         END_INTERFACE_MAP
 
     private:
@@ -188,7 +190,8 @@ namespace Plugin {
                 string rawMessage;
                 message->ToString(rawMessage);
 
-                _callback->Message((info.MessageMetaData().Type() == Core::Messaging::MetaData::MessageType::LOGGING? MessageType::Logging : MessageType::Tracing),
+                ASSERT(_callback != nullptr);
+                _callback->Message(ToMessageType(info.MessageMetaData().Type()),
                     info.MessageMetaData().Category(),
                     info.MessageMetaData().Module(),
                     info.FileName(),
@@ -196,12 +199,12 @@ namespace Plugin {
                     info.ClassName(),
                     info.TimeStamp(),
                     rawMessage);
-                });
+            });
         }
 
     private:
         Core::CriticalSection _adminLock;
-        IMessageControl::ICallback* _callback;
+        IMessageControl::ICollect::ICallback* _callback;
 
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;
@@ -209,10 +212,9 @@ namespace Plugin {
         WorkerThread _worker;
         Messaging::MessageClient _client;
         Messaging::TraceFactory _factory;
-
-        Core::Messaging::ControlList::InformationIterator _controls;
     };
 
     SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);
-}
+
+} // namespace Plugin
 }
