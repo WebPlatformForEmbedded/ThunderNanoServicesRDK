@@ -123,8 +123,8 @@ namespace Plugin {
                 _callback->AddRef();
 
                 _client.AddInstance(0);
-                _client.AddFactory(Core::Messaging::MetaData::MessageType::TRACING, &_factory);
-                _client.AddFactory(Core::Messaging::MetaData::MessageType::LOGGING, &_factory);
+                _client.AddFactory(Core::Messaging::MessageType::TRACING, &_factory);
+                _client.AddFactory(Core::Messaging::MessageType::LOGGING, &_factory);
 
                 _worker.Run();
             }

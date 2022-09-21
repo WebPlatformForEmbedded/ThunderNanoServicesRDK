@@ -104,20 +104,20 @@ namespace WPEFramework {
         }
         else {
             if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
             }
             if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
             }
             if (_config.FileName.Value().empty() == false) {
                 _config.FileName = service->VolatilePath() + _config.FileName.Value();
 
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
             }
             if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
                 std::shared_ptr<Messaging::IMessageOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, output);
-                Announce(Core::Messaging::MetaData::MessageType::LOGGING, output);
+                Announce(Core::Messaging::MessageType::TRACING, output);
+                Announce(Core::Messaging::MessageType::LOGGING, output);
             }
 
             _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());

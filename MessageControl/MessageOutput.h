@@ -22,25 +22,25 @@
 
 namespace WPEFramework {
 
-static inline Core::Messaging::MetaData::MessageType ToMessageType(const Exchange::IMessageControl::messagetype type)
+static inline Core::Messaging::MessageType ToMessageType(const Exchange::IMessageControl::messagetype type)
 {
     switch (type) {
     case Exchange::IMessageControl::messagetype::TRACING:
-        return Core::Messaging::MetaData::MessageType::TRACING;
+        return Core::Messaging::MessageType::TRACING;
     case Exchange::IMessageControl::messagetype::LOGGING:
-        return Core::Messaging::MetaData::MessageType::LOGGING;
+        return Core::Messaging::MessageType::LOGGING;
     default:
         ASSERT(!"Invalid message type!");
-        return Core::Messaging::MetaData::MessageType::TRACING;
+        return Core::Messaging::MessageType::TRACING;
     }
 }
 
-static inline Exchange::IMessageControl::messagetype ToMessageType(const Core::Messaging::MetaData::MessageType type)
+static inline Exchange::IMessageControl::messagetype ToMessageType(const Core::Messaging::MessageType type)
 {
     switch (type) {
-    case Core::Messaging::MetaData::MessageType::TRACING:
+    case Core::Messaging::MessageType::TRACING:
         return Exchange::IMessageControl::messagetype::TRACING;
-    case Core::Messaging::MetaData::MessageType::LOGGING:
+    case Core::Messaging::MessageType::LOGGING:
         return Exchange::IMessageControl::messagetype::LOGGING;
     default:
         ASSERT(!"Invalid message type!");

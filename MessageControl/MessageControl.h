@@ -26,7 +26,7 @@ namespace WPEFramework {
 namespace Plugin {
     class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
-        using OutputMap = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::shared_ptr<Messaging::IMessageOutput>>>;
+        using OutputMap = std::unordered_map<Core::Messaging::MessageType, std::list<std::shared_ptr<Messaging::IMessageOutput>>>;
 
         class Config : public Core::JSON::Container {
         private:
@@ -249,7 +249,7 @@ namespace Plugin {
         Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
 
     private:
-        void Announce(Core::Messaging::MetaData::MessageType type, const std::shared_ptr<Messaging::IMessageOutput>& output) {
+        void Announce(Core::Messaging::MessageType type, const std::shared_ptr<Messaging::IMessageOutput>& output) {
 
             _outputLock.Lock();
 
