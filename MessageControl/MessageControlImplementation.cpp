@@ -187,10 +187,9 @@ namespace Plugin {
             _client.WaitForUpdates(Core::infinite);
 
             _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
-                string rawMessage;
-                message->ToString(rawMessage);
-
                 ASSERT(_callback != nullptr);
+
+                // Turn data into piecies to trasfer over the wire
                 _callback->Message(ToMessageType(info.MessageMetaData().Type()),
                     info.MessageMetaData().Category(),
                     info.MessageMetaData().Module(),
@@ -198,7 +197,7 @@ namespace Plugin {
                     info.LineNumber(),
                     info.ClassName(),
                     info.TimeStamp(),
-                    rawMessage);
+                    message->Data());
             });
         }
 

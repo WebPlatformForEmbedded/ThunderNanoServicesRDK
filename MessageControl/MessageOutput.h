@@ -68,7 +68,7 @@ namespace Publishers {
         bool _abbreviated;
     };
 
-    class ConsoleOutput : public Messaging::IMessageOutput {
+    class ConsoleOutput : public Core::Messaging::IOutput {
     public:
         ConsoleOutput() = delete;
         ConsoleOutput(const ConsoleOutput&) = delete;
@@ -86,7 +86,7 @@ namespace Publishers {
         Text _convertor;
     };
 
-    class SyslogOutput : public Messaging::IMessageOutput {
+    class SyslogOutput : public Core::Messaging::IOutput {
     public:
         SyslogOutput() = delete;
         SyslogOutput(const SyslogOutput&) = delete;
@@ -104,7 +104,7 @@ namespace Publishers {
         Text _convertor;
     };
   
-    class FileOutput : public Messaging::IMessageOutput {
+    class FileOutput : public Core::Messaging::IOutput {
     public:
         FileOutput() = delete;
         FileOutput(const FileOutput&) = delete;
@@ -285,7 +285,7 @@ namespace Publishers {
         std::atomic<ExtraOutputOptions> _outputOptions;
     };
 
-    class UDPOutput : public Messaging::IMessageOutput {
+    class UDPOutput : public Core::Messaging::IOutput {
     private:
         class Channel : public Core::SocketDatagram {
         public:
@@ -323,7 +323,7 @@ namespace Publishers {
         Channel _output;
     };
 
-    class WebSocketOutput : public Messaging::IMessageOutput {
+    class WebSocketOutput : public Core::Messaging::IOutput {
     private:
         class ExportCommand : public Core::JSON::Container {
         public:

@@ -24,11 +24,9 @@ namespace Publishers {
 
     string Text::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
     {
-        string deserializedMessage;
         string output;
 
-        message->ToString(deserializedMessage);
-        Core::Time now(info.TimeStamp());
+        const Core::Time now(info.TimeStamp());
 
         if (_abbreviated == true) {
             const string time(now.ToTimeOnly(true));
@@ -36,7 +34,7 @@ namespace Publishers {
                     time.c_str(),
                     info.MessageMetaData().Module().c_str(),
                     info.MessageMetaData().Category().c_str(),
-                    deserializedMessage.c_str());
+                    message->Data().c_str());
         } else {
             const string time(now.ToRFC1123(true));
             output = Core::Format("[%s]:[%s:%u]:[%s]:[%s]: %s\n",
@@ -45,7 +43,7 @@ namespace Publishers {
                     info.LineNumber(),
                     info.ClassName().c_str(),
                     info.MessageMetaData().Category().c_str(),
-                    deserializedMessage.c_str());
+                    message->Data().c_str());
         }
 
         return (output);
@@ -105,9 +103,7 @@ namespace Publishers {
                 data.Category = info.MessageMetaData().Category();
             }
 
-            string rawMessage;
-            message->ToString(rawMessage);
-            data.Message = rawMessage;
+            data.Message = message->Data();
         }
     }
 

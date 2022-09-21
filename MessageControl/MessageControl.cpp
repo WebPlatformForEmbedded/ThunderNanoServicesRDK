@@ -115,7 +115,7 @@ namespace WPEFramework {
                 Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
             }
             if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-                std::shared_ptr<Messaging::IMessageOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
+                std::shared_ptr<Core::Messaging::IOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
                 Announce(Core::Messaging::MessageType::TRACING, output);
                 Announce(Core::Messaging::MessageType::LOGGING, output);
             }
