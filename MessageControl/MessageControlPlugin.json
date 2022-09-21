@@ -13,51 +13,44 @@
       "properties": {
         "console": {
           "type": "boolean",
-          "description": "Output messages to the console"
+          "description": "Enables message output messages to the console"
         },
         "syslog": {
           "type": "boolean",
-          "description": "Output messages to the syslog"
+          "description": "Enables message ouutput to syslog"
         },
         "filepath": {
           "type": "string",
-          "description": "Path to file (inside VolatilePath), where messages can be stored"
+          "description": "Path to file (inside VolatilePath) where messages will be stored"
         },
         "abbreviated": {
           "type": "boolean",
-          "description": "Should the messages be abbreviated"
+          "description": "Denotes if the messages should be abbreviated"
         },
         "maxexportconnections": {
           "type": "number",
-          "description": "To how many websockets can messages be outputted"
+          "description": "Specifies to how many websockets can the messages be outputted"
         },
         "remote": {
           "type": "object",
-          "required": [],
           "properties": {
             "port" : {
               "type": "number",
               "size": "16",
-              "description": "Port."
+              "description": "Port"
             },
             "bindig" : {
-              "type": "bindig",
-              "size": "string",
-              "description": "Binding."
+              "type": "string",
+              "description": "Binding address"
             }
-          }
+          },
+          "required": [ "port", "binding" ]
         }
-        
       },
       "required": [
-        "console",
-        "syslog",
-        "filepath",
-        "abbreviated",
-        "maxexportconnections"
       ]
     },
     "interface": {
-      "$ref": "{interfacedir}/MessageControl.json#"
+      "$ref": "{cppinterfacedir}/IMessageControl.h"
     }
   }
