@@ -19,7 +19,35 @@
 
 #pragma once
 #include "Module.h"
+
 namespace WPEFramework {
+
+static inline Core::Messaging::MessageType ToMessageType(const Exchange::IMessageControl::messagetype type)
+{
+    switch (type) {
+    case Exchange::IMessageControl::messagetype::TRACING:
+        return Core::Messaging::MessageType::TRACING;
+    case Exchange::IMessageControl::messagetype::LOGGING:
+        return Core::Messaging::MessageType::LOGGING;
+    default:
+        ASSERT(!"Invalid message type!");
+        return Core::Messaging::MessageType::TRACING;
+    }
+}
+
+static inline Exchange::IMessageControl::messagetype ToMessageType(const Core::Messaging::MessageType type)
+{
+    switch (type) {
+    case Core::Messaging::MessageType::TRACING:
+        return Exchange::IMessageControl::messagetype::TRACING;
+    case Core::Messaging::MessageType::LOGGING:
+        return Exchange::IMessageControl::messagetype::LOGGING;
+    default:
+        ASSERT(!"Invalid message type!");
+        return Exchange::IMessageControl::messagetype::TRACING;
+    }
+}
+
 namespace Publishers {
 
     class Text {
@@ -40,7 +68,7 @@ namespace Publishers {
         bool _abbreviated;
     };
 
-    class ConsoleOutput : public Messaging::IMessageOutput {
+    class ConsoleOutput : public Core::Messaging::IOutput {
     public:
         ConsoleOutput() = delete;
         ConsoleOutput(const ConsoleOutput&) = delete;
@@ -58,7 +86,7 @@ namespace Publishers {
         Text _convertor;
     };
 
-    class SyslogOutput : public Messaging::IMessageOutput {
+    class SyslogOutput : public Core::Messaging::IOutput {
     public:
         SyslogOutput() = delete;
         SyslogOutput(const SyslogOutput&) = delete;
@@ -76,7 +104,7 @@ namespace Publishers {
         Text _convertor;
     };
   
-    class FileOutput : public Messaging::IMessageOutput {
+    class FileOutput : public Core::Messaging::IOutput {
     public:
         FileOutput() = delete;
         FileOutput(const FileOutput&) = delete;
@@ -101,9 +129,8 @@ namespace Publishers {
         void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) override;
 
     private:
-        Core::File _file;
         Text _convertor;
-
+        Core::File _file;
     };
 
     class JSON  {
@@ -112,11 +139,12 @@ namespace Publishers {
             ABREVIATED    = 0x00,
             FILENAME      = 0x01,
             LINENUMBER    = 0x03, // selecting LINENUMBER will automatically select FILENAME
-            MODULE        = 0x04,
-            CATEGORY      = 0x08,
-            INCLUDINGDATE = 0x10,
-            ALL           = 0x1F,
-            PAUSED        = 0x20
+            CLASSNAME     = 0x04,
+            MODULE        = 0x08,
+            CATEGORY      = 0x10,
+            INCLUDINGDATE = 0x20,
+            ALL           = 0x3F,
+            PAUSED        = 0x40
         };
 
     public:
@@ -128,15 +156,17 @@ namespace Publishers {
             Data()
                 : Core::JSON::Container()
                 , Time()
-                , Filename()
-                , Linenumber()
+                , FileName()
+                , LineNumber()
+                , ClassName()
                 , Category()
                 , Module()
                 , Message()
             {
                 Add(_T("time"), &Time);
-                Add(_T("filename"), &Filename);
-                Add(_T("linenumber"), &Linenumber);
+                Add(_T("filename"), &FileName);
+                Add(_T("linenumber"), &LineNumber);
+                Add(_T("classname"), &ClassName);
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
                 Add(_T("message"), &Message);
@@ -145,8 +175,9 @@ namespace Publishers {
 
         public:
             Core::JSON::String Time;
-            Core::JSON::String Filename;
-            Core::JSON::DecUInt32 Linenumber;
+            Core::JSON::String FileName;
+            Core::JSON::DecUInt32 LineNumber;
+            Core::JSON::String ClassName;
             Core::JSON::String Category;
             Core::JSON::String Module;
             Core::JSON::String Message;
@@ -157,76 +188,87 @@ namespace Publishers {
         JSON& operator=(const JSON&) = delete;
 
         JSON()
-            : _outputoptions(ExtraOutputOptions::ALL) {
+            : _outputOptions(ExtraOutputOptions::ALL) {
         }
 
         ~JSON() = default;
 
     public:
         bool FileName() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
         }
         void FileName(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::FILENAME));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::FILENAME));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::FILENAME));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::FILENAME));
             }
         }
         bool LineNumber() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0);
         }
         void LineNumber(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::LINENUMBER));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::LINENUMBER));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::LINENUMBER));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::LINENUMBER));
+            }
+        }
+        bool ClassName() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CLASSNAME)) != 0);
+        }
+        void ClassName(const bool enabled) {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::CLASSNAME));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CLASSNAME));
             }
         }
         bool Module() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::MODULE)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::MODULE)) != 0);
         }
         void Module(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::MODULE));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::MODULE));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::MODULE));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::MODULE));
             }
         }
         bool Category() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
         }
         void Category(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::CATEGORY));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::CATEGORY));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::CATEGORY));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CATEGORY));
             }
         }
         bool Date() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         }
         void Date(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::INCLUDINGDATE));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::INCLUDINGDATE));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::INCLUDINGDATE));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::INCLUDINGDATE));
             }
         }
         bool Paused() const {
-            return ((AsNumber<ExtraOutputOptions>(_outputoptions) & AsNumber(ExtraOutputOptions::PAUSED)) != 0);
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PAUSED)) != 0);
         }
         void Paused(const bool enabled) {
             if (enabled == true) {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) | AsNumber(ExtraOutputOptions::PAUSED));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::PAUSED));
             }
             else {
-                _outputoptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputoptions) & ~AsNumber(ExtraOutputOptions::PAUSED));
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::PAUSED));
             }
         }
 
@@ -240,10 +282,10 @@ namespace Publishers {
         }
 
     private:
-        std::atomic<ExtraOutputOptions> _outputoptions;
+        std::atomic<ExtraOutputOptions> _outputOptions;
     };
 
-    class UDPOutput : public Messaging::IMessageOutput {
+    class UDPOutput : public Core::Messaging::IOutput {
     private:
         class Channel : public Core::SocketDatagram {
         public:
@@ -281,9 +323,8 @@ namespace Publishers {
         Channel _output;
     };
 
-    class WebSocketOutput : public Messaging::IMessageOutput {
+    class WebSocketOutput : public Core::Messaging::IOutput {
     private:
-
         class ExportCommand : public Core::JSON::Container {
         public:
             ExportCommand(const ExportCommand&) = delete;
@@ -291,15 +332,18 @@ namespace Publishers {
 
             ExportCommand()
                 : Core::JSON::Container()
-                , Filename()
-                , Identifier()
+                , FileName()
+                , LineNumber()
                 , Category()
+                , Module()
                 , IncludingDate()
                 , Paused()
             {
-                Add(_T("filename"), &Filename);
-                Add(_T("identifier"), &Identifier);
+                Add(_T("filename"), &FileName);
+                Add(_T("linenumber"), &LineNumber);
+                Add(_T("classname"), &ClassName);
                 Add(_T("category"), &Category);
+                Add(_T("module"), &Module);
                 Add(_T("includingdate"), &IncludingDate);
                 Add(_T("paused"), &Paused);
             }
@@ -307,12 +351,15 @@ namespace Publishers {
             ~ExportCommand() override = default;
 
         public:
-            Core::JSON::Boolean Filename;
-            Core::JSON::Boolean Identifier;
+            Core::JSON::Boolean FileName;
+            Core::JSON::Boolean LineNumber;
+            Core::JSON::Boolean ClassName;
             Core::JSON::Boolean Category;
+            Core::JSON::Boolean Module;
             Core::JSON::Boolean IncludingDate;
             Core::JSON::Boolean Paused;
         };
+
         using ChannelMap = std::unordered_map<uint32_t, JSON>;
 
     public:
@@ -392,7 +439,7 @@ namespace Publishers {
             return (_maxExportConnections);
         }
 
-        Core::ProxyType<Core::JSON::IElement> Received (const uint32_t id, const Core::ProxyType<Core::JSON::IElement>& element) {
+        Core::ProxyType<Core::JSON::IElement> Received(const uint32_t id, const Core::ProxyType<Core::JSON::IElement>& element) {
             Core::ProxyType<ExportCommand> info = Core::ProxyType<ExportCommand>(element);
 
             if (info.IsValid() == false) {
@@ -404,14 +451,20 @@ namespace Publishers {
                 ChannelMap::iterator index = _channels.find(id);
 
                 if (index != _channels.end()) {
-                    if (info->Filename.IsSet() == true) {
-                        index->second.FileName(info->Filename == true);
+                    if (info->FileName.IsSet() == true) {
+                        index->second.FileName(info->FileName == true);
                     }
-                    if (info->Identifier.IsSet() == true) {
-                        index->second.LineNumber(info->Identifier == true);
+                    if (info->LineNumber.IsSet() == true) {
+                        index->second.LineNumber(info->LineNumber == true);
+                    }
+                    if (info->ClassName.IsSet() == true) {
+                        index->second.ClassName(info->ClassName == true);
                     }
                     if (info->Category.IsSet() == true) {
                         index->second.Category(info->Category == true);
+                    }
+                    if (info->Module.IsSet() == true) {
+                        index->second.Module(info->Module == true);
                     }
                     if (info->IncludingDate.IsSet() == true) {
                         index->second.Date(info->IncludingDate == true);
@@ -421,9 +474,11 @@ namespace Publishers {
                     }
 
                     info->Clear();
-                    info->Filename = index->second.FileName();
-                    info->Identifier = index->second.LineNumber();
+                    info->FileName = index->second.FileName();
+                    info->LineNumber = index->second.LineNumber();
+                    info->ClassName = index->second.ClassName();
                     info->Category = index->second.Category();
+                    info->Module = index->second.Module();
                     info->IncludingDate = index->second.Date();
                     info->Paused = index->second.Paused();
                 }

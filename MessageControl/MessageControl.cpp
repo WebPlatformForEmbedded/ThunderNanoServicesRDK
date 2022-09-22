@@ -19,6 +19,7 @@
 
 #include "MessageControl.h"
 #include "MessageOutput.h"
+#include <interfaces/json/JMessageControl.h>
 
 namespace WPEFramework {
 
@@ -37,7 +38,7 @@ namespace WPEFramework {
             {}
         );
     }
-    
+
     MessageControl::Config::NetworkNode::NetworkNode()
         : Core::JSON::Container()
         , Port(2200)
@@ -63,6 +64,7 @@ namespace WPEFramework {
         , _outputDirector()
         , _webSocketExporter()
         , _control(nullptr)
+        , _collect(nullptr)
         , _observer(*this)
         , _connectionId(0)
         , _service(nullptr) {
@@ -80,44 +82,60 @@ namespace WPEFramework {
         _service = service;
         _service->AddRef();
 
-        RegisterAll();
-
         _service->Register(&_observer);
 
-        // Lets see if we can create the Message catcher...
         _control = _service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
+        ASSERT(_control != nullptr);
+
+        if (_control != nullptr) {
+            // Lets see if we can create the Message catcher...
+            _collect = _control->QueryInterface<Exchange::IMessageControl::ICollect>();
+            ASSERT(_collect != nullptr);
+        }
 
         if (_control == nullptr) {
             message = _T("MessageControl plugin could not be instantiated.");
         }
-        else if (_control->Configure(&_observer) != Core::ERROR_NONE) {
+        else if (_collect == nullptr) {
+            message = _T("MessageControl plugin could not be instantiated (collect).");
+        }
+        else if (_collect->Configure(&_observer) != Core::ERROR_NONE) {
             message = _T("MessageControl plugin could not be _configured.");
         }
         else {
             if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
             }
             if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
             }
             if (_config.FileName.Value().empty() == false) {
                 _config.FileName = service->VolatilePath() + _config.FileName.Value();
 
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
+                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
             }
             if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-                std::shared_ptr<Messaging::IMessageOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
-                Announce(Core::Messaging::MetaData::MessageType::TRACING, output);
-                Announce(Core::Messaging::MetaData::MessageType::LOGGING, output);
+                std::shared_ptr<Core::Messaging::IOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
+                Announce(Core::Messaging::MessageType::TRACING, output);
+                Announce(Core::Messaging::MessageType::LOGGING, output);
             }
 
             _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
 
             _observer.Enable(true);
+
+            Exchange::JMessageControl::Register(*this, _control);
         }
 
-        if(message.length() != 0) {
-            Deinitialize(service);
+        if (message.empty() == false) {
+            if (_collect != nullptr) {
+                _collect->Release();
+                _collect = nullptr;
+            }
+            if (_control != nullptr) {
+                _control->Release();
+                _control = nullptr;
+            }
         }
 
         return message;
@@ -127,9 +145,9 @@ namespace WPEFramework {
     {
         ASSERT (_service == service);
 
-        _observer.Enable(false);
+        Exchange::JMessageControl::Unregister(*this);
 
-        UnregisterAll();
+        _observer.Enable(false);
 
         _service->Unregister(&_observer);
 
@@ -140,7 +158,13 @@ namespace WPEFramework {
 
         _outputLock.Unlock();
 
+        _control->Release();
+        _control = nullptr;
+
         RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+        _collect->Release();
+        _collect = nullptr;
 
         VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
         _control = nullptr;
@@ -156,6 +180,7 @@ namespace WPEFramework {
             connection->Terminate();
             connection->Release();
         }
+
         _service->Release();
         _service = nullptr;
 

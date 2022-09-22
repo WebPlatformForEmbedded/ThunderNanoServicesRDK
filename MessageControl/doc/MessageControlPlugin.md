@@ -6,7 +6,7 @@
 
 **Status: :black_circle::white_circle::white_circle:**
 
-A MessageControl plugin for Thunder framework.
+MessageControl plugin for Thunder framework.
 
 ### Table of Contents
 
@@ -15,6 +15,7 @@ A MessageControl plugin for Thunder framework.
 - [Configuration](#head.Configuration)
 - [Interfaces](#head.Interfaces)
 - [Methods](#head.Methods)
+- [Properties](#head.Properties)
 
 <a name="head.Introduction"></a>
 # Introduction
@@ -22,7 +23,7 @@ A MessageControl plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the MessageControl plugin. It includes detailed specification about its configuration and methods provided.
+This document describes purpose and functionality of the MessageControl plugin. It includes detailed specification about its configuration, methods and properties provided.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -75,21 +76,21 @@ The table below lists configuration options of the plugin.
 | classname | string | Class name: *MessageControl* |
 | locator | string | Library name: *libWPEFrameworkMessageControl.so* |
 | autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
-| console | boolean | Output messages to the console |
-| syslog | boolean | Output messages to the syslog |
-| filepath | string | Path to file (inside VolatilePath), where messages can be stored |
-| abbreviated | boolean | Should the messages be abbreviated |
-| maxexportconnections | number | To how many websockets can messages be outputted |
+| console | boolean | <sup>*(optional)*</sup> Enables message output messages to the console |
+| syslog | boolean | <sup>*(optional)*</sup> Enables message ouutput to syslog |
+| filepath | string | <sup>*(optional)*</sup> Path to file (inside VolatilePath) where messages will be stored |
+| abbreviated | boolean | <sup>*(optional)*</sup> Denotes if the messages should be abbreviated |
+| maxexportconnections | number | <sup>*(optional)*</sup> Specifies to how many websockets can the messages be outputted |
 | remote | object | <sup>*(optional)*</sup>  |
-| remote?.port | number | <sup>*(optional)*</sup> Port |
-| remote?.bindig | bindig | <sup>*(optional)*</sup> Binding |
+| remote.port | number | Port |
+| remote?.bindig | string | <sup>*(optional)*</sup> Binding address |
 
 <a name="head.Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
-- [MessageControl.json](https://github.com/rdkcentral/ThunderInterfaces/tree/master/jsonrpc/MessageControl.json)
+- Exchange::IMessageControl ([IMessageControl.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessageControl.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -100,28 +101,23 @@ MessageControl interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [set](#method.set) | Sets messages |
-| [status](#method.status) | Retrieves general information |
+| [enable](#method.enable) | Enables/disables a message control |
 
 
-<a name="method.set"></a>
-## *set [<sup>method</sup>](#head.Methods)*
+<a name="method.enable"></a>
+## *enable [<sup>method</sup>](#head.Methods)*
 
-Sets messages.
-
-### Description
-
-Disables/enables all/select category messages for particular module.
+Enables/disables a message control.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
 | params | object |  |
-| params?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*) |
-| params?.module | string | <sup>*(optional)*</sup> Module name |
-| params?.category | string | <sup>*(optional)*</sup> Category name |
-| params.state | string | State value (must be one of the following: *enabled*, *disabled*, *tristated*) |
+| params.type | string | Message type (must be one of the following: *Tracing*, *Logging*) |
+| params.category | string | Name of the message category |
+| params.module | string | Name of the module the message is originating from |
+| params.enabled | boolean | Denotes if control should be enabled (true) or disabled (false) |
 
 ### Result
 
@@ -137,12 +133,12 @@ Disables/enables all/select category messages for particular module.
 {
     "jsonrpc": "2.0",
     "id": 42,
-    "method": "MessageControl.1.set",
+    "method": "MessageControl.1.enable",
     "params": {
         "type": "Tracing",
-        "module": "Plugin_Monitor",
         "category": "Information",
-        "state": "disabled"
+        "module": "Plugin_BluetoothControl",
+        "enabled": false
     }
 }
 ```
@@ -157,160 +153,64 @@ Disables/enables all/select category messages for particular module.
 }
 ```
 
-<a name="method.status"></a>
-## *status [<sup>method</sup>](#head.Methods)*
+<a name="head.Properties"></a>
+# Properties
 
-Retrieves general information.
+The following properties are provided by the MessageControl plugin:
 
-### Description
+MessageControl interface properties:
 
-Retrieves the actual trace status information for targeted module and category, if either category nor module is given, all information is returned. It will retrieves the details about console status and remote address(port and binding address), if these are configured.
+| Property | Description |
+| :-------- | :-------- |
+| [controls](#property.controls) <sup>RO</sup> | Retrieves a list of current message controls |
 
-### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.type | string | Type of message (must be one of the following: *Tracing*, *Logging*) |
-| params?.module | string | <sup>*(optional)*</sup> Module name |
-| params?.category | string | <sup>*(optional)*</sup> Category name |
+<a name="property.controls"></a>
+## *controls [<sup>property</sup>](#head.Properties)*
+
+Provides access to the retrieves a list of current message controls.
+
+> This property is **read-only**.
+
+### Value
 
 ### Result
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| result | object |  |
-| result.console | boolean | Output message to console (config attribute) |
-| result.syslog | boolean | Output message to syslog (config attribute) |
-| result.fileNameOutput | string | Filepath where messages are stored |
-| result.abbreviated | boolean | Should messages be shortened |
-| result.maxexportconnections | number | To how many websocked should the messages be outputted |
-| result.remote | object |  |
-| result.remote.port | number | Config attribute (port) |
-| result.remote.binding | string | Config attribute (binding) |
-| result.messages | array | List of currently announced message controls |
-| result.messages[#] | object |  |
-| result.messages[#]?.type | string | <sup>*(optional)*</sup> Type of message (must be one of the following: *Tracing*, *Logging*) |
-| result.messages[#]?.module | string | <sup>*(optional)*</sup> Module name |
-| result.messages[#]?.category | string | <sup>*(optional)*</sup> Category name |
-| result.messages[#].state | string | State value (must be one of the following: *enabled*, *disabled*, *tristated*) |
+| result | array | Retrieves a list of current message controls |
+| result[#] | object |  |
+| result[#].type | string | Type of message (must be one of the following: *Tracing*, *Logging*) |
+| result[#].category | string | Name of the message category |
+| result[#].module | string | Name of the module the message is originating from |
+| result[#].enabled | boolean | Denotes if the control is enabled (true) or disabled (false) |
 
 ### Example
 
-#### Request
+#### Get Request
 
 ```json
 {
     "jsonrpc": "2.0",
     "id": 42,
-    "method": "MessageControl.1.status"
+    "method": "MessageControl.1.controls"
 }
 ```
 
-#### Response
+#### Get Response
 
 ```json
 {
     "jsonrpc": "2.0",
     "id": 42,
-    "result": {
-        "console": true,
-        "syslog": true,
-        "fileNameOutput": "/tmp/MessageControl/messages.log",
-        "abbreviated": true,
-        "maxexportconnections": 5,
-        "remote":{
-            "binding":"0.0.0.0",
-            "port":2200
-        },
-        "messages": [
-            {
-                "type": "Tracing",
-                "module": "Plugin_Monitor",
-                "category": "Information",
-                "state": "disabled"
-            },
-            {
-                "type": "Logging",
-                "module": "SysLog",
-                "category": "Startup",
-                "state": "enabled"
-            }
-        ]
-    }
-}
-```
-
-#### Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "MessageControl.1.status",
-    "params": {
-        "type": "Tracing",
-        "module": "Plugin_DeviceInfo",
-        "category": "Information"
-    }
-}
-```
-
-#### Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "messages": [
-            {
-                "type": "Tracing",
-                "module": "Plugin_DeviceInfo",
-                "category": "Information",
-                "state": "disabled"
-            }
-        ]
-    }
-}
-```
-
-#### Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "MessageControl.1.status",
-    "params": {
-        "type": "Tracing",
-        "module": "Plugin_DeviceInfo",
-    }
-}
-```
-
-#### Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "messages": [
-            {
-                "type": "Tracing",
-                "module": "Plugin_DeviceInfo",
-                "category": "Information",
-                "state": "disabled"
-            },
-            {
-                "type": "Tracing",
-                "module": "Plugin_DeviceInfo",
-                "category": "Error",
-                "state": "enabled"
-            }
-        ]
-    }
+    "result": [
+        {
+            "type": "Tracing",
+            "category": "Information",
+            "module": "Plugin_BluetoothControl",
+            "enabled": false
+        }
+    ]
 }
 ```
 

@@ -26,7 +26,7 @@ namespace WPEFramework {
 namespace Plugin {
     class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
-        using OutputMap = std::unordered_map<Core::Messaging::MetaData::MessageType, std::list<std::shared_ptr<Messaging::IMessageOutput>>>;
+        using OutputMap = std::unordered_map<Core::Messaging::MessageType, std::list<std::shared_ptr<Core::Messaging::IOutput>>>;
 
         class Config : public Core::JSON::Container {
         private:
@@ -76,9 +76,9 @@ namespace Plugin {
             NetworkNode Remote;
         };
 
-        class Observer 
+        class Observer
             : public RPC::IRemoteConnection::INotification
-            , public Exchange::IMessageControl::ICallback {
+            , public Exchange::IMessageControl::ICollect::ICallback {
         private:
             enum state {
                 ATTACHING,
@@ -92,7 +92,7 @@ namespace Plugin {
             Observer(const Observer&) = delete;
             Observer& operator= (const Observer&) = delete;
 
-            explicit Observer(MessageControl& parent) 
+            explicit Observer(MessageControl& parent)
                 : _parent(parent)
                 , _adminLock()
                 , _observing()
@@ -114,19 +114,20 @@ namespace Plugin {
                 if ((enabled == true) && (_observing.empty() == false)) {
                     _job.Submit();
                 }
-            }    
+            }
 
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Exchange::IMessageControl::MessageType type, const string& category,
+            void Message(const Exchange::IMessageControl::messagetype type, const string& category,
                 const string& module, const string& fileName,
-                const uint16_t lineNumber, const uint64_t timestamp,
-                const string& message) override {
+                const uint16_t lineNumber, const string& className,
+                const uint64_t timestamp, const string& message) override {
 
                 //yikes, recreating stuff from received pieces
                 Messaging::TextMessage textMessage(message);
-                Core::Messaging::Information info(static_cast<Core::Messaging::MetaData::MessageType>(type), category, module, fileName, lineNumber, timestamp);
+                Core::Messaging::Information info(ToMessageType(type), category, module, fileName, lineNumber, className, timestamp);
+
                 _parent.Output(info, &textMessage);
             }
 
@@ -182,7 +183,7 @@ namespace Plugin {
 
             BEGIN_INTERFACE_MAP(Observer)
                 INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
-                INTERFACE_ENTRY(Exchange::IMessageControl::ICallback)
+                INTERFACE_ENTRY(Exchange::IMessageControl::ICollect::ICallback)
             END_INTERFACE_MAP
 
         private:
@@ -247,14 +248,8 @@ namespace Plugin {
         Core::ProxyType<Core::JSON::IElement> Inbound(const string& identifier) override;
         Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
 
-        //JSONRPC
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t endpoint_set(const JsonData::MessageControl::MessageInfo& params);
-        uint32_t endpoint_status(const JsonData::MessageControl::StatusParamsData& params, JsonData::MessageControl::StatusResultData& response);
-
     private:
-        void Announce(Core::Messaging::MetaData::MessageType type, const std::shared_ptr<Messaging::IMessageOutput>& output) {
+        void Announce(Core::Messaging::MessageType type, const std::shared_ptr<Core::Messaging::IOutput>& output) {
 
             _outputLock.Lock();
 
@@ -287,12 +282,12 @@ namespace Plugin {
         }
         void Attach(const uint32_t id) {
             _adminLock.Lock();
-            _control->Attach(id);
+            _collect->Attach(id);
             _adminLock.Unlock();
         }
         void Detach(const uint32_t id) {
             _adminLock.Lock();
-            _control->Detach(id);
+            _collect->Detach(id);
             _adminLock.Unlock();
 
             if (id == _connectionId) {
@@ -308,10 +303,10 @@ namespace Plugin {
         OutputMap _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
         Exchange::IMessageControl* _control;
+        Exchange::IMessageControl::ICollect* _collect;
         Core::Sink<Observer> _observer;
         uint32_t _connectionId;
         PluginHost::IShell* _service;
- 
     };
 
 } // namespace Plugin
