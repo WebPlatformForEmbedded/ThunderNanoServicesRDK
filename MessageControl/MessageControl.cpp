@@ -158,9 +158,6 @@ namespace WPEFramework {
 
         _outputLock.Unlock();
 
-        _control->Release();
-        _control = nullptr;
-
         RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
         _collect->Release();
