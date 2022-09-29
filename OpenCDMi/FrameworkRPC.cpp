@@ -601,7 +601,7 @@ POP_WARNING()
                             ASSERT(_buffer != nullptr);
 
                             if (_buffer->IsValid() == false) {
-                                SYSLOG(Trace::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
+                                SYSLOG(Logging::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
                             }
                             
                             if (_parent.Group().IsSet() == true) {
