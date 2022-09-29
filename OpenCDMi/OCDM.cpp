@@ -111,26 +111,34 @@ namespace Plugin {
         // change to "register" the sink for these events !!! So do it ahead of instantiation.
         _service->Register(&_notification);
 
-        _opencdmi = _service->Root<Exchange::IContentDecryption>(_connectionId, Core::infinite, _T("OCDMImplementation"));
-
-        if (_opencdmi == nullptr) {
-            message = _T("OCDM could not be instantiated.");
+        Plugin::Config::RootConfig rootConfig(service);
+        const uint32_t permission = (Core::File::USER_READ | Core::File::USER_WRITE | Core::File::USER_EXECUTE |
+                                     Core::File::GROUP_READ | Core::File::GROUP_WRITE | Core::File::GROUP_EXECUTE);
+        if (_service->EnablePersistentStorage(permission, rootConfig.User.Value(), rootConfig.Group.Value())
+            != Core::ERROR_NONE) {
+            message = _T("Could not setup persistent path: ") + service->PersistentPath();
         } else {
-            RegisterAll();
-            _opencdmi->Initialize(_service);
+            _opencdmi = _service->Root<Exchange::IContentDecryption>(_connectionId, Core::infinite, _T("OCDMImplementation"));
 
-            ASSERT(_connectionId != 0);
-            const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
+            if (_opencdmi == nullptr) {
+                message = _T("OCDM could not be instantiated.");
+            } else {
+                RegisterAll();
+                _opencdmi->Initialize(_service);
 
-            if (connection != nullptr) {
+                ASSERT(_connectionId != 0);
+                const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
 
-                _memory = WPEFramework::OCDM::MemoryObserver(connection);
-                ASSERT(_memory != nullptr);
+                if (connection != nullptr) {
 
-                connection->Release();
-            }
-            else {
-                message = _T("OCDM crashed at initialize!");
+                    _memory = WPEFramework::OCDM::MemoryObserver(connection);
+                    ASSERT(_memory != nullptr);
+
+                    connection->Release();
+                }
+                else {
+                    message = _T("OCDM crashed at initialize!");
+                }
             }
         }
 

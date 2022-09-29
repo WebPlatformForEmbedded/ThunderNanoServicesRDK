@@ -92,6 +92,9 @@ namespace Plugin {
     static const TCHAR BufferFileName[] = _T("ocdmbuffer.");
 
     class OCDMImplementation : public Exchange::IContentDecryption {
+        static const uint16_t OcdmAccessMode = (Core::File::USER_READ | Core::File::USER_WRITE |
+                                                Core::File::GROUP_WRITE | Core::File::GROUP_READ);
+
     private:
         OCDMImplementation(const OCDMImplementation&) = delete;
         OCDMImplementation& operator=(const OCDMImplementation&) = delete;
@@ -597,12 +600,13 @@ POP_WARNING()
                             
                             ASSERT(_buffer != nullptr);
 
-                            if(_buffer->IsValid() == false){
-                                SYSLOG(Logging::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
+                            if (_buffer->IsValid() == false) {
+                                SYSLOG(Trace::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
                             }
                             
-                            if(_parent.Group().IsSet() == true){
+                            if (_parent.Group().IsSet() == true) {
                                 _buffer->Group(_parent.Group().Value());
+                                _buffer->Permission(OcdmAccessMode);
                             }                            
 
                             TRACE(Trace::Information, ("Server::Session::CreateSessionBuffer(%s,%s,%s) => %p", _keySystem.c_str(), _sessionId.c_str(), BufferId().c_str(), this));
