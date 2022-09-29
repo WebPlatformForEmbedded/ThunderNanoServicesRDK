@@ -27,18 +27,12 @@
 
 find_package(PkgConfig)
 
-if (NOT PC_WPE_WEBKIT_FOUND)
-pkg_check_modules(PC_WPE_WEBKIT wpe-webkit-1.0)
-endif()
-
-if (NOT PC_WPE_WEBKIT_FOUND)
-pkg_check_modules(PC_WPE_WEBKIT wpe-webkit-0.1)
-endif()
-
-# Support old, non-versioned pc
-if (NOT PC_WPE_WEBKIT_FOUND)
-pkg_check_modules(PC_WPE_WEBKIT wpe-webkit)
-endif()
+pkg_search_module(PC_WPE_WEBKIT QUIET
+    wpe-webkit-1.1>=2.38.0
+    wpe-webkit-1.0
+    wpe-webkit-0.1
+    wpe-webkit
+)
 
 if (PC_WPE_WEBKIT_FOUND)
     set(WPE_WEBKIT_FOUND TRUE)
