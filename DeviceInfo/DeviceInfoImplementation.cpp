@@ -4,13 +4,15 @@ namespace WPEFramework {
 namespace Plugin {
     SERVICE_REGISTRATION(DeviceInfoImplementation, 1, 0);
 
-    using AudioJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::AudioOutput>>;
-    using VideoJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::VideoOutput>>;
-    using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceCapabilities::OutputResolution>>;
+    using AudioCapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::AudioCapability>>;
+    using MS12CapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::MS12Capability>>;
+    using MS12ProfilesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::MS12Profile>>;
+    using AudioCapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator>;
+    using MS12CapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>;
+    using MS12ProfileIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>;
 
-    using AudioIteratorImplementation = RPC::IteratorType<Exchange::IDeviceCapabilities::IAudioOutputIterator>;
-    using VideoIteratorImplementation = RPC::IteratorType<Exchange::IDeviceCapabilities::IVideoOutputIterator>;
-    using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceCapabilities::IOutputResolutionIterator>;
+    using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;;
+    using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>;
 
     uint32_t DeviceInfoImplementation::Configure(const PluginHost::IShell* service)
     {
@@ -21,47 +23,137 @@ namespace Plugin {
         _supportsHdr = _config.Hdr.Value();
         _supportsAtmos = _config.Atmos.Value();
         _supportsCEC = _config.Cec.Value();
-        _supportedHDCP = _config.Hdcp.Value();
+        _hostEdid = _config.Edid.Value();
+        _make = _config.Make.Value();
+        _deviceType = _config.DeviceType.Value();
+        _distributorId = _config.DistributorId.Value();
         _modelName = _config.ModelName.Value();
         _modelYear = _config.ModelYear.Value();
         _friendlyName = _config.FriendlyName.Value();
-        _systemIntegratorName = _config.SystemIntegratorName.Value();
         _platformName = _config.PlatformName.Value();
+        _serialNumber = _config.SerialNumber.Value();
+        _sku = _config.Sku.Value();
 
-        AudioJsonArray::Iterator audioIterator(_config.Audio.Elements());
-        while (audioIterator.Next()) {
-            _audio.push_back(audioIterator.Current().Value());
+        Core::JSON::ArrayType<Config::AudioOutput>::Iterator audioOutputIterator(_config.AudioOutputs.Elements());
+        while (audioOutputIterator.Next()) {
+            AudioOutputCapability audioOutputCapability;
+
+            AudioCapabilitiesJsonArray::Iterator audioCapabilitiesIterator(audioOutputIterator.Current().AudioCapabilities.Elements());
+            while (audioCapabilitiesIterator.Next()) {
+                audioOutputCapability.AudioCapabilities.push_back(audioCapabilitiesIterator.Current().Value());
+            }
+            MS12CapabilitiesJsonArray::Iterator ms12CapabilitiesIterator(audioOutputIterator.Current().MS12Capabilities.Elements());
+            while (ms12CapabilitiesIterator.Next()) {
+                audioOutputCapability.MS12Capabilities.push_back(ms12CapabilitiesIterator.Current().Value());
+            }
+            MS12ProfilesJsonArray::Iterator ms12ProfilesIterator(audioOutputIterator.Current().MS12Profiles.Elements());
+            while (ms12ProfilesIterator.Next()) {
+                audioOutputCapability.MS12Profiles.push_back(ms12ProfilesIterator.Current().Value());
+            }
+            _audioOutputMap.insert(std::pair<Exchange::IDeviceAudioCapabilities::AudioOutput, AudioOutputCapability>
+                                   (audioOutputIterator.Current().Name.Value(), audioOutputCapability));
         }
 
-        VideoJsonArray::Iterator videoIterator(_config.Video.Elements());
-        while (videoIterator.Next()) {
-            _video.push_back(videoIterator.Current().Value());
-        }
+        Core::JSON::ArrayType<Config::VideoOutput>::Iterator videoOutputIterator(_config.VideoOutputs.Elements());
+        while (videoOutputIterator.Next()) {
+            VideoOutputCapability videoOutputCapability;
+            videoOutputCapability.CopyProtection = (videoOutputIterator.Current().CopyProtection.Value());
+            videoOutputCapability.DefaultResolution = (videoOutputIterator.Current().DefaultResolution.Value());
 
-        ResolutionJsonArray::Iterator resolutionIterator(_config.Resolution.Elements());
-        while (resolutionIterator.Next()) {
-            _resolution.push_back(resolutionIterator.Current().Value());
+            ResolutionJsonArray::Iterator resolutionIterator(videoOutputIterator.Current().Resolutions.Elements());
+            while (resolutionIterator.Next()) {
+                videoOutputCapability.Resolutions.push_back(resolutionIterator.Current().Value());
+            }
+            _videoOutputMap.insert(std::pair<Exchange::IDeviceVideoCapabilities::VideoOutput, VideoOutputCapability>
+                                   (videoOutputIterator.Current().Name.Value(), videoOutputCapability));
         }
 
         return (Core::ERROR_NONE);
     }
 
-    uint32_t DeviceInfoImplementation::AudioOutputs(IAudioOutputIterator*& res) const
+    uint32_t DeviceInfoImplementation::AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const
     {
-        res = Core::Service<AudioIteratorImplementation>::Create<Exchange::IDeviceCapabilities::IAudioOutputIterator>(_audio);
-        return (res != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+        AudioOutputList audioOutputList;
+
+        std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::front_inserter(audioOutputList),
+        [](decltype(_audioOutputMap)::value_type const &pair) {
+            return pair.first;
+        });
+
+        audioOutputs = Core::Service<AudioOutputIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>(audioOutputList);
+        return (audioOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::VideoOutputs(IVideoOutputIterator*& res) const
+    uint32_t DeviceInfoImplementation::AudioCapabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator*& audioCapabilities) const
     {
-        res = Core::Service<VideoIteratorImplementation>::Create<Exchange::IDeviceCapabilities::IVideoOutputIterator>(_video);
-        return (res != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+        AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
+        if ((index != _audioOutputMap.end()) && (index->second.AudioCapabilities.size() > 0)) {
+             audioCapabilities = Core::Service<AudioCapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator>(index->second.AudioCapabilities);
+        }
+        return (audioCapabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::Resolutions(IOutputResolutionIterator*& res) const
+    uint32_t DeviceInfoImplementation::MS12Capabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator*& ms12Capabilities) const
     {
-        res = Core::Service<ResolutionIteratorImplementation>::Create<Exchange::IDeviceCapabilities::IOutputResolutionIterator>(_resolution);
-        return (res != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+        AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
+        if ((index != _audioOutputMap.end()) && (index->second.MS12Capabilities.size() > 0)) {
+             ms12Capabilities = Core::Service<MS12CapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>(index->second.MS12Capabilities);
+        }
+        return (ms12Capabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+    }
+
+    uint32_t DeviceInfoImplementation::MS12AudioProfiles(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator*& ms12AudioProfiles) const
+    {
+        AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
+        if ((index != _audioOutputMap.end()) && (index->second.MS12Profiles.size() > 0)) {
+             ms12AudioProfiles = Core::Service<MS12ProfileIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>(index->second.MS12Profiles);
+        }
+        return (ms12AudioProfiles != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+    }
+
+    uint32_t DeviceInfoImplementation::VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const
+    {
+        VideoOutputList videoOutputList;
+
+        std::transform(_videoOutputMap.begin(), _videoOutputMap.end(), std::back_inserter(videoOutputList),
+        [](decltype(_videoOutputMap)::value_type const &pair) {
+            return pair.first;
+        });
+
+        videoOutputs = Core::Service<VideoOutputIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>(videoOutputList);
+
+        return (videoOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+    }
+
+    uint32_t DeviceInfoImplementation::DefaultResolution(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::ScreenResolution& defaultResolution) const
+    {
+        defaultResolution = Exchange::IDeviceVideoCapabilities::ScreenResolution_Unknown;
+        VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
+        if ((index != _videoOutputMap.end()) && (index->second.DefaultResolution != Exchange::IDeviceVideoCapabilities::ScreenResolution_Unknown)) {
+            defaultResolution = index->second.DefaultResolution;
+        }
+        return (Core::ERROR_NONE);
+    }
+
+    uint32_t DeviceInfoImplementation::Resolutions(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator*& resolutions) const
+    {
+        VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
+        if ((index != _videoOutputMap.end()) && (index->second.Resolutions.size() > 0)) {
+            resolutions = Core::Service<ResolutionIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>(index->second.Resolutions);
+        }
+
+        return (resolutions != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+    }
+
+    uint32_t DeviceInfoImplementation::Hdcp(const VideoOutput videoOutput, CopyProtection& hdcpVersion) const
+    {
+        hdcpVersion = Exchange::IDeviceVideoCapabilities::CopyProtection::HDCP_UNAVAILABLE;
+        VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
+        if ((index != _videoOutputMap.end()) && (index->second.CopyProtection != HDCP_UNAVAILABLE)) {
+            hdcpVersion = index->second.CopyProtection;
+        }
+
+        return (Core::ERROR_NONE);
     }
 
     uint32_t DeviceInfoImplementation::HDR(bool& supportsHDR) const
@@ -82,10 +174,40 @@ namespace Plugin {
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::HDCP(CopyProtection& supportedHDCP) const
+    uint32_t DeviceInfoImplementation::HostEDID(string& edid) const
     {
-        supportedHDCP = _supportedHDCP;
+        edid = _hostEdid;
         return Core::ERROR_NONE;
+    }
+
+    uint32_t DeviceInfoImplementation::Make(string& value) const
+    {
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_make.empty() == false) {
+            value = _make;
+            result = Core::ERROR_NONE;
+        }
+        return result;
+    }
+
+    uint32_t DeviceInfoImplementation::SerialNumber(string& value) const
+    {
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_serialNumber.empty() == false) {
+            value = _serialNumber;
+            result = Core::ERROR_NONE;
+        }
+        return result;
+    }
+
+    uint32_t DeviceInfoImplementation::Sku(string& value) const
+    {
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_sku.empty() == false) {
+            value = _sku;
+            result = Core::ERROR_NONE;
+        }
+        return result;
     }
 
     uint32_t DeviceInfoImplementation::ModelName(string& value) const
@@ -118,11 +240,21 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::SystemIntegratorName(string& value) const
+    uint32_t DeviceInfoImplementation::DeviceType(string& value) const
     {
         uint32_t result = Core::ERROR_UNAVAILABLE;
-        if (_systemIntegratorName.empty() == false) {
-            value = _systemIntegratorName;
+        if (_deviceType.empty() == false) {
+            value = _deviceType;
+            result = Core::ERROR_NONE;
+        }
+        return result;
+    }
+
+    uint32_t DeviceInfoImplementation::DistributorId(string& value) const
+    {
+        uint32_t result = Core::ERROR_UNAVAILABLE;
+        if (_distributorId.empty() == false) {
+            value = _distributorId;
             result = Core::ERROR_NONE;
         }
         return result;
