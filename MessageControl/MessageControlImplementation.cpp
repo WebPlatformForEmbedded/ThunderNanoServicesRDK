@@ -25,31 +25,21 @@ namespace WPEFramework {
 
 namespace {
 
-    string DispatcherIdentifier()
-    {
-        string result;
-        Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPACTHER_IDENTIFIER_ENV, result);
-        return result;
-    }
+    class MessageSettings : public Core::Messaging::MessageUnit::Settings {
+    private:
+        MessageSettings() {
+            Core::Messaging::MessageUnit::Settings::Load();
+        };
 
-    string DispatcherBasePath()
-    {
-        string result;
-        Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_PATH_ENV, result);
-        return result;
-    }
+    public:
+        MessageSettings(const MessageSettings&) = delete;
+        MessageSettings& operator= (const MessageSettings&) = delete;
 
-    uint16_t DispatcherSocketPort()
-    {
-        uint16_t result = 0;
-        string socketPort;
-
-        if (Core::SystemInfo::GetEnvironment(Core::Messaging::MessageUnit::MESSAGE_DISPATCHER_SOCKETPORT_ENV, socketPort) == true) {
-            result = Core::NumberType<uint16_t>(socketPort.c_str(), static_cast<uint32_t>(socketPort.length()), NumberBase::BASE_DECIMAL).Value();
+        static MessageSettings& Instance() {
+            static MessageSettings singleton;
+            return (singleton);
         }
-
-        return (result);
-    }
+    };
 }
 
 namespace Plugin {
@@ -88,10 +78,10 @@ namespace Plugin {
         MessageControlImplementation()
             : _adminLock()
             , _callback(nullptr)
-            , _dispatcherIdentifier(DispatcherIdentifier())
-            , _dispatcherBasePath(DispatcherBasePath())
+            , _dispatcherIdentifier(MessageSettings::Instance().Identifier())
+            , _dispatcherBasePath(MessageSettings::Instance().BasePath())
             , _worker(*this)
-            , _client(_dispatcherIdentifier, _dispatcherBasePath, DispatcherSocketPort())
+            , _client(_dispatcherIdentifier, _dispatcherBasePath, MessageSettings::Instance().SocketPort())
             , _factory()
         {
         }
@@ -162,11 +152,12 @@ namespace Plugin {
         uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
-            Core::Messaging::ControlList::InformationStorage controlList;
+            Core::Messaging::MessageUnit::Iterator index;
 
-            _client.Controls(controlList);
-            for (auto const& e : controlList) {
-                list.push_back({ToMessageType(e.first.Type()), e.first.Category(), e.first.Module(), e.second});
+            _client.Controls(index);
+
+            while (index.Next() == true) {
+                list.push_back( { ToMessageType(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
