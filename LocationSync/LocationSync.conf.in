@@ -1,0 +1,8 @@
+autostart = "@PLUGIN_LOCATIONSYNC_AUTOSTART@"
+
+configuration = JSON()
+
+configuration.add("interval", 10)
+configuration.add("retries", 20)
+configuration.add("source", "@PLUGIN_LOCATIONSYNC_URI@")
+
