@@ -1,5 +1,5 @@
 if boolean("@PLUGIN_WEBSERVER@"):
-    precondition.append("WebSource")
+    precondition = ["WebSource"]
 
 autostart = "@PLUGIN_WEBKITBROWSER_AUTOSTART@"
 resumed =  "@PLUGIN_WEBKITBROWSER_RESUMED@"
