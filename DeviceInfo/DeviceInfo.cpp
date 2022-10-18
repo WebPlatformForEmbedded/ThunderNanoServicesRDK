@@ -42,7 +42,7 @@ namespace Plugin {
     {
         ASSERT(_service == nullptr);
         ASSERT(_subSystem == nullptr);
-        ASSERT(_implementation == nullptr);
+        ASSERT(_deviceInfo == nullptr);
         ASSERT(service != nullptr);
         ASSERT(_connectionId == 0);
 
@@ -61,17 +61,17 @@ namespace Plugin {
             _subSystem->AddRef();
             _subSystem->Register(&_notification);
 
-            _implementation = _service->Root<Exchange::IDeviceInfo>(_connectionId, 2000, _T("DeviceInfoImplementation"));
-            if (_implementation == nullptr) {
+            _deviceInfo = _service->Root<Exchange::IDeviceInfo>(_connectionId, 2000, _T("DeviceInfoImplementation"));
+            if (_deviceInfo == nullptr) {
                 message = _T("DeviceInfo could not be instantiated");
                 SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
             } else {
-                _implementation->Configure(_service);
-                _deviceAudioCapabilityInterface = _implementation->QueryInterface<Exchange::IDeviceAudioCapabilities>();
+                _deviceInfo->Configure(_service);
+                _deviceAudioCapabilityInterface = _deviceInfo->QueryInterface<Exchange::IDeviceAudioCapabilities>();
                 if (_deviceAudioCapabilityInterface == nullptr) {
                     message = _T("DeviceInfo Audio Capabilities Interface could not be instantiated");
                 } else {
-                    _deviceVideoCapabilityInterface = _implementation->QueryInterface<Exchange::IDeviceVideoCapabilities>();
+                    _deviceVideoCapabilityInterface = _deviceInfo->QueryInterface<Exchange::IDeviceVideoCapabilities>();
                     if (_deviceVideoCapabilityInterface == nullptr) {
                         message = _T("DeviceInfo Video Capabilities Interface could not be instantiated");
                     } else {
@@ -101,7 +101,7 @@ namespace Plugin {
             _subSystem = nullptr;
         }
 
-        if (_implementation != nullptr) {
+        if (_deviceInfo != nullptr){
 
             if (_deviceAudioCapabilityInterface != nullptr) {
                 _deviceAudioCapabilityInterface->Release();
@@ -114,8 +114,8 @@ namespace Plugin {
             }
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-            VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
-            _implementation = nullptr;
+            VARIABLE_IS_NOT_USED uint32_t result = _deviceInfo->Release();
+            _deviceInfo = nullptr;
             // It should have been the last reference we are releasing,
             // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
             // are leaking...
@@ -239,9 +239,9 @@ namespace Plugin {
         uint32_t status = _deviceAudioCapabilityInterface->AudioOutputs(audioIt);
         if ((status == Core::ERROR_NONE) && (audioIt != nullptr)) {
             Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput;
-            Core::JSON::EnumType<JsonData::DeviceInfo::AudiooutputType> jsonAudioOutput;
+            Core::JSON::EnumType<JsonData::DeviceInfo::AudioportType> jsonAudioOutput;
             while (audioIt->Next(audioOutput) == true) {
-                jsonAudioOutput = static_cast<JsonData::DeviceInfo::AudiooutputType>(audioOutput);
+                jsonAudioOutput = static_cast<JsonData::DeviceInfo::AudioportType>(audioOutput);
                 audioOutputs.Add(jsonAudioOutput);
             }
             audioIt->Release();
@@ -315,8 +315,8 @@ namespace Plugin {
 
             while (audioIt->Next(audioOutput)) {
                 JsonData::DeviceInfo::DeviceaudiocapabilitiesData::AudiooutputcapabilitiesData audiocapabilities;
-                audiocapabilities.Audiooutput =
-                    static_cast<WPEFramework::JsonData::DeviceInfo::AudiooutputType>(audioOutput);
+                audiocapabilities.AudioPort =
+                    static_cast<WPEFramework::JsonData::DeviceInfo::AudioportType>(audioOutput);
 
                 AudioCapabilities(audioOutput, audiocapabilities.Audiocapabilities);
                 Ms12Capabilities(audioOutput, audiocapabilities.Ms12capabilities);
@@ -335,9 +335,9 @@ namespace Plugin {
         uint32_t status = _deviceVideoCapabilityInterface->VideoOutputs(videoIt);
         if ((status == Core::ERROR_NONE) && (videoIt != nullptr)) {
             Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput;
-            Core::JSON::EnumType<JsonData::DeviceInfo::VideooutputType> jsonVideoOutput;
+            Core::JSON::EnumType<JsonData::DeviceInfo::VideodisplayType> jsonVideoOutput;
             while (videoIt->Next(videoOutput) == true) {
-                jsonVideoOutput = static_cast<JsonData::DeviceInfo::VideooutputType>(videoOutput);
+                jsonVideoOutput = static_cast<JsonData::DeviceInfo::VideodisplayType>(videoOutput);
                 videoOutputs.Add(jsonVideoOutput);
             }
             videoIt->Release();
@@ -352,7 +352,7 @@ namespace Plugin {
         uint32_t status = _deviceVideoCapabilityInterface->DefaultResolution(videoOutput, defaultResolution);
 
         if (status == Core::ERROR_NONE) {
-            screenResolutionType = static_cast<JsonData::DeviceInfo::ScreenresolutionType>(defaultResolution);
+            screenResolutionType = static_cast<JsonData::DeviceInfo::Output_resolutionType>(defaultResolution);
         }
         return (status);
     }
@@ -365,9 +365,9 @@ namespace Plugin {
 
         uint32_t status = _deviceVideoCapabilityInterface->Resolutions(videoOutput, resolutionIt);
         if ((status == Core::ERROR_NONE) && (resolutionIt != nullptr)) {
-            Core::JSON::EnumType<JsonData::DeviceInfo::ScreenresolutionType> jsonResolution;
+            Core::JSON::EnumType<JsonData::DeviceInfo::Output_resolutionType> jsonResolution;
             while (resolutionIt->Next(resolution)) {
-                jsonResolution = static_cast<JsonData::DeviceInfo::ScreenresolutionType>(resolution);
+                jsonResolution = static_cast<JsonData::DeviceInfo::Output_resolutionType>(resolution);
                 screenResolutionTypes.Add(jsonResolution);
             }
             resolutionIt->Release();
@@ -414,14 +414,14 @@ namespace Plugin {
             Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput;
             while (videoIt->Next(videoOutput) == true) {
                 JsonData::DeviceInfo::DevicevideocapabilitiesData::VideooutputcapabilitiesData videocapabilities;
-                videocapabilities.Videooutput =
-                    static_cast<WPEFramework::JsonData::DeviceInfo::VideooutputType>(videoOutput);
+                videocapabilities.VideoDisplay =
+                    static_cast<WPEFramework::JsonData::DeviceInfo::VideodisplayType>(videoOutput);
 
                 Hdcp(videoOutput, videocapabilities.Hdcp);
 
                 DefaultResolution(videoOutput, videocapabilities.Defaultresolution);
 
-                Resolutions(videoOutput, videocapabilities.Screenresolutions);
+                Resolutions(videoOutput, videocapabilities.Output_resolutions);
 
                 response.Videooutputcapabilities.Add(videocapabilities);
             }
@@ -431,43 +431,43 @@ namespace Plugin {
 
     void DeviceInfo::DeviceMetaData(JsonData::DeviceInfo::DeviceinfoData& response) const
     {
-        ASSERT(_implementation != nullptr);
+        ASSERT(_deviceInfo != nullptr);
         string localresult ;
 
-        if (_implementation->DeviceType(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->DeviceType(localresult) == Core::ERROR_NONE) {
             response.Devicetype = localresult;
         }
 
-        if (_implementation->DistributorId(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->DistributorId(localresult) == Core::ERROR_NONE) {
             response.Distributorid = localresult;
         }
 
-        if (_implementation->FriendlyName(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->FriendlyName(localresult) == Core::ERROR_NONE) {
             response.Friendlyname = localresult;
         }
 
-        if (_implementation->Make(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->Make(localresult) == Core::ERROR_NONE) {
             response.Make = localresult;
         }
 
-        if (_implementation->ModelName(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->ModelName(localresult) == Core::ERROR_NONE) {
             response.Modelname = localresult;
         }
 
         uint16_t year = 0;
-        if (_implementation->ModelYear(year) == Core::ERROR_NONE) {
+        if (_deviceInfo->ModelYear(year) == Core::ERROR_NONE) {
             response.Modelyear = year;
         }
 
-        if (_implementation->PlatformName(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->PlatformName(localresult) == Core::ERROR_NONE) {
             response.Platformname = localresult;
         }
 
-        if (_implementation->SerialNumber(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->SerialNumber(localresult) == Core::ERROR_NONE) {
             response.Serialnumber = localresult;
         }
 
-        if (_implementation->Sku(localresult) == Core::ERROR_NONE) {
+        if (_deviceInfo->Sku(localresult) == Core::ERROR_NONE) {
             response.Sku = localresult;
         }
     }
