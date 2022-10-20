@@ -1,23 +1,24 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_YOUTUBE_AUTOSTART@"
+autostart = "@PLUGIN_APPS_AUTOSTART@"
 
 configuration = JSON()
 
-configuration.add("url", "https://www.youtube.com/tv")
-configuration.add("useragent", "@PLUGIN_YOUTUBE_USERAGENT@")
+configuration.add("url", "about:blank")
+configuration.add("useragent", "@PLUGIN_APPS_USERAGENT@")
 
 if not boolean("@WEBKIT_GLIB_API@"):
     configuration.add("injectedbundle", "libWPEInjectedBundle@CMAKE_SHARED_LIBRARY_SUFFIX@")
 else:
     configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 
+
 configuration.add("transparent", "@PLUGIN_WEBKITBROWSER_TRANSPARENT@")
 configuration.add("compositor", "noaa")
-configuration.add("inspector", "@PLUGIN_YOUTUBE_WEBINSPECTOR_ADDRESS@")
+configuration.add("inspector", "@PLUGIN_APPS_WEBINSPECTOR_ADDRESS@")
 configuration.add("fps", "true")
 configuration.add("cursor", "false")
 configuration.add("touch", "false")
-configuration.add("msebuffers", "@PLUGIN_YOUTUBE_MSEBUFFERS@")
+configuration.add("msebuffers", "@PLUGIN_APPS_MSEBUFFERS@")
 configuration.add("thunderdecryptorpreference", "@PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE@")
 configuration.add("memoryprofile", "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@")
 configuration.add("memorypressure", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE@")
@@ -25,29 +26,28 @@ configuration.add("mediacontenttypesrequiringhardwaresupport", "@PLUGIN_WEBKITBR
 configuration.add("mediadiskcache", "@PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@")
 configuration.add("diskcache", "@PLUGIN_WEBKITBROWSER_DISKCACHE@")
 configuration.add("xhrcache", "@PLUGIN_WEBKITBROWSER_XHRCACHE@")
-configuration.add("webgl", "false")
-configuration.add("windowclose", "true")
+configuration.add("webgl", "@PLUGIN_APPS_WEBGL@")
 configuration.add("threadedpainting", "@PLUGIN_WEBKITBROWSER_THREADEDPAINTING@")
-configuration.add("height", "@PLUGIN_YOUTUBE_HEIGHT@")
-configuration.add("width", "@PLUGIN_YOUTUBE_WIDTH@")
+configuration.add("height", "@PLUGIN_WEBKITBROWSER_HEIGHT@")
+configuration.add("width", "@PLUGIN_WEBKITBROWSER_WIDTH@")
 configuration.add("clientidentifier", "@PLUGIN_WEBKITBROWSER_CLIENTIDENTIFIER@")
-configuration.add("localstorageenabled", "@PLUGIN_YOUTUBE_LOCALSTORAGE_ENABLE@")
+configuration.add("localstorageenabled", "@PLUGIN_APPS_LOCALSTORAGE_ENABLE@")
 configuration.add("localstorage", "@PLUGIN_WEBKITBROWSER_LOCALSTORAGE@")
 configuration.add("cookiestorage", "@PLUGIN_WEBKITBROWSER_COOKIESTORAGE@")
+if boolean("@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@"):
+    configuration.add("windowclose", "@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@")
+configuration.add("execpath", "@PLUGIN_WEBKITBROWSER_ALTERNATIVE_EXEC_PATH@")
 if "@PLUGIN_WEBKITBROWSER_PTSOFFSET@" != "0":
     configuration.add("ptsoffset", "@PLUGIN_WEBKITBROWSER_PTSOFFSET@")
-configuration.add("execpath", "@PLUGIN_WEBKITBROWSER_ALTERNATIVE_EXEC_PATH@")
 configuration.add("proxy", "@PLUGIN_WEBKITBROWSER_HTTP_PROXY@")
 configuration.add("proxyexclusion", "@PLUGIN_WEBKITBROWSER_HTTP_PROXY_EXCLUSION@")
 
 rootobject = JSON()
-rootobject.add("mode", "@PLUGIN_YOUTUBE_MODE@")
+rootobject.add("mode", "@PLUGIN_APPS_MODE@")
 rootobject.add("locator", "lib@PLUGIN_WEBKITBROWSER_IMPLEMENTATION@.so")
-rootobject.add("user", "@PLUGIN_WEBKITBROWSER_USER@")
-rootobject.add("group", "@PLUGIN_WEBKITBROWSER_GROUP@")
 configuration.add("root", rootobject)
 
 javascript = JSON()
-javascript.add("useJIT", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@") else "false")
-javascript.add("useDFG", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@") else "false")
+javascript.add("useJIT", "true" if boolean("@PLUGIN_APPS_ENABLE_JIT@") else "false")
+javascript.add("useDFG", "true" if boolean("@PLUGIN_APPS_ENABLE_DFG@") else "false")
 configuration.add("javascript", javascript)
