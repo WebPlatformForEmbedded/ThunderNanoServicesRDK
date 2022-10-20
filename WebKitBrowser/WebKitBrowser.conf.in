@@ -63,6 +63,6 @@ root.add("group", "@PLUGIN_WEBKITBROWSER_GROUP@")
 configuration.add("root", root)
 
 javascript = JSON()
-javascript.add("useJIT", str(boolean("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@")))
-javascript.add("useDFG", str(boolean("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@")))
+javascript.add("useJIT", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@") else "false")
+javascript.add("useDFG", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@") else "false")
 configuration.add("javascript", javascript)
