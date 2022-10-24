@@ -29,7 +29,7 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    namespace AMLogic {
+    namespace Linux {
 
         bool operator<(const drmModeModeInfo& lhs, const drmModeModeInfo& rhs)
         {

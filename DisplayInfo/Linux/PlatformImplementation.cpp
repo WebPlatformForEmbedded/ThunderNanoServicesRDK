@@ -398,7 +398,7 @@ namespace Plugin {
         {
             std::lock_guard<std::mutex> lock(_propertiesLock);
 
-            _drmConnector.reset(new AMLogic::DRMConnector(_drmDevice, DRM_MODE_CONNECTOR_HDMIA, _usePreferredMode));
+            _drmConnector.reset(new Linux::DRMConnector(_drmDevice, DRM_MODE_CONNECTOR_HDMIA, _usePreferredMode));
 
             /* clang-format off */
             TRACE(Trace::Information, (_T("HDMI status: %d, Resolution: %dx%d @ %d Hz")
@@ -432,7 +432,7 @@ namespace Plugin {
         std::string _hdcpLevelNode;
 
         mutable std::mutex _propertiesLock;
-        std::unique_ptr<AMLogic::DRMConnector> _drmConnector;
+        std::unique_ptr<Linux::DRMConnector> _drmConnector;
         bool _audioPassthrough;
         std::vector<uint8_t> _edid;
         Exchange::IConnectionProperties::HDCPProtectionType _hdcpLevel;
