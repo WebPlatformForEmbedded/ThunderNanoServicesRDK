@@ -1,0 +1,7 @@
+autostart = "@PLUGIN_PLAYERINFO_AUTOSTART@"
+
+configuration = JSON()
+
+rootobject = JSON()
+rootobject.add("mode", "@PLUGIN_PLAYERINFO_MODE@")
+configuration.add("root", rootobject)
