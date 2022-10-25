@@ -1,0 +1,9 @@
+autostart = "@PLUGIN_WARNINGREPORTINGCONTROL_AUTOSTART@"
+
+configuration = JSON()
+
+configuration.add("console", "@PLUGIN_WARNINGREPORTINGCONTROL_CONSOLE@")
+configuration.add("syslog", "@PLUGIN_WARNINGREPORTINGCONTROL_SYSLOG@")
+configuration.add("filepath", "@PLUGIN_WARNINGREPORTINGCONTROL_FILENAME@")
+configuration.add("abbreviated", "@PLUGIN_WARNINGREPORTINGCONTROL_ABBREVIATED@")
+configuration.add("warningsonly", "@PLUGIN_WARNINGREPORTINGCONTROL_WARNINGSONLY@")
