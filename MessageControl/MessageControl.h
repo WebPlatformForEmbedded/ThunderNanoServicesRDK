@@ -26,7 +26,7 @@ namespace WPEFramework {
 namespace Plugin {
     class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
-        using OutputMap = std::unordered_map<Core::Messaging::MessageType, std::list<std::shared_ptr<Core::Messaging::IOutput>>>;
+        using OutputMap = std::unordered_map<Core::Messaging::Metadata::type, std::list<std::shared_ptr<Messaging::IOutput>>>;
 
         class Config : public Core::JSON::Container {
         private:
@@ -126,7 +126,7 @@ namespace Plugin {
 
                 //yikes, recreating stuff from received pieces
                 Messaging::TextMessage textMessage(message);
-                Core::Messaging::Information info(ToMessageType(type), category, module, fileName, lineNumber, className, timestamp);
+                Core::Messaging::IStore::Information info(ToMessageType(type), category, module, fileName, lineNumber, className, timestamp);
 
                 _parent.Output(info, &textMessage);
             }
@@ -249,7 +249,7 @@ namespace Plugin {
         Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
 
     private:
-        void Announce(Core::Messaging::MessageType type, const std::shared_ptr<Core::Messaging::IOutput>& output) {
+        void Announce(Core::Messaging::Metadata::type type, const std::shared_ptr<Messaging::IOutput>& output) {
 
             _outputLock.Lock();
 
@@ -265,11 +265,11 @@ namespace Plugin {
 
             _outputLock.Unlock();
         }
-        void Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) {
+        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) {
             // Time to start sending it to all interested parties...
             _outputLock.Lock();
 
-            OutputMap::iterator index = _outputDirector.find(info.MessageMetaData().Type());
+            OutputMap::iterator index = _outputDirector.find(info.Type());
             if (index != _outputDirector.end()) {
                 for (const auto& entry : index->second) {
                     entry->Output(info, message);

@@ -22,7 +22,7 @@
 namespace WPEFramework {
 namespace Publishers {
 
-    string Text::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    string Text::Convert(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message)
     {
         string output;
 
@@ -32,8 +32,8 @@ namespace Publishers {
             const string time(now.ToTimeOnly(true));
             output = Core::Format("[%s]:[%s]:[%s]: %s\n",
                     time.c_str(),
-                    info.MessageMetaData().Module().c_str(),
-                    info.MessageMetaData().Category().c_str(),
+                    info.Module().c_str(),
+                    info.Category().c_str(),
                     message->Data().c_str());
         } else {
             const string time(now.ToRFC1123(true));
@@ -42,19 +42,19 @@ namespace Publishers {
                     Core::FileNameOnly(info.FileName().c_str()),
                     info.LineNumber(),
                     info.ClassName().c_str(),
-                    info.MessageMetaData().Category().c_str(),
+                    info.Category().c_str(),
                     message->Data().c_str());
         }
 
         return (output);
     }
 
-    void ConsoleOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) /* override */
+    void ConsoleOutput::Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) /* override */
     {
         std::cout << _convertor.Convert(info, message);
     }
 
-    void SyslogOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message) /* override */
+    void SyslogOutput::Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) /* override */
     {
 #ifndef __WINDOWS__
         syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(info, message).c_str());
@@ -63,7 +63,7 @@ namespace Publishers {
 #endif
     }
 
-    void FileOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    void FileOutput::Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message)
     {
         if (_file.IsOpen()) {
             string line = _convertor.Convert(info, message);
@@ -71,7 +71,7 @@ namespace Publishers {
         }
     }
 
-    void JSON::Convert(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message, Data& data)
+    void JSON::Convert(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message, Data& data)
     {
         ExtraOutputOptions options = _outputOptions;
 
@@ -96,11 +96,11 @@ namespace Publishers {
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::MODULE)) != 0) {
-                data.Module = info.MessageMetaData().Module();
+                data.Module = info.Module();
             }
 
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
-                data.Category = info.MessageMetaData().Category();
+                data.Category = info.Category();
             }
 
             data.Message = message->Data();
@@ -109,7 +109,7 @@ namespace Publishers {
 
     //UDPOutput
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
-        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Core::Messaging::MessageUnit::DataSize, 0)
+        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::DataSize, 0)
         , _loaded(0)
     {
     }
@@ -139,7 +139,7 @@ namespace Publishers {
     {
     }
 
-    void UDPOutput::Channel::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    void UDPOutput::Channel::Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message)
     {
         _adminLock.Lock();
 
@@ -159,7 +159,7 @@ namespace Publishers {
         _output.Open(0);
     }
 
-    void UDPOutput::Output(const Core::Messaging::Information& info, const Core::Messaging::IEvent* message)
+    void UDPOutput::Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message)
     {
         _output.Output(info, message);
     }

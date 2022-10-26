@@ -104,20 +104,20 @@ namespace WPEFramework {
         }
         else {
             if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
             }
             if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
+                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
             }
             if (_config.FileName.Value().empty() == false) {
                 _config.FileName = service->VolatilePath() + _config.FileName.Value();
 
-                Announce(Core::Messaging::MessageType::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
+                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
             }
             if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-                std::shared_ptr<Core::Messaging::IOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
-                Announce(Core::Messaging::MessageType::TRACING, output);
-                Announce(Core::Messaging::MessageType::LOGGING, output);
+                std::shared_ptr<Messaging::IOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
+                Announce(Core::Messaging::Metadata::type::TRACING, output);
+                Announce(Core::Messaging::Metadata::type::LOGGING, output);
             }
 
             _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
@@ -149,7 +149,7 @@ namespace WPEFramework {
 
         _observer.Enable(false);
 
-        _service->Unregister(&_observer);
+        service->Unregister(&_observer);
 
         _outputLock.Lock();
 
@@ -158,7 +158,7 @@ namespace WPEFramework {
 
         _outputLock.Unlock();
 
-        RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+        RPC::IRemoteConnection* connection(service->RemoteConnection(_connectionId));
 
         _collect->Release();
         _collect = nullptr;

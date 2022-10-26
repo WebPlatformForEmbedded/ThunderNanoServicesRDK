@@ -25,10 +25,10 @@ namespace WPEFramework {
 
 namespace {
 
-    class MessageSettings : public Core::Messaging::MessageUnit::Settings {
+    class MessageSettings : public Messaging::MessageUnit::Settings {
     private:
         MessageSettings() {
-            Core::Messaging::MessageUnit::Settings::Load();
+            Messaging::MessageUnit::Settings::Load();
         };
 
     public:
@@ -113,8 +113,8 @@ namespace Plugin {
                 _callback->AddRef();
 
                 _client.AddInstance(0);
-                _client.AddFactory(Core::Messaging::MessageType::TRACING, &_factory);
-                _client.AddFactory(Core::Messaging::MessageType::LOGGING, &_factory);
+                _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_factory);
+                _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_factory);
 
                 _worker.Run();
             }
@@ -152,7 +152,7 @@ namespace Plugin {
         uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
-            Core::Messaging::MessageUnit::Iterator index;
+            Messaging::MessageUnit::Iterator index;
 
             _client.Controls(index);
 
@@ -177,13 +177,13 @@ namespace Plugin {
         {
             _client.WaitForUpdates(Core::infinite);
 
-            _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+            _client.PopMessagesAndCall([this](const Core::Messaging::IStore::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
                 ASSERT(_callback != nullptr);
 
                 // Turn data into piecies to trasfer over the wire
-                _callback->Message(ToMessageType(info.MessageMetaData().Type()),
-                    info.MessageMetaData().Category(),
-                    info.MessageMetaData().Module(),
+                _callback->Message(ToMessageType(info.Type()),
+                    info.Category(),
+                    info.Module(),
                     info.FileName(),
                     info.LineNumber(),
                     info.ClassName(),

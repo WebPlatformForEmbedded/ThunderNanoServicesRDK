@@ -37,7 +37,7 @@ public:
     BrowserConsoleLog(const string& message, const uint64_t line, const uint64_t column)
     {
         _text = '[' + Core::NumberType<uint64_t>(line).Text() + ',' + Core::NumberType<uint64_t>(column).Text() + ']' + message;
-        const uint16_t maxStringLength = Core::Messaging::MessageUnit::DataSize - 1;
+        const uint16_t maxStringLength = Messaging::MessageUnit::DataSize - 1;
         if (_text.length() > maxStringLength) {
             _text = _text.substr(0, maxStringLength);
         }
@@ -46,7 +46,7 @@ public:
     BrowserConsoleLog(const WKStringRef message, const uint64_t line, const uint64_t column)
     { 
         _text = '[' + Core::NumberType<uint64_t>(line).Text() + ',' + Core::NumberType<uint64_t>(column).Text() + ']' + WebKit::Utils::WKStringToString(message);
-        const uint16_t maxStringLength = Core::Messaging::MessageUnit::DataSize - 1;
+        const uint16_t maxStringLength = Messaging::MessageUnit::DataSize - 1;
         if (_text.length() > maxStringLength) {
             _text = _text.substr(0, maxStringLength);
         }
