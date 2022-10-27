@@ -26,7 +26,7 @@ namespace WPEFramework {
 namespace Plugin {
     class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket {
     private:
-        using OutputMap = std::unordered_map<Core::Messaging::Metadata::type, std::list<std::shared_ptr<Messaging::IOutput>>>;
+        using OutputList = std::vector<Publishers::IPublish*>;
 
         class Config : public Core::JSON::Container {
         private:
@@ -96,39 +96,21 @@ namespace Plugin {
                 : _parent(parent)
                 , _adminLock()
                 , _observing()
-                , _job(*this)
-                , _observe(false) {
+                , _job(*this) {
             }
             ~Observer() override {
                 _job.Revoke();
             }
 
         public:
-            void Enable(const bool enabled) {
-                _adminLock.Lock();
-
-                _observe = enabled;
-
-                _adminLock.Unlock();
-
-                if ((enabled == true) && (_observing.empty() == false)) {
-                    _job.Submit();
-                }
-            }
-
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Exchange::IMessageControl::messagetype type, const string& category,
-                const string& module, const string& fileName,
+            void Message(const Exchange::IMessageControl::messagetype type,
+                const string& module, const string& category, const string& fileName,
                 const uint16_t lineNumber, const string& className,
                 const uint64_t timestamp, const string& message) override {
-
-                //yikes, recreating stuff from received pieces
-                Messaging::TextMessage textMessage(message);
-                Core::Messaging::IStore::Information info(ToMessageType(type), category, module, fileName, lineNumber, className, timestamp);
-
-                _parent.Output(info, &textMessage);
+                _parent.Message(static_cast<Core::Messaging::Metadata::type>(type), module, category , fileName, lineNumber, className, timestamp, message);
             }
 
             //
@@ -193,23 +175,20 @@ namespace Plugin {
             {
                 _adminLock.Lock();
 
-                if (_observe == true) {
+                ObservingMap::iterator index = _observing.begin();
 
-                    ObservingMap::iterator index = _observing.begin();
-
-                    while (index != _observing.end()) {
-                        if (index->second == state::ATTACHING) {
-                            index->second = state::OBSERVING;
-                            _parent.Attach(index->first);
-                            index++;
-                        }
-                        else if (index->second == state::DETACHING) {
-                            _parent.Detach(index->first);
-                            index = _observing.erase(index);
-                        }
-                        else {
-                            index++;
-                        }
+                while (index != _observing.end()) {
+                    if (index->second == state::ATTACHING) {
+                        index->second = state::OBSERVING;
+                        _parent.Attach(index->first);
+                        index++;
+                    }
+                    else if (index->second == state::DETACHING) {
+                        _parent.Detach(index->first);
+                        index = _observing.erase(index);
+                    }
+                    else {
+                        index++;
                     }
                 }
 
@@ -221,7 +200,6 @@ namespace Plugin {
             Core::CriticalSection _adminLock;
             ObservingMap _observing;
             Core::WorkerPool::JobType<Observer&> _job;
-            bool _observe;
         };
 
     public:
@@ -249,34 +227,29 @@ namespace Plugin {
         Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
 
     private:
-        void Announce(Core::Messaging::Metadata::type type, const std::shared_ptr<Messaging::IOutput>& output) {
+        void Announce(Publishers::IPublish* output) {
 
             _outputLock.Lock();
 
-            OutputMap::iterator index = _outputDirector.find(type);
+            ASSERT(std::find(_outputDirector.begin(), _outputDirector.end(), output) == _outputDirector.end());
 
-            if (index == _outputDirector.end()) {
-                index = _outputDirector.emplace(std::piecewise_construct,
-                    std::make_tuple(type),
-                    std::make_tuple()).first;
-            }
-
-            index->second.emplace_back(output);
+            _outputDirector.emplace_back(output);
 
             _outputLock.Unlock();
         }
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) {
+        void Message(const Core::Messaging::Metadata::type type,
+            const string & module, const string& category, const string & fileName,
+            const uint16_t lineNumber, const string & className,
+            const uint64_t timestamp, const string & message) {
+
             // Time to start sending it to all interested parties...
             _outputLock.Lock();
 
-            OutputMap::iterator index = _outputDirector.find(info.Type());
-            if (index != _outputDirector.end()) {
-                for (const auto& entry : index->second) {
-                    entry->Output(info, message);
-                }
+            for (auto& entry : _outputDirector) {
+                entry->Message(type, module, category, fileName, lineNumber, className, timestamp, message);
             }
 
-            _webSocketExporter.Output(info, message);
+            _webSocketExporter.Message(type, module, category, fileName, lineNumber, className, timestamp, message);
 
             _outputLock.Unlock();
         }
@@ -300,7 +273,7 @@ namespace Plugin {
         Core::CriticalSection _adminLock;
         Core::CriticalSection _outputLock;
         Config _config;
-        OutputMap _outputDirector;
+        OutputList _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
         Exchange::IMessageControl* _control;
         Exchange::IMessageControl::ICollect* _collect;

@@ -22,33 +22,16 @@
 
 namespace WPEFramework {
 
-static inline Core::Messaging::Metadata::type ToMessageType(const Exchange::IMessageControl::messagetype type)
-{
-    switch (type) {
-    case Exchange::IMessageControl::messagetype::TRACING:
-        return Core::Messaging::Metadata::type::TRACING;
-    case Exchange::IMessageControl::messagetype::LOGGING:
-        return Core::Messaging::Metadata::type::LOGGING;
-    default:
-        ASSERT(!"Invalid message type!");
-        return Core::Messaging::Metadata::type::TRACING;
-    }
-}
-
-static inline Exchange::IMessageControl::messagetype ToMessageType(const Core::Messaging::Metadata::type type)
-{
-    switch (type) {
-    case Core::Messaging::Metadata::type::TRACING:
-        return Exchange::IMessageControl::messagetype::TRACING;
-    case Core::Messaging::Metadata::type::LOGGING:
-        return Exchange::IMessageControl::messagetype::LOGGING;
-    default:
-        ASSERT(!"Invalid message type!");
-        return Exchange::IMessageControl::messagetype::TRACING;
-    }
-}
-
 namespace Publishers {
+
+    struct IPublish {
+        virtual ~IPublish() = default;
+
+        virtual void Message(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, 
+            const string& fileName, const uint16_t lineNumber, 
+            const string& className, const uint64_t timeStamp, const string& text) = 0;
+    };
 
     class Text {
     public:
@@ -62,13 +45,16 @@ namespace Publishers {
         ~Text() = default;
 
     public:
-        string Convert(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message);
+        string Convert (const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text);
 
     private:
         bool _abbreviated;
     };
 
-    class ConsoleOutput : public Messaging::IOutput {
+    class ConsoleOutput : public IPublish {
     public:
         ConsoleOutput() = delete;
         ConsoleOutput(const ConsoleOutput&) = delete;
@@ -80,13 +66,16 @@ namespace Publishers {
         ~ConsoleOutput() override = default;
 
     public:
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) override;
+        void Message(const Core::Messaging::Metadata::type type, 
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text) override;
 
     private:
         Text _convertor;
     };
 
-    class SyslogOutput : public Messaging::IOutput {
+    class SyslogOutput : public IPublish {
     public:
         SyslogOutput() = delete;
         SyslogOutput(const SyslogOutput&) = delete;
@@ -98,13 +87,16 @@ namespace Publishers {
         ~SyslogOutput() override = default;
 
     public:
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) override;
+        void Message(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text) override;
 
     private:
         Text _convertor;
     };
   
-    class FileOutput : public Messaging::IOutput {
+    class FileOutput : public IPublish {
     public:
         FileOutput() = delete;
         FileOutput(const FileOutput&) = delete;
@@ -126,7 +118,10 @@ namespace Publishers {
         }
 
     public:
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) override;
+        void Message(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text) override;
 
     private:
         Text _convertor;
@@ -272,7 +267,10 @@ namespace Publishers {
             }
         }
 
-        void Convert(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message, Data& response);
+        void Convert(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text, Data& info);
 
     private:
         template <typename E>
@@ -285,7 +283,7 @@ namespace Publishers {
         std::atomic<ExtraOutputOptions> _outputOptions;
     };
 
-    class UDPOutput : public Messaging::IOutput {
+    class UDPOutput : public IPublish {
     private:
         class Channel : public Core::SocketDatagram {
         public:
@@ -317,13 +315,16 @@ namespace Publishers {
         explicit UDPOutput(const Core::NodeId& nodeId);
         ~UDPOutput() = default;
 
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) override;
+        void Message(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text) override;
 
     private:
         Channel _output;
     };
 
-    class WebSocketOutput : public Messaging::IOutput {
+    class WebSocketOutput : public IPublish {
     private:
         class ExportCommand : public Core::JSON::Container {
         public:
@@ -488,7 +489,10 @@ namespace Publishers {
             return (element);
         }
 
-        void Output(const Core::Messaging::IStore::Information& info, const Core::Messaging::IEvent* message) override {
+        void Message(const Core::Messaging::Metadata::type type,
+            const string& module, const string& category, const string& fileName,
+            const uint16_t lineNumber, const string& className,
+            const uint64_t timeStamp, const string& text) override {
 
             std::list<std::pair<uint32_t, Core::ProxyType<Core::JSON::IElement>>> cachedList;
             PluginHost::IShell* server = nullptr;
@@ -500,7 +504,7 @@ namespace Publishers {
                 for (auto& item : _channels) {
                     if (item.second.Paused() == false) {
                         Core::ProxyType<JSON::Data> data = _jsonExportDataFactory.Element();
-                        item.second.Convert(info, message, *data);
+                        item.second.Convert(type, category, module, fileName, lineNumber, className, timeStamp, text, *data);
                         cachedList.emplace_back(item.first, Core::ProxyType<Core::JSON::IElement>(data));
                     }
                 }

@@ -82,8 +82,6 @@ namespace WPEFramework {
         _service = service;
         _service->AddRef();
 
-        _service->Register(&_observer);
-
         _control = _service->Root<Exchange::IMessageControl>(_connectionId, RPC::CommunicationTimeOut, _T("MessageControlImplementation"));
         ASSERT(_control != nullptr);
 
@@ -99,42 +97,29 @@ namespace WPEFramework {
         else if (_collect == nullptr) {
             message = _T("MessageControl plugin could not be instantiated (collect).");
         }
-        else if (_collect->Configure(&_observer) != Core::ERROR_NONE) {
-            message = _T("MessageControl plugin could not be _configured.");
-        }
         else {
             if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::ConsoleOutput>(_config.Abbreviated.Value()));
+                Announce(new Publishers::ConsoleOutput(_config.Abbreviated.Value()));
             }
             if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::SyslogOutput>(_config.Abbreviated.Value()));
+                Announce(new Publishers::SyslogOutput(_config.Abbreviated.Value()));
             }
             if (_config.FileName.Value().empty() == false) {
                 _config.FileName = service->VolatilePath() + _config.FileName.Value();
-
-                Announce(Core::Messaging::Metadata::type::TRACING, std::make_shared<Publishers::FileOutput>(_config.Abbreviated.Value(), _config.FileName.Value()));
+                Announce(new Publishers::FileOutput(_config.Abbreviated.Value(), _config.FileName.Value()));
             }
             if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-                std::shared_ptr<Messaging::IOutput> output = std::make_shared<Publishers::UDPOutput>(Core::NodeId(_config.Remote.NodeId()));
-                Announce(Core::Messaging::Metadata::type::TRACING, output);
-                Announce(Core::Messaging::Metadata::type::LOGGING, output);
+                Announce(new Publishers::UDPOutput(Core::NodeId(_config.Remote.NodeId())));
             }
 
             _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
 
-            _observer.Enable(true);
-
             Exchange::JMessageControl::Register(*this, _control);
-        }
 
-        if (message.empty() == false) {
-            if (_collect != nullptr) {
-                _collect->Release();
-                _collect = nullptr;
-            }
-            if (_control != nullptr) {
-                _control->Release();
-                _control = nullptr;
+            _service->Register(&_observer);
+
+            if (_collect->Callback(&_observer) != Core::ERROR_NONE) {
+                message = _T("MessageControl plugin could not be _configured.");
             }
         }
 
@@ -145,11 +130,13 @@ namespace WPEFramework {
     {
         ASSERT (_service == service);
 
-        Exchange::JMessageControl::Unregister(*this);
+        if ((_collect != nullptr) && (_control != nullptr)) {
+            Exchange::JMessageControl::Unregister(*this);
 
-        _observer.Enable(false);
+            _collect->Callback(nullptr);
 
-        service->Unregister(&_observer);
+            service->Unregister(&_observer);
+        }
 
         _outputLock.Lock();
 
@@ -160,22 +147,31 @@ namespace WPEFramework {
 
         RPC::IRemoteConnection* connection(service->RemoteConnection(_connectionId));
 
-        _collect->Release();
-        _collect = nullptr;
+        if (_collect != nullptr) {
+            _collect->Release();
+            _collect = nullptr;
+        }
 
-        VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
-        _control = nullptr;
+        if (_control != nullptr) {
+            VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
+            _control = nullptr;
 
-        // It should have been the last reference we are releasing,
-        // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
-        // are leaking...
-        ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+            // It should have been the last reference we are releasing,
+            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+            // are leaking...
+            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+        }
 
         // The process can disappear in the meantime...
         if (connection != nullptr) {
             // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
             connection->Terminate();
             connection->Release();
+        }
+
+        while (_outputDirector.empty() == false) {
+            delete _outputDirector.back();
+            _outputDirector.pop_back();
         }
 
         _service->Release();
