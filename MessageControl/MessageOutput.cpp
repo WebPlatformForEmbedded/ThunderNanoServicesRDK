@@ -22,7 +22,7 @@
 namespace WPEFramework {
 namespace Publishers {
 
-    string Text::Convert(const Core::Messaging::Metadata::type type,
+    string Text::Convert(const Core::Messaging::Metadata::type,
         const string& module, const string& category, const string& fileName,
         const uint16_t lineNumber, const string& className,
         const uint64_t timeStamp, const string& text) /* override */
@@ -83,10 +83,10 @@ namespace Publishers {
         }
     }
 
-    void JSON::Convert(const Core::Messaging::Metadata::type type,
+    void JSON::Convert(const Core::Messaging::Metadata::type,
         const string& module, const string& category, const string& fileName,
         const uint16_t lineNumber, const string& className,
-        const uint64_t timeStamp, const string& text, Data& data)
+        const uint64_t, const string& text, Data& data)
     {
         ExtraOutputOptions options = _outputOptions;
 
@@ -181,7 +181,7 @@ namespace Publishers {
     {
         //yikes, recreating stuff from received pieces
         Messaging::TextMessage textMessage(text);
-        Core::Messaging::IStore::Information info(type, timeStamp, module, category, fileName, lineNumber, className);
+        Core::Messaging::IStore::Information info(Core::Messaging::Metadata(type, module, category), fileName, lineNumber, className, timeStamp);
 
         _output.Output(info, &textMessage);
     }
