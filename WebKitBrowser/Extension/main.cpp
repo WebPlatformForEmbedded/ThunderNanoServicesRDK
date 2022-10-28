@@ -92,7 +92,7 @@ public:
         } else {
 // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
 #ifdef __CORE_MESSAGING__
-            Core::Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
+            Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
 #else
             Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
 #endif

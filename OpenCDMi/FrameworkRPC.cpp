@@ -329,7 +329,7 @@ namespace Plugin {
                                 sampleInfo.ivLength = IVKeyLength();
                                 sampleInfo.keyId = const_cast<uint8_t *>(KeyId(sampleInfo.keyIdLength));
                                 sampleInfo.subSample = const_cast<CDMi::SubSampleInfo *>(SubSamples());
-                                sampleInfo.subSampleCount = SubSampleLength();
+                                sampleInfo.subSampleCount = static_cast<uint8_t>(SubSampleLength());
 
                                 uint16_t width = 0, height = 0;
                                 uint8_t type = 0;

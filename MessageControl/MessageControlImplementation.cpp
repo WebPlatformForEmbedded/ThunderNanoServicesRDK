@@ -25,10 +25,10 @@ namespace WPEFramework {
 
 namespace {
 
-    class MessageSettings : public Core::Messaging::MessageUnit::Settings {
+    class MessageSettings : public Messaging::MessageUnit::Settings {
     private:
         MessageSettings() {
-            Core::Messaging::MessageUnit::Settings::Load();
+            Messaging::MessageUnit::Settings::Load();
         };
 
     public:
@@ -84,38 +84,44 @@ namespace Plugin {
             , _client(_dispatcherIdentifier, _dispatcherBasePath, MessageSettings::Instance().SocketPort())
             , _factory()
         {
+            _client.AddInstance(0);
+            _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_factory);
+            _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_factory);
         }
 
         ~MessageControlImplementation() override
         {
-            if (_callback != nullptr) {
-                _worker.Stop();
-                _client.SkipWaiting();
-                _worker.Wait(Core::Thread::STOPPED, Core::infinite);
+            ASSERT(_callback == nullptr);
 
-                _client.ClearInstances();
-
-                _callback->Release();
-            }
+            _worker.Stop();
+            _worker.Wait(Core::Thread::STOPPED, Core::infinite);
+            _client.ClearInstances();
         }
 
     public:
-        uint32_t Configure(Exchange::IMessageControl::ICollect::ICallback* callback) override
+        uint32_t Callback(Exchange::IMessageControl::ICollect::ICallback* callback) override
         {
-            ASSERT(callback != nullptr);
-
             _adminLock.Lock();
 
-            ASSERT(_callback == nullptr);
+            ASSERT((_callback != nullptr) ^ (callback != nullptr));
 
-            if (callback != nullptr) {
-                _callback = callback;
+            if (_callback != nullptr) {
+
+                _worker.Block();
+                _client.SkipWaiting();
+
+                _adminLock.Unlock();
+
+                _worker.Wait(Core::Thread::BLOCKED, Core::infinite);
+
+                _adminLock.Lock();
+
+                _callback->Release();
+            }
+            _callback = callback;
+
+            if (_callback != nullptr) {
                 _callback->AddRef();
-
-                _client.AddInstance(0);
-                _client.AddFactory(Core::Messaging::MessageType::TRACING, &_factory);
-                _client.AddFactory(Core::Messaging::MessageType::LOGGING, &_factory);
-
                 _worker.Run();
             }
 
@@ -144,7 +150,7 @@ namespace Plugin {
 
         uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
-            _client.Enable({ToMessageType(type), category, module}, enabled);
+            _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
 
             return (Core::ERROR_NONE);
         }
@@ -152,12 +158,12 @@ namespace Plugin {
         uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
-            Core::Messaging::MessageUnit::Iterator index;
+            Messaging::MessageUnit::Iterator index;
 
             _client.Controls(index);
 
             while (index.Next() == true) {
-                list.push_back( { ToMessageType(index.Type()), index.Category(), index.Module(), index.Enabled() } );
+                list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
@@ -177,18 +183,11 @@ namespace Plugin {
         {
             _client.WaitForUpdates(Core::infinite);
 
-            _client.PopMessagesAndCall([this](const Core::Messaging::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+            _client.PopMessagesAndCall([this](const Core::Messaging::IStore::Information& info, const Core::ProxyType<Core::Messaging::IEvent>& message) {
                 ASSERT(_callback != nullptr);
 
                 // Turn data into piecies to trasfer over the wire
-                _callback->Message(ToMessageType(info.MessageMetaData().Type()),
-                    info.MessageMetaData().Category(),
-                    info.MessageMetaData().Module(),
-                    info.FileName(),
-                    info.LineNumber(),
-                    info.ClassName(),
-                    info.TimeStamp(),
-                    message->Data());
+                _callback->Message(static_cast<Exchange::IMessageControl::messagetype>(info.Type()), info.Module(), info.Category(), info.FileName(), info.LineNumber(), info.ClassName(), info.TimeStamp(), message->Data());
             });
         }
 
