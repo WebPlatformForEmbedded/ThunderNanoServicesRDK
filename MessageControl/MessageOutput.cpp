@@ -181,7 +181,7 @@ namespace Publishers {
     {
         //yikes, recreating stuff from received pieces
         Messaging::TextMessage textMessage(text);
-        Core::Messaging::IStore::Information info(Core::Messaging::Metadata(type, module, category), fileName, lineNumber, className, timeStamp);
+        Core::Messaging::IStore::Information info(Core::Messaging::Metadata(type, category, module), fileName, lineNumber, className, timeStamp);
 
         _output.Output(info, &textMessage);
     }
