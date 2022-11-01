@@ -1,0 +1,5 @@
+autostart = "@PLUGIN_PERFORMANCEMETRICS_AUTOSTART@"
+
+configuration = JSON()
+
+configuration.add("callsign", "WebKitBrowser")

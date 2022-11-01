@@ -1,0 +1,5 @@
+autostart = "@PLUGIN_SECURITYAGENT_AUTOSTART@"
+
+configuration = JSON()
+
+configuration.add("acl", "acl.json")
