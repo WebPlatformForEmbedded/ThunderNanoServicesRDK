@@ -29,8 +29,9 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-option(DOLBY_SUPPORT "Build the PlayerInfo with dolby support" OFF)
-set(PLUGIN_PLAYERINFO_AUTOSTART true CACHE STRING "Automatically start PlayerInfo plugin")
+option(DOLBY_SUPPORT "Enable dolby support for Gstreamer based implementation" OFF)
+set(PLUGIN_PLAYERINFO_AUTOSTART "true" CACHE STRING "Automatically start PlayerInfo plugin")
+set(PLUGIN_PLAYERINFO_STARTUPORDER "" CACHE STRING "Automatically start PlayerInfo plugin")
 set(PLUGIN_PLAYERINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
@@ -51,29 +52,8 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
 
-if (DOLBY_SUPPORT)
-
-    target_sources(${MODULE_NAME}
-        PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/Dolby/DolbyOutput.cpp)
-
-    target_include_directories(${MODULE_NAME}
-        PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/Dolby/include)
-
-    target_compile_definitions(${MODULE_NAME}
-        PRIVATE
-            DOLBY_SUPPORT=1)
-
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Dolby)
-
-    target_link_libraries(${MODULE_NAME}
-        PRIVATE
-            PlayerInfoDolby)
-endif()
-
 find_package(GStreamer REQUIRED)
-if (GSTREAMER_FOUND)
+if (GStreamer_FOUND)
     target_link_libraries(${MODULE_NAME}
         PRIVATE
             GStreamer::GStreamer)
@@ -86,7 +66,7 @@ if (GSTREAMER_FOUND)
             ${DS_INCLUDE_DIRS}
             ../helpers)
         target_link_libraries(${MODULE_NAME} PRIVATE
-           ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
             ${IARMBUS_LIBRARIES}
             ${DS_LIBRARIES})
         target_sources(${MODULE_NAME}
@@ -97,6 +77,25 @@ if (GSTREAMER_FOUND)
             PRIVATE
                 GStreamer/PlatformImplementation.cpp)
 
+        if (DOLBY_SUPPORT)
+            target_sources(${MODULE_NAME}
+                PRIVATE
+                    ${CMAKE_CURRENT_LIST_DIR}/Dolby/DolbyOutput.cpp)
+
+            target_include_directories(${MODULE_NAME}
+                PRIVATE
+                    ${CMAKE_CURRENT_LIST_DIR}/Dolby/include)
+
+            target_compile_definitions(${MODULE_NAME}
+                PRIVATE
+                    DOLBY_SUPPORT=1)
+
+            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Dolby)
+
+            target_link_libraries(${MODULE_NAME}
+                PRIVATE
+                    PlayerInfoDolby)
+        endif()
     endif ()
 endif ()
 
