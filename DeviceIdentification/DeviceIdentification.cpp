@@ -30,11 +30,19 @@ namespace Plugin {
             // Version
             1, 0, 0,
             // Preconditions
-            {  subsystem::PLATFORM },
+#ifdef DISABLE_DEVICEID_CONTROL
+            { subsystem::PLATFORM, subsystem::IDENTIFIER },
+#else
+            { subsystem::PLATFORM },
+#endif
             // Terminations
             {},
             // Controls
+#ifdef DISABLE_DEVICEID_CONTROL
             {}
+#else
+            { subsystem::IDENTIFIER }
+#endif
         );
     }
 
@@ -47,7 +55,7 @@ namespace Plugin {
 
         _service = service;
         _service->AddRef();
-         
+
          string message;
 
         // Register the Process::Notification stuff. The Remote process might die before we get a
@@ -69,7 +77,9 @@ namespace Plugin {
             RegisterAll();
 
             if (_deviceId.empty() != true) {
+#ifndef DISABLE_DEVICEID_CONTROL
                 service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, _identifier);
+#endif
             }
             else {
                 message = _T("DeviceIdentification plugin could not be instantiated. No DeviceID available");
@@ -93,29 +103,30 @@ namespace Plugin {
         _service->Unregister(&_notification);
 
         if (_deviceId.empty() != true) {
+#ifndef DISABLE_DEVICEID_CONTROL
             service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, nullptr);
+#endif
             _deviceId.clear();
         }
-
-        if(_identifier != nullptr) {
+        if (_identifier != nullptr) {
 
             UnregisterAll();
 
-               // Stop processing:
+            // Stop processing:
             RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
 
             VARIABLE_IS_NOT_USED uint32_t result = _identifier->Release();
             _identifier = nullptr;
 
-            // It should have been the last reference we are releasing, 
+            // It should have been the last reference we are releasing,
             // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
             // are leaking...
             ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
 
             // If this was running in a (container) process...
             if (connection != nullptr) {
-                // Lets trigger the cleanup sequence for 
-                // out-of-process code. Which will guard 
+                // Lets trigger the cleanup sequence for
+                // out-of-process code. Which will guard
                 // that unwilling processes, get shot if
                 // not stopped friendly :-)
                 connection->Terminate();
@@ -138,6 +149,7 @@ namespace Plugin {
     string DeviceIdentification::GetDeviceId() const
     {
         string result;
+#ifndef DISABLE_DEVICEID_CONTROL
         ASSERT(_identifier != nullptr);
 
         if (_identifier != nullptr) {
@@ -149,7 +161,22 @@ namespace Plugin {
                 result = Core::SystemInfo::Instance().Id(myBuffer, ~0);
             }
         }
+#else
+        // extract DeviceId set by Thunder
+        if (_service->SubSystems()->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true) {
 
+            const PluginHost::ISubSystem::IIdentifier* identifier(_service->SubSystems()->Get<PluginHost::ISubSystem::IIdentifier>());
+
+            if (identifier != nullptr) {
+                uint8_t myBuffer[64];
+
+                if ((myBuffer[0] = identifier->Identifier(sizeof(myBuffer) - 1, &(myBuffer[1]))) != 0) {
+                    result = Core::SystemInfo::Instance().Id(myBuffer, ~0);
+                }
+                identifier->Release();
+            }
+         }
+#endif
         return result;
     }
 
