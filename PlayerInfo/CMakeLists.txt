@@ -29,8 +29,9 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-option(DOLBY_SUPPORT "Build the PlayerInfo with dolby support" OFF)
-set(PLUGIN_PLAYERINFO_AUTOSTART true CACHE STRING "Automatically start PlayerInfo plugin")
+option(DOLBY_SUPPORT "Enable dolby support" OFF)
+set(PLUGIN_PLAYERINFO_AUTOSTART "true" CACHE STRING "Automatically start PlayerInfo plugin")
+set(PLUGIN_PLAYERINFO_STARTUPORDER "" CACHE STRING "Automatically start PlayerInfo plugin")
 set(PLUGIN_PLAYERINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
@@ -51,8 +52,34 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
 
-if (DOLBY_SUPPORT)
+find_package(GStreamer REQUIRED)
+if (GStreamer_FOUND)
+    target_link_libraries(${MODULE_NAME}
+        PRIVATE
+            GStreamer::GStreamer)
 
+    if (USE_DEVICESETTINGS)
+        find_package(DS REQUIRED)
+        find_package(IARMBus REQUIRED)
+        target_include_directories(${MODULE_NAME} PRIVATE
+            ${IARMBUS_INCLUDE_DIRS}
+            ${DS_INCLUDE_DIRS}
+            ../helpers)
+        target_link_libraries(${MODULE_NAME} PRIVATE
+            ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+            ${IARMBUS_LIBRARIES}
+            ${DS_LIBRARIES})
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                DeviceSettings/PlatformImplementation.cpp)
+    else ()
+        target_sources(${MODULE_NAME}
+            PRIVATE
+                GStreamer/PlatformImplementation.cpp)
+    endif ()
+endif ()
+
+if (DOLBY_SUPPORT)
     target_sources(${MODULE_NAME}
         PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/Dolby/DolbyOutput.cpp)
@@ -71,34 +98,6 @@ if (DOLBY_SUPPORT)
         PRIVATE
             PlayerInfoDolby)
 endif()
-
-find_package(GStreamer REQUIRED)
-if (GSTREAMER_FOUND)
-    target_link_libraries(${MODULE_NAME}
-        PRIVATE
-            GStreamer::GStreamer)
-
-    if (USE_DEVICESETTINGS)
-        find_package(DS REQUIRED)
-        find_package(IARMBus REQUIRED)
-        target_include_directories(${MODULE_NAME} PRIVATE
-            ${IARMBUS_INCLUDE_DIRS}
-            ${DS_INCLUDE_DIRS}
-            ../helpers)
-        target_link_libraries(${MODULE_NAME} PRIVATE
-           ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-            ${IARMBUS_LIBRARIES}
-            ${DS_LIBRARIES})
-        target_sources(${MODULE_NAME}
-            PRIVATE
-                DeviceSettings/PlatformImplementation.cpp)
-    else ()
-        target_sources(${MODULE_NAME}
-            PRIVATE
-                GStreamer/PlatformImplementation.cpp)
-
-    endif ()
-endif ()
 
 install(TARGETS ${MODULE_NAME}
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)

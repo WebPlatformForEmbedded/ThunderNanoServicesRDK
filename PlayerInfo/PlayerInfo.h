@@ -58,7 +58,6 @@ namespace Plugin {
         private:
             PlayerInfo& _parent;
         };
-#if DOLBY_SUPPORT
         class DolbyNotification : protected Exchange::Dolby::IOutput::INotification {
         public:
             DolbyNotification() = delete;
@@ -100,7 +99,7 @@ namespace Plugin {
             PlayerInfo& _parent;
             Exchange::Dolby::IOutput* _client;
         };
-#endif
+
     public:
         PlayerInfo(const PlayerInfo&) = delete;
         PlayerInfo& operator=(const PlayerInfo&) = delete;
@@ -111,9 +110,7 @@ namespace Plugin {
             , _player(nullptr)
             , _audioCodecs(nullptr)
             , _videoCodecs(nullptr)
-#if DOLBY_SUPPORT
             , _dolbyNotification(this)
-#endif
             , _notification(this)
             , _service(nullptr)
         {
@@ -144,13 +141,6 @@ namespace Plugin {
         void Deactivated(RPC::IRemoteConnection* connection);
         void Info(JsonData::PlayerInfo::CodecsData&) const;
 
-#if DOLBY_SUPPORT
-        uint32_t get_playerinfo(JsonData::PlayerInfo::CodecsData&) const;
-
-        uint32_t get_dolbymode(Core::JSON::EnumType<JsonData::PlayerInfo::DolbyType>&) const;
-        uint32_t set_dolbymode(const Core::JSON::EnumType<JsonData::PlayerInfo::DolbyType>&);
-#endif
-
     private:
         uint8_t _skipURL;
         uint32_t _connectionId;
@@ -158,10 +148,8 @@ namespace Plugin {
         Exchange::IPlayerProperties* _player;
         Exchange::IPlayerProperties::IAudioCodecIterator* _audioCodecs;
         Exchange::IPlayerProperties::IVideoCodecIterator* _videoCodecs;
-#if DOLBY_SUPPORT
         Exchange::Dolby::IOutput* _dolbyOut;
         Core::Sink<DolbyNotification> _dolbyNotification;
-#endif
         Core::Sink<Notification> _notification;
         PluginHost::IShell* _service;
     };

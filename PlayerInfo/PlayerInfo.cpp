@@ -37,7 +37,6 @@ namespace Plugin {
         );
     }
 
-
     static Core::ProxyPoolType<Web::Response> responseFactory(4);
     static Core::ProxyPoolType<Web::JSONBodyType<JsonData::PlayerInfo::CodecsData>> jsonResponseFactory(4);
 
@@ -70,15 +69,13 @@ namespace Plugin {
                     // value, as it is not a essential.
                     // The relevant JSONRPC endpoints will return ERROR_UNAVAILABLE,
                     // if it hasn't been initialized.
-#if DOLBY_SUPPORT
                     _dolbyOut = _player->QueryInterface<Exchange::Dolby::IOutput>();
-                    if(_dolbyOut == nullptr){
+                    if (_dolbyOut == nullptr) {
                         SYSLOG(Logging::Startup, (_T("Dolby output switching service is unavailable.")));
                     } else {
                         _dolbyNotification.Initialize(_dolbyOut);
                         Exchange::Dolby::JOutput::Register(*this, _dolbyOut);
                     }
-#endif
                 } else {
                     message = _T("PlayerInfo Video Codecs not be Loaded.");
                 }
@@ -90,7 +87,7 @@ namespace Plugin {
             message = _T("PlayerInfo could not be instantiated.");
         }
 
-        if(message.length() != 0){
+        if (message.length() != 0) {
             Deinitialize(service);
         }
         return message;
@@ -114,14 +111,12 @@ namespace Plugin {
                 _videoCodecs->Release();
                 _videoCodecs = nullptr;
             }
-            #if DOLBY_SUPPORT
-                if (_dolbyOut != nullptr) {
-                    _dolbyNotification.Deinitialize();
-                    Exchange::Dolby::JOutput::Unregister(*this);
-                    _dolbyOut->Release();
-                    _dolbyOut = nullptr;
-                }
-            #endif
+            if (_dolbyOut != nullptr) {
+                _dolbyNotification.Deinitialize();
+                Exchange::Dolby::JOutput::Unregister(*this);
+                _dolbyOut->Release();
+                _dolbyOut = nullptr;
+            }
 
             RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
             VARIABLE_IS_NOT_USED uint32_t result = _player->Release();
@@ -194,7 +189,7 @@ namespace Plugin {
         Core::JSON::EnumType<JsonData::PlayerInfo::CodecsData::VideocodecsType> videoCodec;
         Exchange::IPlayerProperties::VideoCodec video;
         _videoCodecs->Reset(0);
-         while(_videoCodecs->Next(video) == true) {
+        while(_videoCodecs->Next(video) == true) {
             playerInfo.Video.Add(videoCodec = static_cast<JsonData::PlayerInfo::CodecsData::VideocodecsType>(video));
         }
     }
