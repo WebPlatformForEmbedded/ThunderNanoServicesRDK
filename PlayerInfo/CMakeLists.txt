@@ -29,7 +29,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-option(DOLBY_SUPPORT "Enable dolby support for Gstreamer based implementation" OFF)
+option(DOLBY_SUPPORT "Enable dolby support" OFF)
 set(PLUGIN_PLAYERINFO_AUTOSTART "true" CACHE STRING "Automatically start PlayerInfo plugin")
 set(PLUGIN_PLAYERINFO_STARTUPORDER "" CACHE STRING "Automatically start PlayerInfo plugin")
 set(PLUGIN_PLAYERINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
@@ -76,28 +76,28 @@ if (GStreamer_FOUND)
         target_sources(${MODULE_NAME}
             PRIVATE
                 GStreamer/PlatformImplementation.cpp)
-
-        if (DOLBY_SUPPORT)
-            target_sources(${MODULE_NAME}
-                PRIVATE
-                    ${CMAKE_CURRENT_LIST_DIR}/Dolby/DolbyOutput.cpp)
-
-            target_include_directories(${MODULE_NAME}
-                PRIVATE
-                    ${CMAKE_CURRENT_LIST_DIR}/Dolby/include)
-
-            target_compile_definitions(${MODULE_NAME}
-                PRIVATE
-                    DOLBY_SUPPORT=1)
-
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Dolby)
-
-            target_link_libraries(${MODULE_NAME}
-                PRIVATE
-                    PlayerInfoDolby)
-        endif()
     endif ()
 endif ()
+
+if (DOLBY_SUPPORT)
+    target_sources(${MODULE_NAME}
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/Dolby/DolbyOutput.cpp)
+
+    target_include_directories(${MODULE_NAME}
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/Dolby/include)
+
+    target_compile_definitions(${MODULE_NAME}
+        PRIVATE
+            DOLBY_SUPPORT=1)
+
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Dolby)
+
+    target_link_libraries(${MODULE_NAME}
+        PRIVATE
+            PlayerInfoDolby)
+endif()
 
 install(TARGETS ${MODULE_NAME}
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
