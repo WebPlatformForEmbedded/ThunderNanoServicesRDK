@@ -527,7 +527,7 @@ namespace Plugin {
             result->Message = _T(" could not handle your request.");
         }
 
-        // Make sure all interface aquired for this action are released again otherwise
+        // Make sure all interface acquired for this action are released again otherwise
         // a process can not shut down if the plugin is deactivated due to an trace
         // interface still referenced !!!!
         _observer.Relinquish();
