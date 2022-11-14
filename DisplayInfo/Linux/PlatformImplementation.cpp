@@ -438,7 +438,9 @@ namespace Plugin {
         Exchange::IConnectionProperties::HDCPProtectionType _hdcpLevel;
     };
 
-    class DisplayInfoImplementation : public Exchange::IConnectionProperties, public Exchange::IConfiguration {
+    class DisplayInfoImplementation : public Exchange::IConnectionProperties,
+                                      public Exchange::IConfiguration,
+                                      public Exchange::IDisplayProperties {
 
     public:
         DisplayInfoImplementation(const DisplayInfoImplementation&) = delete;
@@ -635,9 +637,40 @@ namespace Plugin {
             }
         }
 
+        uint32_t ColorSpace(ColourSpaceType&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
+        uint32_t FrameRate(FrameRateType&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
+        uint32_t ColourDepth(ColourDepthType&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
+        uint32_t Colorimetry(IColorimetryIterator*&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
+        uint32_t QuantizationRange(QuantizationRangeType&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
+        uint32_t EOTF(EotfType&) const override
+        {
+            return (Core::ERROR_UNAVAILABLE);
+        }
+
         BEGIN_INTERFACE_MAP(DisplayInfoImplementation)
         INTERFACE_ENTRY(Exchange::IConnectionProperties)
         INTERFACE_ENTRY(Exchange::IConfiguration)
+        INTERFACE_ENTRY(Exchange::IDisplayProperties)
         INTERFACE_AGGREGATE(Exchange::IGraphicsProperties, _graphics)
         INTERFACE_AGGREGATE(Exchange::IHDRProperties, _hdr)
         END_INTERFACE_MAP
