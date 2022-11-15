@@ -32,6 +32,7 @@ namespace Plugin {
 class DisplayInfoImplementation : public Exchange::IHDRProperties,
                                   public Exchange::IGraphicsProperties,
                                   public Exchange::IConnectionProperties,
+                                  public Exchange::IDisplayProperties,
                                   public Exchange::IConfiguration {
 
 public:
@@ -230,10 +231,41 @@ public:
         _adminLock.Unlock();
     }
 
+    uint32_t ColorSpace(ColourSpaceType&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
+    uint32_t FrameRate(FrameRateType&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
+    uint32_t ColourDepth(ColourDepthType&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
+    uint32_t Colorimetry(IColorimetryIterator*&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
+    uint32_t QuantizationRange(QuantizationRangeType&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
+    uint32_t EOTF(EotfType&) const override
+    {
+        return (Core::ERROR_UNAVAILABLE);
+    }
+
     BEGIN_INTERFACE_MAP(DisplayInfoImplementation)
         INTERFACE_ENTRY(Exchange::IHDRProperties)
         INTERFACE_ENTRY(Exchange::IGraphicsProperties)
         INTERFACE_ENTRY(Exchange::IConnectionProperties)
+        INTERFACE_ENTRY(Exchange::IDisplayProperties)
         INTERFACE_ENTRY(Exchange::IConfiguration)
     END_INTERFACE_MAP
 

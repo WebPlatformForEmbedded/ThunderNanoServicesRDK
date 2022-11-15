@@ -77,6 +77,17 @@ namespace Plugin {
                     message = _T("DisplayInfo could not be instantiated. Could not acquire HDRProperties interface");
                 } else {
                     Exchange::JHDRProperties::Register(*this, _hdrProperties);
+
+                    // The code execution should proceed regardless of the _displayProperties
+                    // value, as it is not a essential.
+                    // The relevant JSONRPC endpoints will return ERROR_UNAVAILABLE,
+                    // if it hasn't been initialized.
+                    _displayProperties = _connectionProperties->QueryInterface<Exchange::IDisplayProperties>();
+                    if (_displayProperties == nullptr) {
+                        SYSLOG(Logging::Startup, (_T("Display Properties service is unavailable.")));
+                    } else {
+                        Exchange::JDisplayProperties::Register(*this, _displayProperties);
+                    }
                 }
             }
         } else {
@@ -110,6 +121,12 @@ namespace Plugin {
                 Exchange::JGraphicsProperties::Unregister(*this);
                 _graphicsProperties->Release();
                 _graphicsProperties = nullptr;
+            }
+
+            if (_displayProperties != nullptr) {
+                _displayProperties->Release();
+                Exchange::JDisplayProperties::Unregister(*this);
+                _displayProperties = nullptr;
             }
 
             // Stop processing:
