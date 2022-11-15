@@ -168,7 +168,7 @@ namespace Plugin {
                 {
                     // Lazy creation, get the interface, if we want to iterate over the trace categories.
                     if ((_iterator == nullptr) && (_connection != nullptr)) {
-                        _iterator = _connection->Aquire<Trace::ITraceIterator>(Core::infinite, _T("TraceIterator"), static_cast<uint32_t>(~0));
+                        _iterator = _connection->Acquire<Trace::ITraceIterator>(Core::infinite, _T("TraceIterator"), static_cast<uint32_t>(~0));
                     }
 
                     if (_iterator != nullptr) {
@@ -181,7 +181,7 @@ namespace Plugin {
 
                     // Lazy creation, get the interface, if we want to iterate over the trace categories.
                     if ((_iterator == nullptr) && (_connection != nullptr)) {
-                        _iterator = _connection->Aquire<Trace::ITraceIterator>(Core::infinite, _T("TraceIterator"), static_cast<uint32_t>(~0));
+                        _iterator = _connection->Acquire<Trace::ITraceIterator>(Core::infinite, _T("TraceIterator"), static_cast<uint32_t>(~0));
                     }
 
                     if (_iterator != nullptr) {
@@ -193,7 +193,7 @@ namespace Plugin {
                 void Set(const bool enabled, const string& module, const string& category)
                 {
                     if (_control == nullptr) {
-                        _control = _connection->Aquire<Trace::ITraceController>(Core::infinite, _T("TraceController"), static_cast<uint32_t>(~0));
+                        _control = _connection->Acquire<Trace::ITraceController>(Core::infinite, _T("TraceController"), static_cast<uint32_t>(~0));
                     }
 
                     if (_control != nullptr) {

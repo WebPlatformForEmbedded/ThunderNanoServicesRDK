@@ -64,7 +64,7 @@ namespace Plugin {
             }
 
         private:
-            void* Aquire(const string&, const uint32_t interfaceId, const uint32_t versionId) override
+            void* Acquire(const string&, const uint32_t interfaceId, const uint32_t versionId) override
             {
                 void* result = nullptr;
 
@@ -73,7 +73,7 @@ namespace Plugin {
                     _parentInterface->AddRef();
 
 
-                    TRACE(Trace::Information, ("SecurityAgent interface(IAuthenticate) aquired => %p", this));
+                    TRACE(Trace::Information, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
                     result = _parentInterface;
                 }
                 return (result);

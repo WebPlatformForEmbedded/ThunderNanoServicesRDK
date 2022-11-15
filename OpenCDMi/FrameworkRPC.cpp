@@ -128,7 +128,7 @@ namespace Plugin {
             }
 
         private:
-            virtual void* Aquire(const string&, const uint32_t interfaceId, const uint32_t versionId)
+            virtual void* Acquire(const string&, const uint32_t interfaceId, const uint32_t versionId)
             {
                 void* result = nullptr;
 
@@ -136,7 +136,7 @@ namespace Plugin {
                 if (((versionId == 1) || (versionId == static_cast<uint32_t>(~0))) && ((interfaceId == Exchange::IAccessorOCDM::ID) || (interfaceId == Core::IUnknown::ID))) {
                     // Reference count our parent
                     _parentInterface->AddRef();
-                    TRACE(Trace::Information, ("OCDM interface aquired => %p", this));
+                    TRACE(Trace::Information, ("OCDM interface acquired => %p", this));
                     // Allright, respond with the interface.
                     result = _parentInterface;
                 }
@@ -171,7 +171,7 @@ namespace Plugin {
                 }
 
             public:
-                bool AquireBuffer(string& locator)
+                bool AcquireBuffer(string& locator)
                 {
                     uint8_t index = 0;
 
@@ -593,7 +593,7 @@ POP_WARNING()
                     _adminLock.Lock();
                     if( _buffer == nullptr ) {
 
-                        if (_parent._administrator.AquireBuffer(bufferID) == true)
+                        if (_parent._administrator.AcquireBuffer(bufferID) == true)
                         {
                             _buffer = new DataExchange(_mediaKeySession, bufferID, _parent.DefaultSize());
                             _adminLock.Unlock();

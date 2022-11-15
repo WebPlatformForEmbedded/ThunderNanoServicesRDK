@@ -62,7 +62,7 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         GCallback(+[](gpointer userData) -> gpointer {
             Core::ProxyType<RPC::CommunicatorClient>& comClient = *static_cast<Core::ProxyType<RPC::CommunicatorClient>*>(userData);
 
-            PluginHost::IShell* controller = comClient->Aquire<PluginHost::IShell>(10000, _T("Controller"), ~0);
+            PluginHost::IShell* controller = comClient->Acquire<PluginHost::IShell>(10000, _T("Controller"), ~0);
             const PluginHost::ISubSystem* subsysInterface = controller->SubSystems();
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = subsysInterface->Get<PluginHost::ISubSystem::IIdentifier>();
 
