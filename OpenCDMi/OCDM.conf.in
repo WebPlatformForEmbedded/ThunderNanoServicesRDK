@@ -3,7 +3,7 @@ autostart = "@PLUGIN_OPENCDMI_AUTOSTART@"
 if boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
     boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
     boolean("@PLUGIN_OPENCDMI_NAGRA@") :
-    precondition.append("WebSource")
+    precondition = ["Platform"]
 
 configuration = JSON()
 
