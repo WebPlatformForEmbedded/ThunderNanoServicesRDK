@@ -25,6 +25,8 @@
 #include <interfaces/json/JsonData_LocationSync.h>
 #include <interfaces/ITimeZone.h>
 
+#include <limits>
+
 namespace WPEFramework {
 namespace Plugin {
 
@@ -115,6 +117,11 @@ POP_WARNING()
             {
                 return (_locator);
             }
+            bool Valid() const {
+                ASSERT(_locator != nullptr);
+                return _locator->Valid();
+            }
+
 
         private:
             inline uint32_t Probe()
@@ -147,13 +154,19 @@ POP_WARNING()
             Config()
                 : Interval(30)
                 , Retries(8)
+                , ActivateOnFailure(true) // as in some cases startup of the system depends on the Internet and Locatioin subsystems to be flagged this enables the activation of these subsystems even though probing was unsuccesfull  (and for backward compatibility it is even the default)
                 , Source()
                 , TimeZone()
+                , Latitude(51977956) // Divider 1.000.000
+                , Longitude(5726384) // Divider 1.000.000
             {
                 Add(_T("interval"), &Interval);
                 Add(_T("retries"), &Retries);
+                Add(_T("activateonfailure"), &ActivateOnFailure);
                 Add(_T("source"), &Source);
                 Add(_T("timezone"), &TimeZone);
+                Add(_T("latitude"), &Latitude);
+                Add(_T("longitude"), &Longitude);
             }
             ~Config()
             {
@@ -162,8 +175,66 @@ POP_WARNING()
         public:
             Core::JSON::DecUInt16 Interval;
             Core::JSON::DecUInt8 Retries;
+            Core::JSON::Boolean ActivateOnFailure; // as in some cases startup of the system depends on the Internet and Locatioin subsystems to be flagged this enables the activation of these subsystems even though probing was unsuccesfull  (and for backward compatibility it is even the default)
             Core::JSON::String Source;
             Core::JSON::String TimeZone;
+            Core::JSON::DecSInt32 Latitude;
+            Core::JSON::DecSInt32 Longitude;
+        };
+
+        class LocationInfo :  public PluginHost::ISubSystem::ILocation {
+        public:
+            LocationInfo(const LocationInfo&) = default;
+            LocationInfo(LocationInfo&&) = default;
+            LocationInfo& operator=(const LocationInfo&) = default;
+            LocationInfo& operator=(LocationInfo&&) = default;
+
+            LocationInfo()
+                : _timeZone()
+                , _country()
+                , _region()
+                , _city()
+                , _latitude(std::numeric_limits<int32_t>::min())
+                , _longitude(std::numeric_limits<int32_t>::min())
+            {
+            }
+            LocationInfo(int32_t latitude, int32_t longitude)
+                : _timeZone()
+                , _country()
+                , _region()
+                , _city()
+                , _latitude(latitude)
+                , _longitude(longitude)
+            {
+            }
+            ~LocationInfo() override = default;
+
+        public:
+            BEGIN_INTERFACE_MAP(Location)
+            INTERFACE_ENTRY(PluginHost::ISubSystem::ILocation)
+            END_INTERFACE_MAP
+
+        public:
+            string TimeZone() const override { return _timeZone; }
+            void TimeZone(const string& timezone) { _timeZone = timezone; }
+            string Country() const override { return _country; }
+            void Country(const string& country) { _country = country; }
+            string Region() const override { return _region; }
+            void Region(const string& region) { _region = region; }
+            string City() const override { return _city; }
+            void City(const string& city) { _city = city; }
+            int32_t Latitude() const override { return _latitude; }
+            void Latitude(const int32_t latitude) { _latitude = latitude; }
+            int32_t Longitude() const override { return _longitude; }
+            void Longitude(const int32_t longitude) { _longitude = longitude; }
+
+        private:
+            string _timeZone;
+            string _country;
+            string _region;
+            string _city;
+            int32_t _latitude; 
+            int32_t _longitude;
         };
 
     public:
@@ -202,7 +273,8 @@ POP_WARNING()
 
     private:
         string CurrentTimeZone() const;
-        void TimeZoneChanged(const string& timezone) const;
+        void NotifyTimeZoneChanged(const string& timezone) const;
+        void SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update);
         void RegisterAll();
         void UnregisterAll();
         uint32_t endpoint_sync();
@@ -217,10 +289,12 @@ POP_WARNING()
         uint16_t _skipURL;
         string _source;
         Core::Sink<Notification> _sink;
-        PluginHost::IShell* _service;
-        string _timezoneoverride;
+        PluginHost::IShell* _service; 
+        bool _timezoneoverriden; 
+        Core::Sink<LocationInfo> _locationinfo;
         mutable Core::CriticalSection _adminLock;
         TimeZoneObservers _timezoneoberservers;
+        bool _activateOnFailure;
     };
 
 } // namespace Plugin
