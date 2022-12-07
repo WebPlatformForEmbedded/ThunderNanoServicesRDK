@@ -47,9 +47,11 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         , _source()
         , _sink(this)
         , _service(nullptr)
-        , _timezoneoverride()
+        , _timezoneoverriden(false)
+        , _locationinfo()
         , _adminLock()
         , _timezoneoberservers()
+        , _activateOnFailure(true)
     {
     }
 POP_WARNING()
@@ -60,14 +62,21 @@ POP_WARNING()
         Config config;
         config.FromString(service->ConfigLine());
 
-        if( ( config.TimeZone.IsSet() == true ) && ( config.TimeZone.Value().empty() == false ) ) {
-            Core::SystemInfo::Instance().SetTimeZone(config.TimeZone.Value());
-            _timezoneoverride = config.TimeZone.Value();
-        }
-
         if (LocationService::IsSupported(config.Source.Value()) == Core::ERROR_NONE) {
+            if( ( config.TimeZone.IsSet() == true ) && ( config.TimeZone.Value().empty() == false ) ) {
+                _locationinfo.TimeZone(config.TimeZone.Value());
+                _timezoneoverriden = true;
+                Core::SystemInfo::Instance().SetTimeZone(config.TimeZone.Value());
+            }
+
+            if( ( config.Latitude.IsSet() == true ) && ( config.Longitude.IsSet() == true ) ) {
+                _locationinfo.Latitude(config.Latitude.Value());
+                _locationinfo.Longitude(config.Longitude.Value());
+            }
+
             _skipURL = static_cast<uint16_t>(service->WebPrefix().length());
             _source = config.Source.Value();
+            _activateOnFailure = config.ActivateOnFailure.Value();
             _service = service;
             _service->AddRef();
             
@@ -97,10 +106,11 @@ POP_WARNING()
         config.FromString(service->ConfigLine());
 
         PluginHost::IController* controller = nullptr;
-        if( ( _timezoneoverride != config.TimeZone.Value() ) && 
+        if( (_timezoneoverriden == true) &&
+            ( _locationinfo.TimeZone() != config.TimeZone.Value() ) && 
             ( ( controller = service->QueryInterfaceByCallsign<PluginHost::IController>(_T("")) ) != nullptr ) 
           ) {
-            config.TimeZone = _timezoneoverride;
+            config.TimeZone = _locationinfo.TimeZone();
             string newconfig;
             config.ToString(newconfig);
             service->ConfigLine(newconfig);
@@ -147,7 +157,7 @@ POP_WARNING()
 
             if ((internet != nullptr) && (location != nullptr)) {
                 response->PublicIp = internet->PublicIPAddress();
-                response->TimeZone = CurrentTimeZone();
+                response->TimeZone = location->TimeZone();
                 response->Region = location->Region();
                 response->Country = location->Country();
                 response->City = location->City();
@@ -208,63 +218,111 @@ POP_WARNING()
     }
 
     uint32_t LocationSync::TimeZone(const string& timeZone) {
+
         _adminLock.Lock();
-        _timezoneoverride = timeZone;
-        _adminLock.Unlock();
-        Core::SystemInfo::Instance().SetTimeZone(_timezoneoverride);
-        TimeZoneChanged(timeZone);
+
+        _timezoneoverriden = true;
+
+        if(_locationinfo.TimeZone() != timeZone) {
+
+            _locationinfo.TimeZone(timeZone);
+
+            _adminLock.Unlock();
+
+            Core::SystemInfo::Instance().SetTimeZone(timeZone);
+
+            // let's check if we need to update the subsystem. As there is no support in this plugin for unsetting the Location subsystem that is not taken into account
+            PluginHost::ISubSystem* subSystem = _service->SubSystems();
+            ASSERT(subSystem != nullptr);
+            if(subSystem != nullptr) {
+                SetLocationSubsystem(*subSystem, true);
+                subSystem->Release();
+            }
+
+            NotifyTimeZoneChanged(timeZone);
+
+        } else {
+            _adminLock.Unlock();
+        }
+
         return Core::ERROR_NONE;
     }
 
     string LocationSync::CurrentTimeZone() const {
-        string timezone;
-        _adminLock.Lock();
-        if( _timezoneoverride.empty() == true ) {
-            _adminLock.Unlock();
-            PluginHost::ISubSystem* subSystem = _service->SubSystems();
-            ASSERT(subSystem != nullptr);
-            const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
-            timezone = location->TimeZone();
-        } else {
-            timezone = _timezoneoverride;
-            _adminLock.Unlock();
-        }
-        return timezone;
+        Core::SafeSyncType<Core::CriticalSection> guard(_adminLock);
+        return _locationinfo.TimeZone();
     }
 
-    void LocationSync::TimeZoneChanged(const string& timezone) const {
+    void LocationSync::NotifyTimeZoneChanged(const string& timezone) const {
         _adminLock.Lock();
         for (auto observer : _timezoneoberservers) {
             observer->TimeZoneChanged(timezone);
         }
         _adminLock.Unlock();
+
         Exchange::JTimeZone::Event::TimeZoneChanged(const_cast<PluginHost::JSONRPC&>(static_cast<const PluginHost::JSONRPC&>(*this)), timezone);
+        SYSLOG(Logging::Startup, (_T("TimeZone change to \"%s\", local date time is now %s."), timezone.c_str(), Core::Time::Now().ToRFC1123(true).c_str()));
+    }
+
+    void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {
+        if(update == false) {
+            _adminLock.Lock();
+            subsystem.Set(PluginHost::ISubSystem::LOCATION, &_locationinfo);
+            _adminLock.Unlock();
+        } else {
+            _adminLock.Lock();
+            if(subsystem.IsActive(PluginHost::ISubSystem::LOCATION) == true) {
+                subsystem.Set(PluginHost::ISubSystem::LOCATION, &_locationinfo);
+            }
+            _adminLock.Unlock();
+        }
     }
 
     void LocationSync::SyncedLocation()
     {
-        PluginHost::ISubSystem* subSystem = _service->SubSystems();
+        if ((_sink.Location() != nullptr) && (_sink.Valid() == true)) {  // _sink.Location() != nullptr basically is always true
+            string newtimezone;
+            _adminLock.Lock();
+            if( (_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min()) ) {
+                _locationinfo.Latitude(_sink.Location()->Latitude());
+                _locationinfo.Longitude(_sink.Location()->Longitude());
+            } 
+            _locationinfo.Country(_sink.Location()->Country());
+            _locationinfo.Region(_sink.Location()->Region());
+            _locationinfo.City(_sink.Location()->City());
+            if( (_sink.Location()->TimeZone().empty() == false) && (_timezoneoverriden == false) ) {
+                newtimezone = _sink.Location()->TimeZone();
+                _locationinfo.TimeZone(newtimezone);
+            }
+            _adminLock.Unlock();
 
+            if(newtimezone.empty() == false) {
+                Core::SystemInfo::Instance().SetTimeZone(newtimezone);
+                NotifyTimeZoneChanged(newtimezone);
+            }
+        } else {
+            _adminLock.Lock();
+            // if they are not overriden in the config and we cannot get them from the lookup, set them to default
+            if( (_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min()) ) {
+                _locationinfo.Latitude(51977956);
+                _locationinfo.Longitude(5726384);
+            } 
+            _adminLock.Unlock();
+        }
+
+        PluginHost::ISubSystem* subSystem = _service->SubSystems();
         ASSERT(subSystem != nullptr);
 
-        if (subSystem != nullptr) {
-
-            subSystem->Set(PluginHost::ISubSystem::INTERNET, _sink.Network());
-            subSystem->Set(PluginHost::ISubSystem::LOCATION, _sink.Location());
-            subSystem->Release();
-
-            if ((_sink.Location() != nullptr) && (_sink.Location()->TimeZone().empty() == false)) {
-                _adminLock.Lock();
-                if( _timezoneoverride.empty() == true ) {
-                    _adminLock.Unlock();
-                    Core::SystemInfo::Instance().SetTimeZone(_sink.Location()->TimeZone());
-                    TimeZoneChanged(_sink.Location()->TimeZone());
-                } else {
-                    _adminLock.Unlock();
-                }
-                SYSLOG(Logging::Startup, (_T("Local time %s."),Core::Time::Now().ToRFC1123(true).c_str()));
+        if (subSystem != nullptr) { 
+            if( (_activateOnFailure == true) || (_sink.Location() == nullptr) || ( _sink.Valid() == true ) ) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
+                subSystem->Set(PluginHost::ISubSystem::INTERNET, _sink.Network());
+                SetLocationSubsystem(*subSystem, false);
+                event_locationchange();
+            } else if(_timezoneoverriden == true) { // if the probing failed but the timezone was explicitely set we only set the location subsystem to pass on the timezone info
+                SetLocationSubsystem(*subSystem, false);
                 event_locationchange();
             }
+            subSystem->Release();
         }
     }
 

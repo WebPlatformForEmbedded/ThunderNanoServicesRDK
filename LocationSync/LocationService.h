@@ -67,6 +67,9 @@ namespace Plugin {
         static uint32_t IsSupported(const string& remoteNode);
         uint32_t Probe(const string& remoteNode, const uint32_t retries, const uint32_t retryTimeSpan);
         void Stop();
+        bool Valid() const {
+            return _state == LOADED;
+        }
 
         /*
         * ------------------------------------------------------------------------------------------------------------
