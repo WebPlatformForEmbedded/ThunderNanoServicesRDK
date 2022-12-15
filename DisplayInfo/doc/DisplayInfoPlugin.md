@@ -200,7 +200,7 @@ This method takes no parameters.
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| heigth | integer |  |
+| height | integer |  |
 
 ### Example
 
