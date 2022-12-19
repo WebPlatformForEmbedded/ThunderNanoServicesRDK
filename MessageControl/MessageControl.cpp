@@ -140,7 +140,6 @@ namespace WPEFramework {
 
         _outputLock.Lock();
 
-        _outputDirector.clear();
         _webSocketExporter.Deinitialize();
 
         _outputLock.Unlock();
