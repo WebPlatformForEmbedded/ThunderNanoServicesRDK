@@ -93,9 +93,11 @@ namespace Plugin {
                 : Core::JSON::Container()
                 , ACL(_T("acl.json"))
                 , Connector()
+                , TestToken()
             {
                 Add(_T("acl"), &ACL);
                 Add(_T("connector"), &Connector);
+                Add(_T("testtoken"), &TestToken);
             }
             ~Config()
             {
@@ -104,6 +106,7 @@ namespace Plugin {
         public:
             Core::JSON::String ACL;
             Core::JSON::String Connector;
+            Core::JSON::String TestToken;
         };
 
     public:
@@ -159,12 +162,14 @@ namespace Plugin {
         #endif // DEBUG
         uint32_t endpoint_validate(const JsonData::SecurityAgent::CreatetokenResultInfo& params, JsonData::SecurityAgent::ValidateResultData& response);
 
-
     private:
         AccessControlList _acl;
         uint8_t _skipURL;
         std::unique_ptr<TokenDispatcher> _dispatcher; 
         Core::ProxyType<RPC::InvokeServer> _engine;
+        string _testtoken;
+
+        static constexpr TCHAR TestTokenContent[] = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
     };
 
 } // namespace Plugin
