@@ -74,6 +74,7 @@ namespace Plugin {
         : _acl()
         , _dispatcher(nullptr)
         , _engine()
+        , _testtoken()
     {
         RegisterAll();
     }
@@ -88,6 +89,10 @@ namespace Plugin {
         Config config;
         config.FromString(service->ConfigLine());
         string version = service->Version();
+
+        if (config.TestToken.IsSet()) {
+            _testtoken = config.TestToken.Value();
+        }
 
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
         Core::File aclFile(service->PersistentPath() + config.ACL.Value());
@@ -115,7 +120,6 @@ namespace Plugin {
         ASSERT(subSystem != nullptr);
 
         string connector = config.Connector.Value();
-
         if (connector.empty() == true) {
             connector = service->VolatilePath() + _T("token");
         }
@@ -141,7 +145,6 @@ namespace Plugin {
                 }
             }
         }
-
         // On success return empty, to indicate there is no error text.
         return _T("");
     }
@@ -180,19 +183,27 @@ namespace Plugin {
     {
         PluginHost::ISecurity* result = nullptr;
 
-        auto webToken = JWTFactory::Instance().Element();
-        uint16_t load = webToken->PayloadLength(token);
+        if (token.empty() == false) {
+            if (token != _testtoken) {
 
-        // Validate the token
-        if (load != static_cast<uint16_t>(~0)) {
-            // It is potentially a valid token, extract the payload.
-            uint8_t* payload = reinterpret_cast<uint8_t*>(ALLOCA(load));
+                auto webToken = JWTFactory::Instance().Element();
+                    uint16_t load = webToken->PayloadLength(token);
 
-            load = webToken->Decode(token, load, payload);
+                    // Validate the token
+                    if (load != static_cast<uint16_t>(~0)) {
+                        // It is potentially a valid token, extract the payload.
+                        uint8_t* payload = reinterpret_cast<uint8_t*>(ALLOCA(load));
 
-            if (load != static_cast<uint16_t>(~0)) {
-                // Seems like we extracted a valid payload, time to create an security context
-                result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload);
+                            load = webToken->Decode(token, load, payload);
+
+                        if (load != static_cast<uint16_t>(~0)) {
+                            // Seems like we extracted a valid payload, time to create an security context
+                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload);
+                        }
+                    }
+            }
+            else {
+                result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(TestTokenContent));
             }
         }
         return (result);

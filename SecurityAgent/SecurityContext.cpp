@@ -17,36 +17,6 @@
  * limitations under the License.
  */
  
-// C++ program to demonstrate working of regex_search()
-#include <iostream>
-#include <string.h>
-#include <regex>
-
-int testApp()
-{
-    // Target sequence
-    std::string s = "I am looking for GeeksForGeeks "
-                    "articles";
-
-    // An object of regex for pattern to be searched
-    std::regex r("Geek[a-zA-Z]+");
-
-    // flag type for determining the matching behavior
-    // here it is for matches on 'string' objects
-    std::smatch m;
-
-    // regex_search() for searching the regex pattern
-    // 'r' in the string 's'. 'm' is flag for determining
-    // matching behavior.
-    std::regex_search(s, m, r);
-
-    // for each loop
-    for (auto x : m)
-        std::cout << x << " ";
-
-    return 0;
-}
-
 #include "SecurityContext.h"
 
 namespace WPEFramework {
