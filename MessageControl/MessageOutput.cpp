@@ -40,8 +40,9 @@ namespace Publishers {
                     text.c_str());
         } else {
             const string time(now.ToRFC1123(true));
-            output = Core::Format("[%s]:[%s:%u]:[%s]:[%s]: %s\n",
+            output = Core::Format("[%s]:[%s]:[%s:%u]:[%s]:[%s]: %s\n",
                     time.c_str(),
+                    module.c_str(),
                     Core::FileNameOnly(fileName.c_str()),
                     lineNumber,
                     className.c_str(),
