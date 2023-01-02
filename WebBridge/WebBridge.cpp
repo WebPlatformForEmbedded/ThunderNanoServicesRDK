@@ -183,9 +183,11 @@ namespace WPEFramework {
 
             void WebBridge::Deinitialize(PluginHost::IShell* service) /* override */
             {
-                ASSERT(_service == service);
+                if (_service != nullptr) {
+                    ASSERT(_service == service);
 
-                _service = nullptr;
+                    _service = nullptr;
+                }
             }
 
             string WebBridge::Information() const /* override */

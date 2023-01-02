@@ -68,45 +68,43 @@ namespace {
             }
         }
 
-        if(result.length() != 0){
-            Deinitialize(service);
-        }
         return (result);
     }
 
     void Packager::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if(_implementation != nullptr) {
-            Unregister(kInstallMethodName);
-            Unregister(kSynchronizeMethodName);
+            if (_implementation != nullptr) {
+                Unregister(kInstallMethodName);
+                Unregister(kSynchronizeMethodName);
 
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
-            VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
-             _implementation = nullptr;
-            // It should have been the last reference we are releasing,
-            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-            // are leaking ...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                VARIABLE_IS_NOT_USED uint32_t result = _implementation->Release();
+                _implementation = nullptr;
+                // It should have been the last reference we are releasing,
+                // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+                // are leaking ...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
 
-            // If this was running in a (container) process ...
-            if (connection != nullptr) {
-                // Lets trigger the cleanup sequence for
-                // out-of-process code. Will will guard
-                // that unwilling processes, get shot if
-                // not stopped friendly :~)
-                connection->Terminate();
-                connection->Release();
+                // If this was running in a (container) process ...
+                if (connection != nullptr) {
+                    // Lets trigger the cleanup sequence for
+                    // out-of-process code. Will will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :~)
+                    connection->Terminate();
+                    connection->Release();
+                }
             }
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
         }
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
-
     }
 
     string Packager::Information() const

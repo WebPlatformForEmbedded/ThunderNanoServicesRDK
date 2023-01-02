@@ -267,6 +267,8 @@ namespace Plugin {
         ASSERT(_outputs.size() == 0);
 
         _service = service;
+        _service->AddRef();
+
         _config.FromString(_service->ConfigLine());
         _warningsPath = service->VolatilePath();
         _outputOnlyWarnings = _config.WarningsOnly.Value();
@@ -305,14 +307,19 @@ namespace Plugin {
 
     void WarningReportingControl::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        ASSERT(service == _service);
+        if (_service != nullptr) {
+            ASSERT(service == _service);
 
-        _service->Unregister(&_observer);
+            _service->Unregister(&_observer);
 
-        // Stop observing..
-        _observer.Stop();
+            // Stop observing..
+            _observer.Stop();
 
-        _outputs.clear();
+            _outputs.clear();
+
+            _service->Release();
+            _service = nullptr;
+        }
     }
 
     bool WarningReportingControl::Attach(PluginHost::Channel& channel)

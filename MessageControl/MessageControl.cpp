@@ -128,55 +128,57 @@ namespace WPEFramework {
 
     void MessageControl::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT (_service == service);
+        if (_service != nullptr) {
+            ASSERT (_service == service);
 
-        if ((_collect != nullptr) && (_control != nullptr)) {
-            Exchange::JMessageControl::Unregister(*this);
+            if ((_collect != nullptr) && (_control != nullptr)) {
+                Exchange::JMessageControl::Unregister(*this);
 
-            _collect->Callback(nullptr);
+                _collect->Callback(nullptr);
 
-            service->Unregister(&_observer);
+                _service->Unregister(&_observer);
+            }
+
+            _outputLock.Lock();
+
+            _webSocketExporter.Deinitialize();
+
+            _outputLock.Unlock();
+
+            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+            if (_collect != nullptr) {
+                _collect->Release();
+                _collect = nullptr;
+            }
+
+            if (_control != nullptr) {
+                VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
+                _control = nullptr;
+
+                // It should have been the last reference we are releasing,
+                // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+            }
+
+            // The process can disappear in the meantime...
+            if (connection != nullptr) {
+                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
+                connection->Terminate();
+                connection->Release();
+            }
+
+            while (_outputDirector.empty() == false) {
+                delete _outputDirector.back();
+                _outputDirector.pop_back();
+            }
+
+            _service->Release();
+            _service = nullptr;
+
+            _connectionId = 0;
         }
-
-        _outputLock.Lock();
-
-        _webSocketExporter.Deinitialize();
-
-        _outputLock.Unlock();
-
-        RPC::IRemoteConnection* connection(service->RemoteConnection(_connectionId));
-
-        if (_collect != nullptr) {
-            _collect->Release();
-            _collect = nullptr;
-        }
-
-        if (_control != nullptr) {
-            VARIABLE_IS_NOT_USED uint32_t result = _control->Release();
-            _control = nullptr;
-
-            // It should have been the last reference we are releasing,
-            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-        }
-
-        // The process can disappear in the meantime...
-        if (connection != nullptr) {
-            // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
-            connection->Terminate();
-            connection->Release();
-        }
-
-        while (_outputDirector.empty() == false) {
-            delete _outputDirector.back();
-            _outputDirector.pop_back();
-        }
-
-        _service->Release();
-        _service = nullptr;
-
-        _connectionId = 0;
     }
 
     string MessageControl::Information() const

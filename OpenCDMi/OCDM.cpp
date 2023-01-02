@@ -142,63 +142,61 @@ namespace Plugin {
             }
         }
 
-        if(message.length() != 0) {
-            Deinitialize(service);
-        }
-
         return message;
     }
 
     /*virtual*/ void OCDM::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if(_opencdmi != nullptr) {
+            if (_opencdmi != nullptr) {
 
-            if(_memory != nullptr) {
-                _memory->Release();
-                _memory = nullptr;
+                if (_memory != nullptr) {
+                    _memory->Release();
+                    _memory = nullptr;
+                }
+
+                _opencdmi->Deinitialize(service);
+
+                UnregisterAll();
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+                VARIABLE_IS_NOT_USED uint32_t result = _opencdmi->Release();
+                _opencdmi = nullptr;
+                // It should have been the last reference we are releasing,
+                // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // If this was running in a (container) proccess...
+                if (connection != nullptr) {
+
+                    // Lets trigger the cleanup sequence for
+                    // out-of-process code. Which will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :~)
+                    connection->Terminate();
+                    connection->Release();
+                }
             }
 
-            _opencdmi->Deinitialize(service);
+            PluginHost::ISubSystem* subSystem = service->SubSystems();
 
-            UnregisterAll();
-
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-
-            VARIABLE_IS_NOT_USED uint32_t result = _opencdmi->Release();
-            _opencdmi = nullptr;
-            // It should have been the last reference we are releasing,
-            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // If this was running in a (container) proccess...
-            if (connection != nullptr) {
-
-                // Lets trigger the cleanup sequence for
-                // out-of-process code. Which will guard
-                // that unwilling processes, get shot if
-                // not stopped friendly :~)
-                connection->Terminate();
-                connection->Release();
+            if (subSystem != nullptr) {
+                if (subSystem->IsActive(PluginHost::ISubSystem::DECRYPTION) == true) {
+                    subSystem->Set(PluginHost::ISubSystem::NOT_DECRYPTION, nullptr);
+                    subSystem->Release();
+                }
             }
+
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
         }
-
-        PluginHost::ISubSystem* subSystem = service->SubSystems();
-
-        if (subSystem != nullptr) {
-            if(subSystem->IsActive(PluginHost::ISubSystem::DECRYPTION) == true) {
-                subSystem->Set(PluginHost::ISubSystem::NOT_DECRYPTION, nullptr);
-                subSystem->Release();
-            }
-        }
-
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
     }
 
     /* virtual */ string OCDM::Information() const

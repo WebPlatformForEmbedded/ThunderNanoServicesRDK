@@ -81,56 +81,54 @@ namespace Plugin {
             }
         }
 
-        if (message.length() != 0) {
-            Deinitialize(service);
-        }
-
         // On success return empty, to indicate there is no error text.
         return message;
     }
 
     /* virtual */ void DeviceInfo::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if (_subSystem != nullptr) {
-            _subSystem->Unregister(&_notification);
-            _subSystem->Release();
-            _subSystem = nullptr;
+            if (_subSystem != nullptr) {
+                _subSystem->Unregister(&_notification);
+                _subSystem->Release();
+                _subSystem = nullptr;
+            }
+
+            if (_deviceInfo != nullptr){
+
+                if (_deviceAudioCapabilityInterface != nullptr) {
+                    _deviceAudioCapabilityInterface->Release();
+                    _deviceAudioCapabilityInterface = nullptr;
+                }
+                if (_deviceVideoCapabilityInterface != nullptr) {
+                    UnregisterAll();
+                    _deviceVideoCapabilityInterface->Release();
+                    _deviceVideoCapabilityInterface = nullptr;
+                }
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+                VARIABLE_IS_NOT_USED uint32_t result = _deviceInfo->Release();
+                _deviceInfo = nullptr;
+                // It should have been the last reference we are releasing,
+                // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                // The process can disappear in the meantime...
+                if (connection != nullptr) {
+                    // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
+                    connection->Terminate();
+                    connection->Release();
+                }
+            }
+
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
         }
-
-        if (_deviceInfo != nullptr){
-
-            if (_deviceAudioCapabilityInterface != nullptr) {
-                _deviceAudioCapabilityInterface->Release();
-                _deviceAudioCapabilityInterface = nullptr;
-            }
-            if (_deviceVideoCapabilityInterface != nullptr) {
-                UnregisterAll();
-                _deviceVideoCapabilityInterface->Release();
-                _deviceVideoCapabilityInterface = nullptr;
-            }
-
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-            VARIABLE_IS_NOT_USED uint32_t result = _deviceInfo->Release();
-            _deviceInfo = nullptr;
-            // It should have been the last reference we are releasing,
-            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-             // The process can disappear in the meantime...
-            if (connection != nullptr) {
-                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
-                connection->Terminate();
-                connection->Release();
-            }
-        }
-
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
     }
 
     /* virtual */ string DeviceInfo::Information() const
