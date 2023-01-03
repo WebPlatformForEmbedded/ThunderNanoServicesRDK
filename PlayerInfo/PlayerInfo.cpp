@@ -87,53 +87,52 @@ namespace Plugin {
             message = _T("PlayerInfo could not be instantiated.");
         }
 
-        if (message.length() != 0) {
-            Deinitialize(service);
-        }
         return message;
     }
 
     /* virtual */ void PlayerInfo::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        ASSERT(service == _service);
+        if (_service != nullptr) {
+            ASSERT(service == _service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if (_player != nullptr) {
-            if(_audioCodecs != nullptr && _videoCodecs != nullptr) {
-                Exchange::JPlayerProperties::Unregister(*this);
-            }
-            if (_audioCodecs != nullptr) {
-                _audioCodecs->Release();
-                _audioCodecs = nullptr;
-            }
-            if (_videoCodecs != nullptr) {
-                _videoCodecs->Release();
-                _videoCodecs = nullptr;
-            }
-            if (_dolbyOut != nullptr) {
-                _dolbyNotification.Deinitialize();
-                Exchange::Dolby::JOutput::Unregister(*this);
-                _dolbyOut->Release();
-                _dolbyOut = nullptr;
+            if (_player != nullptr) {
+                if (_audioCodecs != nullptr && _videoCodecs != nullptr) {
+                    Exchange::JPlayerProperties::Unregister(*this);
+                }
+                if (_audioCodecs != nullptr) {
+                    _audioCodecs->Release();
+                    _audioCodecs = nullptr;
+                }
+                if (_videoCodecs != nullptr) {
+                    _videoCodecs->Release();
+                    _videoCodecs = nullptr;
+                }
+                if (_dolbyOut != nullptr) {
+                    _dolbyNotification.Deinitialize();
+                    Exchange::Dolby::JOutput::Unregister(*this);
+                    _dolbyOut->Release();
+                    _dolbyOut = nullptr;
+                }
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+                VARIABLE_IS_NOT_USED uint32_t result = _player->Release();
+                _player = nullptr;
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // The connection can disappear in the meantime...
+                if (connection != nullptr) {
+                    // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
+                    connection->Terminate();
+                    connection->Release();
+                }
             }
 
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-            VARIABLE_IS_NOT_USED uint32_t result = _player->Release();
-            _player = nullptr;
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // The connection can disappear in the meantime...
-            if (connection != nullptr) {
-                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
-                connection->Terminate();
-                connection->Release();
-            }
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
         }
-
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
     }
 
     /* virtual */ string PlayerInfo::Information() const

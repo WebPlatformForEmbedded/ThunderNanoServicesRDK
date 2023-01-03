@@ -383,8 +383,7 @@ class WebSocketExporter;
     public:
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         WarningReportingControl()
-            : _service(nullptr)
-            , _config()
+            : _config()
             , _outputs()
             , _warningsPath()
             , _observer(*this)
@@ -460,7 +459,6 @@ POP_WARNING()
     private:
         using WarningsMediaContainer = std::list<std::unique_ptr<WarningReporting::IWarningReportingMedia>>;
 
-        PluginHost::IShell* _service;
         Config _config;
         WarningsMediaContainer _outputs;
         string _warningsPath;

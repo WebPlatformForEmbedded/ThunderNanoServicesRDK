@@ -89,55 +89,53 @@ namespace Plugin {
             message = _T("DeviceIdentification plugin could not be instantiated.");
         }
 
-        if (message.length() != 0) {
-            Deinitialize(service);
-        }
-
         return message;
     }
 
     /* virtual */ void DeviceIdentification::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if (_deviceId.empty() != true) {
+            if (_deviceId.empty() != true) {
 #ifndef DISABLE_DEVICEID_CONTROL
-            service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, nullptr);
+                service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, nullptr);
 #endif
-            _deviceId.clear();
-        }
-        if (_identifier != nullptr) {
-
-            UnregisterAll();
-
-            // Stop processing:
-            RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
-
-            VARIABLE_IS_NOT_USED uint32_t result = _identifier->Release();
-            _identifier = nullptr;
-
-            // It should have been the last reference we are releasing,
-            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // If this was running in a (container) process...
-            if (connection != nullptr) {
-                // Lets trigger the cleanup sequence for
-                // out-of-process code. Which will guard
-                // that unwilling processes, get shot if
-                // not stopped friendly :-)
-                connection->Terminate();
-                connection->Release();
+                _deviceId.clear();
             }
-         }
+            if (_identifier != nullptr) {
 
-         _connectionId = 0;
+                UnregisterAll();
 
-        _service->Release();
-        _service = nullptr;
+                // Stop processing:
+                RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
+
+                VARIABLE_IS_NOT_USED uint32_t result = _identifier->Release();
+                _identifier = nullptr;
+
+                // It should have been the last reference we are releasing,
+                // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // If this was running in a (container) process...
+                if (connection != nullptr) {
+                    // Lets trigger the cleanup sequence for
+                    // out-of-process code. Which will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :-)
+                    connection->Terminate();
+                    connection->Release();
+                }
+            }
+
+            _connectionId = 0;
+
+            _service->Release();
+            _service = nullptr;
+        }
     }
 
     /* virtual */ string DeviceIdentification::Information() const

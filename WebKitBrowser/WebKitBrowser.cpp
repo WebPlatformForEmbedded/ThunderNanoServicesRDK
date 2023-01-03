@@ -97,65 +97,63 @@ namespace Plugin {
             message = _T("WebKitBrowser could not be instantiated.");
         }
 
-        if(message.length() != 0){
-            Deinitialize(service);
-        }
-
         return message;
     }
 
     /* virtual */ void WebKitBrowser::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        // Make sure we get no longer get any notifications, we are deactivating..
-        _service->Unregister(&_notification);
+            // Make sure we get no longer get any notifications, we are deactivating..
+            _service->Unregister(&_notification);
 
-        if(_browser != nullptr) {
+            if (_browser != nullptr) {
 
-            PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
-            // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
-            if (stateControl != nullptr) {
-                stateControl->Unregister(&_notification);
-                stateControl->Release();
+                PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
+                // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
+                if (stateControl != nullptr) {
+                    stateControl->Unregister(&_notification);
+                    stateControl->Release();
+                 }
+
+                if (_memory != nullptr) {
+                    _memory->Release();
+                    _memory = nullptr;
+                }
+                if (_application != nullptr) {
+                    Exchange::JWebBrowser::Unregister(*this);
+                    UnregisterAll();
+                    _browser->Unregister(&_notification);
+                    _application->Release();
+                    _application = nullptr;
+                }
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+
+                // Stop processing of the browser:
+                VARIABLE_IS_NOT_USED uint32_t result = _browser->Release();
+                _browser = nullptr;
+                // It should have been the last reference we are releasing,
+                // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // If this was running in a (container) process...
+                if (connection != nullptr) {
+                    // Lets trigger a cleanup sequence for
+                    // out-of-process code. Which will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :~)
+                    connection->Terminate();
+                    connection->Release();
+                }
             }
 
-            if(_memory != nullptr) {
-                _memory->Release();
-                _memory = nullptr;
-            }
-            if(_application != nullptr) {
-                Exchange::JWebBrowser::Unregister(*this);
-                UnregisterAll();
-                _browser->Unregister(&_notification);
-                _application->Release();
-                _application = nullptr;
-            }
-
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-
-            // Stop processing of the browser:
-            VARIABLE_IS_NOT_USED uint32_t result = _browser->Release();
-            _browser = nullptr;
-            // It should have been the last reference we are releasing,
-            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // If this was running in a (container) process...
-            if (connection != nullptr) {
-                // Lets trigger a cleanup sequence for
-                // out-of-process code. Which will guard
-                // that unwilling processes, get shot if
-                // not stopped friendly :~)
-                connection->Terminate();
-                connection->Release();
-            }
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
         }
-
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
     }
 
     /* virtual */ string WebKitBrowser::Information() const

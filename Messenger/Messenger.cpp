@@ -66,53 +66,52 @@ namespace Plugin {
             _roomAdmin->Register(this);
         }
 
-        if(message.length() != 0) {
-            Deinitialize(service);
-        }
         return message;
     }
 
     /* virtual */ void Messenger::Deinitialize(PluginHost::IShell* service)
     {
-        ASSERT(service == _service);
+        if (_service != nullptr) {
+            ASSERT(service == _service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if(_roomAdmin != nullptr) {
-            // Exit all the rooms (if any) that were joined by this client
-            for (auto& room : _roomIds) {
-                room.second->Release();
+            if (_roomAdmin != nullptr) {
+                // Exit all the rooms (if any) that were joined by this client
+                for (auto& room : _roomIds) {
+                     room.second->Release();
+                }
+
+                _roomIds.clear();
+                _roomAdmin->Unregister(this);
+                _rooms.clear();
+                UnregisterAll();
+
+                RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
+                VARIABLE_IS_NOT_USED uint32_t result = _roomAdmin->Release();
+                _roomAdmin = nullptr;
+                // It should have been the last reference we are releasing,
+                // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // If this was running in a (container) proccess...
+                if (connection != nullptr) {
+
+                    // Lets trigger the cleanup sequence for
+                    // out-of-process code. Which will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :~)
+                    connection->Terminate();
+                    connection->Release();
+                }
+
             }
-
-            _roomIds.clear();
-            _roomAdmin->Unregister(this);
-            _rooms.clear();
-            UnregisterAll();
-
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-            VARIABLE_IS_NOT_USED uint32_t result = _roomAdmin->Release();
-            _roomAdmin = nullptr;
-            // It should have been the last reference we are releasing,
-            // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // If this was running in a (container) proccess...
-            if (connection != nullptr) {
-
-                // Lets trigger the cleanup sequence for
-                // out-of-process code. Which will guard
-                // that unwilling processes, get shot if
-                // not stopped friendly :~)
-                connection->Terminate();
-                connection->Release();
-            }
-
+            _service->Release();
+            _service = nullptr;
+            _connectionId = 0;
+            _roomACL.clear();
         }
-        _service->Release();
-        _service = nullptr;
-        _connectionId = 0;
-        _roomACL.clear();
     }
 
     // Web request handlers
