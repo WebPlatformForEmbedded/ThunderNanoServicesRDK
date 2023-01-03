@@ -351,12 +351,9 @@ namespace Plugin {
 
     const string TraceControl::Initialize(PluginHost::IShell* service)
     {
-        ASSERT(_service == nullptr);
         ASSERT(_outputs.size() == 0);
 
-        _service = service;
-        _service->AddRef();
-        _config.FromString(_service->ConfigLine());
+        _config.FromString(service->ConfigLine());
         _tracePath = service->VolatilePath();
 
 
@@ -366,7 +363,7 @@ namespace Plugin {
             _tracePath = _tracePath.substr(0, pos);
         }
 
-        _skipURL = static_cast<uint8_t>(_service->WebPrefix().length());
+        _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
 
         auto customDeleter = [](Trace::ITraceMedia *pObj) {delete pObj;};
 
@@ -392,7 +389,7 @@ namespace Plugin {
             _outputs.emplace_back(std::move(obj));
         }
 
-        _service->Register(&_observer);
+        service->Register(&_observer);
 
         // Start observing..
         _observer.Start();
@@ -403,18 +400,14 @@ namespace Plugin {
 
     void TraceControl::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        if (_service != nullptr) {
-            ASSERT(service == _service);
+        if (service != nullptr) {
 
-            _service->Unregister(&_observer);
+            service->Unregister(&_observer);
 
             // Stop observing..
             _observer.Stop();
 
             _outputs.clear();
-
-            _service->Release();
-            _service = nullptr;
         }
     }
 

@@ -263,13 +263,9 @@ namespace Plugin {
 
     const string WarningReportingControl::Initialize(PluginHost::IShell* service)
     {
-        ASSERT(_service == nullptr);
         ASSERT(_outputs.size() == 0);
 
-        _service = service;
-        _service->AddRef();
-
-        _config.FromString(_service->ConfigLine());
+        _config.FromString(service->ConfigLine());
         _warningsPath = service->VolatilePath();
         _outputOnlyWarnings = _config.WarningsOnly.Value();
 
@@ -299,7 +295,7 @@ namespace Plugin {
             _outputs.emplace_back(_webSocketExporterInstance);
         }
 
-        _service->Register(&_observer);
+        service->Register(&_observer);
         _observer.Start();
 
         return _T("");
@@ -307,18 +303,14 @@ namespace Plugin {
 
     void WarningReportingControl::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
-        if (_service != nullptr) {
-            ASSERT(service == _service);
+        if (service != nullptr) {
 
-            _service->Unregister(&_observer);
+            service->Unregister(&_observer);
 
             // Stop observing..
             _observer.Stop();
 
             _outputs.clear();
-
-            _service->Release();
-            _service = nullptr;
         }
     }
 

@@ -174,6 +174,8 @@ namespace WPEFramework {
                 _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
                 _callsign = service->Callsign();
                 _service = service;
+                _service->AddRef();
+
                 _mode = config.Context.Value();
                 _timeOut = (config.TimeOut.Value() * Core::Time::TicksPerMillisecond);
 
@@ -186,6 +188,7 @@ namespace WPEFramework {
                 if (_service != nullptr) {
                     ASSERT(_service == service);
 
+                    _service->Release();
                     _service = nullptr;
                 }
             }
