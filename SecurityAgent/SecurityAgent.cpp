@@ -160,9 +160,11 @@ namespace Plugin {
             subSystem->Release();
         }
         _acl.Clear();
-
         _dispatcher.reset(nullptr);
-        _engine.Release();
+
+        if (_engine.IsValid()) {
+            _engine.Release();
+        }
     }
 
     /* virtual */ string SecurityAgent::Information() const
@@ -224,7 +226,7 @@ namespace Plugin {
 
         index.Next();
 
-		if (index.Next() == true) {
+            if (index.Next() == true) {
             // We might be receiving a plugin download request.
             #ifdef SECURITY_TESTING_MODE
             if ((request.Verb == Web::Request::HTTP_PUT) && (request.HasBody() == true)) {
@@ -273,11 +275,10 @@ namespace Plugin {
                             TRACE(Trace::Information, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
                         }
                     }
-                
-				}
+                }
             }
         }
-		return (result);
+        return (result);
     }
 
 } // namespace Plugin

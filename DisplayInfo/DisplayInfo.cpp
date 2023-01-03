@@ -94,64 +94,62 @@ namespace Plugin {
             message = _T("DisplayInfo could not be instantiated. Could not acquire ConnectionProperties interface");
         }
 
-        if (message.length() != 0) {
-            Deinitialize(service);
-        }
-
         return message;
     }
 
     void DisplayInfo::Deinitialize(PluginHost::IShell* service) /* override */
     {
-        ASSERT(service == _service);
+        if (_service != nullptr) {
+            ASSERT(service == _service);
 
-        _service->Unregister(&_notification);
+            _service->Unregister(&_notification);
 
-        if(_connectionProperties != nullptr) {
-            _connectionProperties->Unregister(&_notification);
-            Exchange::JConnectionProperties::Unregister(*this);
+            if (_connectionProperties != nullptr) {
+                _connectionProperties->Unregister(&_notification);
+                Exchange::JConnectionProperties::Unregister(*this);
 
-            if (_hdrProperties != nullptr) {
-                Exchange::JHDRProperties::Unregister(*this);
-                _hdrProperties->Release();
-                _hdrProperties = nullptr;
+                if (_hdrProperties != nullptr) {
+                    Exchange::JHDRProperties::Unregister(*this);
+                    _hdrProperties->Release();
+                    _hdrProperties = nullptr;
+                }
+
+                if (_graphicsProperties != nullptr) {
+                    Exchange::JGraphicsProperties::Unregister(*this);
+                    _graphicsProperties->Release();
+                    _graphicsProperties = nullptr;
+                }
+
+                if (_displayProperties != nullptr) {
+                    _displayProperties->Release();
+                    Exchange::JDisplayProperties::Unregister(*this);
+                    _displayProperties = nullptr;
+                }
+
+                // Stop processing:
+                RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
+                VARIABLE_IS_NOT_USED uint32_t result = _connectionProperties->Release();
+                _connectionProperties = nullptr;
+
+                // It should have been the last reference we are releasing, 
+                // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
+                // are leaking...
+                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+
+                // If this was running in a (container) process...
+                if (connection != nullptr) {
+                    // Lets trigger the cleanup sequence for
+                    // out-of-process code. Which will guard
+                    // that unwilling processes, get shot if
+                    // not stopped friendly :-)
+                    connection->Terminate();
+                    connection->Release();
+                }
             }
-
-            if (_graphicsProperties != nullptr) {
-                Exchange::JGraphicsProperties::Unregister(*this);
-                _graphicsProperties->Release();
-                _graphicsProperties = nullptr;
-            }
-
-            if (_displayProperties != nullptr) {
-                _displayProperties->Release();
-                Exchange::JDisplayProperties::Unregister(*this);
-                _displayProperties = nullptr;
-            }
-
-            // Stop processing:
-            RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
-            VARIABLE_IS_NOT_USED uint32_t result = _connectionProperties->Release();
-            _connectionProperties = nullptr;
-
-            // It should have been the last reference we are releasing, 
-            // so it should endup in a DESTRUCTION_SUCCEEDED, if not we
-            // are leaking...
-            ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
-
-            // If this was running in a (container) process...
-            if (connection != nullptr) {
-                // Lets trigger the cleanup sequence for 
-                // out-of-process code. Which will guard 
-                // that unwilling processes, get shot if
-                // not stopped friendly :-)
-                connection->Terminate();
-                connection->Release();
-            }
+            _connectionId = 0;
+            _service->Release();
+            _service = nullptr;
         }
-        _connectionId = 0;
-        _service->Release();
-        _service = nullptr;
     }
 
     string DisplayInfo::Information() const /* override */

@@ -95,31 +95,33 @@ POP_WARNING()
 
     void LocationSync::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED) /* override */
     {
-        ASSERT(_service == service);
+        if (_service != nullptr) {
+            ASSERT(_service == service);
 
-        UnregisterAll();
-        Exchange::JTimeZone::Unregister(*this);
+            UnregisterAll();
+            Exchange::JTimeZone::Unregister(*this);
 
-        _sink.Deinitialize();
+            _sink.Deinitialize();
 
-        Config config;
-        config.FromString(service->ConfigLine());
+            Config config;
+            config.FromString(_service->ConfigLine());
 
-        PluginHost::IController* controller = nullptr;
-        if( (_timezoneoverriden == true) &&
-            ( _locationinfo.TimeZone() != config.TimeZone.Value() ) && 
-            ( ( controller = service->QueryInterfaceByCallsign<PluginHost::IController>(_T("")) ) != nullptr ) 
-          ) {
-            config.TimeZone = _locationinfo.TimeZone();
-            string newconfig;
-            config.ToString(newconfig);
-            service->ConfigLine(newconfig);
-            controller->Persist();
-            controller->Release();
+            PluginHost::IController* controller = nullptr;
+            if ( (_timezoneoverriden == true) &&
+               ( _locationinfo.TimeZone() != config.TimeZone.Value() ) &&
+               ( ( controller = _service->QueryInterfaceByCallsign<PluginHost::IController>(_T("")) ) != nullptr )
+            ) {
+                config.TimeZone = _locationinfo.TimeZone();
+                string newconfig;
+                config.ToString(newconfig);
+                _service->ConfigLine(newconfig);
+                controller->Persist();
+                controller->Release();
+            }
+
+            _service->Release();
+            _service = nullptr;
         }
-
-        _service->Release();
-        _service = nullptr;
     }
 
     string LocationSync::Information() const /* override */

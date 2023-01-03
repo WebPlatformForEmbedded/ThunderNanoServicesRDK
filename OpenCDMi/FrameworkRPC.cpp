@@ -1341,39 +1341,43 @@ POP_WARNING()
         }
 
         void Deinitialize(PluginHost::IShell* service) override {
-            _thread.Stop();
+            if (_shell != nullptr) {
+                ASSERT(_shell == _service);
 
-            std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
+                _thread.Stop();
 
-            std::list<CDMi::ISystemFactory*> deinitialized;
+                std::map<const string, SystemFactory>::iterator factory(_systemToFactory.begin());
 
-            while (factory != _systemToFactory.end()) {
-                std::list<CDMi::ISystemFactory*>::iterator index(std::find(deinitialized.begin(), deinitialized.end(), factory->second.Factory));
+                std::list<CDMi::ISystemFactory*> deinitialized;
 
-                if(index == deinitialized.end()){
-                    TRACE(Trace::Information, (_T("Deinitializing factory(%p) for key system %s"), factory->second.Factory, factory->second.Factory->KeySystem()));
-                    factory->second.Factory->Deinitialize(service);
-                    deinitialized.push_back(factory->second.Factory);
+                while (factory != _systemToFactory.end()) {
+                    std::list<CDMi::ISystemFactory*>::iterator index(std::find(deinitialized.begin(), deinitialized.end(), factory->second.Factory));
+
+                    if (index == deinitialized.end()) {
+                        TRACE(Trace::Information, (_T("Deinitializing factory(%p) for key system %s"), factory->second.Factory, factory->second.Factory->KeySystem()));
+                        factory->second.Factory->Deinitialize(service);
+                        deinitialized.push_back(factory->second.Factory);
+                    }
+
+                    factory++;
                 }
 
-                factory++;
-            }
+                if (_service != nullptr) {
+                    delete _service;
+                }
 
-            if (_service != nullptr) {
-                delete _service;
-            }
+                if (_entryPoint != nullptr) {
+                    _entryPoint->Release();
+                }
 
-            if (_entryPoint != nullptr) {
-                _entryPoint->Release();
-            }
+                if (_engine.IsValid()) {
+                    _engine.Release();
+                }
+                _systemLibraries.clear();
 
-            if (_engine.IsValid()) {
-                _engine.Release();
+                _shell->Release();
+                _shell = nullptr;
             }
-            _systemLibraries.clear();
-
-            _shell->Release();
-            _shell = nullptr;
         }
 
         virtual uint32_t Reset()

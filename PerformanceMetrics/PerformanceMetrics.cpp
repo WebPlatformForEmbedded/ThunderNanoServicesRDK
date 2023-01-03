@@ -61,8 +61,6 @@ namespace Plugin {
             ASSERT(_handler);
             _handler->Initialize();
             service->Register(&_notification);
-        } else {
-            Deinitialize(service);
         }
 
         return result;
@@ -70,7 +68,7 @@ namespace Plugin {
 
     void PerformanceMetrics::Deinitialize(PluginHost::IShell* service)
     {
-        if( _handler ) {
+        if (_handler) {
             service->Unregister(&_notification);
             // as we do this after the unregister the call to Deinitialize should be threadsafe, no more notifications can be received
             // if the deactivate of the observable did not happen we must clean up here
