@@ -6,6 +6,8 @@ if boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
     precondition = ["Platform"]
 
 configuration = JSON()
+configuration.add("connector", "@PLUGIN_OPENCDMI_CONNECTOR@")
+configuration.add("group", "@PLUGIN_OPENCDMI_GROUP@")
 
 systems = []
 
