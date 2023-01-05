@@ -1342,7 +1342,7 @@ POP_WARNING()
 
         void Deinitialize(PluginHost::IShell* service) override {
             if (_shell != nullptr) {
-                ASSERT(_shell == _service);
+                ASSERT(_shell == service);
 
                 _thread.Stop();
 
