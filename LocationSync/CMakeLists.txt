@@ -29,6 +29,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_LOCATIONSYNC_AUTOSTART "true" CACHE STRING "Automatically start LocationSync plugin")
 set(PLUGIN_LOCATIONSYNC_URI "location.webplatformforembedded.org" CACHE STRING "URI to request the location information")
+set(PLUGIN_LOCATIONSYNC_OVERRIDE_TIMEZONE CACHE STRING "Override Timezone value")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)

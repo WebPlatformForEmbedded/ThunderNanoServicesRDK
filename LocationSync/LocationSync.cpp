@@ -41,6 +41,10 @@ namespace Plugin {
     static Core::ProxyPoolType<Web::Response> responseFactory(4);
     static Core::ProxyPoolType<Web::JSONBodyType<LocationSync::Data>> jsonResponseFactory(4);
 
+namespace {
+    constexpr TCHAR FactorySetTimeZone[] = _T("Factory");
+}
+
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
     LocationSync::LocationSync()
         : _skipURL(0)
@@ -66,7 +70,7 @@ POP_WARNING()
             if( ( config.TimeZone.IsSet() == true ) && ( config.TimeZone.Value().empty() == false ) ) {
                 _locationinfo.TimeZone(config.TimeZone.Value());
                 _timezoneoverriden = true;
-                Core::SystemInfo::Instance().SetTimeZone(config.TimeZone.Value());
+                UpdateSystemTimeZone(config.TimeZone.Value());
             }
 
             if( ( config.Latitude.IsSet() == true ) && ( config.Longitude.IsSet() == true ) ) {
@@ -231,7 +235,7 @@ POP_WARNING()
 
             _adminLock.Unlock();
 
-            Core::SystemInfo::Instance().SetTimeZone(timeZone);
+            UpdateSystemTimeZone(timeZone);
 
             // let's check if we need to update the subsystem. As there is no support in this plugin for unsetting the Location subsystem that is not taken into account
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
@@ -299,7 +303,7 @@ POP_WARNING()
             _adminLock.Unlock();
 
             if(newtimezone.empty() == false) {
-                Core::SystemInfo::Instance().SetTimeZone(newtimezone);
+                UpdateSystemTimeZone(newtimezone);
                 NotifyTimeZoneChanged(newtimezone);
             }
         } else {
@@ -325,6 +329,13 @@ POP_WARNING()
                 event_locationchange();
             }
             subSystem->Release();
+        }
+    }
+
+    void LocationSync::UpdateSystemTimeZone(const string& newtimezone) 
+    {
+        if( newtimezone != FactorySetTimeZone ) {
+            Core::SystemInfo::Instance().SetTimeZone(newtimezone, false);
         }
     }
 
