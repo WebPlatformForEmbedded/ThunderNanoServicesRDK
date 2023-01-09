@@ -282,6 +282,7 @@ POP_WARNING()
         void event_locationchange();
 
         void SyncedLocation();
+        void UpdateSystemTimeZone(const string& timezone);
 
     private:
         using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;        
