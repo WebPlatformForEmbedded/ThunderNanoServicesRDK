@@ -97,7 +97,7 @@ namespace Plugin {
     static WKPageNavigationClientV0 _handlerWebKit = {
         { 0, nullptr },
         // decidePolicyForNavigationAction
-        [](WKPageRef, WKNavigationActionRef, WKFramePolicyListenerRef listener, WKTypeRef, const void* customData) {
+        [](WKPageRef, WKNavigationActionRef, WKFramePolicyListenerRef listener, WKTypeRef, const void* /* customData */) {
             WKFramePolicyListenerUse(listener);
         },
         decidePolicyForNavigationResponse,
@@ -133,7 +133,7 @@ namespace Plugin {
     WKGeolocationProviderV0 _handlerGeolocationProvider = {
         { 0, nullptr },
         // startUpdating
-        [](WKGeolocationManagerRef geolocationManager, const void* clientInfo) {
+        [](WKGeolocationManagerRef geolocationManager, const void* /* clientInfo */) {
             std::cerr << "in WKGeolocationProviderV0::startUpdating" << std::endl;
             WKGeolocationPositionRef position = WKGeolocationPositionCreate(0.0, 51.49, 4.40, 1.0);
             WKGeolocationManagerProviderDidChangePosition(geolocationManager, position);
@@ -176,7 +176,7 @@ namespace Plugin {
         nullptr, // exceededDatabaseQuota
         nullptr, // runOpenPanel
         // decidePolicyForGeolocationPermissionRequest
-        [](WKPageRef page, WKFrameRef frame, WKSecurityOriginRef origin, WKGeolocationPermissionRequestRef permissionRequest, const void* clientInfo) {
+        [](WKPageRef /* page */, WKFrameRef /* frame */, WKSecurityOriginRef /* origin */, WKGeolocationPermissionRequestRef permissionRequest, const void* /* clientInfo */) {
             WKGeolocationPermissionRequestAllow(permissionRequest);
         },
         nullptr, // headerHeight
@@ -191,7 +191,7 @@ namespace Plugin {
         nullptr, // createNewPage_deprecatedForUseWithV1
         nullptr, // mouseDidMoveOverElement
         // decidePolicyForNotificationPermissionRequest
-        [](WKPageRef page, WKSecurityOriginRef origin, WKNotificationPermissionRequestRef permissionRequest, const void* clientInfo) {
+        [](WKPageRef /* page */, WKSecurityOriginRef /* origin */, WKNotificationPermissionRequestRef permissionRequest, const void* /* clientInfo */) {
             WKNotificationPermissionRequestAllow(permissionRequest);
         },
         nullptr, // unavailablePluginButtonClicked_deprecatedForUseWithV1
@@ -230,9 +230,11 @@ namespace Plugin {
         nullptr, // runBeforeUnloadConfirmPanel
         nullptr, // fullscreenMayReturnToInline
         // willAddDetailedMessageToConsole
-        [](WKPageRef, WKStringRef source, WKStringRef, uint64_t line, uint64_t column, WKStringRef message, WKStringRef, const void* clientInfo) {
+        [](WKPageRef, WKStringRef /* source */, WKStringRef, uint64_t line, uint64_t column, WKStringRef message, WKStringRef, const void* /* clientInfo */) {
             TRACE_GLOBAL(BrowserConsoleLog, (message, line, column));
         },
+        nullptr, // requestPointerLock
+        nullptr  // didLosePointerLock
     };
 
     WKNotificationProviderV0 _handlerNotificationProvider = {
@@ -2709,7 +2711,7 @@ static GSourceFuncs _handlerIntervention =
 
 #ifndef WEBKIT_GLIB_API
     // Handles synchronous messages from injected bundle.
-    /* static */ void onDidReceiveSynchronousMessageFromInjectedBundle(WKContextRef context, WKStringRef messageName,
+    /* static */ void onDidReceiveSynchronousMessageFromInjectedBundle(WKContextRef /* context */, WKStringRef messageName,
         WKTypeRef messageBodyObj, WKTypeRef* returnData, const void* clientInfo)
     {
         int configLen = strlen(Tags::Config);
@@ -2742,7 +2744,7 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
-    /* static */ void didStartProvisionalNavigation(WKPageRef page, WKNavigationRef navigation, WKTypeRef userData, const void* clientInfo)
+    /* static */ void didStartProvisionalNavigation(WKPageRef page, WKNavigationRef navigation, WKTypeRef /* userData */, const void* clientInfo)
     {
         WebKitImplementation* browser = const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(clientInfo));
 
@@ -2758,7 +2760,7 @@ static GSourceFuncs _handlerIntervention =
         WKRelease(urlStringRef);
     }
 
-    /* static */ void didSameDocumentNavigation(const OpaqueWKPage* page, const OpaqueWKNavigation* nav, WKSameDocumentNavigationType type, const void* clientInfo, const void* info)
+    /* static */ void didSameDocumentNavigation(const OpaqueWKPage* page, const OpaqueWKNavigation* /* nav */, WKSameDocumentNavigationType type, const void* /* clientInfo */, const void* info)
     {
         if (type == kWKSameDocumentNavigationAnchorNavigation) {
             WebKitImplementation* browser = const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(info));
@@ -2775,7 +2777,7 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
-    /* static */ void didFinishDocumentLoad(WKPageRef page, WKNavigationRef navigation, WKTypeRef userData, const void* clientInfo)
+    /* static */ void didFinishDocumentLoad(WKPageRef page, WKNavigationRef navigation, WKTypeRef /* userData */, const void* clientInfo)
     {
 
         WebKitImplementation* browser = const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(clientInfo));
@@ -2791,7 +2793,7 @@ static GSourceFuncs _handlerIntervention =
         WKRelease(urlStringRef);
     }
 
-    /* static */ void requestClosure(const void* clientInfo)
+    /* static */ void requestClosure(const void* /* clientInfo */)
     {
         // WebKitImplementation* browser = const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(clientInfo));
         // TODO: @Igalia, make sure the clientInfo is actually holding the correct clientINfo, currently it is nullptr. For
@@ -2801,7 +2803,7 @@ static GSourceFuncs _handlerIntervention =
         realBrowser->NotifyClosure();
     }
 
-    /* static */ void onNotificationShow(WKPageRef page, WKNotificationRef notification, const void* clientInfo)
+    /* static */ void onNotificationShow(WKPageRef /* page */, WKNotificationRef notification, const void* clientInfo)
     {
         const WebKitImplementation* browser = static_cast<const WebKitImplementation*>(clientInfo);
 
@@ -2821,7 +2823,7 @@ static GSourceFuncs _handlerIntervention =
         WKRelease(titleRef);
     }
 
-    /* static */ void onFrameDisplayed(WKViewRef view, const void* clientInfo)
+    /* static */ void onFrameDisplayed(WKViewRef /* view */, const void* clientInfo)
     {
         WebKitImplementation* browser = const_cast<WebKitImplementation*>(static_cast<const WebKitImplementation*>(clientInfo));
         browser->SetFPS();
@@ -2856,7 +2858,7 @@ static GSourceFuncs _handlerIntervention =
         didFailNavigation(page, navigation, error, userData, clientInfo);
     }
 
-    /* static */ void didFailNavigation(WKPageRef page, WKNavigationRef, WKErrorRef error, WKTypeRef, const void *clientInfo)
+    /* static */ void didFailNavigation(WKPageRef /* page */, WKNavigationRef, WKErrorRef error, WKTypeRef, const void *clientInfo)
     {
         const int WebKitNetworkErrorCancelled = 302;
         auto errorDomain = WKErrorCopyDomain(error);
@@ -2875,7 +2877,7 @@ static GSourceFuncs _handlerIntervention =
 
     /* static */ void webProcessDidCrash(WKPageRef, const void*)
     {
-        SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess crashed, exiting...")));
+        SYSLOG_GLOBAL(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
         exit(1);
     }
 #endif // !WEBKIT_GLIB_API

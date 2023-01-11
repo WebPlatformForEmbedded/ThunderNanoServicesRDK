@@ -126,7 +126,7 @@ namespace WPEFramework {
         return message;
     }
 
-    void MessageControl::Deinitialize(PluginHost::IShell* service)
+    void MessageControl::Deinitialize(VARIABLE_IS_NOT_USED PluginHost::IShell* service)
     {
         if (_service != nullptr) {
             ASSERT (_service == service);

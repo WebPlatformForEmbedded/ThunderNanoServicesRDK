@@ -41,8 +41,8 @@ namespace Functions {
 
     JSValueRef HandleMessage(
       JSContextRef context, JSObjectRef,
-      JSObjectRef, size_t argumentCount,
-      const JSValueRef arguments[], JSValueRef*) {
+      JSObjectRef, size_t /* argumentCount */,
+      const JSValueRef /* arguments */ [], JSValueRef*) {
 
       string thunderAccess;
       if ( !Core::SystemInfo::GetEnvironment(_T("THUNDER_ACCESS"), thunderAccess) )

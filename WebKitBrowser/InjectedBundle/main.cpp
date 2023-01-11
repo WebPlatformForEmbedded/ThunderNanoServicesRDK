@@ -257,7 +257,7 @@ static WKBundlePageLoaderClientV6 s_pageLoaderClient = {
     nullptr, // didDisplayInsecureContentForFrame
     nullptr, // didRunInsecureContentForFrame
     // didClearWindowObjectForFrame
-    [](WKBundlePageRef page, WKBundleFrameRef frame, WKBundleScriptWorldRef scriptWorld, const void*) {
+    [](WKBundlePageRef /* page */, WKBundleFrameRef frame, WKBundleScriptWorldRef scriptWorld, const void*) {
         bool isMainCtx = (WKBundleFrameGetJavaScriptContext(frame) == WKBundleFrameGetJavaScriptContextForWorld(frame, scriptWorld));
         if (isMainCtx) {
             #if defined(ENABLE_AAMP_JSBINDINGS)
@@ -322,8 +322,8 @@ static WKBundlePageUIClientV4 s_pageUIClient = {
     nullptr, // unused5
     nullptr, // didClickAutoFillButton
     //willAddDetailedMessageToConsole
-    [](WKBundlePageRef page, WKConsoleMessageSource source, WKConsoleMessageLevel level, WKStringRef message, uint32_t lineNumber,
-        uint32_t columnNumber, WKStringRef url, const void* clientInfo) {
+    [](WKBundlePageRef /* page */, WKConsoleMessageSource /* source */, WKConsoleMessageLevel /* level */, WKStringRef message, uint32_t /* lineNumber */,
+        uint32_t /* columnNumber */, WKStringRef /* url */, const void* /* clientInfo */) {
         auto prepareMessage = [&]() {
             string messageString = WebKit::Utils::WKStringToString(message);
             const uint16_t maxStringLength = Messaging::MessageUnit::DataSize - 1;
@@ -335,7 +335,8 @@ static WKBundlePageUIClientV4 s_pageUIClient = {
 
         // TODO: use "Trace" classes for different levels.
         TRACE_GLOBAL(Trace::Information, (prepareMessage()));
-    }
+    },
+    nullptr // didResignInputElementStrongPasswordAppearance
 };
 
 static WKURLRequestRef willSendRequestForFrame(
@@ -376,7 +377,7 @@ static WKBundlePageResourceLoadClientV0 s_resourceLoadClient = {
 static WKBundleClientV1 s_bundleClient = {
     { 1, nullptr },
     // didCreatePage
-    [](WKBundleRef bundle, WKBundlePageRef page, const void* clientInfo) {
+    [](WKBundleRef bundle, WKBundlePageRef page, const void* /* clientInfo */) {
         // Register page loader client, for javascript callbacks.
         WKBundlePageSetPageLoaderClient(page, &s_pageLoaderClient.base);
 
