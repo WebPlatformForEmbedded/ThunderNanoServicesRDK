@@ -233,7 +233,7 @@ namespace Plugin {
     // Return codes:
     //  - ERROR_NONE: Success
     //  - ERROR_UNAVAILABLE: FirmwareVersion information is not available
-    uint32_t DeviceInfo::endpoint_get_firmwareversion(FirmwareversionData& response) const
+    uint32_t DeviceInfo::endpoint_get_firmwareversion(FirmwareversionData& /* response */) const
     {
         return Core::ERROR_UNAVAILABLE;
     }
