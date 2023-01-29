@@ -2167,7 +2167,52 @@ static GSourceFuncs _handlerIntervention =
                 }
                 g_mkdir_with_parents(wpeDiskCachePath, 0700);
 
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
+                uint32_t webProcessLimit{ 0 };
+                uint32_t networkProcessLimit{ 0 };
+
+                if (_config.MemoryPressure.Value().empty() == false) {
+
+                    string mStr = _config.MemoryPressure.Value();
+
+                    mStr.erase(remove_if(mStr.begin(), mStr.end(), ::isspace), mStr.end());
+                    std::istringstream iss(mStr);
+                    while (iss.good()) {
+                        string token;
+                        getline(iss, token, ',');
+
+                        auto pos = token.find(":");
+                        if (pos != string::npos) {
+                            string mKey = token.substr(0, pos);
+                            uint32_t mValue = static_cast<uint32_t>(atoi(token.substr(pos + 1).c_str()));
+                            if (mKey.compare("webprocess") == 0) {
+                                webProcessLimit = mValue;
+                            } else if (mKey.compare("networkprocess") == 0) {
+                                networkProcessLimit = mValue;
+                            }
+                        }
+                    }
+                }
+
+                if (networkProcessLimit) {
+                    WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
+                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, networkProcessLimit);
+                    webkit_website_data_manager_set_memory_pressure_settings(memoryPressureSettings);
+                    webkit_memory_pressure_settings_free(memoryPressureSettings);
+                }
+
+                WebKitWebsiteDataManager* websiteDataManager;
+                if (webProcessLimit) {
+                    WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
+                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, webProcessLimit);
+                    websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, "memory-pressure-settings", memoryPressureSettings, nullptr);
+                    webkit_memory_pressure_settings_free(memoryPressureSettings);
+                } else {
+                    websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, nullptr);
+                }
+#else
                 auto* websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, nullptr);
+#endif
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
 
