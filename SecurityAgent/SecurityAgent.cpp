@@ -88,7 +88,6 @@ namespace Plugin {
     {
         Config config;
         config.FromString(service->ConfigLine());
-        string version = service->Version();
 
         if (config.TestToken.IsSet()) {
             _testtoken = config.TestToken.Value();
