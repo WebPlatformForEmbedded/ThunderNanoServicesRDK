@@ -464,6 +464,8 @@ static GSourceFuncs _handlerIntervention =
                 , ThunderDecryptorPreference()
                 , MemoryProfile()
                 , MemoryPressure()
+                , WebProcessLimit()
+                , NetworkProcessLimit()
                 , MediaContentTypesRequiringHardwareSupport()
                 , MediaDiskCache(true)
                 , DiskCache()
@@ -515,6 +517,8 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("thunderdecryptorpreference"), &ThunderDecryptorPreference);
                 Add(_T("memoryprofile"), &MemoryProfile);
                 Add(_T("memorypressure"), &MemoryPressure);
+                Add(_T("webprocesslimit"), &WebProcessLimit);
+                Add(_T("networkprocesslimit"), &NetworkProcessLimit);
                 Add(_T("mediacontenttypesrequiringhardwaresupport"), &MediaContentTypesRequiringHardwareSupport);
                 Add(_T("mediadiskcache"), &MediaDiskCache);
                 Add(_T("diskcache"), &DiskCache);
@@ -573,6 +577,8 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::Boolean ThunderDecryptorPreference;
             Core::JSON::String MemoryProfile;
             Core::JSON::String MemoryPressure;
+            Core::JSON::DecUInt32 WebProcessLimit;
+            Core::JSON::DecUInt32 NetworkProcessLimit;
             Core::JSON::String MediaContentTypesRequiringHardwareSupport;
             Core::JSON::Boolean MediaDiskCache;
             Core::JSON::String DiskCache;
@@ -2167,44 +2173,18 @@ static GSourceFuncs _handlerIntervention =
                 }
                 g_mkdir_with_parents(wpeDiskCachePath, 0700);
 
-#if WEBKIT_CHECK_VERSION(2, 38, 0)
-                uint32_t webProcessLimit{ 0 };
-                uint32_t networkProcessLimit{ 0 };
-
-                if (_config.MemoryPressure.Value().empty() == false) {
-
-                    string mStr = _config.MemoryPressure.Value();
-
-                    mStr.erase(remove_if(mStr.begin(), mStr.end(), ::isspace), mStr.end());
-                    std::istringstream iss(mStr);
-                    while (iss.good()) {
-                        string token;
-                        getline(iss, token, ',');
-
-                        auto pos = token.find(":");
-                        if (pos != string::npos) {
-                            string mKey = token.substr(0, pos);
-                            uint32_t mValue = static_cast<uint32_t>(atoi(token.substr(pos + 1).c_str()));
-                            if (mKey.compare("webprocess") == 0) {
-                                webProcessLimit = mValue;
-                            } else if (mKey.compare("networkprocess") == 0) {
-                                networkProcessLimit = mValue;
-                            }
-                        }
-                    }
-                }
-
-                if (networkProcessLimit) {
+#ifdef WEBKIT_MEMORY_PRESSURE_API
+                if (_config.NetworkProcessLimit.IsSet() == true) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
-                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, networkProcessLimit);
+                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.NetworkProcessLimit.Value());
                     webkit_website_data_manager_set_memory_pressure_settings(memoryPressureSettings);
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 }
 
                 WebKitWebsiteDataManager* websiteDataManager;
-                if (webProcessLimit) {
+                if (_config.WebProcessLimit.IsSet() == true) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
-                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, webProcessLimit);
+                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.WebProcessLimit.Value());
                     websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, "memory-pressure-settings", memoryPressureSettings, nullptr);
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 } else {
