@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 RDK Management
+ * Copyright 2022 Metrological
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 #pragma once
 
 #include "Module.h"
+#include <interfaces/IRustBridge.h>
 
 namespace WPEFramework {
     namespace Plugin {
 
-        class WebBridge :
+        class RustBridge :
             public PluginHost::IPluginExtended,
-            public PluginHost::IWebSocket,
             public PluginHost::JSONRPC
         {
         private:
@@ -39,6 +39,73 @@ namespace WPEFramework {
                 STATE_EXISTS,
                 STATE_NONE_EXISTING,
                 STATE_CUSTOM
+            };
+            class BridgeCallback : public Exchange::IRustBridge::ICallback {
+            public:
+                BridgeCallback() = delete;
+                BridgeCallback(BridgeCallback&) = delete;
+                BridgeCallback(const BridgeCallback&) = delete;
+                BridgeCallback& operator= (const BridgeCallback&) = delete;
+
+                explicit BridgeCallback(RustBridge& parent)
+                    : _parent(parent)
+                {
+                }
+                ~BridgeCallback() override = default;
+
+            public:
+                // ALLOW RUST -> THUNDER (Invoke and Event)
+                // The synchronous Invoke from a JSONRPC is coming from the RUST world,
+                // synchronously handle this in the Thunder world.
+                void Invoke(const string& context, const string& method, const string& parameters, string& response /* @out */, uint32_t& result /* @out */) override {
+                   _parent.RustInvoke(context, method, parameters, response, result);
+                }
+
+                // Allow RUST to send an event to the interested subscribers in the Thunder
+                // world.
+                void Event(const string& event, const string& parameters) override {
+                    _parent.RustEvent(event, parameters);
+                }
+
+                void Response(const uint32_t id, const string& response, const uint32_t error) override {
+                    _parent.RustResponse(id, response, error);
+                }
+
+                BEGIN_INTERFACE_MAP(BridgeCallback)
+                    INTERFACE_ENTRY(Exchange::IRustBridge::ICallback)
+                END_INTERFACE_MAP
+
+            private:
+                RustBridge& _parent;
+            };
+            class Notification : public RPC::IRemoteConnection::INotification {
+            public:
+                Notification() = delete;
+                Notification(Notification&&) = delete;
+                Notification(const Notification&) = delete;
+                Notification& operator= (const Notification&) = delete;
+
+                explicit Notification(RustBridge& parent)
+                    : _parent(parent)
+                {
+                }
+                ~Notification() override = default;
+
+            public:
+                void Activated(RPC::IRemoteConnection* /* connection */) override
+                {
+                }
+                void Deactivated(RPC::IRemoteConnection* connectionId) override
+                {
+                    _parent.Deactivated(connectionId);
+                }
+
+                BEGIN_INTERFACE_MAP(Notification)
+                    INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+                END_INTERFACE_MAP
+
+            private:
+                RustBridge& _parent;
             };
             class Request {
             public:
@@ -59,6 +126,7 @@ namespace WPEFramework {
                     _callback->Release();
                     _callback = nullptr;
                 }
+
                 bool operator== (const IDispatcher::ICallback* callback) const {
                     return (_callback == callback);
                 }
@@ -87,14 +155,10 @@ namespace WPEFramework {
                 uint32_t _sequenceId;
                 Core::Time _issued;
             };
-            using PendingMap = std::unordered_map<uint32_t, Request>;
+
+            using PendingMap = std::map<uint32_t, Request>;
 
         public:
-            enum context : uint8_t {
-                NONE,
-                ADDED,
-                WRAPPED
-            };
             class Config : public Core::JSON::Container {
             public:
                 Config(Config&&) = delete;
@@ -104,44 +168,42 @@ namespace WPEFramework {
                 Config()
                     : Core::JSON::Container()
                     , TimeOut(3000)
-                    , Context(context::NONE)
                 {
                     Add(_T("timeout"), &TimeOut);
-                    Add(_T("context"), &Context);
                 }
                 ~Config() override = default;
 
             public:
                 Core::JSON::DecUInt16 TimeOut;
-                Core::JSON::EnumType<context> Context;
             };
 
         public:
-            WebBridge(WebBridge&&) = delete;
-            WebBridge(const WebBridge&) = delete;
-            WebBridge& operator=(const WebBridge&) = delete;
+            RustBridge(const RustBridge&) = delete;
+            RustBridge& operator=(const RustBridge&) = delete;
 
             PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST);
-            WebBridge()
+                RustBridge()
                 : _adminLock()
                 , _skipURL(0)
-                , _mode(context::NONE)
                 , _service(nullptr)
                 , _callsign()
                 , _pendingRequests()
                 , _javascriptService(0)
                 , _sequenceId(1)
                 , _timeOut(0)
+                , _connectionId(0)
+                , _module(nullptr)
+                , _notification(*this)
+                , _callback(*this)
                 , _cleaner(*this)
             {
             }
             POP_WARNING();
-            ~WebBridge() override = default;
+            ~RustBridge() override = default;
 
-            BEGIN_INTERFACE_MAP(WebBridge)
+            BEGIN_INTERFACE_MAP(RustBridge)
                 INTERFACE_ENTRY(PluginHost::IPlugin)
                 INTERFACE_ENTRY(PluginHost::IPluginExtended)
-                INTERFACE_ENTRY(PluginHost::IWebSocket)
                 INTERFACE_ENTRY(PluginHost::IDispatcher)
             END_INTERFACE_MAP
 
@@ -155,10 +217,10 @@ namespace WPEFramework {
             //! ==================================== CALLED ON THREADPOOL THREAD ======================================
             string Information() const override;
 
-            // IDispatcher (override message)
+            // IDispatcher
             // -------------------------------------------------------------------------------------------------------
             //! ==================================== CALLED ON THREADPOOL THREAD ======================================
-            Core::hresult Invoke(ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) override;
+            Core::hresult Invoke(IDispatcher::ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) override;
             Core::hresult Revoke(ICallback* callback) override;
 
             // IPluginExtended
@@ -168,29 +230,31 @@ namespace WPEFramework {
             //! ================================== CALLED ON COMMUNICATION THREAD =====================================
             void Detach(PluginHost::Channel& channel) override;
 
-            // IWebSocket
-            // -------------------------------------------------------------------------------------------------------
-            //! ================================== CALLED ON COMMUNICATION THREAD =====================================
-            Core::ProxyType<Core::JSON::IElement> Inbound(const string& identifier) override;
-            //! ==================================== CALLED ON THREADPOOL THREAD ======================================
-            Core::ProxyType<Core::JSON::IElement> Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) override;
+        private:
+            friend class Core::ThreadPool::JobType<RustBridge&>;
+            void Dispatch();
+            bool InternalMessage(const string& message, const string& parameters);
 
         private:
-            friend Core::ThreadPool::JobType<WebBridge&>;
-            void Dispatch();
-            bool InternalMessage(const Core::ProxyType<Core::JSONRPC::Message>& message);
+            void Deactivated(RPC::IRemoteConnection* connection);
+            void RustInvoke(const string& context, const string& method, const string& parmeters, string& response, uint32_t& result);
+            void RustEvent(const string & event, const string & parmeters);
+            void RustResponse(const uint32_t id, const string& response, const uint32_t error);
 
         private:
             Core::CriticalSection _adminLock;
             uint8_t _skipURL;
-            context _mode;
             PluginHost::IShell* _service;
             string _callsign;
             PendingMap _pendingRequests;
             uint32_t _javascriptService;
             uint32_t _sequenceId;
             uint32_t _timeOut;
-            Core::WorkerPool::JobType<WebBridge&> _cleaner;
+            uint32_t _connectionId;
+            Exchange::IRustBridge* _module;
+            Core::Sink<Notification> _notification;
+            Core::Sink< BridgeCallback> _callback;
+            Core::WorkerPool::JobType<RustBridge&> _cleaner;
         };
 
     } // namespace Plugin
