@@ -47,6 +47,7 @@ namespace WPEFramework {
 
             class Registration : public Core::JSON::Container {
             public:
+                Registration(Registration&&) = delete;
                 Registration(const Registration&) = delete;
                 Registration& operator=(const Registration&) = delete;
 
@@ -68,6 +69,7 @@ namespace WPEFramework {
             public:
                 class CallContext : public Core::JSON::Container {
                 public:
+                    CallContext(CallContext&&) = delete;
                     CallContext(const CallContext&) = delete;
                     CallContext& operator= (const CallContext&) = delete;
 
@@ -99,22 +101,12 @@ namespace WPEFramework {
                 };
 
             public:
+                Message(Message&&) = delete;
                 Message(const Message&) = delete;
                 Message& operator= (const Message&) = delete;
 
                 Message()
                     : Core::JSONRPC::Message() {
-                    Add(_T("context"), &Context);
-                    Add(_T("request"), &Request);
-                    Add(_T("response"), &Response);
-
-                    Core::JSONRPC::Message::JSONRPC.Clear();
-                    Request.JSONRPC.Clear();
-                    Response.JSONRPC.Clear();
-                }
-                Message(const Core::JSONRPC::Message& inbound)
-                    : Core::JSONRPC::Message()
-                    , Request(inbound) {
                     Add(_T("context"), &Context);
                     Add(_T("request"), &Request);
                     Add(_T("response"), &Response);
@@ -223,84 +215,71 @@ namespace WPEFramework {
             // -------------------------------------------------------------------------------------------------------
             //   IDispatcher methods
             // -------------------------------------------------------------------------------------------------------
-            Core::ProxyType<Core::JSONRPC::Message> WebBridge::Invoke(const Core::JSONRPC::Context& context, const Core::JSONRPC::Message& inbound) /* override */
+            Core::hresult 
+                WebBridge::Invoke(
+                    IDispatcher::ICallback* callback, 
+                    const uint32_t channelId, 
+                    const uint32_t id, 
+                    const string& token,
+                    const string& method,
+                    const string& parameters,
+                    string& response) /* override */
             {
-                string method;
-                Registration info;
+                uint32_t result(Core::ERROR_BAD_REQUEST);
+                Core::JSONRPC::Handler* handler(PluginHost::JSONRPC::Handler(method));
+                string realMethod(Core::JSONRPC::Message::Method(method));
 
-                Core::ProxyType<Message> message(g_BridgeMessages.Element());
-                string designator(inbound.Designator.Value());
-
-                if (inbound.Id.IsSet() == true) {
-                    message->JSONRPC = Core::JSONRPC::Message::DefaultVersion;
-                    message->Id = inbound.Id.Value();
+                if (handler == nullptr) {
+                    result = Core::ERROR_INVALID_RANGE;
                 }
+                else if (realMethod == _T("exists")) {
+                    result = Core::ERROR_NONE;
+                    if (handler->Exists(realMethod) == Core::ERROR_NONE) {
+                        response = _T("1");
+                    }
+                    else {
+                        response = _T("0");
+                    }
+                }
+                else if (handler->Exists(realMethod) == Core::ERROR_NONE) {
 
-                switch (Destination(designator, method)) {
-                case state::STATE_INCORRECT_HANDLER:
-                    message->Error.SetError(Core::ERROR_INVALID_DESIGNATOR);
-                    message->Error.Text = _T("Destined invoke failed.");
-                    break;
-                case state::STATE_INCORRECT_VERSION:
-                    message->Error.SetError(Core::ERROR_INVALID_SIGNATURE);
-                    message->Error.Text = _T("Requested version is not supported.");
-                    break;
-                case state::STATE_UNKNOWN_METHOD:
-                    message->Error.SetError(Core::ERROR_UNKNOWN_KEY);
-                    message->Error.Text = _T("Unknown method.");
-                    break;
-                case state::STATE_REGISTRATION:
-                    info.FromString(inbound.Parameters.Value());
-                    Subscribe(context.ChannelId(), info.Event.Value(), info.Callsign.Value(), *message);
-                    break;
-                case state::STATE_UNREGISTRATION:
-                    info.FromString(inbound.Parameters.Value());
-                    Unsubscribe(context.ChannelId(), info.Event.Value(), info.Callsign.Value(), *message);
-                    break;
-                case state::STATE_EXISTS:
-                    message->Result = Core::NumberType<uint32_t>(Core::ERROR_UNKNOWN_KEY).Text();
-                    break;
-                case state::STATE_NONE_EXISTING:
-                    message->Result = Core::NumberType<uint32_t>(Core::ERROR_NONE).Text();
-                    break;
-                case state::STATE_CUSTOM:
                     // Let's on behalf of the request forward it and update 
+                    string messageToSend(parameters);
+                    Core::ProxyType<Message> message(g_BridgeMessages.Element());
                     uint32_t newId = Core::_InterlockedIncrement(_sequenceId);
                     Core::Time waitTill = Core::Time::Now() + _timeOut;
 
                     _pendingRequests.emplace(std::piecewise_construct,
                         std::forward_as_tuple(newId),
-                        std::forward_as_tuple(context.ChannelId(), message->Id.Value(), waitTill));
-
-                    message->Id = newId;
+                        std::forward_as_tuple(callback, channelId, id, waitTill));
 
                     switch (_mode) {
                     case WebBridge::context::ADDED: {
-                        message->Context.ChannelId = context.ChannelId();
-                        message->Context.OriginalId = context.Sequence();
-                        message->Context.Token = context.Token();
+                        message->Context.ChannelId = channelId;
+                        message->Context.OriginalId = id;
+                        message->Context.Token = token;
                         message->Context.Callsign = _callsign;
                     }
                     case WebBridge::context::NONE: {
-                        message->Parameters = inbound.Parameters;
-                        message->Designator = inbound.Designator;
                         break;
                     }
                     case WebBridge::context::WRAPPED: {
-                        Message wrapper(inbound);
+                        Message wrapper;
 
-                        wrapper.Context.ChannelId = context.ChannelId();
-                        wrapper.Context.Token = context.Token();
-
-                        string fullParameters;
-                        wrapper.ToString(fullParameters);
-                        message->Parameters = fullParameters;
-                        message->Designator = _callsign;
+                        wrapper.Context.ChannelId = channelId;
+                        wrapper.Context.OriginalId = id;
+                        wrapper.Context.Token = token;
+                        wrapper.Parameters = parameters;
+                        wrapper.ToString(messageToSend);
                         break;
                     }
                     }
 
-                    TRACE(Trace::Information, (_T("Request: [%d] from [%d], method: [%s]"), newId, context.ChannelId(), method.c_str()));
+                    message->Id = newId;
+                    message->Parameters = messageToSend;
+                    message->Designator = method;
+
+                    TRACE(Trace::Information, (_T("Request: [%d] from [%d], method: [%s]"), newId, channelId, method.c_str()));
 
                     _service->Submit(_javascriptService, Core::ProxyType<Core::JSON::IElement>(message));
 
@@ -311,44 +290,30 @@ namespace WPEFramework {
                         _cleaner.Reschedule(waitTill);
                     }
 
-                    break;
+                    result = ~0; // No resposne to report yet....
                 }
 
-                return (Core::ProxyType<Core::JSONRPC::Message>(message));
+                return (result);
             }
+            Core::hresult WebBridge::Revoke(ICallback* callback) /* override*/ {
+                // Remove the interface from the pendings..
+                _adminLock.Lock();
 
-            void WebBridge::Activate(PluginHost::IShell* /* service */) /* override */ {
-                // We did what we needed to do in the Intialize.
-            }
+                PendingMap::iterator index = _pendingRequests.begin();
 
-            void WebBridge::Deactivate() /* override */ {
-                // We did what we needed to do in the Deintialize.
-            }
-
-            void WebBridge::Close(const uint32_t channelId) /* override */ {
+                while (index != _pendingRequests.end()) {
+                    if (index->second != callback) {
+                        index++;
+                    }
+                    else {
+                        index = _pendingRequests.erase(index);
+                    }
+                }
 
                 _adminLock.Lock();
 
-                ObserverMap::iterator index = _observers.begin();
-
-                while (index != _observers.end()) {
-                    ObserverList::iterator loop(index->second.begin());
-
-                    while (loop != index->second.end()) {
-                        if (loop->Id() != channelId) {
-                            loop++;
-                        }
-                        else {
-                            loop = index->second.erase(loop);
-                        }
-                    }
-
-                    index++;
-                }
-
-                _adminLock.Unlock();
+                return (PluginHost::JSONRPC::Revoke(callback));
             }
-
 
             // -------------------------------------------------------------------------------------------------------
             //   IWebSocket methods
@@ -374,43 +339,34 @@ namespace WPEFramework {
                         if (InternalMessage(message) == false) {
 
                             // This is an event, we need event handling..
-                            _adminLock.Lock();
-
-                            ObserverMap::iterator index = _observers.find(eventName);
-
-                            if (index != _observers.end()) {
-                                for (const Observer& entry : index->second) {
-                                    Core::ProxyType<Core::JSONRPC::Message> outbound(PluginHost::IFactories::Instance().JSONRPC());
-                                    outbound->Designator = (entry.Designator().empty() == false ? entry.Designator() + '.' + eventName : eventName);
-                                    outbound->Parameters = message->Parameters.Value();
-
-                                    _service->Submit(entry.Id(), Core::ProxyType<Core::JSON::IElement>(outbound));
-                                }
-                            }
-
-                            _adminLock.Unlock();
+                            PluginHost::JSONRPC::Event(eventName, message->Parameters.Value());
                         }
                     }
                     else {
-                        uint32_t requestId, channelId = 0;
-
                         // This is the response to an invoked method, Let's see who should get this repsonse :-)
                         _adminLock.Lock();
                         PendingMap::iterator index = _pendingRequests.find(message->Id.Value());
                         if (index != _pendingRequests.end()) {
+                            uint32_t requestId, channelId;
+                            IDispatcher::ICallback* callback;
+
                             channelId = index->second.ChannelId();
                             requestId = index->second.SequenceId();
+                            callback = index->second.Callback();
+
+                            ASSERT(callback != nullptr);
+
+                            TRACE(Trace::Information, (_T("Response: [%d] to [%d]"), requestId, channelId));
+
+                            if (callback != nullptr) {
+                                // Oke, there is someone waiting for a response!
+                                callback->Response(channelId, requestId, message->Result.Value());
+                                callback->Release();
+                            }
+
                             _pendingRequests.erase(index);
                         }
                         _adminLock.Unlock();
-
-                        if (channelId != 0) {
-                            TRACE(Trace::Information, (_T("Response: [%d] to [%d]"), requestId, channelId));
-
-                            // Oke, there is someone waiting for a response!
-                            message->Id = requestId;
-                            _service->Submit(channelId, Core::ProxyType<Core::JSON::IElement>(message));
-                        }
                     }
                 }
 
@@ -421,7 +377,7 @@ namespace WPEFramework {
             // -------------------------------------------------------------------------------------------------------
             //   Private methods
             // -------------------------------------------------------------------------------------------------------
-            void WebBridge::Cleanup() {
+            void WebBridge::Dispatch() {
                 // Lets see if there are still any pending request we should report Missing In Action :-)
                 Core::Time now(Core::Time::Now());
                 Core::Time nextSlot;
@@ -431,14 +387,17 @@ namespace WPEFramework {
                 while (index != _pendingRequests.end()) {
                     if (now >= index->second.Issued()) {
                         // Send and Error to the requester..
-                        Core::ProxyType<Core::JSONRPC::Message> message(PluginHost::IFactories::Instance().JSONRPC());
-                        message->Error.SetError(Core::ERROR_TIMEDOUT);
-                        message->Error.Text = _T("There is no response form the server within time!!!");
-                        message->Id = index->second.SequenceId();
+                        IDispatcher::ICallback* callback = index->second.Callback();
 
-                        TRACE(Trace::Warning, (_T("Got a timeout on channelId [%d] for request [%d]"), index->second.ChannelId(), message->Id.Value()));
+                        ASSERT(callback != nullptr);
 
-                        _service->Submit(index->second.ChannelId(), Core::ProxyType<Core::JSON::IElement>(message));
+                        if (callback != nullptr) {
+                            callback->Error(index->second.ChannelId(), index->second.SequenceId(), Core::ERROR_TIMEDOUT, _T("There is no response form the server within time!!!"));
+                            callback->Release();
+                        }
+                            
+                        TRACE(Trace::Warning, (_T("Got a timeout on channelId [%d] for request [%d]"), index->second.ChannelId(), index->second.SequenceId()));
+
                         index = _pendingRequests.erase(index);
                     }
                     else {
@@ -466,25 +425,10 @@ namespace WPEFramework {
                     parameter.FromString(message->Parameters.Value());
                     Core::JSON::ArrayType<Core::JSON::String>::Iterator index(parameter.Elements());
 
-                    _supportedVersions.clear();
-
                     while (index.Next() == true) {
                         string entry = index.Current().Value();
-                        uint8_t version = Core::JSONRPC::Message::Version(entry);
-                        string method = Core::JSONRPC::Message::Method(entry);
-                        VersionMap::iterator placement = _supportedVersions.find(version);
 
-                        if (placement == _supportedVersions.end()) {
-                            auto newEntry = _supportedVersions.emplace(std::piecewise_construct,
-                                std::forward_as_tuple(version),
-                                std::forward_as_tuple());
-
-                            newEntry.first->second.push_back(method);
-                        }
-                        else if (std::find(placement->second.begin(), placement->second.end(), method) == placement->second.end()) {
-                            // Check if this label does not already exist
-                            placement->second.push_back(method);
-                        }
+                        PluginHost::JSONRPC::RegisterMethod(Core::JSONRPC::Message::Version(entry), Core::JSONRPC::Message::Method(entry));
                     }
                 }
 
