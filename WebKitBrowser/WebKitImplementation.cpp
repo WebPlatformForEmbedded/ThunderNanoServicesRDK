@@ -463,9 +463,12 @@ static GSourceFuncs _handlerIntervention =
                 , MSEBuffers()
                 , ThunderDecryptorPreference()
                 , MemoryProfile()
-                , MemoryPressure()
+#ifdef WEBKIT_MEMORY_PRESSURE_API
                 , WebProcessLimit()
                 , NetworkProcessLimit()
+#else
+                , MemoryPressure()
+#endif
                 , MediaContentTypesRequiringHardwareSupport()
                 , MediaDiskCache(true)
                 , DiskCache()
@@ -516,9 +519,12 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("msebuffers"), &MSEBuffers);
                 Add(_T("thunderdecryptorpreference"), &ThunderDecryptorPreference);
                 Add(_T("memoryprofile"), &MemoryProfile);
-                Add(_T("memorypressure"), &MemoryPressure);
+#ifdef WEBKIT_MEMORY_PRESSURE_API
                 Add(_T("webprocesslimit"), &WebProcessLimit);
                 Add(_T("networkprocesslimit"), &NetworkProcessLimit);
+#else
+                Add(_T("memorypressure"), &MemoryPressure);
+#endif
                 Add(_T("mediacontenttypesrequiringhardwaresupport"), &MediaContentTypesRequiringHardwareSupport);
                 Add(_T("mediadiskcache"), &MediaDiskCache);
                 Add(_T("diskcache"), &DiskCache);
@@ -576,9 +582,12 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::String MSEBuffers;
             Core::JSON::Boolean ThunderDecryptorPreference;
             Core::JSON::String MemoryProfile;
-            Core::JSON::String MemoryPressure;
+#ifdef WEBKIT_MEMORY_PRESSURE_API
             Core::JSON::DecUInt32 WebProcessLimit;
             Core::JSON::DecUInt32 NetworkProcessLimit;
+#else
+            Core::JSON::String MemoryPressure;
+#endif
             Core::JSON::String MediaContentTypesRequiringHardwareSupport;
             Core::JSON::Boolean MediaDiskCache;
             Core::JSON::String DiskCache;
@@ -1697,9 +1706,11 @@ static GSourceFuncs _handlerIntervention =
             }
 
             // Memory Pressure
+#ifndef WEBKIT_MEMORY_PRESSURE_API
             if (_config.MemoryPressure.Value().empty() == false) {
                 Core::SystemInfo::SetEnvironment(_T("WPE_POLL_MAX_MEMORY"), _config.MemoryPressure.Value(), !environmentOverride);
             }
+#endif
 
             // Memory Profile
             if (_config.MemoryProfile.Value().empty() == false) {
