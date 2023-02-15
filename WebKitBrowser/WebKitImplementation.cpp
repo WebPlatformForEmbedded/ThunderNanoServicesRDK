@@ -2180,23 +2180,25 @@ static GSourceFuncs _handlerIntervention =
                     webkit_website_data_manager_set_memory_pressure_settings(memoryPressureSettings);
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 }
-
-                WebKitWebsiteDataManager* websiteDataManager;
-                if (_config.WebProcessLimit.IsSet() == true) {
-                    WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
-                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.WebProcessLimit.Value());
-                    websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, "memory-pressure-settings", memoryPressureSettings, nullptr);
-                    webkit_memory_pressure_settings_free(memoryPressureSettings);
-                } else {
-                    websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, nullptr);
-                }
-#else
-                auto* websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, nullptr);
 #endif
+                // Create WebKitWebsiteDataManager after adding network process memory pressure settings
+                auto* websiteDataManager = webkit_website_data_manager_new("local-storage-directory", wpeStoragePath, "disk-cache-directory", wpeDiskCachePath, nullptr);
+
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
 
-                wkContext = webkit_web_context_new_with_website_data_manager(websiteDataManager);
+#ifdef WEBKIT_MEMORY_PRESSURE_API
+                if (_config.WebProcessLimit.IsSet() == true) {
+                    WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
+                    webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.WebProcessLimit.Value());
+                    // Pass web process memory pressure settings to WebKitWebContext constructor
+                    wkContext = WEBKIT_WEB_CONTEXT(g_object_new(WEBKIT_TYPE_WEB_CONTEXT, "website-data-manager", websiteDataManager, "memory-pressure-settings", memoryPressureSettings, nullptr));
+                    webkit_memory_pressure_settings_free(memoryPressureSettings);
+                } else
+#endif
+                {
+                    wkContext = webkit_web_context_new_with_website_data_manager(websiteDataManager);
+                }
                 g_object_unref(websiteDataManager);
             }
 
