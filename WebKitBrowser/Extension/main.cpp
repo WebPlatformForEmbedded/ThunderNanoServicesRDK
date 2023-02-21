@@ -52,6 +52,9 @@
 #if defined(ENABLE_FIREBOLTOS_ENDPOINT)
 #include "FireboltOSEndpoint.h"
 #endif
+#if defined(UPDATE_TZ_FROM_FILE)
+#include "TimeZoneSupport.h"
+#endif
 
 using namespace WPEFramework;
 
@@ -106,6 +109,9 @@ public:
 
         g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &_logToSystemConsoleEnabled);
 
+        if (_logToSystemConsoleEnabled && Core::SystemInfo::GetEnvironment(string(_T("CLIENT_IDENTIFIER")), _consoleLogPrefix))
+          _consoleLogPrefix = _consoleLogPrefix.substr(0, _consoleLogPrefix.find(','));
+
         g_signal_connect(
           webkit_script_world_get_default(),
           "window-object-cleared",
@@ -124,10 +130,18 @@ public:
               list->AddWhiteListToWebKit(extension);
             }
         }
+
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Initialize();
+#endif
+
     }
 
     void Deinitialize()
     {
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Deinitialize();
+#endif
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
@@ -223,6 +237,11 @@ private:
     Core::ProxyType<RPC::InvokeServerType<2, 0, 4> > _engine;
     Core::ProxyType<RPC::CommunicatorClient> _comClient;
 
+#if defined(UPDATE_TZ_FROM_FILE)
+    TZ::TimeZoneSupport _tzSupport;
+#endif
+
+    string _consoleLogPrefix;
     gboolean _logToSystemConsoleEnabled;
     WebKitWebExtension* _extension;
 } _wpeFrameworkClient;
