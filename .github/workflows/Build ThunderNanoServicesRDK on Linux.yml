@@ -78,7 +78,6 @@ jobs:
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
         -DPLUGIN_PERFORMANCEMETRICS=ON \
-        -DPLUGIN_TRACECONTROL=ON \
         -DPLUGIN_WARNINGREPORTINGCONTROL=ON
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
         
