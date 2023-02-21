@@ -77,8 +77,7 @@ jobs:
         -DPLUGIN_MESSENGER=ON \
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
-        -DPLUGIN_PERFORMANCEMETRICS=ON \
-        -DPLUGIN_WARNINGREPORTINGCONTROL=ON
+        -DPLUGIN_PERFORMANCEMETRICS=ON
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
         
     - name: Tar files
