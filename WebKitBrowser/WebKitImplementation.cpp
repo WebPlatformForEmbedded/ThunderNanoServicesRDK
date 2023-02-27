@@ -463,12 +463,8 @@ static GSourceFuncs _handlerIntervention =
                 , MSEBuffers()
                 , ThunderDecryptorPreference()
                 , MemoryProfile()
-#ifdef WEBKIT_MEMORY_PRESSURE_API
                 , WebProcessLimit()
                 , NetworkProcessLimit()
-#else
-                , MemoryPressure()
-#endif
                 , MediaContentTypesRequiringHardwareSupport()
                 , MediaDiskCache(true)
                 , DiskCache()
@@ -519,12 +515,8 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("msebuffers"), &MSEBuffers);
                 Add(_T("thunderdecryptorpreference"), &ThunderDecryptorPreference);
                 Add(_T("memoryprofile"), &MemoryProfile);
-#ifdef WEBKIT_MEMORY_PRESSURE_API
                 Add(_T("webprocesslimit"), &WebProcessLimit);
                 Add(_T("networkprocesslimit"), &NetworkProcessLimit);
-#else
-                Add(_T("memorypressure"), &MemoryPressure);
-#endif
                 Add(_T("mediacontenttypesrequiringhardwaresupport"), &MediaContentTypesRequiringHardwareSupport);
                 Add(_T("mediadiskcache"), &MediaDiskCache);
                 Add(_T("diskcache"), &DiskCache);
@@ -582,12 +574,8 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::String MSEBuffers;
             Core::JSON::Boolean ThunderDecryptorPreference;
             Core::JSON::String MemoryProfile;
-#ifdef WEBKIT_MEMORY_PRESSURE_API
             Core::JSON::DecUInt32 WebProcessLimit;
             Core::JSON::DecUInt32 NetworkProcessLimit;
-#else
-            Core::JSON::String MemoryPressure;
-#endif
             Core::JSON::String MediaContentTypesRequiringHardwareSupport;
             Core::JSON::Boolean MediaDiskCache;
             Core::JSON::String DiskCache;
@@ -1706,9 +1694,17 @@ static GSourceFuncs _handlerIntervention =
             }
 
             // Memory Pressure
-#ifndef WEBKIT_MEMORY_PRESSURE_API
-            if (_config.MemoryPressure.Value().empty() == false) {
-                Core::SystemInfo::SetEnvironment(_T("WPE_POLL_MAX_MEMORY"), _config.MemoryPressure.Value(), !environmentOverride);
+
+#if !(WEBKIT_CHECK_VERSION(2, 38, 0))
+            std::stringstream limitStr;
+            if (_config.NetworkProcessLimit.IsSet() == true) {
+                limitStr << "networkprocess:" << _config.NetworkProcessLimit.Value() << "m";
+            }
+            if (_config.WebProcessLimit.IsSet() == true) {
+                limitStr << (!limitStr.str().empty() ? "," : "") << "webprocess:" << _config.WebProcessLimit.Value() << "m";
+            }
+            if (!limitStr.str().empty()) {
+                Core::SystemInfo::SetEnvironment(_T("WPE_POLL_MAX_MEMORY"), limitStr.str(), !environmentOverride);
             }
 #endif
 
@@ -2184,7 +2180,7 @@ static GSourceFuncs _handlerIntervention =
                 }
                 g_mkdir_with_parents(wpeDiskCachePath, 0700);
 
-#ifdef WEBKIT_MEMORY_PRESSURE_API
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
                 if (_config.NetworkProcessLimit.IsSet() == true) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
                     webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.NetworkProcessLimit.Value());
@@ -2198,7 +2194,7 @@ static GSourceFuncs _handlerIntervention =
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
 
-#ifdef WEBKIT_MEMORY_PRESSURE_API
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
                 if (_config.WebProcessLimit.IsSet() == true) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
                     webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.WebProcessLimit.Value());
