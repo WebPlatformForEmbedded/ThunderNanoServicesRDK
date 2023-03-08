@@ -25,7 +25,7 @@
 #endif
 
 #include <plugins/plugins.h>
-#include <interfaces/definitions.h>
+#include <definitions/definitions.h>
 
 #undef EXTERNAL
 #define EXTERNAL
