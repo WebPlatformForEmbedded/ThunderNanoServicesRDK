@@ -152,9 +152,7 @@ namespace Plugin {
                         _observing.erase(index);
                     }
                     else if (index->second == state::OBSERVING) {
-                        _observing.emplace(std::piecewise_construct,
-                            std::make_tuple(id),
-                            std::make_tuple(state::DETACHING));
+                        index->second = state::DETACHING;
                     }
                 }
 
