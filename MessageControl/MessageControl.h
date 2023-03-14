@@ -138,7 +138,9 @@ namespace Plugin {
 
                 _job.Submit();
             }
-            void Deactivated(RPC::IRemoteConnection* connection) override {
+            void Deactivated(RPC::IRemoteConnection* /* connection */) override {
+            }
+            void Terminated(RPC::IRemoteConnection* connection) override {
 
                 uint32_t id = connection->Id();
 
