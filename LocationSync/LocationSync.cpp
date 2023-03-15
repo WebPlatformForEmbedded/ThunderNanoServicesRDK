@@ -110,10 +110,10 @@ POP_WARNING()
             Config config;
             config.FromString(_service->ConfigLine());
 
-            PluginHost::IController* controller = nullptr;
+            Exchange::IController::IConfiguration* controller = nullptr;
             if ( (_timezoneoverriden == true) &&
                ( _locationinfo.TimeZone() != config.TimeZone.Value() ) &&
-               ( ( controller = _service->QueryInterfaceByCallsign<PluginHost::IController>(_T("")) ) != nullptr )
+               ( ( controller = _service->QueryInterfaceByCallsign<Exchange::IController::IConfiguration>(_T("")) ) != nullptr )
             ) {
                 config.TimeZone = _locationinfo.TimeZone();
                 string newconfig;
