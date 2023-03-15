@@ -138,7 +138,9 @@ namespace Plugin {
 
                 _job.Submit();
             }
-            void Deactivated(RPC::IRemoteConnection* connection) override {
+            void Deactivated(RPC::IRemoteConnection* /* connection */) override {
+            }
+            void Terminated(RPC::IRemoteConnection* connection) override {
 
                 uint32_t id = connection->Id();
 
@@ -152,9 +154,7 @@ namespace Plugin {
                         _observing.erase(index);
                     }
                     else if (index->second == state::OBSERVING) {
-                        _observing.emplace(std::piecewise_construct,
-                            std::make_tuple(id),
-                            std::make_tuple(state::DETACHING));
+                        index->second = state::DETACHING;
                     }
                 }
 

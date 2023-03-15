@@ -99,6 +99,9 @@ namespace WPEFramework {
                 {
                     _parent.Deactivated(connectionId);
                 }
+                void Terminated(RPC::IRemoteConnection* /* connectionId */) override
+                {
+                }
 
                 BEGIN_INTERFACE_MAP(Notification)
                     INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
