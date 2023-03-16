@@ -138,12 +138,35 @@ namespace Plugin {
 
                 _job.Submit();
             }
-            void Deactivated(RPC::IRemoteConnection* /* connection */) override {
+            void Deactivated(RPC::IRemoteConnection* connection) override {
+                RPC::IMonitorableProcess* controlled (connection->QueryInterface<RPC::IMonitorableProcess>());
+                if (controlled != nullptr) {
+                    // This is a connection that is controleld by WPEFramework. For this we can wait till we
+                    // receive a terminated.
+                    controlled->Release();
+                }
+                else {
+                    // We have no clue where this is coming from, just assume that if there are message files
+                    // with this ID that it can be closed.
+                    Drop(connection->Id());
+                }
             }
             void Terminated(RPC::IRemoteConnection* connection) override {
 
-                uint32_t id = connection->Id();
+                Drop(connection->Id());
+            }
 
+
+
+            BEGIN_INTERFACE_MAP(Observer)
+                INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+                INTERFACE_ENTRY(Exchange::IMessageControl::ICollect::ICallback)
+            END_INTERFACE_MAP
+
+        private:
+            friend class Core::ThreadPool::JobType<Observer&>;
+
+            void Drop (const uint32_t id) {
                 _adminLock.Lock();
 
                 // Seems the ID is already in here, thats odd, and impossible :-)
@@ -162,15 +185,6 @@ namespace Plugin {
 
                 _job.Submit();
             }
-
-            BEGIN_INTERFACE_MAP(Observer)
-                INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
-                INTERFACE_ENTRY(Exchange::IMessageControl::ICollect::ICallback)
-            END_INTERFACE_MAP
-
-        private:
-            friend class Core::ThreadPool::JobType<Observer&>;
-
             void Dispatch()
             {
                 _adminLock.Lock();
