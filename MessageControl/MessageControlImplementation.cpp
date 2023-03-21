@@ -151,7 +151,7 @@ namespace Plugin {
             Cleanups::iterator index = _cleaning.begin();
             while (index != _cleaning.end()) {
                 bool destructed = true;
-                string filter (_dispatcherIdentifier + '.' + Core::NumberType<uint32_t>(*index).Text() + _T(".*");
+                string filter (_dispatcherIdentifier + '.' + Core::NumberType<uint32_t>(*index).Text() + _T(".*"));
                 Core::Directory directory (_dispatcherBasePath.c_str(), filter.c_str());
 
                 while ((destructed == true) && (directory.Next() == true)) {
