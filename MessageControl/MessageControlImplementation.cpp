@@ -23,29 +23,12 @@
 
 namespace WPEFramework {
 
-namespace {
-
-    class MessageSettings : public Messaging::MessageUnit::Settings {
-    private:
-        MessageSettings() {
-            Messaging::MessageUnit::Settings::Load();
-        };
-
-    public:
-        MessageSettings(const MessageSettings&) = delete;
-        MessageSettings& operator= (const MessageSettings&) = delete;
-
-        static MessageSettings& Instance() {
-            static MessageSettings singleton;
-            return (singleton);
-        }
-    };
-}
-
 namespace Plugin {
 
     class MessageControlImplementation : public Exchange::IMessageControl, public Exchange::IMessageControl::ICollect {
     private:
+        using Cleanups  = std::vector<uint32_t>;
+
         class WorkerThread : public Core::Thread {
         public:
             WorkerThread() = delete;
@@ -78,10 +61,10 @@ namespace Plugin {
         MessageControlImplementation()
             : _adminLock()
             , _callback(nullptr)
-            , _dispatcherIdentifier(MessageSettings::Instance().Identifier())
-            , _dispatcherBasePath(MessageSettings::Instance().BasePath())
+            , _dispatcherIdentifier(Messaging::MessageUnit::Instance().Identifier())
+            , _dispatcherBasePath(Messaging::MessageUnit::Instance().BasePath())
             , _worker(*this)
-            , _client(_dispatcherIdentifier, _dispatcherBasePath, MessageSettings::Instance().SocketPort())
+            , _client(_dispatcherIdentifier, _dispatcherBasePath, Messaging::MessageUnit::Instance().SocketPort())
             , _factory()
         {
             _client.AddInstance(0);
@@ -136,6 +119,8 @@ namespace Plugin {
             _client.AddInstance(id);
             _adminLock.Unlock();
 
+            Cleanup();
+
             return (Core::ERROR_NONE);
         }
 
@@ -145,7 +130,42 @@ namespace Plugin {
             _client.RemoveInstance(id);
             _adminLock.Unlock();
 
+            // There are "Voll idioten" that where allowed to develop software. They assume that what
+            // you bring up should never be brought down and if you want to bring it down, you just
+            // shoot-to-kill, no need to allow for a proper shutdown. A-symetrical interfaces allowed
+            // and used here!
+            // If you have to work with these briljant minds you need to come up with a backup plan.
+            // So besides assuming that there is a proper cleanup on destruction assume the worst,
+            // which might happen occasionally anyway, BUT NOT BY DEFAULT!
+            // So this cleanup seems superflous but it definitly is not!!!
+            _cleaning.emplace_back(id);
+
+            Cleanup();
+
             return (Core::ERROR_NONE);
+        }
+
+        void Cleanup() {
+
+            // Also have a list through the cleanup we should do, just to make sure
+            Cleanups::iterator index = _cleaning.begin();
+            while (index != _cleaning.end()) {
+                bool destructed = true;
+                string filter (_dispatcherIdentifier + '.' + Core::NumberType<uint32_t>(*index).Text() + _T(".*"));
+                Core::Directory directory (_dispatcherBasePath.c_str(), filter.c_str());
+
+                while ((destructed == true) && (directory.Next() == true)) {
+                    Core::File file (directory.Current());
+                    destructed = destructed && (Core::File(directory.Current()).Destroy());
+                }
+
+                if (destructed == true) {
+                    index = _cleaning.erase(index); 
+                }
+                else {
+                    index++;
+                }
+            }
         }
 
         uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
@@ -174,8 +194,8 @@ namespace Plugin {
 
     public:
         BEGIN_INTERFACE_MAP(MessageControlImplementation)
-        INTERFACE_ENTRY(Exchange::IMessageControl)
-        INTERFACE_ENTRY(Exchange::IMessageControl::ICollect)
+            INTERFACE_ENTRY(Exchange::IMessageControl)
+            INTERFACE_ENTRY(Exchange::IMessageControl::ICollect)
         END_INTERFACE_MAP
 
     private:
@@ -201,6 +221,8 @@ namespace Plugin {
         WorkerThread _worker;
         Messaging::MessageClient _client;
         Messaging::TraceFactory _factory;
+
+        Cleanups _cleaning;
     };
 
     SERVICE_REGISTRATION(MessageControlImplementation, 1, 0);
