@@ -85,7 +85,7 @@ namespace Plugin {
                 DETACHING,
                 OBSERVING
             };
-            using ObservingMap = std::unordered_map<uint32_t, state>;
+            using Observers = std::unordered_map<uint32_t, state>;
 
         public:
             Observer() = delete;
@@ -123,7 +123,7 @@ namespace Plugin {
                 _adminLock.Lock();
 
                 // Seems the ID is already in here, thats odd, and impossible :-)
-                ObservingMap::iterator index = _observing.find(id);
+                Observers::iterator index = _observing.find(id);
 
                 if (index == _observing.end()) {
                     _observing.emplace(std::piecewise_construct,
@@ -149,14 +149,11 @@ namespace Plugin {
                     // We have no clue where this is coming from, just assume that if there are message files
                     // with this ID that it can be closed.
                     Drop(connection->Id());
-                }
+               }
             }
             void Terminated(RPC::IRemoteConnection* connection) override {
-
                 Drop(connection->Id());
             }
-
-
 
             BEGIN_INTERFACE_MAP(Observer)
                 INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
@@ -170,7 +167,7 @@ namespace Plugin {
                 _adminLock.Lock();
 
                 // Seems the ID is already in here, thats odd, and impossible :-)
-                ObservingMap::iterator index = _observing.find(id);
+                Observers::iterator index = _observing.find(id);
 
                 if (index != _observing.end()) {
                     if (index->second == state::ATTACHING) {
@@ -189,7 +186,7 @@ namespace Plugin {
             {
                 _adminLock.Lock();
 
-                ObservingMap::iterator index = _observing.begin();
+                Observers::iterator index = _observing.begin();
 
                 while (index != _observing.end()) {
                     if (index->second == state::ATTACHING) {
@@ -212,7 +209,7 @@ namespace Plugin {
         private:
             MessageControl& _parent;
             Core::CriticalSection _adminLock;
-            ObservingMap _observing;
+            Observers _observing;
             Core::WorkerPool::JobType<Observer&> _job;
         };
 
