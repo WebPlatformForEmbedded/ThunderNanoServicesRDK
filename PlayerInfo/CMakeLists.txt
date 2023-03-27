@@ -54,6 +54,7 @@ target_link_libraries(${MODULE_NAME}
 
 find_package(GStreamer REQUIRED)
 if (GStreamer_FOUND)
+    set(PLUGIN_IMPLEMENTATION_GSTREAMER "ON" CACHE STRING "Flag to identify gstreamer implemenation is selected")
     target_link_libraries(${MODULE_NAME}
         PRIVATE
             GStreamer::GStreamer)
