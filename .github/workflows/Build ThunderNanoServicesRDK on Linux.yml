@@ -72,7 +72,7 @@ jobs:
         regex_flags: 'gim'
         search_string: ${{github.event.pull_request.body}}
 
-    - name: Build ThunderNanoServicesRDK - default
+    - name: Build ThunderNanoServicesRDK
       run: |
         cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
         -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
