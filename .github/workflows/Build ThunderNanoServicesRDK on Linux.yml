@@ -64,25 +64,15 @@ jobs:
         repository: ${{github.repository_owner}}/ThunderNanoServicesRDK
 
     - name: Regex ThunderNanoServicesRDK
-      if: contains(github.event.pull_request.body, '[Plugins:')
+      if: contains(github.event.pull_request.body, '[Options:')
       id: plugins
       uses: AsasInnab/regex-action@v1
       with:
-        regex_pattern: '(?<=\[Plugins:).*(?=\])'
+        regex_pattern: '(?<=\[Options:).*(?=\])'
         regex_flags: 'gim'
         search_string: ${{github.event.pull_request.body}}
 
-    - name: Build ThunderNanoServicesRDK - custom plugins
-      if: contains(github.event.pull_request.body, '[Plugins:')
-      run: |
-        cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
-        -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
-        -DCMAKE_MODULE_PATH="${PWD}/${{matrix.build_type}}/install/usr/include/WPEFramework/Modules" \
-        ${{steps.plugins.outputs.first_match}}
-        cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
-
-    - name: Build ThunderNanoServicesRDK - default
-      if: ${{ !contains(github.event.pull_request.body, '[Plugins:') }}
+    - name: Build ThunderNanoServicesRDK
       run: |
         cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
         -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
@@ -94,7 +84,8 @@ jobs:
         -DPLUGIN_MESSENGER=ON \
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
-        -DPLUGIN_PERFORMANCEMETRICS=ON
+        -DPLUGIN_PERFORMANCEMETRICS=ON \
+        ${{steps.plugins.outputs.first_match}}
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
 
     - name: Tar files
