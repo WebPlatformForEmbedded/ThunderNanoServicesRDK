@@ -1,10 +1,13 @@
 autostart = "@PLUGIN_OPENCDMI_AUTOSTART@"
 
+precondition = []
+
 if boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS@") or \
     boolean("@PLUGIN_OPENCDMI_PLAYREADY_NEXUS_SVP@") or \
     boolean("@PLUGIN_OPENCDMI_NAGRA@") :
-    precondition = ["Platform"]
+    precondition.append("Platform")
 
+precondition.append("Provisioning")
 configuration = JSON()
 configuration.add("connector", "@PLUGIN_OPENCDMI_CONNECTOR@")
 configuration.add("group", "@PLUGIN_OPENCDMI_GROUP@")
