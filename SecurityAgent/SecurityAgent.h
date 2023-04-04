@@ -157,9 +157,9 @@ namespace Plugin {
         // -------------------------------------------------------------------------------------------------------
         void RegisterAll();
         void UnregisterAll();
-        #ifdef SECURITY_TESTING_MODE
+#ifdef SECURITY_TESTING_MODE
         uint32_t endpoint_createtoken(const JsonData::SecurityAgent::CreatetokenParamsData& params, JsonData::SecurityAgent::CreatetokenResultInfo& response);
-        #endif // DEBUG
+#endif // DEBUG
         uint32_t endpoint_validate(const JsonData::SecurityAgent::CreatetokenResultInfo& params, JsonData::SecurityAgent::ValidateResultData& response);
 
     private:
@@ -168,8 +168,9 @@ namespace Plugin {
         std::unique_ptr<TokenDispatcher> _dispatcher; 
         Core::ProxyType<RPC::InvokeServer> _engine;
         string _testtoken;
+        string _servicePrefix;
 
-        static constexpr TCHAR TestTokenContent[] = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
+        static constexpr const TCHAR* TestTokenContent = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
     };
 
 } // namespace Plugin

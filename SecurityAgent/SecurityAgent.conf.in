@@ -1,5 +1,8 @@
 autostart = "@PLUGIN_SECURITYAGENT_AUTOSTART@"
 
+if boolean("@PLUGIN_SECURITYAGENT_STARTUPORDER@"):
+    startuporder = "@PLUGIN_SECURITYAGENT_STARTUPORDER@"
+
 configuration = JSON()
 
 configuration.add("acl", "acl.json")
