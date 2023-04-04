@@ -33,7 +33,7 @@ jobs:
           sudo apt install python3-pip
           pip install jsonref
           sudo apt install build-essential cmake ninja-build libusb-1.0-0-dev zlib1g-dev libssl-dev
-    
+
     - name: Checkout Thunder
       uses: actions/checkout@v3
       with:
@@ -56,12 +56,21 @@ jobs:
       run: |
         tar -xvzf ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
         rm ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
-        
+
     - name: Checkout ThunderNanoServicesRDK
       uses: actions/checkout@v3
       with:
         path: ThunderNanoServicesRDK
         repository: ${{github.repository_owner}}/ThunderNanoServicesRDK
+
+    - name: Regex ThunderNanoServicesRDK
+      if: contains(github.event.pull_request.body, '[Options:')
+      id: plugins
+      uses: AsasInnab/regex-action@v1
+      with:
+        regex_pattern: '(?<=\[Options:).*(?=\])'
+        regex_flags: 'gim'
+        search_string: ${{github.event.pull_request.body}}
 
     - name: Build ThunderNanoServicesRDK
       run: |
@@ -75,9 +84,10 @@ jobs:
         -DPLUGIN_MESSENGER=ON \
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
-        -DPLUGIN_PERFORMANCEMETRICS=ON
+        -DPLUGIN_PERFORMANCEMETRICS=ON \
+        ${{steps.plugins.outputs.first_match}}
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
-        
+
     - name: Tar files
       run: tar -czvf ${{matrix.build_type}}.tar.gz ${{matrix.build_type}}
 
