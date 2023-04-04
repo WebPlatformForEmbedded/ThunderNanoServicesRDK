@@ -21,8 +21,8 @@
 
 #include "Module.h"
 #include "AccessControlList.h"
-#include <securityagent/IPCSecurityToken.h>
 
+#include <securityagent/IPCSecurityToken.h>
 #include <interfaces/json/JsonData_SecurityAgent.h>
 
 namespace WPEFramework {
@@ -73,7 +73,7 @@ namespace Plugin {
                     _parentInterface->AddRef();
 
 
-                    TRACE(Trace::Information, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
+                    TRACE(Security, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
                     result = _parentInterface;
                 }
                 return (result);
@@ -170,7 +170,9 @@ namespace Plugin {
         string _testtoken;
         string _servicePrefix;
 
+#ifdef SECURITY_TESTING_MODE
         static constexpr const TCHAR* TestTokenContent = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
+#endif // DEBUG
     };
 
 } // namespace Plugin

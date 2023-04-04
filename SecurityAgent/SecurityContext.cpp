@@ -73,7 +73,7 @@ namespace Plugin {
     {
         bool bAllowed = ((_accessControlList != nullptr) && (_accessControlList->Allowed(message.Callsign(), message.Method())));
         if(!bAllowed)
-            SYSLOG(Logging::Notification, ("Access for token url [%s], plugin [%s], method [%s] not allowed", _context.URL.Value().c_str(),message.Callsign().c_str(),message.Method().c_str()));
+            TRACE(Security, ("Access for token url [%s], plugin [%s], method [%s] not allowed", _context.URL.Value().c_str(),message.Callsign().c_str(),message.Method().c_str()));
 
         return bAllowed;
     }

@@ -104,7 +104,7 @@ namespace Plugin {
             aclFile = service->DataPath() + config.ACL.Value();
         }
 
-        SYSLOG(Logging::Startup, (_T("SecurityAgent: Reading acl file %s"), aclFile.Name().c_str()));
+        TRACE(Security, (_T("SecurityAgent: Reading acl file %s"), aclFile.Name().c_str()));
 
         if ((aclFile.Exists() == true) && (aclFile.Open(true) == true)) {
 
@@ -129,7 +129,7 @@ namespace Plugin {
             connector = service->VolatilePath() + _T("token");
         }
 
-        SYSLOG(Logging::Notification,(_T("SecurityAgent TokenDispatcher connector path %s"),connector.c_str()));
+        TRACE(Security, (_T("SecurityAgent TokenDispatcher connector path %s"),connector.c_str()));
 
         _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
         _dispatcher.reset(new TokenDispatcher(Core::NodeId(connector.c_str()), service->ProxyStubPath(), this, _engine));
@@ -184,7 +184,7 @@ namespace Plugin {
 
     /* virtual */ uint32_t SecurityAgent::CreateToken(const uint16_t length, const uint8_t buffer[], string& token)
     {
-        SYSLOG(Logging::Notification, (_T("Creating Token for %.*s"), length, buffer));
+        TRACE(Security, (_T("Creating Token for %.*s"), length, buffer));
 
         // Generate the token from the buffer coming in...
         auto newToken = JWTFactory::Instance().Element();
@@ -215,9 +215,11 @@ namespace Plugin {
                         }
                     }
             }
+#ifdef SECURITY_TESTING_MODE
             else {
                 result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(SecurityAgent::TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(SecurityAgent::TestTokenContent), _servicePrefix);
             }
+#endif
         }
         return (result);
     }
@@ -283,7 +285,7 @@ namespace Plugin {
                         } else {
                             result->ErrorCode = Web::STATUS_OK;
                             result->Message = _T("Valid token");
-                            TRACE(Trace::Information, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
+                            TRACE(Security, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
                         }
                     }
                 }
