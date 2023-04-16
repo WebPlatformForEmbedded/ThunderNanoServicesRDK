@@ -20,7 +20,7 @@
 #pragma once
 
 #include <core/Portability.h>
-#include <tracing/Logging.h>
+#include <messaging/messaging.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
