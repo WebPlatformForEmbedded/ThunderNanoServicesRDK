@@ -299,11 +299,6 @@ namespace Plugin {
         event_bridgequery(message);
     }
 
-    void WebKitBrowser::CookieJarChanged()
-    {
-        Exchange::JBrowserCookieJar::Event::CookieJarChanged(*this);
-    }
-
     void WebKitBrowser::StateChange(const PluginHost::IStateControl::state state)
     {
         TRACE(Trace::Information, (_T("StateChange: { \"State\": %d }"), state));
