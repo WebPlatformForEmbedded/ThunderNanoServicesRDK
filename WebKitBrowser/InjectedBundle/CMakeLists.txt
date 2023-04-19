@@ -27,6 +27,7 @@ option(PLUGIN_SECURITYAGENT "Enable the Security Agent Features interface in jav
 option(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS "Enable AAMP JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
 option(PLUGIN_WEBKITBROWSER_FIREBOLTOS_ENDPOINT "Enable injection of __firebolt.endpoint." ON)
+option(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE "Update TimeZone from given file" OFF)
 
 add_library(${MODULE_NAME} SHARED
     main.cpp
@@ -69,6 +70,15 @@ endif()
 if(PLUGIN_WEBKITBROWSER_FIREBOLTOS_ENDPOINT)
     target_sources(${MODULE_NAME} PRIVATE FireboltOSEndpoint.cpp)
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_FIREBOLTOS_ENDPOINT)
+endif()
+
+if(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE)
+    target_sources(${MODULE_NAME} PRIVATE ../TimeZone/TimeZoneSupport.cpp)
+    target_compile_definitions(${MODULE_NAME} PRIVATE UPDATE_TZ_FROM_FILE)
+    target_include_directories(${MODULE_NAME} PRIVATE ../TimeZone)
+    if(TZ_FILE)
+        add_definitions(-DTZ_FILE="${TZ_FILE}")
+    endif()
 endif()
 
 set_target_properties(${MODULE_NAME} PROPERTIES
