@@ -1,0 +1,98 @@
+name: Build ThunderNanoServicesRDK on Linux
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  ThunderInterfaces:
+    uses: rdkcentral/ThunderInterfaces/.github/workflows/Build ThunderInterfaces on Linux.yml@master
+
+  ThunderNanoServicesRDK:
+    needs: ThunderInterfaces
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release, MinSizeRel]
+
+    name: Build type - ${{matrix.build_type}}
+    steps:
+    - name: Install necessary packages
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 10
+        command: |
+          sudo gem install apt-spy2
+          sudo apt-spy2 fix --commit --launchpad --country=US
+          sudo apt-get update
+          sudo apt install python3-pip
+          pip install jsonref
+          sudo apt install build-essential cmake ninja-build libusb-1.0-0-dev zlib1g-dev libssl-dev
+
+    - name: Checkout Thunder
+      uses: actions/checkout@v3
+      with:
+        path: Thunder
+        repository: rdkcentral/Thunder
+
+    - name: Checkout ThunderInterfaces
+      uses: actions/checkout@v3
+      with:
+        path: ThunderInterfaces
+        repository: rdkcentral/ThunderInterfaces
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: ThunderInterfaces-${{matrix.build_type}}-artifact
+        path: ${{matrix.build_type}}
+
+    - name: Unpack files
+      run: |
+        tar -xvzf ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
+        rm ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
+
+    - name: Checkout ThunderNanoServicesRDK
+      uses: actions/checkout@v3
+      with:
+        path: ThunderNanoServicesRDK
+        repository: ${{github.repository_owner}}/ThunderNanoServicesRDK
+
+    - name: Regex ThunderNanoServicesRDK
+      if: contains(github.event.pull_request.body, '[Options:')
+      id: plugins
+      uses: AsasInnab/regex-action@v1
+      with:
+        regex_pattern: '(?<=\[Options:).*(?=\])'
+        regex_flags: 'gim'
+        search_string: ${{github.event.pull_request.body}}
+
+    - name: Build ThunderNanoServicesRDK
+      run: |
+        cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
+        -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
+        -DCMAKE_MODULE_PATH="${PWD}/${{matrix.build_type}}/install/usr/include/WPEFramework/Modules" \
+        -DPLUGIN_DEVICEIDENTIFICATION=ON \
+        -DPLUGIN_DEVICEINFO=ON \
+        -DPLUGIN_LOCATIONSYNC=ON \
+        -DPLUGIN_MESSAGECONTROL=ON \
+        -DPLUGIN_MESSENGER=ON \
+        -DPLUGIN_MONITOR=ON \
+        -DPLUGIN_OPENCDMI=ON \
+        -DPLUGIN_PERFORMANCEMETRICS=ON \
+        ${{steps.plugins.outputs.first_match}}
+        cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
+
+    - name: Tar files
+      run: tar -czvf ${{matrix.build_type}}.tar.gz ${{matrix.build_type}}
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: ThunderNanoServicesRDK-${{matrix.build_type}}-artifact
+        path: ${{matrix.build_type}}.tar.gz

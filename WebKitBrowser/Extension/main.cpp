@@ -94,11 +94,7 @@ public:
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId(), Core::NumberType<uint32_t>(result).Text()));
         } else {
 // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
-#ifdef __CORE_MESSAGING__
             Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
-#else
-            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
-#endif
         }
 
         _extension = WEBKIT_WEB_EXTENSION(g_object_ref(extension));
@@ -142,6 +138,9 @@ public:
 #if defined(UPDATE_TZ_FROM_FILE)
         _tzSupport.Deinitialize();
 #endif
+
+        Messaging::MessageUnit::Instance().Close();
+
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }

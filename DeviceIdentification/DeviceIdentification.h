@@ -53,6 +53,9 @@ namespace Plugin {
             {
                 _parent.Deactivated(connectionId);
             }
+            void Terminated(RPC::IRemoteConnection* /* connection */) override
+            {
+            }
 
             BEGIN_INTERFACE_MAP(Notification)
             INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)

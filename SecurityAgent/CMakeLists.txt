@@ -28,6 +28,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_SECURITYAGENT_AUTOSTART "true" CACHE STRING "Automatically start SecurityAgent plugin")
+set(PLUGIN_SECURITYAGENT_STARTUPORDER "" CACHE STRING "To configure startup order of SecurityAgent plugin")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
@@ -37,7 +38,7 @@ if (SECAPI)
     set(SECAPI_RELATED_SOURCES SecapiToken.cpp)
 endif()
 
-add_library(${MODULE_NAME} SHARED 
+add_library(${MODULE_NAME} SHARED
     AccessControlList.cpp
     SecurityAgent.cpp
     SecurityContext.cpp

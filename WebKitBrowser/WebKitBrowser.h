@@ -100,6 +100,9 @@ namespace Plugin {
             {
                 _parent.CookieJarChanged();
             }
+            void Terminated(RPC::IRemoteConnection* /* connection */) override
+            {
+            }
 
             BEGIN_INTERFACE_MAP(Notification)
             INTERFACE_ENTRY(Exchange::IWebBrowser::INotification)
