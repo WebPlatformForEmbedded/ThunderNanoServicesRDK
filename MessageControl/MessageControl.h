@@ -317,7 +317,7 @@ namespace Plugin {
             for (auto& entry : _outputDirector) {
                 entry->Message(metadata, message);
             }
-            
+
             _webSocketExporter.Message(metadata, message);
 
             _outputLock.Unlock();
