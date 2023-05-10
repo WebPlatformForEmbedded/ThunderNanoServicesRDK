@@ -109,6 +109,7 @@ namespace WPEFramework {
         Exchange::JMessageControl::Register(*this, this);
 
         _service->Register(&_observer);
+        
         if (this->Callback(&_observer) != Core::ERROR_NONE) {
             message = _T("MessageControl plugin could not be _configured.");
         }

@@ -177,6 +177,7 @@ namespace Publishers {
         _loaded = 0;
 
         _adminLock.Unlock();
+
         return (actualByteCount);
     }
 
@@ -185,6 +186,7 @@ namespace Publishers {
     {
         return 0;
     }
+
     void UDPOutput::Channel::StateChange()
     {
     }

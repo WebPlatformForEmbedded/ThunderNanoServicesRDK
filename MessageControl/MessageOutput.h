@@ -176,7 +176,6 @@ namespace Publishers {
             : _outputOptions(ExtraOutputOptions::ALL)
         {
         }
-
         ~JSON() = default;
 
     public:
@@ -184,6 +183,7 @@ namespace Publishers {
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
         }
+
         void FileName(const bool enabled)
         {
             if (enabled == true) {
@@ -193,10 +193,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::FILENAME));
             }
         }
+
         bool LineNumber() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0);
         }
+
         void LineNumber(const bool enabled)
         {
             if (enabled == true) {
@@ -206,10 +208,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::LINENUMBER));
             }
         }
+
         bool ClassName() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CLASSNAME)) != 0);
         }
+
         void ClassName(const bool enabled)
         {
             if (enabled == true) {
@@ -219,10 +223,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CLASSNAME));
             }
         }
+
         bool Module() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::MODULE)) != 0);
         }
+
         void Module(const bool enabled)
         {
             if (enabled == true) {
@@ -232,10 +238,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::MODULE));
             }
         }
+
         bool Category() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
         }
+
         void Category(const bool enabled)
         {
             if (enabled == true) {
@@ -245,10 +253,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CATEGORY));
             }
         }
+
         bool Date() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         }
+
         void Date(const bool enabled)
         {
             if (enabled == true) {
@@ -258,10 +268,12 @@ namespace Publishers {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::INCLUDINGDATE));
             }
         }
+
         bool Paused() const
         {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PAUSED)) != 0);
         }
+
         void Paused(const bool enabled)
         {
             if (enabled == true) {
@@ -296,7 +308,7 @@ namespace Publishers {
             explicit Channel(const Core::NodeId& nodeId);
             ~Channel() override;
 
-            void Output(const Core::Messaging::Metadata& imetadatanfo, const Core::Messaging::IEvent* message);
+            void Output(const Core::Messaging::Metadata& metadata, const Core::Messaging::IEvent* message);
 
         private:
             uint16_t SendData(uint8_t* dataFrame, const uint16_t maxSendSize) override;
@@ -347,7 +359,6 @@ namespace Publishers {
                 Add(_T("includingdate"), &IncludingDate);
                 Add(_T("paused"), &Paused);
             }
-
             ~ExportCommand() override = default;
 
         public:
@@ -389,6 +400,7 @@ namespace Publishers {
             _maxExportConnections = maxConnections;
             _lock.Unlock();
         }
+
         void Deinitialize()
         {
             _lock.Lock();
@@ -398,6 +410,7 @@ namespace Publishers {
             _maxExportConnections = 0;
             _lock.Unlock();
         }
+
         bool Attach(const uint32_t id)
         {
             bool accepted = false;

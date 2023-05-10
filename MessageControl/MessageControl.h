@@ -319,6 +319,7 @@ namespace Plugin {
             }
             
             _webSocketExporter.Message(metadata, message);
+
             _outputLock.Unlock();
         }
         
@@ -351,17 +352,21 @@ namespace Plugin {
         void Attach(const uint32_t id)
         {
             _adminLock.Lock();
+
             _client.AddInstance(id);
             Cleanup();
+
             _adminLock.Unlock();
         }
         
         void Detach(const uint32_t id)
         {
             _adminLock.Lock();
+
             _client.RemoveInstance(id);
             _cleaning.emplace_back(id);
             Cleanup();
+            
             _adminLock.Unlock();
 
             if (id == _connectionId) {
@@ -375,6 +380,7 @@ namespace Plugin {
         {
             // Also have a list through the cleanup we should do, just to make sure
             Cleanups::iterator index = _cleaning.begin();
+
             while (index != _cleaning.end()) {
                 bool destructed = true;
                 string filter (_dispatcherIdentifier + '.' + Core::NumberType<uint32_t>(*index).Text() + _T(".*"));
@@ -406,9 +412,11 @@ namespace Plugin {
             std::list<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
             _client.Controls(index);
+            
             while (index.Next() == true) {
                 list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
+            
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
             controls = Core::Service<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
             
