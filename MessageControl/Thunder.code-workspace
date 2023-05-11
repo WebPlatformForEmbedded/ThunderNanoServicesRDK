@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../Thunder"
+		},
+		{
+			"path": "../../ThunderClientLibraries"
+		},
+		{
+			"path": "../../ThunderInterfaces"
+		},
+		{
+			"path": "../../ThunderLibraries"
+		},
+		{
+			"path": "../../ThunderNanoServices"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../ThunderTools"
+		}
+	],
+	"settings": {}
+}

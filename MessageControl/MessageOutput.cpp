@@ -196,19 +196,9 @@ namespace Publishers {
         _adminLock.Lock();
 
         uint16_t length = 0;
+        ASSERT(metadata.Type() != Core::Messaging::Metadata::INVALID);
 
-        if (metadata.Type() == Core::Messaging::Metadata::TRACING) {
-            ASSERT(dynamic_cast<const Core::Messaging::IStore::Tracing*>(&metadata) != nullptr);
-            length += static_cast<const Core::Messaging::IStore::Tracing&>(metadata).Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        }
-        else if (metadata.Type() == Core::Messaging::Metadata::LOGGING || metadata.Type() == Core::Messaging::Metadata::REPORTING) {
-            ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
-            length += static_cast<const Core::Messaging::IStore::Logging&>(metadata).Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        }
-        else {
-            ASSERT(metadata.Type() != Core::Messaging::Metadata::INVALID);
-        } 
-        
+        length += metadata.Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
         length += message->Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
         _loaded = length;
 

@@ -290,7 +290,7 @@ namespace Publishers {
         template <typename E>
         static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type
         {
-            return static_cast<typename std::underlying_type<E>::type>(t);
+            return (static_cast<typename std::underlying_type<E>::type>(t));
         }
 
     private:
@@ -395,19 +395,23 @@ namespace Publishers {
         void Initialize(PluginHost::IShell* service, const uint32_t maxConnections = DefaultMaxConnections)
         {
             _lock.Lock();
+
             _server = service;
             _server->AddRef();
             _maxExportConnections = maxConnections;
+
             _lock.Unlock();
         }
 
         void Deinitialize()
         {
             _lock.Lock();
+
             _server->Release();
             _server = nullptr;
             _channels.clear();
             _maxExportConnections = 0;
+
             _lock.Unlock();
         }
 
@@ -514,7 +518,6 @@ namespace Publishers {
             _lock.Lock();
 
             if (_server != nullptr) {
-
                 for (auto& item : _channels) {
                     if (item.second.Paused() == false) {
                         Core::ProxyType<JSON::Data> data = _jsonExportDataFactory.Element();
@@ -522,7 +525,6 @@ namespace Publishers {
                         cachedList.emplace_back(item.first, Core::ProxyType<Core::JSON::IElement>(data));
                     }
                 }
-
                 if (cachedList.empty() == false) {
                     server = _server;
                     server->AddRef();

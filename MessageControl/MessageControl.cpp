@@ -164,6 +164,7 @@ namespace WPEFramework {
     bool MessageControl::Attach(PluginHost::Channel& channel)
     {
         TRACE(Trace::Information, (Core::Format(_T("Attaching channel ID [%d]"), channel.Id()).c_str()));
+        
         return (_webSocketExporter.Attach(channel.Id()));
     }
 
