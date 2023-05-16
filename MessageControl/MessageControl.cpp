@@ -155,8 +155,7 @@ namespace WPEFramework {
         }
     }
 
-    string MessageControl::Information() const
-    {
+    string MessageControl::Information() const {
         // No additional info to report.
         return (string());
     }
@@ -174,15 +173,13 @@ namespace WPEFramework {
         _webSocketExporter.Detach(channel.Id());
     }
 
-    Core::ProxyType<Core::JSON::IElement> MessageControl::Inbound(const string&)
-    {
+    Core::ProxyType<Core::JSON::IElement> MessageControl::Inbound(const string&) {
         return (_webSocketExporter.Command());
     }
 
-    Core::ProxyType<Core::JSON::IElement> MessageControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element)
-    {
+    Core::ProxyType<Core::JSON::IElement> MessageControl::Inbound(const uint32_t ID, const Core::ProxyType<Core::JSON::IElement>& element) {
         return (Core::ProxyType<Core::JSON::IElement>(_webSocketExporter.Received(ID, element)));
     }
 
 } // namespace Plugin
-} // namespace WPEFramework
+}

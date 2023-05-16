@@ -84,8 +84,7 @@ namespace Plugin {
                 ~NetworkNode() = default;
 
             public:
-                Core::NodeId NodeId() const
-                {
+                Core::NodeId NodeId() const {
                     return (Core::NodeId(Binding.Value().c_str(), Port.Value()));
                 }
 
@@ -155,8 +154,7 @@ namespace Plugin {
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Core::Messaging::Metadata& metadata, const string& message) override
-            {
+            void Message(const Core::Messaging::Metadata& metadata, const string& message) override {
                 _parent.Message(metadata, message);
             }
 
@@ -453,4 +451,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+}

@@ -179,8 +179,7 @@ namespace Publishers {
         ~JSON() = default;
 
     public:
-        bool FileName() const
-        {
+        bool FileName() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::FILENAME)) != 0);
         }
 
@@ -194,8 +193,7 @@ namespace Publishers {
             }
         }
 
-        bool LineNumber() const
-        {
+        bool LineNumber() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0);
         }
 
@@ -209,8 +207,7 @@ namespace Publishers {
             }
         }
 
-        bool ClassName() const
-        {
+        bool ClassName() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CLASSNAME)) != 0);
         }
 
@@ -224,8 +221,7 @@ namespace Publishers {
             }
         }
 
-        bool Module() const
-        {
+        bool Module() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::MODULE)) != 0);
         }
 
@@ -239,8 +235,7 @@ namespace Publishers {
             }
         }
 
-        bool Category() const
-        {
+        bool Category() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0);
         }
 
@@ -254,8 +249,7 @@ namespace Publishers {
             }
         }
 
-        bool Date() const
-        {
+        bool Date() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         }
 
@@ -269,8 +263,7 @@ namespace Publishers {
             }
         }
 
-        bool Paused() const
-        {
+        bool Paused() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PAUSED)) != 0);
         }
 
@@ -288,8 +281,7 @@ namespace Publishers {
 
     private:
         template <typename E>
-        static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type
-        {
+        static inline auto AsNumber(E t) -> typename std::underlying_type<E>::type {
             return (static_cast<typename std::underlying_type<E>::type>(t));
         }
 
@@ -454,8 +446,7 @@ namespace Publishers {
             return (deactivated);
         }
 
-        uint32_t MaxConnections() const
-        {
+        uint32_t MaxConnections() const {
             return (_maxExportConnections);
         }
 
@@ -542,8 +533,7 @@ namespace Publishers {
             }
         }
 
-        Core::ProxyType<Core::JSON::IElement> Command()
-        {
+        Core::ProxyType<Core::JSON::IElement> Command() {
             return (Core::ProxyType<Core::JSON::IElement>(_jsonExportCommandFactory.Element()));
         }
 
@@ -557,4 +547,4 @@ namespace Publishers {
     };
 
 } // namespace Publishers
-} // namespace WPEFramework
+}

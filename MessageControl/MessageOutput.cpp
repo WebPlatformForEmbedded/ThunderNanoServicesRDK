@@ -163,8 +163,7 @@ namespace Publishers {
         , _loaded(0)
     {
     }
-    UDPOutput::Channel::~Channel()
-    {
+    UDPOutput::Channel::~Channel() {
         Close(Core::infinite);
     }
 
@@ -182,8 +181,7 @@ namespace Publishers {
     }
 
     //unused
-    uint16_t UDPOutput::Channel::ReceiveData(uint8_t*, const uint16_t)
-    {
+    uint16_t UDPOutput::Channel::ReceiveData(uint8_t*, const uint16_t) {
         return 0;
     }
 
@@ -208,8 +206,7 @@ namespace Publishers {
     }
 
     UDPOutput::UDPOutput(const Core::NodeId& nodeId)
-        : _output(nodeId)
-    {
+        : _output(nodeId) {
         _output.Open(0);
     }
 
@@ -221,4 +218,4 @@ namespace Publishers {
     }
 
 } // namespace Publishers
-} // namespace WPEFramework
+}
