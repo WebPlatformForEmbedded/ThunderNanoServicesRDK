@@ -57,7 +57,6 @@ namespace Plugin {
         };
     
     private:
-        // Interface not exposed over JSON-RPC
         struct ICollect {
 
             struct ICallback {
@@ -366,11 +365,6 @@ namespace Plugin {
             Cleanup();
             
             _adminLock.Unlock();
-
-            if (id == _connectionId) {
-                ASSERT(_service != nullptr);
-                Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_service, PluginHost::IShell::DEACTIVATED, PluginHost::IShell::FAILURE));
-            }
         }
 
     public:
@@ -440,7 +434,6 @@ namespace Plugin {
         Publishers::WebSocketOutput _webSocketExporter;
         MessageControl::ICollect::ICallback* _callback;
         Core::Sink<Observer> _observer;
-        uint32_t _connectionId;
         PluginHost::IShell* _service;
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;

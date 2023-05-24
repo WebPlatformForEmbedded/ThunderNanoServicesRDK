@@ -65,7 +65,6 @@ namespace WPEFramework {
         , _webSocketExporter()
         , _callback(nullptr)
         , _observer(*this)
-        , _connectionId(0)
         , _service(nullptr)
         , _dispatcherIdentifier(Messaging::MessageUnit::Instance().Identifier())
         , _dispatcherBasePath(Messaging::MessageUnit::Instance().BasePath())
@@ -110,7 +109,7 @@ namespace WPEFramework {
 
         _service->Register(&_observer);
         
-        if (this->Callback(&_observer) != Core::ERROR_NONE) {
+        if (Callback(&_observer) != Core::ERROR_NONE) {
             message = _T("MessageControl plugin could not be _configured.");
         }
 
@@ -124,7 +123,7 @@ namespace WPEFramework {
 
             Exchange::JMessageControl::Unregister(*this);
 
-            this->Callback(nullptr);
+            Callback(nullptr);
 
             _service->Unregister(&_observer);
 
@@ -134,15 +133,6 @@ namespace WPEFramework {
 
             _outputLock.Unlock();
 
-            RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
-
-            // The process can disappear in the meantime...
-            if (connection != nullptr) {
-                // But if it did not dissapear in the meantime, forcefully terminate it. Shoot to kill :-)
-                connection->Terminate();
-                connection->Release();
-            }
-
             while (_outputDirector.empty() == false) {
                 delete _outputDirector.back();
                 _outputDirector.pop_back();
@@ -150,8 +140,6 @@ namespace WPEFramework {
 
             _service->Release();
             _service = nullptr;
-
-            _connectionId = 0;
         }
     }
 
