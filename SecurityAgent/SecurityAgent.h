@@ -51,7 +51,6 @@ namespace Plugin {
                 if(_parentInterface != nullptr){
                     _parentInterface->AddRef();
                 }
-                engine->Announcements(Announcement());
                 Open(Core::infinite);
             }
             ~TokenDispatcher() override
