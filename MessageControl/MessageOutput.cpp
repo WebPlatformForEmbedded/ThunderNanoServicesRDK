@@ -52,7 +52,7 @@ namespace Publishers {
                         text.c_str());
             }
         }
-        else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING || metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
+        else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING) {
             ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
             const Core::Messaging::IStore::Logging& log = static_cast<const Core::Messaging::IStore::Logging&>(metadata);
             const Core::Time now(log.TimeStamp());
@@ -68,6 +68,25 @@ namespace Publishers {
                     time.c_str(),
                     metadata.Module().c_str(),
                     metadata.Category().c_str(),
+                    text.c_str());
+        }
+        else if (metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
+            ASSERT(dynamic_cast<const Core::Messaging::IStore::WarningReporting*>(&metadata) != nullptr);
+            const Core::Messaging::IStore::WarningReporting& report = static_cast<const Core::Messaging::IStore::WarningReporting&>(metadata);
+            const Core::Time now(report.TimeStamp());
+            string time;
+
+            if (_abbreviated == true) {
+                time = now.ToTimeOnly(true);
+            }
+            else {
+                time = now.ToRFC1123(true);
+            }
+            output = Core::Format("[%s]:[%s]:[%s]:[%s]: %s\n",
+                    time.c_str(),
+                    metadata.Module().c_str(),
+                    metadata.Category().c_str(),
+                    report.Callsign().c_str(),
                     text.c_str());
         }
         else {
@@ -137,7 +156,7 @@ namespace Publishers {
                     data.ClassName = trace.ClassName();
                 }
             }
-            else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING || metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
+            else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING) {
                 ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
                 const Core::Messaging::IStore::Logging& log = static_cast<const Core::Messaging::IStore::Logging&>(metadata);
                 const Core::Time now(log.TimeStamp());
@@ -147,6 +166,22 @@ namespace Publishers {
                 }
                 else {
                     data.Time = now.ToTimeOnly(true);
+                }
+            }
+            else if (metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
+                ASSERT(dynamic_cast<const Core::Messaging::IStore::WarningReporting*>(&metadata) != nullptr);
+                const Core::Messaging::IStore::WarningReporting& report = static_cast<const Core::Messaging::IStore::WarningReporting&>(metadata);
+                const Core::Time now(report.TimeStamp());
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
+                    data.Time = now.ToRFC1123(true);
+                }
+                else {
+                    data.Time = now.ToTimeOnly(true);
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CALLSIGN)) != 0) {
+                    data.Callsign = report.Callsign();
                 }
             }
             else {

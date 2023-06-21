@@ -75,6 +75,7 @@ namespace WPEFramework {
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_factory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_factory);
+        _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_factory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
