@@ -26,7 +26,8 @@ option(PLUGIN_SECURITYAGENT "Enable the Security Agent Features interface in jav
 option(PLUGIN_WEBKITBROWSER_IIDENTIFIER "Enable IIDENTIFIER interface JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS "Enable AAMP JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
-option(PLUGIN_WEBKITBROWSER_FIREBOLTOS_ENDPOINT "Enable injection of __firebolt.endpoint." ON)
+option(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE "Update TimeZone from given file" ON)
+option(PLUGIN_WEBKITBROWSER_CUSTOM_PROCESS_INFO "Enable set of custom process info (e.g. process name)." OFF)
 
 add_library(${MODULE_NAME} SHARED
     main.cpp
@@ -60,9 +61,19 @@ if(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE)
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_BADGER_BRIDGE)
 endif()
 
-if(PLUGIN_WEBKITBROWSER_FIREBOLTOS_ENDPOINT)
-    target_sources(${MODULE_NAME} PRIVATE FireboltOSEndpoint.cpp)
-    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_FIREBOLTOS_ENDPOINT)
+if(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE)
+    target_sources(${MODULE_NAME} PRIVATE ../TimeZone/TimeZoneSupport.cpp)
+    target_compile_definitions(${MODULE_NAME} PRIVATE UPDATE_TZ_FROM_FILE)
+    target_include_directories(${MODULE_NAME} PRIVATE ../TimeZone)
+    target_include_directories(${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+    if(TZ_FILE)
+        add_definitions(-DTZ_FILE="${TZ_FILE}")
+    endif()
+endif()
+
+if(PLUGIN_WEBKITBROWSER_CUSTOM_PROCESS_INFO)
+    target_sources(${MODULE_NAME} PRIVATE ProcessInfo.cpp)
+    target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_CUSTOM_PROCESS_INFO)
 endif()
 
 set_target_properties(${MODULE_NAME} PROPERTIES

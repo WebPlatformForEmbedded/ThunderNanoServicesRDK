@@ -49,8 +49,12 @@
 #include "AAMPJSBindings.h"
 #endif
 
-#if defined(ENABLE_FIREBOLTOS_ENDPOINT)
-#include "FireboltOSEndpoint.h"
+#if defined(UPDATE_TZ_FROM_FILE)
+#include "TimeZoneSupport.h"
+#endif
+
+#if defined(ENABLE_CUSTOM_PROCESS_INFO)
+#include "ProcessInfo.h"
 #endif
 
 using namespace WPEFramework;
@@ -74,7 +78,6 @@ public:
         : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
     {
-        _engine->Announcements(_comClient->Announcement());
     }
     ~PluginHost()
     {
@@ -102,6 +105,10 @@ public:
 
         g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &_logToSystemConsoleEnabled);
 
+        if (_logToSystemConsoleEnabled && Core::SystemInfo::GetEnvironment(string(_T("CLIENT_IDENTIFIER")), _consoleLogPrefix)) {
+          _consoleLogPrefix = _consoleLogPrefix.substr(0, _consoleLogPrefix.find(','));
+        }
+
         g_signal_connect(
           webkit_script_world_get_default(),
           "window-object-cleared",
@@ -120,12 +127,20 @@ public:
               list->AddWhiteListToWebKit(extension);
             }
         }
+
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Initialize();
+#endif
+#ifdef ENABLE_CUSTOM_PROCESS_INFO
+        ProcessInfo::SetProcessName();
+#endif
     }
 
     void Deinitialize()
     {
-        Messaging::MessageUnit::Instance().Close();
-
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Deinitialize();
+#endif
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
@@ -138,7 +153,7 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame, VARIABLE_IS_NOT_USED PluginHost* host)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
@@ -159,17 +174,14 @@ private:
         JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
-#ifdef  ENABLE_FIREBOLTOS_ENDPOINT
-        JavaScript::FireboltOSEndpoint::InjectJS(world, frame);
-#endif
     }
     static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
                                     WebKitWebPage* page,
-                                    VARIABLE_IS_NOT_USED PluginHost* host)
+                                    PluginHost* host)
     {
         if (host->_logToSystemConsoleEnabled) {
             g_signal_connect(page, "console-message-sent",
-                G_CALLBACK(consoleMessageSentCallback), nullptr);
+                G_CALLBACK(consoleMessageSentCallback), host);
         }
         g_signal_connect(page, "user-message-received",
                 G_CALLBACK(userMessageReceivedCallback), nullptr);
@@ -181,12 +193,12 @@ private:
                 G_CALLBACK(didStartProvisionalLoadForFrame), nullptr);
 #endif
     }
-    static void consoleMessageSentCallback(VARIABLE_IS_NOT_USED WebKitWebPage* page, WebKitConsoleMessage* message)
+    static void consoleMessageSentCallback(VARIABLE_IS_NOT_USED WebKitWebPage* page, WebKitConsoleMessage* message, PluginHost* host)
     {
         string messageString = Core::ToString(webkit_console_message_get_text(message));
         uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
 
-        TRACE_GLOBAL(BrowserConsoleLog, (messageString, line, 0));
+        TRACE_GLOBAL(BrowserConsoleLog, (host->_consoleLogPrefix, messageString, line, 0));
     }
     static gboolean userMessageReceivedCallback(WebKitWebPage* page, WebKitUserMessage* message)
     {
@@ -211,8 +223,9 @@ private:
 #ifdef  ENABLE_AAMP_JSBINDINGS
     static gboolean didStartProvisionalLoadForFrame(WebKitWebPage* page, WebKitFrame* frame)
     {
-      if (webkit_frame_is_main_frame(frame))
+      if (webkit_frame_is_main_frame(frame)) {
           JavaScript::AAMP::UnloadJSBindings(webkit_script_world_get_default(), frame);
+      }
       return FALSE;
     }
 #endif
@@ -221,6 +234,11 @@ private:
     Core::ProxyType<RPC::InvokeServerType<2, 0, 4> > _engine;
     Core::ProxyType<RPC::CommunicatorClient> _comClient;
 
+#if defined(UPDATE_TZ_FROM_FILE)
+    TZ::TimeZoneSupport _tzSupport;
+#endif
+
+    string _consoleLogPrefix;
     gboolean _logToSystemConsoleEnabled;
     WebKitWebExtension* _extension;
 } _wpeFrameworkClient;
@@ -241,3 +259,7 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(WebKitWebExt
 }
 
 }
+
+// explicit instantiation so that -O1/2/3 flags do not introduce undefined symbols
+template void WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Input, 4u>::AddRef() const;
+template void WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Output, 5u>::AddRef() const;

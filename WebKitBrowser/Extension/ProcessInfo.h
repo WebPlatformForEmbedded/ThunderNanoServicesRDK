@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 RDK Management
+ * Copyright 2023 RDK Management
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,9 @@
 #include <wpe/webkit-web-extension.h>
 
 namespace WPEFramework {
-namespace JavaScript {
-namespace FireboltOSEndpoint {
+namespace ProcessInfo {
 
-void InjectJS(WebKitScriptWorld*, WebKitFrame*);
+void SetProcessName();
 
-}  // FireboltOSEndpoint
-}  // JavaScript
-}  // WPEFramework
+}  // namespace ProcessInfo
+}  // namespace WPEFramework

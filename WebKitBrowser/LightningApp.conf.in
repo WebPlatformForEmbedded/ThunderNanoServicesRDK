@@ -1,6 +1,7 @@
 precondition = ["Internet"]
 autostart = "@PLUGIN_LIGHTNING_APP_AUTOSTART@"
 persistentpathpostfix = "@PLUGIN_LIGHTNING_APP_PERSISTENTPATHPOSTFIX@"
+startuporder = "@PLUGIN_LIGHTNING_APP_STARTUPORDER@"
 
 configuration = JSON()
 
@@ -13,14 +14,13 @@ else:
     configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 
 configuration.add("transparent", "@PLUGIN_WEBKITBROWSER_TRANSPARENT@")
-configuration.add("compositor", "noaa")
+configuration.add("compositor", "@PLUGIN_LIGHTNING_APP_COMPOSITOR@")
 configuration.add("inspector", "@PLUGIN_LIGHTNING_APP_WEBINSPECTOR_ADDRESS@")
 configuration.add("fps", "true")
 configuration.add("cursor", "false")
 configuration.add("touch", "false")
 configuration.add("msebuffers", "@PLUGIN_WEBKITBROWSER_MSEBUFFERS@")
 configuration.add("memoryprofile", "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@")
-configuration.add("memorypressure", "@PLUGIN_LIGHTNING_APP_MEMORYPRESSURE@")
 configuration.add("mediadiskcache", "@PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@")
 configuration.add("diskcache", "@PLUGIN_WEBKITBROWSER_DISKCACHE@")
 configuration.add("xhrcache", "@PLUGIN_WEBKITBROWSER_XHRCACHE@")
@@ -35,6 +35,9 @@ configuration.add("localstorageenabled", "@PLUGIN_LIGHTNING_APP_LOCALSTORAGE_ENA
 configuration.add("localstorage", "@PLUGIN_LIGHTNING_APP_LOCALSTORAGE@")
 configuration.add("localstoragesize", "@PLUGIN_LIGHTNING_APP_LOCALSTORAGESIZE@")
 configuration.add("cookiestorage", "@PLUGIN_LIGHTNING_APP_COOKIESTORAGE@")
+configuration.add("indexeddbenabled", "@PLUGIN_LIGHTNING_APP_INDEXEDDB_ENABLE@")
+configuration.add("indexeddbpath", "@PLUGIN_LIGHTNING_APP_INDEXEDDB_PATH@")
+configuration.add("indexeddbsize", "@PLUGIN_LIGHTNING_APP_INDEXEDDB_SIZE@")
 
 if boolean("@PLUGIN_LIGHTNING_APP_WINDOWCLOSE@"):
     configuration.add("windowclose", "true")
@@ -57,3 +60,8 @@ rootobject.add("locator", "lib@PLUGIN_WEBKITBROWSER_IMPLEMENTATION@.so")
 rootobject.add("user", "@PLUGIN_WEBKITBROWSER_USER@")
 rootobject.add("group", "@PLUGIN_WEBKITBROWSER_GROUP@")
 configuration.add("root", rootobject)
+
+memory = JSON()
+memory.add("webprocesslimit", "@PLUGIN_LIGHTNING_APP_MEMORYPRESSURE_WEBPROCESSLIMIT@")
+memory.add("networkprocesslimit", "@PLUGIN_LIGHTNING_APP_MEMORYPRESSURE_NETWORKPROCESSLIMIT@")
+configuration.add("memory", memory)
