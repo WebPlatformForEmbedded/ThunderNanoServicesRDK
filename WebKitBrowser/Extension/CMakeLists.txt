@@ -26,7 +26,7 @@ option(PLUGIN_SECURITYAGENT "Enable the Security Agent Features interface in jav
 option(PLUGIN_WEBKITBROWSER_IIDENTIFIER "Enable IIDENTIFIER interface JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_AAMP_JSBINDINGS "Enable AAMP JS bindings." OFF)
 option(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE "Enable $badger support." OFF)
-option(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE "Update TimeZone from given file" ON)
+option(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE "Update TimeZone from given file" OFF)
 option(PLUGIN_WEBKITBROWSER_CUSTOM_PROCESS_INFO "Enable set of custom process info (e.g. process name)." OFF)
 
 add_library(${MODULE_NAME} SHARED
@@ -61,6 +61,8 @@ if(PLUGIN_WEBKITBROWSER_BADGER_BRIDGE)
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_BADGER_BRIDGE)
 endif()
 
+# This is a Comcast only feature, and for a modular architecture (separation of concern)
+# should use the TimeSync plugin
 if(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE)
     target_sources(${MODULE_NAME} PRIVATE ../TimeZone/TimeZoneSupport.cpp)
     target_compile_definitions(${MODULE_NAME} PRIVATE UPDATE_TZ_FROM_FILE)
@@ -72,7 +74,6 @@ if(PLUGIN_WEBKITBROWSER_UPDATE_TZ_FROM_FILE)
 endif()
 
 if(PLUGIN_WEBKITBROWSER_CUSTOM_PROCESS_INFO)
-    target_sources(${MODULE_NAME} PRIVATE ProcessInfo.cpp)
     target_compile_definitions(${MODULE_NAME} PRIVATE ENABLE_CUSTOM_PROCESS_INFO)
 endif()
 
