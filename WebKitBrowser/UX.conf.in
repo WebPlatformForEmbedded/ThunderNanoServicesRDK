@@ -1,4 +1,5 @@
 autostart = "@PLUGIN_UX_AUTOSTART@"
+startuporder = "@PLUGIN_UX_STARTUPORDER@"
 
 configuration = JSON()
 
@@ -19,7 +20,6 @@ configuration.add("touch", "false")
 configuration.add("msebuffers", "@PLUGIN_UX_MSEBUFFERS@")
 configuration.add("thunderdecryptorpreference", "@PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE@")
 configuration.add("memoryprofile", "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@")
-configuration.add("memorypressure", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE@")
 configuration.add("mediacontenttypesrequiringhardwaresupport", "@PLUGIN_WEBKITBROWSER_MEDIA_CONTENT_TYPES_REQUIRING_HARDWARE_SUPPORT@")
 configuration.add("mediadiskcache", "@PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@")
 configuration.add("diskcache", "@PLUGIN_WEBKITBROWSER_DISKCACHE@")
@@ -50,3 +50,8 @@ javascript = JSON()
 javascript.add("useJIT", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@") else "false")
 javascript.add("useDFG", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@") else "false")
 configuration.add("javascript", javascript)
+
+memory = JSON()
+memory.add("webprocesslimit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESSLIMIT@")
+memory.add("networkprocesslimit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESSLIMIT@")
+configuration.add("memory", memory)

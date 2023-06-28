@@ -16,17 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+#ifndef __TIMEZONESUPPORTH
+#define __TIMEZONESUPPORTH
 
-#pragma once
-
-#include <wpe/webkit-web-extension.h>
+#include "Module.h"
+#include <gio/gio.h>
 
 namespace WPEFramework {
-namespace JavaScript {
-namespace FireboltOSEndpoint {
+namespace TZ {
+    class TimeZoneSupport {
+    public:
+        TimeZoneSupport();
+        void Initialize();
+        void Deinitialize();
+    
+    private:
+        static void HandleTimeZoneFileUpdate(GFileMonitor *monitor, GFile *file, GFile *other, GFileMonitorEvent evtype, gpointer user_data);
 
-void InjectJS(WebKitScriptWorld*, WebKitFrame*);
+    private:
+        GFileMonitor *_timeZoneFileMonitor;
+        gulong _timeZoneFileMonitorId;
+        std::string _previousTimeZone;
+        std::string _tzFile;
+    };
+}
+}
 
-}  // FireboltOSEndpoint
-}  // JavaScript
-}  // WPEFramework
+#endif // __TIMEZONESUPPORTH
