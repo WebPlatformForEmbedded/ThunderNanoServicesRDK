@@ -1300,12 +1300,16 @@ static GSourceFuncs _handlerIntervention =
         }
 
 #if defined(ENABLE_CLOUD_COOKIE_JAR)
-        uint32_t CookieJar(uint32_t& version /* @out */, uint32_t& checksum /* @out */, string& payload /* @out */) const override
+        uint32_t CookieJar(Exchange::IBrowserCookieJar::Config& cookieJarData) const override
         {
             uint32_t result = Core::ERROR_GENERAL;
 
             if (_context == nullptr)
                 return result;
+
+            uint32_t version;
+            uint32_t checksum;
+            string payload;
 
             _adminLock.Lock();
             if (_cookieJar.IsStale()) {
@@ -1326,23 +1330,25 @@ static GSourceFuncs _handlerIntervention =
 
                 _adminLock.Lock();
             }
+
             result = _cookieJar.Pack(version, checksum, payload);
             _adminLock.Unlock();
 
+            cookieJarData.version = version;
+            cookieJarData.checksum = checksum;
+            cookieJarData.payload = payload;
             return result;
         }
 
-        uint32_t CookieJar(const uint32_t version, const uint32_t checksum, const string& payload) override
+        uint32_t CookieJar(const Exchange::IBrowserCookieJar::Config& cookieJarData) override
         {
             uint32_t result = Core::ERROR_GENERAL;
             if (_context == nullptr) {
                 return result;
             }
-
             _adminLock.Lock();
-            result = _cookieJar.Unpack(version, checksum, payload);
+            result = _cookieJar.Unpack(cookieJarData.version, cookieJarData.checksum, cookieJarData.payload);
             _adminLock.Unlock();
-
             if (result == Core::ERROR_NONE) {
                 g_main_context_invoke(
                     _context,

@@ -72,7 +72,10 @@ namespace Plugin {
                 if (_application != nullptr) {
                     RegisterAll();
                     Exchange::JWebBrowser::Register(*this, _browser);
-
+                    _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
+                    if (_cookieJar != nullptr) {
+                        Exchange::JBrowserCookieJar::Register(*this, _cookieJar);
+                    }
                     _browser->Register(&_notification);
 
                     const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
@@ -122,6 +125,11 @@ namespace Plugin {
                     _memory = nullptr;
                 }
                 if (_application != nullptr) {
+                    if (_cookieJar != nullptr) {
+                        Exchange::JBrowserCookieJar::Unregister(*this);
+                        _cookieJar->Release();
+                        _cookieJar = nullptr;
+                    }
                     Exchange::JWebBrowser::Unregister(*this);
                     UnregisterAll();
                     _browser->Unregister(&_notification);
