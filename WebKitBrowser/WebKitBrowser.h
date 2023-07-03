@@ -39,30 +39,6 @@ namespace WebKitBrowser {
     Exchange::IMemory* MemoryObserver(const RPC::IRemoteConnection* connection);
 }
 
-namespace JsonData {
-namespace BrowserCookieJar {
-
-class CookieJarParamsData : public Core::JSON::Container {
-public:
-    CookieJarParamsData()
-        : Core::JSON::Container()
-    {
-        Add(_T("version"), &Version);
-        Add(_T("checksum"), &Checksum);
-        Add(_T("payload"), &Payload);
-    }
-
-    CookieJarParamsData(const CookieJarParamsData&) = delete;
-    CookieJarParamsData& operator=(const CookieJarParamsData&) = delete;
-
-public:
-    Core::JSON::DecUInt32 Version;
-    Core::JSON::DecUInt32 Checksum;
-    Core::JSON::String    Payload;
-}; // class CookieJarParamsData
-
-}}
-
 namespace Plugin {
 
     class WebKitBrowser : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -260,8 +236,6 @@ namespace Plugin {
         uint32_t set_languages(const Core::JSON::ArrayType<Core::JSON::String>& param);
         uint32_t get_headers(Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& response) const;
         uint32_t set_headers(const Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& param);
-        uint32_t get_cookiejar(JsonData::BrowserCookieJar::CookieJarParamsData& response) const;
-        uint32_t set_cookiejar(const JsonData::BrowserCookieJar::CookieJarParamsData& param);
         void event_bridgequery(const string& message);
         void event_statechange(const bool& suspended); // StateControl
 
