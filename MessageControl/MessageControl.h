@@ -420,9 +420,9 @@ namespace Plugin {
         {
             _client.WaitForUpdates(Core::infinite);
 
-            _client.PopMessagesAndCall([this](const Core::Messaging::Metadata& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+            _client.PopMessagesAndCall([this](const Core::ProxyType<Core::Messaging::MessageInfo>& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
                 // Turn data into piecies to trasfer over the wire
-                Message(metadata, message->Data());
+                Message(*metadata, message->Data());
             });
         }
 
@@ -439,7 +439,9 @@ namespace Plugin {
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
         WorkerThread _worker;
-        Messaging::TraceFactory _factory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Messaging::TextMessage> _tracingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Messaging::TextMessage> _loggingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Messaging::TextMessage> _warningReportingFactory;
         Cleanups _cleaning;
     };
 

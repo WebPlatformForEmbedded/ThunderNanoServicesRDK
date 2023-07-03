@@ -70,12 +70,14 @@ namespace WPEFramework {
         , _dispatcherBasePath(Messaging::MessageUnit::Instance().BasePath())
         , _client(_dispatcherIdentifier, _dispatcherBasePath, Messaging::MessageUnit::Instance().SocketPort())
         , _worker(*this)
-        , _factory()
+        , _tracingFactory()
+        , _loggingFactory()
+        , _warningReportingFactory()
     {
         _client.AddInstance(0);
-        _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_factory);
-        _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_factory);
-        _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_factory);
+        _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
