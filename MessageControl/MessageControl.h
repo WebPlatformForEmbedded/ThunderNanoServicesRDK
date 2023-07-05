@@ -61,7 +61,7 @@ namespace Plugin {
 
             struct ICallback {
 
-                virtual void Message(const Core::Messaging::Metadata& metadata, const string& text) = 0;
+                virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
 
                 virtual ~ICallback() = default;
             };
@@ -153,7 +153,7 @@ namespace Plugin {
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Core::Messaging::Metadata& metadata, const string& message) override {
+            void Message(const Core::Messaging::MessageInfo& metadata, const string& message) override {
                 _parent.Message(metadata, message);
             }
 
@@ -306,7 +306,7 @@ namespace Plugin {
             _outputLock.Unlock();
         }
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& message)
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& message)
         {
             // Time to start sending it to all interested parties...
             _outputLock.Lock();
@@ -420,9 +420,9 @@ namespace Plugin {
         {
             _client.WaitForUpdates(Core::infinite);
 
-            _client.PopMessagesAndCall([this](const Core::Messaging::Metadata& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
+            _client.PopMessagesAndCall([this](const Core::ProxyType<Core::Messaging::MessageInfo>& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
                 // Turn data into piecies to trasfer over the wire
-                Message(metadata, message->Data());
+                Message(*metadata, message->Data());
             });
         }
 
@@ -439,7 +439,9 @@ namespace Plugin {
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
         WorkerThread _worker;
-        Messaging::TraceFactory _factory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Messaging::TextMessage> _tracingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Messaging::TextMessage> _loggingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Messaging::TextMessage> _warningReportingFactory;
         Cleanups _cleaning;
     };
 
