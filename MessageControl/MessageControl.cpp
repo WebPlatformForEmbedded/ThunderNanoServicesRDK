@@ -70,11 +70,14 @@ namespace WPEFramework {
         , _dispatcherBasePath(Messaging::MessageUnit::Instance().BasePath())
         , _client(_dispatcherIdentifier, _dispatcherBasePath, Messaging::MessageUnit::Instance().SocketPort())
         , _worker(*this)
-        , _factory()
+        , _tracingFactory()
+        , _loggingFactory()
+        , _warningReportingFactory()
     {
         _client.AddInstance(0);
-        _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_factory);
-        _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_factory);
+        _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
@@ -86,18 +89,27 @@ namespace WPEFramework {
         _config.Clear();
         _config.FromString(service->ConfigLine());
 
+        Core::Messaging::MessageInfo::abbreviate abbreviate;
+
+        if (_config.Abbreviated.Value() == 0) {
+            abbreviate = Core::Messaging::MessageInfo::abbreviate::FULL;
+        }
+        else {
+            abbreviate = Core::Messaging::MessageInfo::abbreviate::ABBREVIATED;
+        }
+
         _service = service;
         _service->AddRef();
 
         if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-            Announce(new Publishers::ConsoleOutput(_config.Abbreviated.Value()));
+            Announce(new Publishers::ConsoleOutput(abbreviate));
         }
         if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-            Announce(new Publishers::SyslogOutput(_config.Abbreviated.Value()));
+            Announce(new Publishers::SyslogOutput(abbreviate));
         }
         if (_config.FileName.Value().empty() == false) {
             _config.FileName = service->VolatilePath() + _config.FileName.Value();
-            Announce(new Publishers::FileOutput(_config.Abbreviated.Value(), _config.FileName.Value()));
+            Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value()));
         }
         if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
             Announce(new Publishers::UDPOutput(Core::NodeId(_config.Remote.NodeId())));
