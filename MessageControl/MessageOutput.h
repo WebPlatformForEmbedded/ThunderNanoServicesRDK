@@ -27,7 +27,7 @@ namespace Publishers {
     struct IPublish {
         virtual ~IPublish() = default;
 
-        virtual void Message(const Core::Messaging::Metadata& metadata, const string& text) = 0;
+        virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
     };
 
     class Text {
@@ -36,17 +36,17 @@ namespace Publishers {
         Text(const Text&) = delete;
         Text& operator=(const Text&) = delete;
 
-        explicit Text(const bool abbreviated)
+        explicit Text(const Core::Messaging::MessageInfo::abbreviate abbreviated)
             : _abbreviated(abbreviated)
         {
         }
         ~Text() = default;
 
     public:
-        string Convert (const Core::Messaging::Metadata& metadata, const string& text);
+        string Convert (const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
-        bool _abbreviated;
+        Core::Messaging::MessageInfo::abbreviate _abbreviated;
     };
 
     class ConsoleOutput : public IPublish {
@@ -55,14 +55,14 @@ namespace Publishers {
         ConsoleOutput(const ConsoleOutput&) = delete;
         ConsoleOutput& operator=(const ConsoleOutput&) = delete;
 
-        explicit ConsoleOutput(const bool abbreviate)
+        explicit ConsoleOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
             : _convertor(abbreviate)
         {
         }
         ~ConsoleOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -74,14 +74,14 @@ namespace Publishers {
         SyslogOutput(const SyslogOutput&) = delete;
         SyslogOutput& operator=(const SyslogOutput&) = delete;
 
-        explicit SyslogOutput(const bool abbreviate)
+        explicit SyslogOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
             : _convertor(abbreviate)
         {
         }
         ~SyslogOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -93,7 +93,7 @@ namespace Publishers {
         FileOutput(const FileOutput&) = delete;
         FileOutput& operator=(const FileOutput&) = delete;
 
-        explicit FileOutput(const bool abbreviate, const string& filepath)
+        explicit FileOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const string& filepath)
             : _convertor(abbreviate)
             , _file(filepath)
         {
@@ -111,7 +111,7 @@ namespace Publishers {
         }
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -127,9 +127,10 @@ namespace Publishers {
             CLASSNAME     = 0x04,
             MODULE        = 0x08,
             CATEGORY      = 0x10,
-            INCLUDINGDATE = 0x20,
-            ALL           = 0x3F,
-            PAUSED        = 0x40
+            CALLSIGN      = 0x20,
+            INCLUDINGDATE = 0x40,
+            ALL           = 0x7F,
+            PAUSED        = 0x80
         };
 
     public:
@@ -146,6 +147,7 @@ namespace Publishers {
                 , ClassName()
                 , Category()
                 , Module()
+                , Callsign()
                 , Message()
             {
                 Add(_T("time"), &Time);
@@ -154,6 +156,7 @@ namespace Publishers {
                 Add(_T("classname"), &ClassName);
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
+                Add(_T("callsign"), &Callsign);
                 Add(_T("message"), &Message);
             }
             ~Data() override = default;
@@ -165,6 +168,7 @@ namespace Publishers {
             Core::JSON::String ClassName;
             Core::JSON::String Category;
             Core::JSON::String Module;
+            Core::JSON::String Callsign;
             Core::JSON::String Message;
         };
 
@@ -249,6 +253,20 @@ namespace Publishers {
             }
         }
 
+        bool Callsign() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::CALLSIGN)) != 0);
+        }
+
+        void Callsign(const bool enabled)
+        {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::CALLSIGN));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CALLSIGN));
+            }
+        }
+
         bool Date() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         }
@@ -277,7 +295,7 @@ namespace Publishers {
             }
         }
 
-        void Convert(const Core::Messaging::Metadata& metadata, const string& text, Data& info);
+        void Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& info);
 
     private:
         template <typename E>
@@ -321,7 +339,7 @@ namespace Publishers {
         explicit UDPOutput(const Core::NodeId& nodeId);
         ~UDPOutput() = default;
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Channel _output;
@@ -340,6 +358,7 @@ namespace Publishers {
                 , LineNumber()
                 , Category()
                 , Module()
+                , Callsign()
                 , IncludingDate()
                 , Paused()
             {
@@ -348,6 +367,7 @@ namespace Publishers {
                 Add(_T("classname"), &ClassName);
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
+                Add(_T("callsign"), &Callsign);
                 Add(_T("includingdate"), &IncludingDate);
                 Add(_T("paused"), &Paused);
             }
@@ -359,6 +379,7 @@ namespace Publishers {
             Core::JSON::Boolean ClassName;
             Core::JSON::Boolean Category;
             Core::JSON::Boolean Module;
+            Core::JSON::Boolean Callsign;
             Core::JSON::Boolean IncludingDate;
             Core::JSON::Boolean Paused;
         };
@@ -478,6 +499,9 @@ namespace Publishers {
                     if (info->Module.IsSet() == true) {
                         index->second.Module(info->Module == true);
                     }
+                    if (info->Callsign.IsSet() == true) {
+                        index->second.Callsign(info->Callsign == true);
+                    }
                     if (info->IncludingDate.IsSet() == true) {
                         index->second.Date(info->IncludingDate == true);
                     }
@@ -491,6 +515,7 @@ namespace Publishers {
                     info->ClassName = index->second.ClassName();
                     info->Category = index->second.Category();
                     info->Module = index->second.Module();
+                    info->Callsign = index->second.Callsign();
                     info->IncludingDate = index->second.Date();
                     info->Paused = index->second.Paused();
                 }
@@ -501,7 +526,7 @@ namespace Publishers {
             return (element);
         }
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& text) override
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override
         {
             std::list<std::pair<uint32_t, Core::ProxyType<Core::JSON::IElement>>> cachedList;
             PluginHost::IShell* server = nullptr;

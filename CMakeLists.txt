@@ -31,7 +31,6 @@ option(PLUGIN_PERFORMANCEMETRICS "Include PerformanceMetrics plugin" OFF)
 option(PLUGIN_PLAYERINFO "Include PlayerInfo plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
 option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
-option(PLUGIN_WARNINGREPORTINGCONTROL "Include WarningReportingControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
@@ -86,10 +85,6 @@ endif()
 
 if(PLUGIN_TRACECONTROL)
     add_subdirectory(TraceControl)
-endif()
-
-if(PLUGIN_WARNINGREPORTINGCONTROL)
-    add_subdirectory(WarningReportingControl)
 endif()
 
 if(PLUGIN_WEBKITBROWSER)
