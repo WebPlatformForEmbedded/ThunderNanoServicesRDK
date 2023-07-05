@@ -27,7 +27,7 @@ namespace Publishers {
     struct IPublish {
         virtual ~IPublish() = default;
 
-        virtual void Message(const Core::Messaging::Metadata& metadata, const string& text) = 0;
+        virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
     };
 
     class Text {
@@ -36,17 +36,17 @@ namespace Publishers {
         Text(const Text&) = delete;
         Text& operator=(const Text&) = delete;
 
-        explicit Text(const bool abbreviated)
+        explicit Text(const Core::Messaging::MessageInfo::abbreviate abbreviated)
             : _abbreviated(abbreviated)
         {
         }
         ~Text() = default;
 
     public:
-        string Convert (const Core::Messaging::Metadata& metadata, const string& text);
+        string Convert (const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
-        bool _abbreviated;
+        Core::Messaging::MessageInfo::abbreviate _abbreviated;
     };
 
     class ConsoleOutput : public IPublish {
@@ -55,14 +55,14 @@ namespace Publishers {
         ConsoleOutput(const ConsoleOutput&) = delete;
         ConsoleOutput& operator=(const ConsoleOutput&) = delete;
 
-        explicit ConsoleOutput(const bool abbreviate)
+        explicit ConsoleOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
             : _convertor(abbreviate)
         {
         }
         ~ConsoleOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -74,14 +74,14 @@ namespace Publishers {
         SyslogOutput(const SyslogOutput&) = delete;
         SyslogOutput& operator=(const SyslogOutput&) = delete;
 
-        explicit SyslogOutput(const bool abbreviate)
+        explicit SyslogOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
             : _convertor(abbreviate)
         {
         }
         ~SyslogOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -93,7 +93,7 @@ namespace Publishers {
         FileOutput(const FileOutput&) = delete;
         FileOutput& operator=(const FileOutput&) = delete;
 
-        explicit FileOutput(const bool abbreviate, const string& filepath)
+        explicit FileOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const string& filepath)
             : _convertor(abbreviate)
             , _file(filepath)
         {
@@ -111,7 +111,7 @@ namespace Publishers {
         }
 
     public:
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
@@ -295,7 +295,7 @@ namespace Publishers {
             }
         }
 
-        void Convert(const Core::Messaging::Metadata& metadata, const string& text, Data& info);
+        void Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& info);
 
     private:
         template <typename E>
@@ -339,7 +339,7 @@ namespace Publishers {
         explicit UDPOutput(const Core::NodeId& nodeId);
         ~UDPOutput() = default;
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Channel _output;
@@ -526,7 +526,7 @@ namespace Publishers {
             return (element);
         }
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& text) override
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override
         {
             std::list<std::pair<uint32_t, Core::ProxyType<Core::JSON::IElement>>> cachedList;
             PluginHost::IShell* server = nullptr;

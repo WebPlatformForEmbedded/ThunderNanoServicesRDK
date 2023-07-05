@@ -61,7 +61,7 @@ namespace Plugin {
 
             struct ICallback {
 
-                virtual void Message(const Core::Messaging::Metadata& metadata, const string& text) = 0;
+                virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
 
                 virtual ~ICallback() = default;
             };
@@ -153,7 +153,7 @@ namespace Plugin {
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Core::Messaging::Metadata& metadata, const string& message) override {
+            void Message(const Core::Messaging::MessageInfo& metadata, const string& message) override {
                 _parent.Message(metadata, message);
             }
 
@@ -306,7 +306,7 @@ namespace Plugin {
             _outputLock.Unlock();
         }
 
-        void Message(const Core::Messaging::Metadata& metadata, const string& message)
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& message)
         {
             // Time to start sending it to all interested parties...
             _outputLock.Lock();

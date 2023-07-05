@@ -23,85 +23,22 @@ namespace WPEFramework {
 
 namespace Publishers {
 
-    string Text::Convert(const Core::Messaging::Metadata& metadata, const string& text) /* override */
+    string Text::Convert(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
-        string output;
+        ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
 
-        if (metadata.Type() == Core::Messaging::Metadata::type::TRACING) {
-            ASSERT(dynamic_cast<const Core::Messaging::IStore::Tracing*>(&metadata) != nullptr);
-            const Core::Messaging::IStore::Tracing& trace = static_cast<const Core::Messaging::IStore::Tracing&>(metadata);
-            const Core::Time now(trace.TimeStamp());
-
-            if (_abbreviated == true) {
-                const string time(now.ToTimeOnly(true));
-                output = Core::Format("[%s]:[%s]:[%s]: %s\n",
-                        time.c_str(),
-                        metadata.Module().c_str(),
-                        metadata.Category().c_str(),
-                        text.c_str());
-            }
-            else {
-                const string time(now.ToRFC1123(true));
-                output = Core::Format("[%s]:[%s]:[%s:%u]:[%s]:[%s]: %s\n",
-                        time.c_str(),
-                        metadata.Module().c_str(),
-                        Core::FileNameOnly(trace.FileName().c_str()),
-                        trace.LineNumber(),
-                        trace.ClassName().c_str(),
-                        metadata.Category().c_str(),
-                        text.c_str());
-            }
-        }
-        else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING) {
-            ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
-            const Core::Messaging::IStore::Logging& log = static_cast<const Core::Messaging::IStore::Logging&>(metadata);
-            const Core::Time now(log.TimeStamp());
-            string time;
-
-            if (_abbreviated == true) {
-                time = now.ToTimeOnly(true);
-            }
-            else {
-                time = now.ToRFC1123(true);
-            }
-            output = Core::Format("[%s]:[%s]:[%s]: %s\n",
-                    time.c_str(),
-                    metadata.Module().c_str(),
-                    metadata.Category().c_str(),
-                    text.c_str());
-        }
-        else if (metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
-            ASSERT(dynamic_cast<const Core::Messaging::IStore::WarningReporting*>(&metadata) != nullptr);
-            const Core::Messaging::IStore::WarningReporting& report = static_cast<const Core::Messaging::IStore::WarningReporting&>(metadata);
-            const Core::Time now(report.TimeStamp());
-            string time;
-
-            if (_abbreviated == true) {
-                time = now.ToTimeOnly(true);
-            }
-            else {
-                time = now.ToRFC1123(true);
-            }
-            output = Core::Format("[%s]:[%s]:[%s]:[%s]: %s\n",
-                    time.c_str(),
-                    metadata.Module().c_str(),
-                    metadata.Category().c_str(),
-                    report.Callsign().c_str(),
-                    text.c_str());
-        }
-        else {
-            ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
-        }
+        string output = metadata.ToString(_abbreviated).c_str() +
+                        Core::Format("%s\n", text.c_str());
 
         return (output);
     }
 
-    void ConsoleOutput::Message(const Core::Messaging::Metadata& metadata, const string& text) /* override */
+    void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
         std::cout << _convertor.Convert(metadata, text);
     }
 
-    void SyslogOutput::Message(const Core::Messaging::Metadata& metadata, const string& text) /* override */
+    void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
 #ifndef __WINDOWS__
         syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, text).c_str());
@@ -110,7 +47,7 @@ namespace Publishers {
 #endif
     }
 
-    void FileOutput::Message(const Core::Messaging::Metadata& metadata, const string& text) /* override */
+    void FileOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
         if (_file.IsOpen()) {
             const string line = _convertor.Convert(metadata, text);
@@ -118,7 +55,7 @@ namespace Publishers {
         }
     }
 
-    void JSON::Convert(const Core::Messaging::Metadata& metadata, const string& text, Data& data)
+    void JSON::Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& data)
     {
         ExtraOutputOptions options = _outputOptions;
 
@@ -245,7 +182,7 @@ namespace Publishers {
         _output.Open(0);
     }
 
-    void UDPOutput::Message(const Core::Messaging::Metadata& metadata, const string& text) /* override */
+    void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
         //yikes, recreating stuff from received pieces
         Messaging::TextMessage textMessage(text);
