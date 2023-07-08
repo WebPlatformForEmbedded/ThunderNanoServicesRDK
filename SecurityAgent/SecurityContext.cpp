@@ -56,7 +56,13 @@ namespace Plugin {
             return ((_accessControlList != nullptr) && (_accessControlList->Allowed("","")));
         }
 
-        Core::TextSegmentIterator index(Core::TextFragment(request.Path, _servicePrefix.length(), static_cast<uint32_t>(request.Path.length() - _servicePrefix.length())), false, '/');
+        Core::TextSegmentIterator index(
+            Core::TextFragment(
+                request.Path, 
+                static_cast<uint32_t>(_servicePrefix.length()), 
+                static_cast<uint32_t>(request.Path.length() - _servicePrefix.length())), 
+            false, 
+            '/');
 
         if (index.Next()) {
             callsign = index.Current().Text();

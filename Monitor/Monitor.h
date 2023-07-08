@@ -98,7 +98,7 @@ namespace Plugin {
                 return ((_resident.Measurements() != 0) || (_allocated.Measurements() != 0) || (_shared.Measurements() != 0) || (_process.Measurements() != 0));
             }
 
-            void AddMeasurements(const uint64_t resident, const uint64_t allocated, const uint64_t shared, const uint64_t process) {
+            void AddMeasurements(const uint64_t resident, const uint64_t allocated, const uint64_t shared, const uint8_t process) {
                 _resident.Set(resident);
                 _allocated.Set(allocated);
                 _shared.Set(shared);
@@ -612,7 +612,7 @@ namespace Plugin {
                             uint64_t resident = source->Resident();
                             uint64_t allocated = source->Allocated();
                             uint64_t shared = source->Shared();
-                            uint64_t  process = source->Processes();
+                            uint8_t  process = source->Processes();
 
                             _adminLock.Lock();
                             _measurement.AddMeasurements(resident, allocated, shared, process);
