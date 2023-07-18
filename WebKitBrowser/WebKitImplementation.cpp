@@ -2645,13 +2645,13 @@ static GSourceFuncs _handlerIntervention =
         {
             switch (reason) {
             case WEBKIT_WEB_PROCESS_CRASHED:
-                SYSLOG_GLOBAL(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
+                SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
                 break;
             case WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT:
-                SYSLOG_GLOBAL(Logging::Fatal, (_T("CRASH: WebProcess terminated due to memory limit: exiting ...")));
+                SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess terminated due to memory limit: exiting ...")));
                 break;
             case WEBKIT_WEB_PROCESS_TERMINATED_BY_API:
-                SYSLOG_GLOBAL(Logging::Fatal, (_T("CRASH: WebProcess terminated by API")));
+                SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess terminated by API")));
                 break;
             }
             g_signal_handlers_block_matched(webView, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, browser);
@@ -3425,7 +3425,7 @@ static GSourceFuncs _handlerIntervention =
                 if (self->_unresponsiveReplyNum > 0) {
 
                     std::string activeURL(webkit_web_view_get_uri(self->_view));
-                    SYSLOG_GLOBAL(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, url=%s\n"),
+                    SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, url=%s\n"),
                                                 self->_unresponsiveReplyNum, activeURL.c_str()));
                     self->_unresponsiveReplyNum = 0;
                 }
@@ -3439,7 +3439,7 @@ static GSourceFuncs _handlerIntervention =
 
                 std::string activeURL = GetPageActiveURL(page);
                 pid_t webprocessPID = WKPageGetProcessIdentifier(page);
-                SYSLOG_GLOBAL(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, pid=%u, url=%s\n"),
+                SYSLOG(Logging::Notification, (_T("WebProcess recovered after %d unresponsive replies, pid=%u, url=%s\n"),
                                             self._unresponsiveReplyNum, webprocessPID, activeURL.c_str()));
                 self._unresponsiveReplyNum = 0;
             }
@@ -3677,7 +3677,7 @@ static GSourceFuncs _handlerIntervention =
 
     /* static */ void webProcessDidCrash(WKPageRef, const void*)
     {
-        SYSLOG_GLOBAL(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
+        SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
         exit(1);
     }
 
