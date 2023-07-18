@@ -224,7 +224,7 @@ namespace WPEFramework {
             // -------------------------------------------------------------------------------------------------------
             //! ==================================== CALLED ON THREADPOOL THREAD ======================================
             Core::hresult Invoke(IDispatcher::ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) override;
-            Core::hresult Revoke(ICallback* callback) override;
+            Core::hresult Revoke(IDispatcher::ICallback* callback) override;
 
             // IPluginExtended
             // -------------------------------------------------------------------------------------------------------

@@ -165,7 +165,7 @@ namespace WPEFramework {
         // -------------------------------------------------------------------------------------------------------
         //   IDispatcher methods
         // -------------------------------------------------------------------------------------------------------
-        Core::hresult RustBridge::Invoke(ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) /* override */
+        Core::hresult RustBridge::Invoke(IDispatcher::ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) /* override */
         {            
             uint32_t result(Core::ERROR_BAD_REQUEST);
             Core::JSONRPC::Handler* handler(PluginHost::JSONRPC::Handler(method));
@@ -186,7 +186,7 @@ namespace WPEFramework {
             else if (handler->Exists(realMethod) == Core::ERROR_NONE) {
 
                 // Let's on behalf of the request forward it and update 
-                uint32_t newId = Core::_InterlockedIncrement(_sequenceId);
+                uint32_t newId = Core::InterlockedIncrement(_sequenceId);
                 Core::Time waitTill = Core::Time::Now() + _timeOut;
 
                 _pendingRequests.emplace(std::piecewise_construct,
@@ -207,7 +207,7 @@ namespace WPEFramework {
 
             return (result);
         }
-        Core::hresult RustBridge::Revoke(ICallback* callback) /* override*/ {
+        Core::hresult RustBridge::Revoke(IDispatcher::ICallback* callback) /* override*/ {
             // Remove the interface from the pendings..
             _adminLock.Lock();
 
