@@ -411,6 +411,9 @@ namespace WebKitBrowser {
             uint32_t result(0);
 
             if (_startTime != TimePoint::min()) {
+
+                _adminLock.Lock();
+
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
@@ -435,6 +438,9 @@ namespace WebKitBrowser {
             uint32_t result(0);
 
             if (_startTime != TimePoint::min()) {
+
+                _adminLock.Lock();
+
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
