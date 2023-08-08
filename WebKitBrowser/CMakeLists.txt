@@ -28,10 +28,6 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-if(BUILD_REFERENCE)
-    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
-endif()
-
 option(PLUGIN_WEBKITBROWSER_YOUTUBE "Include YouTube in seperate plugin." OFF)
 option(PLUGIN_WEBKITBROWSER_APPS "Include Apps instance in seperate plugin." OFF)
 option(PLUGIN_WEBKITBROWSER_UX "Include UX in seperate plugin." OFF)

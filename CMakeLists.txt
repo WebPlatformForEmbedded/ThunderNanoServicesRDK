@@ -36,6 +36,10 @@ option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 if(PLUGIN_DEVICEIDENTIFICATION)
     add_subdirectory(DeviceIdentification)
 endif()
