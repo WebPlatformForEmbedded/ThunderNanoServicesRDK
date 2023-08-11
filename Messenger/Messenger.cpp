@@ -71,8 +71,7 @@ namespace Plugin {
 
     /* virtual */ void Messenger::Deinitialize(PluginHost::IShell* service)
     {
-        if (_service != nullptr) {
-            ASSERT(service == _service);
+        if ((_service != nullptr) && (service == _service)) {
 
             _service->Unregister(&_notification);
 
