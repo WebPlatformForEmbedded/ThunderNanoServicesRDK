@@ -52,7 +52,17 @@ javascript.add("useJIT", "true" if boolean("@PLUGIN_APPS_ENABLE_JIT@") else "fal
 javascript.add("useDFG", "true" if boolean("@PLUGIN_APPS_ENABLE_DFG@") else "false")
 configuration.add("javascript", javascript)
 
+webprocesssettings = JSON()
+webprocesssettings.add("limit", "@PLUGIN_APPS_MEMORYPRESSURE_WEBPROCESS_SETTINGS_LIMIT@")
+webprocesssettings.add("gpulimit", "@PLUGIN_APPS_MEMORYPRESSURE_WEBPROCESS_SETTINGS_GPU_LIMIT@")
+webprocesssettings.add("gpufile", "@PLUGIN_APPS_MEMORYPRESSURE_WEBPROCESS_SETTINGS_GPU_FILE@")
+webprocesssettings.add("pollinterval", "@PLUGIN_APPS_MEMORYPRESSURE_WEBPROCESS_SETTINGS_POLLINTERVAL@")
+
+networkprocesssettings = JSON()
+networkprocesssettings.add("limit", "@PLUGIN_APPS_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT@")
+networkprocesssettings.add("pollinterval", "@PLUGIN_APPS_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL@")
+
 memory = JSON()
-memory.add("webprocesslimit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESSLIMIT@")
-memory.add("networkprocesslimit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESSLIMIT@")
+memory.add("webprocesssettings", webprocesssettings)
+memory.add("networkprocesssettings", networkprocesssettings)
 configuration.add("memory", memory)
