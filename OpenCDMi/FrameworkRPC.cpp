@@ -119,7 +119,6 @@ namespace Plugin {
                 : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
                 , _parentInterface(parentInterface)
             {
-                engine->Announcements(Announcement());
                 Open(Core::infinite);
             }
             ~ExternalAccess()
@@ -582,6 +581,18 @@ POP_WARNING()
                     return (_cencData.Status());
                 }
 
+                Exchange::OCDM_RESULT Metricdata(uint32_t& bufferSize, uint8_t buffer[]) const override {
+                    Exchange::OCDM_RESULT result = Exchange::OCDM_INTERFACE_NOT_IMPLEMENTED;
+
+                    CDMi::IMediaSessionMetrics* extension = dynamic_cast<CDMi::IMediaSessionMetrics*>(_mediaKeySession);
+
+                    if (extension != nullptr) {
+                        result = static_cast<Exchange::OCDM_RESULT>(extension->Metrics(bufferSize, buffer));
+                    }
+
+                    return(result);
+                }
+
                 Exchange::ISession::KeyStatus Status(const uint8_t keyId[], const uint8_t length) const override
                 {
                     return (_cencData.Status(CommonEncryptionData::KeyId(static_cast<CommonEncryptionData::systemType>(0), keyId, length)));
@@ -776,6 +787,23 @@ POP_WARNING()
                 }
 
                 return result;
+            }
+
+            Exchange::OCDM_RESULT Metricdata(const string& keySystem, uint32_t& bufferSize, uint8_t buffer[]) const override {
+                Exchange::OCDM_RESULT result = Exchange::OCDM_KEYSYSTEM_NOT_SUPPORTED;
+
+                CDMi::IMediaKeys* system = _parent.KeySystem(keySystem);
+                if (system != nullptr) {
+                    CDMi::IMediaSystemMetrics* extension = dynamic_cast<CDMi::IMediaSystemMetrics*>(system);
+                    if (extension != nullptr) {
+                        result = static_cast<Exchange::OCDM_RESULT>(extension->Metrics(bufferSize, buffer));
+                    }
+                    else {
+                        result = Exchange::OCDM_INTERFACE_NOT_IMPLEMENTED;
+                    }
+                }
+
+                return(result);
             }
 
             uint32_t DefaultSize() const {

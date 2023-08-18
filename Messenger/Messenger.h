@@ -48,12 +48,15 @@ namespace Plugin {
             ~Notification() override = default;
 
         public:
-            virtual void Activated(RPC::IRemoteConnection*)
+            void Activated(RPC::IRemoteConnection* /* connection */) override
             {
             }
-            virtual void Deactivated(RPC::IRemoteConnection* connection)
+            void Deactivated(RPC::IRemoteConnection* connection) override
             {
                 _parent.Deactivated(connection);
+            }
+            void Terminated(RPC::IRemoteConnection* /* connection */) override
+            {
             }
 
             BEGIN_INTERFACE_MAP(Notification)
@@ -70,7 +73,7 @@ namespace Plugin {
 
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Messenger()
-            : PluginHost::JSONRPCSupportsEventStatus(std::bind(&Messenger::CheckToken, this,
+            : JSONRPCSupportsEventStatus(std::bind(&Messenger::CheckToken, this,
                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3))
             , _connectionId(0)
             , _service(nullptr)

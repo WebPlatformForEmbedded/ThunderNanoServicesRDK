@@ -5,6 +5,7 @@ autostart = "@PLUGIN_WEBKITBROWSER_AUTOSTART@"
 resumed =  "@PLUGIN_WEBKITBROWSER_RESUMED@"
 
 persistentpathpostfix = "@PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX@"
+startuporder = "@PLUGIN_WEBKITBROWSER_STARTUPORDER@"
 
 configuration = JSON()
 
@@ -25,7 +26,6 @@ configuration.add("touch", "false")
 configuration.add("msebuffers", "@PLUGIN_WEBKITBROWSER_MSEBUFFERS@")
 configuration.add("thunderdecryptorpreference", "@PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE@")
 configuration.add("memoryprofile", "@PLUGIN_WEBKITBROWSER_MEMORYPROFILE@")
-configuration.add("memorypressure", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE@")
 configuration.add("mediacontenttypesrequiringhardwaresupport",
                     "@PLUGIN_WEBKITBROWSER_MEDIA_CONTENT_TYPES_REQUIRING_HARDWARE_SUPPORT@")
 configuration.add("mediadiskcache", "@PLUGIN_WEBKITBROWSER_MEDIADISKCACHE@")
@@ -41,6 +41,9 @@ configuration.add("clientidentifier", "@PLUGIN_WEBKITBROWSER_CLIENTIDENTIFIER@")
 configuration.add("localstorageenabled", "@PLUGIN_WEBKITBROWSER_LOCALSTORAGE_ENABLE@")
 configuration.add("localstorage", "@PLUGIN_WEBKITBROWSER_LOCALSTORAGE@")
 configuration.add("cookiestorage", "@PLUGIN_WEBKITBROWSER_COOKIESTORAGE@")
+configuration.add("indexeddbenabled", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_ENABLE@")
+configuration.add("indexeddbpath", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_PATH@")
+configuration.add("indexeddbsize", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_SIZE@")
 
 if boolean("@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@"):
     configuration.add("windowclose", "@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@")
@@ -66,3 +69,18 @@ javascript = JSON()
 javascript.add("useJIT", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_JIT@") else "false")
 javascript.add("useDFG", "true" if boolean("@PLUGIN_WEBKITBROWSER_ENABLE_DFG@") else "false")
 configuration.add("javascript", javascript)
+
+webprocesssettings = JSON()
+webprocesssettings.add("limit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESS_SETTINGS_LIMIT@")
+webprocesssettings.add("gpulimit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESS_SETTINGS_GPU_LIMIT@")
+webprocesssettings.add("gpufile", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESS_SETTINGS_GPU_FILE@")
+webprocesssettings.add("pollinterval", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_WEBPROCESS_SETTINGS_POLLINTERVAL@")
+
+networkprocesssettings = JSON()
+networkprocesssettings.add("limit", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT@")
+networkprocesssettings.add("pollinterval", "@PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL@")
+
+memory = JSON()
+memory.add("webprocesssettings", webprocesssettings)
+memory.add("networkprocesssettings", networkprocesssettings)
+configuration.add("memory", memory)

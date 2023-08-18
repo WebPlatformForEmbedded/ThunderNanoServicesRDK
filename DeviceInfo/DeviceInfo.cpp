@@ -189,7 +189,7 @@ namespace Plugin {
         Core::SystemInfo& singleton(Core::SystemInfo::Instance());
 
         systemInfo.Time = Core::Time::Now().ToRFC1123(true);
-        systemInfo.Version = _service->Version() + _T("#") + _subSystem->BuildTreeHash();
+        systemInfo.Version = _subSystem->Version() + _T("#") + _subSystem->BuildTreeHash();
         systemInfo.Uptime = singleton.GetUpTime();
         systemInfo.Freeram = singleton.GetFreeRam();
         systemInfo.Totalram = singleton.GetTotalRam();

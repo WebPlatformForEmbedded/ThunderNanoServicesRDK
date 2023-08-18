@@ -69,7 +69,7 @@ namespace Plugin {
         return message;
     }
 
-    /* virtual */ void Messenger::Deinitialize(PluginHost::IShell* service)
+    /* virtual */ void Messenger::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         if (_service != nullptr) {
             ASSERT(service == _service);
@@ -79,7 +79,7 @@ namespace Plugin {
             if (_roomAdmin != nullptr) {
                 // Exit all the rooms (if any) that were joined by this client
                 for (auto& room : _roomIds) {
-                     room.second->Release();
+                    room.second->Release();
                 }
 
                 _roomIds.clear();

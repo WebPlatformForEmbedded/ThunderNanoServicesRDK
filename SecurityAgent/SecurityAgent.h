@@ -21,8 +21,8 @@
 
 #include "Module.h"
 #include "AccessControlList.h"
-#include <securityagent/IPCSecurityToken.h>
 
+#include <securityagent/IPCSecurityToken.h>
 #include <interfaces/json/JsonData_SecurityAgent.h>
 
 namespace WPEFramework {
@@ -51,7 +51,6 @@ namespace Plugin {
                 if(_parentInterface != nullptr){
                     _parentInterface->AddRef();
                 }
-                engine->Announcements(Announcement());
                 Open(Core::infinite);
             }
             ~TokenDispatcher() override
@@ -73,7 +72,7 @@ namespace Plugin {
                     _parentInterface->AddRef();
 
 
-                    TRACE(Trace::Information, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
+                    TRACE(Security, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
                     result = _parentInterface;
                 }
                 return (result);
@@ -157,9 +156,9 @@ namespace Plugin {
         // -------------------------------------------------------------------------------------------------------
         void RegisterAll();
         void UnregisterAll();
-        #ifdef SECURITY_TESTING_MODE
+#ifdef SECURITY_TESTING_MODE
         uint32_t endpoint_createtoken(const JsonData::SecurityAgent::CreatetokenParamsData& params, JsonData::SecurityAgent::CreatetokenResultInfo& response);
-        #endif // DEBUG
+#endif // DEBUG
         uint32_t endpoint_validate(const JsonData::SecurityAgent::CreatetokenResultInfo& params, JsonData::SecurityAgent::ValidateResultData& response);
 
     private:
@@ -168,8 +167,11 @@ namespace Plugin {
         std::unique_ptr<TokenDispatcher> _dispatcher; 
         Core::ProxyType<RPC::InvokeServer> _engine;
         string _testtoken;
+        string _servicePrefix;
 
-        static constexpr TCHAR TestTokenContent[] = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
+#ifdef SECURITY_TESTING_MODE
+        static constexpr const TCHAR* TestTokenContent = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
+#endif // DEBUG
     };
 
 } // namespace Plugin

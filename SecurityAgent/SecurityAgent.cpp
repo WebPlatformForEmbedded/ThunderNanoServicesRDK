@@ -86,22 +86,26 @@ namespace Plugin {
 
     /* virtual */ const string SecurityAgent::Initialize(PluginHost::IShell* service)
     {
+        string webPrefix = service->WebPrefix();
+        string callsign = service->Callsign();
+
+        _skipURL = static_cast<uint8_t>(webPrefix.length());
+        _servicePrefix = webPrefix.substr(0, webPrefix.find(callsign));
+
         Config config;
         config.FromString(service->ConfigLine());
-        string version = service->Version();
-
         if (config.TestToken.IsSet()) {
             _testtoken = config.TestToken.Value();
         }
-
-        _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
         Core::File aclFile(service->PersistentPath() + config.ACL.Value());
-
         PluginHost::ISubSystem* subSystem = service->SubSystems();
 
         if (aclFile.Exists() == false) {
             aclFile = service->DataPath() + config.ACL.Value();
         }
+
+        TRACE(Security, (_T("SecurityAgent: Reading acl file %s"), aclFile.Name().c_str()));
+
         if ((aclFile.Exists() == true) && (aclFile.Open(true) == true)) {
 
             if (_acl.Load(aclFile) == Core::ERROR_INCOMPLETE_CONFIG) {
@@ -120,9 +124,13 @@ namespace Plugin {
         ASSERT(subSystem != nullptr);
 
         string connector = config.Connector.Value();
+
         if (connector.empty() == true) {
             connector = service->VolatilePath() + _T("token");
         }
+
+        TRACE(Security, (_T("SecurityAgent TokenDispatcher connector path %s"),connector.c_str()));
+
         _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
         _dispatcher.reset(new TokenDispatcher(Core::NodeId(connector.c_str()), service->ProxyStubPath(), this, _engine));
 
@@ -134,7 +142,7 @@ namespace Plugin {
             } else {
                 if (subSystem != nullptr) {
                     Core::SystemInfo::SetEnvironment(_T("SECURITYAGENT_PATH"), _dispatcher->Connector().c_str(), true);
-                    Core::Sink<SecurityCallsign> information(service->Callsign());
+                    Core::Sink<SecurityCallsign> information(callsign);
 
                     if (subSystem->IsActive(PluginHost::ISubSystem::SECURITY) != false) {
                         SYSLOG(Logging::Startup, (_T("Security is not defined as External !!")));
@@ -145,6 +153,7 @@ namespace Plugin {
                 }
             }
         }
+
         // On success return empty, to indicate there is no error text.
         return _T("");
     }
@@ -175,6 +184,8 @@ namespace Plugin {
 
     /* virtual */ uint32_t SecurityAgent::CreateToken(const uint16_t length, const uint8_t buffer[], string& token)
     {
+        TRACE(Security, (_T("Creating Token for %.*s"), length, buffer));
+
         // Generate the token from the buffer coming in...
         auto newToken = JWTFactory::Instance().Element();
 
@@ -200,13 +211,15 @@ namespace Plugin {
 
                         if (load != static_cast<uint16_t>(~0)) {
                             // Seems like we extracted a valid payload, time to create an security context
-                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload);
+                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload, _servicePrefix);
                         }
                     }
             }
+#ifdef SECURITY_TESTING_MODE
             else {
-                result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(TestTokenContent));
+                result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(SecurityAgent::TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(SecurityAgent::TestTokenContent), _servicePrefix);
             }
+#endif
         }
         return (result);
     }
@@ -226,9 +239,9 @@ namespace Plugin {
 
         index.Next();
 
-            if (index.Next() == true) {
+        if (index.Next() == true) {
             // We might be receiving a plugin download request.
-            #ifdef SECURITY_TESTING_MODE
+#ifdef SECURITY_TESTING_MODE
             if ((request.Verb == Web::Request::HTTP_PUT) && (request.HasBody() == true)) {
                 if (index.Current() == _T("Token")) {
                     Core::ProxyType<const Web::TextBody> data(request.Body<Web::TextBody>());
@@ -248,7 +261,7 @@ namespace Plugin {
                     }
                 }
             } else
-            #endif      
+#endif
 
             if ( (request.Verb == Web::Request::HTTP_GET) && (index.Current() == _T("Valid")) ) {
                 result->ErrorCode = Web::STATUS_FORBIDDEN;
@@ -272,7 +285,7 @@ namespace Plugin {
                         } else {
                             result->ErrorCode = Web::STATUS_OK;
                             result->Message = _T("Valid token");
-                            TRACE(Trace::Information, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
+                            TRACE(Security, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
                         }
                     }
                 }

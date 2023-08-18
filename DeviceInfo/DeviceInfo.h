@@ -88,12 +88,12 @@ namespace Plugin {
             void Updated() override {
                 _job.Submit();
             }
-
-            void Activated(RPC::IRemoteConnection* process VARIABLE_IS_NOT_USED) override {
+            void Activated(RPC::IRemoteConnection* /* connection */) override {
             }
-
-            void Deactivated(RPC::IRemoteConnection* process) override {
-                _parent.Deactivated(process);
+            void Deactivated(RPC::IRemoteConnection* connection) override {
+                _parent.Deactivated(connection);
+            }
+            void Terminated(RPC::IRemoteConnection* /* connection */) override {
             }
 
             BEGIN_INTERFACE_MAP(Notification)

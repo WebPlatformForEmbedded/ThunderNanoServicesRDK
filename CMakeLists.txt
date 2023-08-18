@@ -29,12 +29,16 @@ option(PLUGIN_OPENCDMI "Include OpenCDMi plugin" OFF)
 option(PLUGIN_PACKAGER "Include Packager plugin" OFF)
 option(PLUGIN_PERFORMANCEMETRICS "Include PerformanceMetrics plugin" OFF)
 option(PLUGIN_PLAYERINFO "Include PlayerInfo plugin" OFF)
+option(PLUGIN_RUSTBRIDGE "Include RustBridge plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
 option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
-option(PLUGIN_WARNINGREPORTINGCONTROL "Include WarningReportingControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
+
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
 
 if(PLUGIN_DEVICEIDENTIFICATION)
     add_subdirectory(DeviceIdentification)
@@ -88,14 +92,14 @@ if(PLUGIN_TRACECONTROL)
     add_subdirectory(TraceControl)
 endif()
 
-if(PLUGIN_WARNINGREPORTINGCONTROL)
-    add_subdirectory(WarningReportingControl)
-endif()
-
 if(PLUGIN_WEBKITBROWSER)
     add_subdirectory(WebKitBrowser)
 endif()
 
 if(PLUGIN_MESSAGE_CONTROL)
     add_subdirectory(MessageControl)
+endif()
+
+if(PLUGIN_RUSTBRIDGE)
+    add_subdirectory(RustBridge)
 endif()

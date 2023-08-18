@@ -29,6 +29,8 @@
 #include <interfaces/json/JsonData_WebKitBrowser.h>
 #include <interfaces/json/JsonData_StateControl.h>
 #include <interfaces/json/JWebBrowser.h>
+#include <interfaces/json/JBrowserScripting.h>
+#include <interfaces/json/JBrowserCookieJar.h>
 
 namespace WPEFramework {
 
@@ -43,7 +45,8 @@ namespace Plugin {
     private:
         class Notification : public RPC::IRemoteConnection::INotification,
                              public PluginHost::IStateControl::INotification,
-                             public Exchange::IWebBrowser::INotification {
+                             public Exchange::IWebBrowser::INotification,
+                             public Exchange::IBrowserCookieJar::INotification {
         private:
             Notification() = delete;
             Notification(const Notification&) = delete;
@@ -93,11 +96,16 @@ namespace Plugin {
             {
                 _parent.Deactivated(connection);
             }
+            void CookieJarChanged() override
+            {
+                _parent.CookieJarChanged();
+            }
 
             BEGIN_INTERFACE_MAP(Notification)
             INTERFACE_ENTRY(Exchange::IWebBrowser::INotification)
             INTERFACE_ENTRY(PluginHost::IStateControl::INotification)
             INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+            INTERFACE_ENTRY(Exchange::IBrowserCookieJar::INotification)
             END_INTERFACE_MAP
 
         private:
@@ -144,6 +152,8 @@ namespace Plugin {
             , _browser(nullptr)
             , _memory(nullptr)
             , _application(nullptr)
+            , _browserScripting(nullptr)
+            , _cookieJar(nullptr)
             , _notification(this)
             , _jsonBodyDataFactory(2)
         {
@@ -172,6 +182,8 @@ namespace Plugin {
         INTERFACE_AGGREGATE(Exchange::IBrowser, _browser)
         INTERFACE_AGGREGATE(Exchange::IApplication, _application)
         INTERFACE_AGGREGATE(Exchange::IWebBrowser, _browser)
+        INTERFACE_AGGREGATE(Exchange::IBrowserScripting, _browserScripting)
+        INTERFACE_AGGREGATE(Exchange::IBrowserCookieJar, _cookieJar)
         INTERFACE_AGGREGATE(Exchange::IMemory, _memory)
         END_INTERFACE_MAP
 
@@ -212,6 +224,7 @@ namespace Plugin {
         void BridgeQuery(const string& message);
         void StateChange(const PluginHost::IStateControl::state state);
         uint32_t DeleteDir(const string& path);
+        void CookieJarChanged();
 
         // JsonRpc
         void RegisterAll();
@@ -233,6 +246,8 @@ namespace Plugin {
         Exchange::IWebBrowser* _browser;
         Exchange::IMemory* _memory;
         Exchange::IApplication* _application;
+        Exchange::IBrowserScripting* _browserScripting;
+        Exchange::IBrowserCookieJar* _cookieJar;
         Core::Sink<Notification> _notification;
         Core::ProxyPoolType<Web::JSONBodyType<WebKitBrowser::Data>> _jsonBodyDataFactory;
         string _persistentStoragePath;

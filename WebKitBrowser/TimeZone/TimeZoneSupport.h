@@ -17,20 +17,30 @@
  * limitations under the License.
  */
  
-#ifndef __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H
-#define __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H
+#ifndef __TIMEZONESUPPORTH
+#define __TIMEZONESUPPORTH
 
-#ifndef MODULE_NAME
-#define MODULE_NAME Plugin_WarningReportingControl
-#endif
+#include "Module.h"
+#include <gio/gio.h>
 
-#include <plugins/plugins.h>
-#include <interfaces/definitions.h>
-#include <warningreporting/warningreporting.h>
-#include <warningreporting/WarningReportingUnit.h>
+namespace WPEFramework {
+namespace TZ {
+    class TimeZoneSupport {
+    public:
+        TimeZoneSupport();
+        void Initialize();
+        void Deinitialize();
+    
+    private:
+        static void HandleTimeZoneFileUpdate(GFileMonitor *monitor, GFile *file, GFile *other, GFileMonitorEvent evtype, gpointer user_data);
 
+    private:
+        GFileMonitor *_timeZoneFileMonitor;
+        gulong _timeZoneFileMonitorId;
+        std::string _previousTimeZone;
+        std::string _tzFile;
+    };
+}
+}
 
-#undef EXTERNAL
-#define EXTERNAL
-
-#endif // __MODULE_PLUGIN_WARNINGREPORTINGCONTROL_H
+#endif // __TIMEZONESUPPORTH
