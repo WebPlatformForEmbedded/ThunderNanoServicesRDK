@@ -40,7 +40,7 @@ namespace {
         string regex = input;
         
         // order of replacing is important
-        ReplaceString(regex,"*","^[a-zA-Z0-9.]+$");
+        ReplaceString(regex,"*","[a-zA-Z0-9.]*");
         ReplaceString(regex,".","\\.");
         
         return regex;
@@ -57,7 +57,7 @@ namespace {
         ReplaceString(regex,":*",":[0-9]+");
         ReplaceString(regex,"*:","[a-z]+:");
         ReplaceString(regex,".","\\.");
-        ReplaceString(regex,"*","[a-zA-Z0-9\\.\\-]+");
+        ReplaceString(regex,"*","[a-zA-Z0-9\\.\\-]*");
         regex.insert(regex.begin(),'(');
         regex.insert(regex.end(),')');
         regex.insert(regex.begin(),'^');
@@ -97,14 +97,14 @@ namespace Plugin {
     //   }
     // },
 
-    class AccessControlList {
+    class EXTERNAL AccessControlList {
     public:
         enum mode {
             BLOCKED,
             ALLOWED
         };
     private:
-        class JSONACL : public Core::JSON::Container {
+        class EXTERNAL JSONACL : public Core::JSON::Container {
         public:
             class Plugins : public Core::JSON::Container {
             public:
@@ -296,7 +296,7 @@ namespace Plugin {
                     while ((index != _methods.end()) && (found == false)) { 
                         std::regex expression(index->c_str());
                         std::smatch matchList;
-                        found = std::regex_search(method, matchList, expression);
+                        found = std::regex_match(method, matchList, expression);
                         if (found == false) {
                             index++;
                         }
@@ -339,7 +339,7 @@ namespace Plugin {
                 while ((index != _plugins.end()) && (pluginFound == false)) {
                     std::regex expression(index->first.c_str());
                     std::smatch matchList;
-                    pluginFound = std::regex_search(callsign, matchList, expression);
+                    pluginFound = std::regex_match(callsign, matchList, expression);
                     if (pluginFound == false) {
                         index++;
                     }

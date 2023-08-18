@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 RDK Management
+ * Copyright 2022 Metrological
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,11 @@
 
 #pragma once
 
-#include <wpe/webkit-web-extension.h>
+#ifndef MODULE_NAME
+#define MODULE_NAME Plugin_RustBridge
+#endif
 
-namespace WPEFramework {
-namespace JavaScript {
-namespace FireboltOSEndpoint {
+#include <plugins/plugins.h>
 
-void InjectJS(WebKitScriptWorld*, WebKitFrame*);
-
-}  // FireboltOSEndpoint
-}  // JavaScript
-}  // WPEFramework
+#undef EXTERNAL
+#define EXTERNAL

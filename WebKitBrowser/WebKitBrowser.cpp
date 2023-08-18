@@ -72,11 +72,14 @@ namespace Plugin {
                 if (_application != nullptr) {
                     RegisterAll();
                     Exchange::JWebBrowser::Register(*this, _browser);
-
+                    _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
+                    if (_cookieJar != nullptr) {
+                        Exchange::JBrowserCookieJar::Register(*this, _cookieJar);
+                    }
                     _browser->Register(&_notification);
 
                     const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
-                    if(connection != nullptr) {
+                    if (connection != nullptr) {
                         _memory = WPEFramework::WebKitBrowser::MemoryObserver(connection);
                         ASSERT(_memory != nullptr);
                         connection->Release();
@@ -122,6 +125,11 @@ namespace Plugin {
                     _memory = nullptr;
                 }
                 if (_application != nullptr) {
+                    if (_cookieJar != nullptr) {
+                        Exchange::JBrowserCookieJar::Unregister(*this);
+                        _cookieJar->Release();
+                        _cookieJar = nullptr;
+                    }
                     Exchange::JWebBrowser::Unregister(*this);
                     UnregisterAll();
                     _browser->Unregister(&_notification);
@@ -295,8 +303,12 @@ namespace Plugin {
 
     void WebKitBrowser::BridgeQuery(const string& message)
     {
-        TRACE(Trace::Information, (_T("BridgeQuery: %s"), message.c_str()));
         event_bridgequery(message);
+    }
+
+    void WebKitBrowser::CookieJarChanged()
+    {
+        Exchange::JBrowserCookieJar::Event::CookieJarChanged(*this);
     }
 
     void WebKitBrowser::StateChange(const PluginHost::IStateControl::state state)
@@ -376,6 +388,8 @@ namespace WebKitBrowser {
     };
 
     static constexpr uint16_t RequiredChildren = (sizeof(mandatoryProcesses) / sizeof(mandatoryProcesses[0]));
+    using SteadyClock = std::chrono::steady_clock;
+    using TimePoint = std::chrono::time_point<SteadyClock>;
     class MemoryObserverImpl : public Exchange::IMemory, public  Exchange::IMemoryExtended {
     private:
         enum { TYPICAL_STARTUP_TIME = 10 }; /* in Seconds */
@@ -383,7 +397,7 @@ namespace WebKitBrowser {
         MemoryObserverImpl(const RPC::IRemoteConnection* connection)
             : _main(connection == nullptr ? Core::ProcessInfo().Id() : connection->RemoteId())
             , _children(_main.Id())
-            , _startTime(connection == nullptr ? 0 : Core::Time::Now().Add(TYPICAL_STARTUP_TIME * 1000).Ticks()) // IsOperation true till calculated time (microseconds)
+            , _startTime(connection == nullptr ? (TimePoint::min()) : (SteadyClock::now() + std::chrono::seconds(TYPICAL_STARTUP_TIME)))
             , _adminLock()
         { 
         }
@@ -394,11 +408,12 @@ namespace WebKitBrowser {
 
         uint64_t Resident() const override
         {
-
             uint32_t result(0);
 
-            if (_startTime != 0) {
-               _adminLock.Lock();
+            if (_startTime != TimePoint::min()) {
+
+                _adminLock.Lock();
+
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
@@ -409,9 +424,10 @@ namespace WebKitBrowser {
 
                 result = _main.Resident();
 
-                children.Reset();
-                while (children.Next() == true) {
-                    result += children.Current().Resident();
+                _children.Reset();
+
+                while (_children.Next() == true) {
+                    result += _children.Current().Resident();
                 }
             }
 
@@ -421,8 +437,10 @@ namespace WebKitBrowser {
         {
             uint32_t result(0);
 
-            if (_startTime != 0) {
+            if (_startTime != TimePoint::min()) {
+
                 _adminLock.Lock();
+
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
                 }
@@ -433,19 +451,20 @@ namespace WebKitBrowser {
 
                 result = _main.Allocated();
 
-                children.Reset();
-                while (children.Next() == true) {
-                    result += children.Current().Allocated();
+                _children.Reset();
+
+                while (_children.Next() == true) {
+                    result += _children.Current().Allocated();
                 }
             }
-            
+
             return (result);
         }
         uint64_t Shared() const override
         {
             uint32_t result(0);
 
-            if (_startTime != 0) {
+            if (_startTime != TimePoint::min()) {
                 _adminLock.Lock();
                 if (_children.Count() < RequiredChildren) {
                     _children = Core::ProcessInfo::Iterator(_main.Id());
@@ -457,9 +476,10 @@ namespace WebKitBrowser {
 
                 result = _main.Shared();
 
-                children.Reset();
-                while (children.Next() == true) {
-                    result += children.Current().Shared();
+                _children.Reset();
+
+                while (_children.Next() == true) {
+                    result += _children.Current().Shared();
                 }
             }
 
@@ -470,16 +490,15 @@ namespace WebKitBrowser {
             // Refresh the children list !!!
             _adminLock.Lock();
             _children = Core::ProcessInfo::Iterator(_main.Id());
-            uint32_t nbrchildren = _children.Count();
             _adminLock.Unlock();
 
-            return ((_startTime == 0) || (_main.IsActive() == true) ? 1 : 0) + nbrchildren;
+            return ((_startTime == TimePoint::min()) || (_main.IsActive() == true) ? 1 : 0) + _children.Count();
         }
         bool IsOperational() const override
         {
             uint32_t requiredProcesses = 0;
 
-            if (_startTime != 0) {
+            if (_startTime != TimePoint::min()) {
 
                 //!< We can monitor a max of 32 processes, every mandatory process represents a bit in the requiredProcesses.
                 // In the end we check if all bits are 0, what means all mandatory processes are still running.
@@ -494,15 +513,15 @@ namespace WebKitBrowser {
                 _adminLock.Unlock();
 
                 //!< If there are less children than in the the mandatoryProcesses struct, we are done and return false.
-                if (children.Count() >= RequiredChildren) {
+                if (_children.Count() >= RequiredChildren) {
 
-                    children.Reset();
+                    _children.Reset();
 
                     //!< loop over all child processes as long as we are operational.
-                    while ((requiredProcesses != 0) && (true == children.Next())) {
+                    while ((requiredProcesses != 0) && (true == _children.Next())) {
 
                         uint8_t count(0);
-                        string name(children.Current().Name());
+                        string name(_children.Current().Name());
 
                         while ((count < RequiredChildren) && (name != mandatoryProcesses[count])) {
                             ++count;
@@ -510,7 +529,7 @@ namespace WebKitBrowser {
 
                         //<! this is a mandatory process and if its still active reset its bit in requiredProcesses.
                         //   If not we are not completely operational.
-                        if ((count < RequiredChildren) && (children.Current().IsActive() == true)) {
+                        if ((count < RequiredChildren) && (_children.Current().IsActive() == true)) {
                             requiredProcesses &= (~(1 << count));
                         }
                     }
@@ -549,8 +568,8 @@ namespace WebKitBrowser {
             _adminLock.Unlock();
 
             children.Reset();
-            while( children.Next() == true ) {
-                if( children.Current().Name() == processname ) {
+            while (children.Next() == true ) {
+                if (children.Current().Name() == processname ) {
                     process = Core::Service<ProcessMemoryObserverImpl>::Create<Exchange::IProcessMemory>(children.Current().Id());
                     result = Core::ERROR_NONE;
                     break;
@@ -568,13 +587,13 @@ namespace WebKitBrowser {
     private:
         inline bool IsStarting() const
         {
-            return (_startTime == 0) || (Core::Time::Now().Ticks() < _startTime);
+            return (_startTime == TimePoint::min()) || (SteadyClock::now() < _startTime);
         }
 
     private:
         Core::ProcessInfo _main;
         mutable Core::ProcessInfo::Iterator _children;
-        uint64_t _startTime; // !< Reference for monitor
+        TimePoint _startTime; // !< Reference for monitor
         mutable Core::CriticalSection _adminLock; // note IMemory could be used from multiple threads (plugins)!!
     };
 

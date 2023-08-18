@@ -46,6 +46,10 @@
 #include "AAMPJSBindings.h"
 #endif
 
+#if defined(UPDATE_TZ_FROM_FILE)
+#include "TimeZoneSupport.h"
+#endif
+
 using namespace WPEFramework;
 using JavaScript::ClassDefinition;
 
@@ -103,18 +107,24 @@ public:
         if (result != Core::ERROR_NONE) {
             TRACE(Trace::Error, (_T("Could not open connection to node %s. Error: %s"), _comClient->Source().RemoteId().c_str(), Core::NumberType<uint32_t>(result).Text().c_str()));
         } else {
-// Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
-#ifdef __CORE_MESSAGING__
+            // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
             Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
-#else
-            Trace::TraceUnit::Instance().Open(_comClient->ConnectionId());
-#endif
         }
         _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromWPEFramework();
+
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Initialize();
+#endif
     }
 
     void Deinitialize()
     {
+#if defined(UPDATE_TZ_FROM_FILE)
+        _tzSupport.Deinitialize();
+#endif
+
+        Messaging::MessageUnit::Instance().Close();
+
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
@@ -132,6 +142,10 @@ public:
 private:
     Core::ProxyType<RPC::InvokeServerType<2, 0, 4> > _engine;
     Core::ProxyType<RPC::CommunicatorClient> _comClient;
+
+#if defined(UPDATE_TZ_FROM_FILE)
+    TZ::TimeZoneSupport _tzSupport;
+#endif
 
     // White list for CORS.
     std::unique_ptr<WhiteListedOriginDomainsList> _whiteListedOriginDomainPairs;
@@ -407,3 +421,7 @@ EXTERNAL void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
 }
 
 }
+
+// explicit instantiation so that -O1/2/3 flags do not introduce undefined symbols
+template void WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Input, 4u>::AddRef() const;
+template void WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Output, 5u>::AddRef() const;
