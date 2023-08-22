@@ -3562,7 +3562,7 @@ static GSourceFuncs _handlerIntervention =
         gint64 _lastDumpTime;
     };
 
-    SERVICE_REGISTRATION(WebKitImplementation, 1, 0);
+    SERVICE_REGISTRATION(WebKitImplementation, 1, 0)
 
 #ifndef WEBKIT_GLIB_API
     // Handles synchronous messages from injected bundle.

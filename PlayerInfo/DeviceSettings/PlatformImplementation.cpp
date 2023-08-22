@@ -524,6 +524,6 @@ public:
     static PlayerInfoImplementation* _instance;
 };
     PlayerInfoImplementation* PlayerInfoImplementation::_instance = nullptr;
-    SERVICE_REGISTRATION(PlayerInfoImplementation, 1, 0);
+    SERVICE_REGISTRATION(PlayerInfoImplementation, 1, 0)
 }
 }

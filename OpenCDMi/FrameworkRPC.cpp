@@ -1574,6 +1574,6 @@ POP_WARNING()
         Core::OptionalType<string> _group;
     };
 
-    SERVICE_REGISTRATION(OCDMImplementation, 1, 0);
+    SERVICE_REGISTRATION(OCDMImplementation, 1, 0)
 }
 } /* namespace WPEFramework::Plugin */
