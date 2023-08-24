@@ -2,7 +2,7 @@
 
 namespace WPEFramework {
 namespace Plugin {
-    SERVICE_REGISTRATION(DeviceInfoImplementation, 1, 0);
+    SERVICE_REGISTRATION(DeviceInfoImplementation, 1, 0)
 
     using AudioCapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::AudioCapability>>;
     using MS12CapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::MS12Capability>>;
@@ -11,7 +11,7 @@ namespace Plugin {
     using MS12CapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>;
     using MS12ProfileIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>;
 
-    using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;;
+    using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;
     using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>;
 
     uint32_t DeviceInfoImplementation::Configure(const PluginHost::IShell* service)

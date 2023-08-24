@@ -198,6 +198,6 @@ private:
 #endif
 };
 
-    SERVICE_REGISTRATION(PlayerInfoImplementation, 1, 0);
+    SERVICE_REGISTRATION(PlayerInfoImplementation, 1, 0)
 }
 }

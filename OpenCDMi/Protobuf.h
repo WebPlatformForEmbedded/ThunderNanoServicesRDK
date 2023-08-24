@@ -525,6 +525,6 @@ namespace Protobuf {
     using Double = FixedType<double>;
     template<typename T> using EnumType = VarintType<T>;
 
-}; // namespace Protobuf
+} // namespace Protobuf
 
 } // namespace
