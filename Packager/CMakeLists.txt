@@ -48,6 +48,9 @@ add_library(${MODULE_NAME} SHARED
     Packager.cpp
     PackagerImplementation.cpp)
 
+target_include_directories(${MODULE_NAME} PRIVATE
+    $<TARGET_PROPERTY:LibOPKG::LibOPKG,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>)
+
 target_link_libraries(${MODULE_NAME} PRIVATE
              CompileSettingsDebug::CompileSettingsDebug
              ${NAMESPACE}Plugins::${NAMESPACE}Plugins
