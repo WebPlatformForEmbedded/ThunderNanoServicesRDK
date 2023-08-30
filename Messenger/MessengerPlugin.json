@@ -1,8 +1,5 @@
 {
   "$schema": "plugin.schema.json",
-  "document": {
-    "$ref": "docs_common.json"
-  },
   "info": {
     "title": "Messenger Plugin",
     "version": "1.0",
