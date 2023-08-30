@@ -116,6 +116,6 @@ private:
     string _identifier;
 };
 
-    SERVICE_REGISTRATION(DeviceImplementation, 1, 0);
+    SERVICE_REGISTRATION(DeviceImplementation, 1, 0)
 }
 }

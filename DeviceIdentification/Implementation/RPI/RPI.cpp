@@ -94,8 +94,8 @@ namespace Plugin {
         {
             WPEFramework::Core::File serialFile(SerialInfoPath);
             if (serialFile.Open(true) == true) {
-                uint8_t serialInfo[serialFile.Size()];
-                uint32_t size = serialFile.Read(serialInfo, static_cast<uint32_t>(sizeof(serialInfo)));
+                uint8_t* serialInfo = static_cast<uint8_t*>(ALLOCA(serialFile.Size()));
+                uint32_t size = serialFile.Read(serialInfo, static_cast<uint32_t>(serialFile.Size()));
                 identifier.assign(reinterpret_cast<char*>(serialInfo), size);
                 identifier.erase(0, identifier.find_first_not_of('0'));
             }
@@ -130,6 +130,6 @@ namespace Plugin {
         string _identifier;
     };
 
-    SERVICE_REGISTRATION(DeviceImplementation, 1, 0);
+    SERVICE_REGISTRATION(DeviceImplementation, 1, 0)
 }
 }

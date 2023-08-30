@@ -136,15 +136,15 @@ namespace {
                 std::array<char, kMaxValueLength> version {0};
                 std::array<char, kMaxValueLength> arch {0};
                 Core::URL::KeyValue options(request.Query.Value());
-                if (options.Exists(_T("Package"), true) == true) {
+                if (options.HasKey(_T("Package"), true) != Core::URL::KeyValue::status::UNAVAILABLE) {
                     const string name (options[_T("Package")].Text());
                     Core::URL::Decode (name.c_str(), name.length(), package.data(), package.size());
                 }
-                if (options.Exists(_T("Architecture"), true) == true) {
+                if (options.HasKey(_T("Architecture"), true) != Core::URL::KeyValue::status::UNAVAILABLE) {
                                     const string name (options[_T("Architecture")].Text());
                                     Core::URL::Decode (name.c_str(), name.length(), arch.data(), arch.size());
                 }
-                if (options.Exists(_T("Version"), true) == true) {
+                if (options.HasKey(_T("Version"), true) != Core::URL::KeyValue::status::UNAVAILABLE) {
                     const string name (options[_T("Version")].Text());
                     Core::URL::Decode (name.c_str(), name.length(), version.data(), version.size());
                 }

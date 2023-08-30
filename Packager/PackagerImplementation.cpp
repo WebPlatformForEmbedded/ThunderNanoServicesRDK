@@ -30,7 +30,7 @@
 namespace WPEFramework {
 namespace Plugin {
 
-    SERVICE_REGISTRATION(PackagerImplementation, 1, 0);
+    SERVICE_REGISTRATION(PackagerImplementation, 1, 0)
 
     void PackagerImplementation::UpdateConfig() const {
         ASSERT(!_configFile.empty() && !_tempPath.empty() && !_cachePath.empty());
@@ -426,5 +426,5 @@ namespace Plugin {
 ENUM_CONVERSION_BEGIN(Plugin::PackagerImplementation::PackageType)
     { Plugin::PackagerImplementation::PackageType::NONE, _TXT("none") },
     { Plugin::PackagerImplementation::PackageType::PLUGIN, _TXT("plugin") },
-ENUM_CONVERSION_END(Plugin::PackagerImplementation::PackageType);
+ENUM_CONVERSION_END(Plugin::PackagerImplementation::PackageType)
 }  // namespace WPEFramework
