@@ -80,7 +80,6 @@ jobs:
         "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%locationSync%"  "%solution%"
         "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messenger%"  "%solution%"
         "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%monitor%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%networkControl%"  "%solution%"
         "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%openCDMi%"  "%solution%"
         "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%securityAgent%"  "%solution%"
 
