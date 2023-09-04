@@ -73,11 +73,15 @@ namespace WPEFramework {
         , _tracingFactory()
         , _loggingFactory()
         , _warningReportingFactory()
+        , _standardOutFactory()
+        , _standardErrorFactory()
     {
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::STANDARD_OUT, &_standardOutFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::STANDARD_ERROR, &_standardErrorFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
