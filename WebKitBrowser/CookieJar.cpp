@@ -26,16 +26,13 @@
 #include <glib.h>
 #include <zlib.h>
 
-#if defined(COOKIE_JAR_CRYPTO_IMPLEMENTATION)
-#include COOKIE_JAR_CRYPTO_IMPLEMENTATION
-#else
-#error "Please define COOKIE_JAR_CRYPTO_IMPLEMENTATION"
-#endif
 
 namespace WPEFramework {
 namespace Plugin {
 
 namespace {
+
+static constexpr uint8_t PAYLOAD_VERSION = 1;
 
 static std::string serialize(const std::vector<std::string>& cookies)
 {
@@ -53,29 +50,6 @@ static void deserialize(const std::string& cookies, std::vector<std::string>& re
         if (!cookie.empty())
             result.push_back(cookie);
     }
-}
-
-static std::string toBase64(const std::vector<uint8_t>& in)
-{
-    gchar* encoded = g_base64_encode(in.data(), in.size());
-    std::string result;
-    if (encoded) {
-        result.assign(encoded);
-        g_free(encoded);
-    }
-    return result;
-}
-
-static std::vector<uint8_t> fromBase64(const std::string& str)
-{
-    gsize outlen;
-    guint8* decoded = g_base64_decode(str.c_str(), &outlen);
-    std::vector<uint8_t> result;
-    if (decoded) {
-        result.assign(decoded, decoded + outlen);
-        g_free(decoded);
-    }
-    return result;
 }
 
 static std::vector<uint8_t> compress(const std::string& str)
@@ -177,25 +151,66 @@ static uint32_t crc_checksum(const std::string& str)
 
 } // namespace
 
-struct CookieJar::CookieJarPrivate
+class CookieJar::CookieJarPrivate
 {
-    CookieJarCrypto _cookieJarCrypto;
+public:
+    CookieJarPrivate(Exchange::ISimpleCrypto* crypto)
+        : _cipher(nullptr)
+    {
+        if (crypto != nullptr) {
+            _cipher = crypto->Cipher("WebKitBrowserCookieJar");
+        } else {
+            TRACE_GLOBAL(Trace::Error,(_T("No crypto!")));
+        }
 
+        if (_cipher == nullptr) {
+            TRACE_GLOBAL(Trace::Error,(_T("Failed to acquire cookie jar encryption!")));
+        }
+    }
+    ~CookieJarPrivate()
+    {
+        if (_cipher != nullptr) {
+            _cipher->Release();
+        }
+    }
+
+public:
     uint32_t Pack(const std::vector<std::string> &cookies, uint32_t& version, uint32_t& checksum, string& payload)
     {
-        uint32_t rc;
-        std::string serialized;
-        std::vector<uint8_t> encrypted;
+        uint32_t rc = Core::ERROR_GENERAL;
 
-        serialized = serialize(cookies);
-        checksum = crc_checksum(serialized);
+        ASSERT(_cipher != nullptr);
 
-        rc = _cookieJarCrypto.Encrypt(compress(serialized), version, encrypted);
+        const string serialized = serialize(cookies);
 
-        if (rc != Core::ERROR_NONE) {
-            TRACE_GLOBAL(Trace::Error,(_T("Encryption failed, rc = %u"), rc));
-        } else {
-            payload = toBase64(encrypted);
+        if (serialized.size() == 0) {
+            rc = Core::ERROR_NONE;
+        }
+        else if (_cipher == nullptr) {
+            TRACE_GLOBAL(Trace::Error,(_T("Encryption not available")));
+        }
+        else {
+            const std::vector<uint8_t> compressed = compress(serialized);
+            ASSERT(compressed.size() != 0);
+
+            uint32_t encryptedSize = (compressed.size() + 32 /* some headroom for padding and IV */);
+            uint8_t* const encrypted = new (std::nothrow) uint8_t[encryptedSize];
+            ASSERT(encrypted != nullptr);
+
+            encryptedSize = _cipher->Encrypt(compressed.size(), compressed.data(), encryptedSize, encrypted);
+
+            if (encryptedSize == 0) {
+                TRACE_GLOBAL(Trace::Error,(_T("Encryption failed")));
+            }
+            else {
+                version = PAYLOAD_VERSION;
+                checksum = crc_checksum(serialized);
+
+                Core::ToString(encrypted, encryptedSize, true, payload);
+                rc = Core::ERROR_NONE;
+            }
+
+            delete[] encrypted;
         }
 
         return rc;
@@ -204,42 +219,73 @@ struct CookieJar::CookieJarPrivate
     uint32_t Unpack(const uint32_t version, const uint32_t checksum, const string& payload, std::vector<std::string>& cookies)
     {
         uint32_t rc = Core::ERROR_GENERAL;
-        std::vector<uint8_t> decrypted;
 
-        rc = _cookieJarCrypto.Decrypt(fromBase64(payload), version, decrypted);
+        ASSERT(_cipher != nullptr);
 
-        if (rc != Core::ERROR_NONE)
-        {
-            TRACE_GLOBAL(Trace::Error,(_T("Decryption failed, rc = %u"), rc));
+        if (payload.size() == 0) {
+            rc = Core::ERROR_NONE;
         }
-        else
-        {
-            std::string serialized;
-            uint32_t actualChecksum;
+        else if (version != PAYLOAD_VERSION) {
+            TRACE_GLOBAL(Trace::Error,(_T("Unsupported payload version (%d)"), version));
+        }
+        else if (_cipher == nullptr) {
+            TRACE_GLOBAL(Trace::Error,(_T("Decryption not available")));
+        }
+        else {
+            uint32_t unencodedSize = ((payload.size() * 3) / 4);
+            uint8_t* const unencoded = new (std::nothrow) uint8_t[unencodedSize];
+            ASSERT(unencoded != nullptr);
 
-            serialized = uncompress(decrypted);
-            actualChecksum = crc_checksum(serialized);
-            if (actualChecksum != checksum) {
-                rc = Core::ERROR_GENERAL;
-                TRACE_GLOBAL(Trace::Error,(_T("Checksum does not match: actual=%d expected=%d"), actualChecksum, checksum));
-            } else {
-                deserialize(serialized, cookies);
+            Core::FromString(payload, unencoded, unencodedSize);
+
+            std::vector<uint8_t> decrypted(unencodedSize);
+
+            const uint32_t decryptedSize = _cipher->Decrypt(unencodedSize, unencoded, decrypted.size(), decrypted.data());
+            decrypted.resize(decryptedSize); // can be less (remove IV/padding), but does not realloc
+
+            if (decryptedSize == 0) {
+                TRACE_GLOBAL(Trace::Error,(_T("Decryption failed")));
             }
+            else {
+                const string serialized = uncompress(decrypted);
+                ASSERT(serialized.size() != 0);
+
+                const uint32_t actualChecksum = crc_checksum(serialized);
+
+                if (actualChecksum != checksum) {
+                    TRACE_GLOBAL(Trace::Error,(_T("Checksum does not match: actual=%04x expected=%04x"), actualChecksum, checksum));
+                }
+                else {
+                    deserialize(serialized, cookies);
+                    rc = Core::ERROR_NONE;
+                }
+            }
+
+            delete[] unencoded;
         }
 
         return rc;
     }
+
+private:
+    Exchange::ISimpleCrypto::ICipher* _cipher;
 };
 
 CookieJar::CookieJar()
-    : _priv(new CookieJarPrivate)
+    : _priv()
 {
 }
 
 CookieJar::~CookieJar() = default;
 
+void CookieJar::Configure(Exchange::ISimpleCrypto* crypto)
+{
+    _priv = std::unique_ptr<CookieJar::CookieJarPrivate>(new CookieJar::CookieJarPrivate(crypto));
+}
+
 uint32_t CookieJar::Pack(uint32_t& version, uint32_t& checksum, string& payload) const
 {
+    ASSERT(_priv != nullptr);
     return _priv->Pack(_cookies, version, checksum, payload);
 }
 
@@ -248,6 +294,7 @@ uint32_t CookieJar::Unpack(const uint32_t version, const uint32_t checksum, cons
     uint32_t rc;
     std::vector<std::string> cookies;
 
+    ASSERT(_priv != nullptr);
     rc = _priv->Unpack(version, checksum, payload, cookies);
 
     if (rc == WPEFramework::Core::ERROR_NONE) {

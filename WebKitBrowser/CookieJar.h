@@ -25,6 +25,8 @@
 #include <vector>
 #include <memory>
 
+#include <interfaces/ISimpleCrypto.h>
+
 namespace WPEFramework {
 namespace Plugin {
 
@@ -33,6 +35,8 @@ class CookieJar
 public:
     CookieJar();
     ~CookieJar();
+
+    void Configure(Exchange::ISimpleCrypto* crypto);
 
     bool IsStale() const { return _refreshed.GetState() == false; }
     void MarkAsStale() { _refreshed.SetState( false ); }

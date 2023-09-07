@@ -161,18 +161,6 @@ namespace Plugin {
 
         ~WebKitBrowser() override = default;
 
-        inline static bool EnvironmentOverride(const bool configFlag)
-        {
-            bool result = configFlag;
-
-            if (result == false) {
-                string value;
-                Core::SystemInfo::GetEnvironment(_T("WPE_ENVIRONMENT_OVERRIDE"), value);
-                result = (value == "1");
-            }
-            return (result);
-        }
-
     public:
         BEGIN_INTERFACE_MAP(WebKitBrowser)
         INTERFACE_ENTRY(PluginHost::IPlugin)

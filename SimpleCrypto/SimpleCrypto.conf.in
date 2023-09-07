@@ -1,0 +1,9 @@
+autostart = "@PLUGIN_SIMPLECRYPTO_AUTOSTART@"
+
+configuration = JSON()
+
+root = JSON()
+root.add("mode", "Off")
+
+configuration.add("root", root)
+

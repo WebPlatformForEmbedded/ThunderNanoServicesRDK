@@ -33,6 +33,7 @@ option(PLUGIN_PERFORMANCEMETRICS "Include PerformanceMetrics plugin" OFF)
 option(PLUGIN_PLAYERINFO "Include PlayerInfo plugin" OFF)
 option(PLUGIN_RUSTBRIDGE "Include RustBridge plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
+option(PLUGIN_SIMPLECRYTPO "Include SimpleCrytpo plugin" ON)
 option(PLUGIN_TRACECONTROL "Include TraceControl plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
 
@@ -107,6 +108,10 @@ endif()
 
 if(PLUGIN_SECURITYAGENT)
     add_subdirectory(SecurityAgent)
+endif()
+
+if(PLUGIN_SIMPLECRYTPO)
+    add_subdirectory(SimpleCrypto)
 endif()
 
 if(PLUGIN_TRACECONTROL)

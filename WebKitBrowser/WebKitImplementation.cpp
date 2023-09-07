@@ -26,6 +26,10 @@
 
 #include "Module.h"
 
+#include <interfaces/IBrowser.h>
+#include <interfaces/IApplication.h>
+
+
 #ifdef WEBKIT_GLIB_API
 #include <wpe/webkit.h>
 #include "Tags.h"
@@ -67,7 +71,6 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #include <glib.h>
 
 #include "HTML5Notification.h"
-#include "WebKitBrowser.h"
 
 #if defined(ENABLE_CLOUD_COOKIE_JAR)
 #include "CookieJar.h"
@@ -369,6 +372,18 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
+    static bool EnvironmentOverride(const bool configFlag)
+    {
+        bool result = configFlag;
+
+        if (result == false) {
+            string value;
+            Core::SystemInfo::GetEnvironment(_T("WPE_ENVIRONMENT_OVERRIDE"), value);
+            result = (value == "1");
+        }
+        return (result);
+    }
+
     class WebKitImplementation : public Core::Thread,
                                  public Exchange::IBrowser,
                                  public Exchange::IWebBrowser,
@@ -566,7 +581,10 @@ static GSourceFuncs _handlerIntervention =
                 , Whitelist()
                 , PageGroup(_T("WPEPageGroup"))
                 , CookieStorage()
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
                 , CloudCookieJarEnabled(false)
+                , CryptoProvider(_T("SimpleCrypto"))
+#endif
                 , LocalStorage()
                 , LocalStorageEnabled(false)
                 , LocalStorageSize()
@@ -630,7 +648,10 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("whitelist"), &Whitelist);
                 Add(_T("pagegroup"), &PageGroup);
                 Add(_T("cookiestorage"), &CookieStorage);
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
                 Add(_T("cloudcookiejarenabled"), &CloudCookieJarEnabled);
+                Add(_T("cryptoprovider"), &CryptoProvider);
+#endif
                 Add(_T("localstorage"), &LocalStorage);
                 Add(_T("localstorageenabled"), &LocalStorageEnabled);
                 Add(_T("localstoragesize"), &LocalStorageSize);
@@ -701,7 +722,10 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::String Whitelist;
             Core::JSON::String PageGroup;
             Core::JSON::String CookieStorage;
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
             Core::JSON::Boolean CloudCookieJarEnabled;
+            Core::JSON::String CryptoProvider;
+#endif
             Core::JSON::String LocalStorage;
             Core::JSON::Boolean LocalStorageEnabled;
             Core::JSON::DecUInt16 LocalStorageSize;
@@ -926,6 +950,11 @@ static GSourceFuncs _handlerIntervention =
 
             if (Wait(Core::Thread::STOPPED | Core::Thread::BLOCKED, 6000) == false) {
                 TRACE(Trace::Information, (_T("Bailed out before the end of the WPE main app was reached. %d"), 6000));
+            }
+
+            if (_service != nullptr) {
+                _service->Release();
+                _service = nullptr;
             }
 
             implementation = nullptr;
@@ -2205,6 +2234,7 @@ static GSourceFuncs _handlerIntervention =
             _consoleLogPrefix = service->Callsign();
             #endif
             _service = service;
+            _service->AddRef();
 
             _dataPath = service->DataPath();
 
@@ -2218,6 +2248,21 @@ static GSourceFuncs _handlerIntervention =
                 return (Core::ERROR_INCOMPLETE_CONFIG);
             }
 
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
+            if (_config.CryptoProvider.Value().empty() == false) {
+                Exchange::ISimpleCrypto* crypto = service->QueryInterfaceByCallsign<Exchange::ISimpleCrypto>("SimpleCrypto");
+
+                _cookieJar.Configure(crypto);
+
+                if (crypto != nullptr) {
+                    crypto->Release();
+                }
+            }
+            else {
+                TRACE(Trace::Error, (_T("No crypto provider configured!")));
+            }
+#endif
+
             #if defined(ENABLE_LOGGING_UTILS)
             if (!_config.LoggingTarget.Value().empty()) {
                 if (!RedirectAllLogsToService(_config.LoggingTarget.Value())) {
@@ -2226,7 +2271,7 @@ static GSourceFuncs _handlerIntervention =
             }
             #endif
 
-            bool environmentOverride(WebKitBrowser::EnvironmentOverride(_config.EnvironmentOverride.Value()));
+            const bool environmentOverride = EnvironmentOverride(_config.EnvironmentOverride.Value());
 
             if ((environmentOverride == false) || (Core::SystemInfo::GetEnvironment(_T("WPE_WEBKIT_URL"), _URL) == false)) {
                 _URL = _config.URL.Value();

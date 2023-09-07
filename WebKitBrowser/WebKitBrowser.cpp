@@ -60,7 +60,6 @@ namespace Plugin {
         _browser = service->Root<Exchange::IWebBrowser>(_connectionId, 2000, _T("WebKitImplementation"));
 
         if (_browser != nullptr) {
-
             PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
 
             // We see that sometimes the WPE implementation crashes before it reaches this point, than there is
@@ -68,14 +67,22 @@ namespace Plugin {
             if (stateControl == nullptr) {
                 message = _T("WebKitBrowser StateControl could not be Obtained.");
             } else {
+                if (stateControl->Configure(_service) != Core::ERROR_NONE) {
+                    message = _T("WebKitBrowser Implementation could not be Configured.");
+                } else {
+                    stateControl->Register(&_notification);
+                }
+
                 _application = _browser->QueryInterface<Exchange::IApplication>();
                 if (_application != nullptr) {
                     RegisterAll();
                     Exchange::JWebBrowser::Register(*this, _browser);
+
                     _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
                     if (_cookieJar != nullptr) {
                         Exchange::JBrowserCookieJar::Register(*this, _cookieJar);
                     }
+
                     _browser->Register(&_notification);
 
                     const RPC::IRemoteConnection *connection = _service->RemoteConnection(_connectionId);
@@ -85,14 +92,10 @@ namespace Plugin {
                         connection->Release();
                     }
 
-                    if (stateControl->Configure(_service) != Core::ERROR_NONE) {
-                        message = _T("WebKitBrowser Implementation could not be Configured.");
-                    } else {
-                        stateControl->Register(&_notification);
-                    }
                 } else {
                     message = _T("WebKitBrowser Application interface could not be obtained");
                 }
+
                 stateControl->Release();
             }
         }
