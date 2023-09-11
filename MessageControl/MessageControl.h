@@ -442,8 +442,7 @@ namespace Plugin {
         Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Messaging::TextMessage> _tracingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Messaging::TextMessage> _loggingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Messaging::TextMessage> _warningReportingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::StandardOut, Messaging::TextMessage> _standardOutFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::StandardError, Messaging::TextMessage> _standardErrorFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Messaging::TextMessage> _operationalStreamFactory;
         Cleanups _cleaning;
     };
 

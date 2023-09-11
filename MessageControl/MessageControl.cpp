@@ -80,8 +80,7 @@ namespace WPEFramework {
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
-        _client.AddFactory(Core::Messaging::Metadata::type::STANDARD_OUT, &_standardOutFactory);
-        _client.AddFactory(Core::Messaging::Metadata::type::STANDARD_ERROR, &_standardErrorFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::OPERATIONAL_STREAM, &_operationalStreamFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
