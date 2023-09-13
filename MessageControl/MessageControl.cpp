@@ -73,8 +73,7 @@ namespace WPEFramework {
         , _tracingFactory()
         , _loggingFactory()
         , _warningReportingFactory()
-        , _standardOutFactory()
-        , _standardErrorFactory()
+        , _operationalStreamFactory()
     {
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
