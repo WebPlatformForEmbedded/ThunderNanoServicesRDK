@@ -35,7 +35,7 @@ namespace Publishers {
 
     void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
-        std::cout << _convertor.Convert(metadata, text);
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, text).c_str());
     }
 
     void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
@@ -43,7 +43,7 @@ namespace Publishers {
 #ifndef __WINDOWS__
         syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, text).c_str());
 #else
-        printf(_T("%s"), _convertor.Convert(metadata, text).c_str());
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, text).c_str());
 #endif
     }
 
