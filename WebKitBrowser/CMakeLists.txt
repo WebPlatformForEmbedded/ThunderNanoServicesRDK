@@ -225,6 +225,7 @@ set(PLUGIN_AMAZON_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_W
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
+find_package(${NAMESPACE}Cryptography REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 find_package(WPEWebKit REQUIRED)
 find_package(WPEBackend REQUIRED)
@@ -261,6 +262,7 @@ target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
+        ${NAMESPACE}Cryptography::${NAMESPACE}Cryptography
         WPEBackend::WPEBackend
         WPEWebKit::WPEWebKit)
 
@@ -273,7 +275,6 @@ if (PLUGIN_WEBKITBROWSER_CLOUD_COOKIEJAR)
         PRIVATE
         ENABLE_CLOUD_COOKIE_JAR=1)
     target_sources(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PRIVATE CookieJar.cpp)
-    include(CookieJarCrypto/CMakeLists.txt)
 endif()
 
 if (PLUGIN_WEBKITBROWSER_LOGGING_UTILS)

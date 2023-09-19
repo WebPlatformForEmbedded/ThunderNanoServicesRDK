@@ -93,6 +93,20 @@ namespace Plugin {
                 } else {
                     message = _T("WebKitBrowser Application interface could not be obtained");
                 }
+
+                PluginHost::ISubSystem::INotification* subsystemNotify = _browser->QueryInterface<PluginHost::ISubSystem::INotification>();
+
+                if (subsystemNotify != nullptr) {
+                    PluginHost::ISubSystem* subsystems = _service->SubSystems();
+
+                    if (subsystems != nullptr) {
+                        subsystems->Register(subsystemNotify);
+                        subsystems->Release();
+                    }
+
+                    subsystemNotify->Release();
+                }
+
                 stateControl->Release();
             }
         }

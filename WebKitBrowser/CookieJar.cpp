@@ -26,16 +26,15 @@
 #include <glib.h>
 #include <zlib.h>
 
-#if defined(COOKIE_JAR_CRYPTO_IMPLEMENTATION)
-#include COOKIE_JAR_CRYPTO_IMPLEMENTATION
-#else
-#error "Please define COOKIE_JAR_CRYPTO_IMPLEMENTATION"
-#endif
+#include <cryptography/cryptography.h>
+
 
 namespace WPEFramework {
 namespace Plugin {
 
 namespace {
+
+static constexpr uint8_t PAYLOAD_VERSION = 1;
 
 static std::string serialize(const std::vector<std::string>& cookies)
 {
@@ -53,29 +52,6 @@ static void deserialize(const std::string& cookies, std::vector<std::string>& re
         if (!cookie.empty())
             result.push_back(cookie);
     }
-}
-
-static std::string toBase64(const std::vector<uint8_t>& in)
-{
-    gchar* encoded = g_base64_encode(in.data(), in.size());
-    std::string result;
-    if (encoded) {
-        result.assign(encoded);
-        g_free(encoded);
-    }
-    return result;
-}
-
-static std::vector<uint8_t> fromBase64(const std::string& str)
-{
-    gsize outlen;
-    guint8* decoded = g_base64_decode(str.c_str(), &outlen);
-    std::vector<uint8_t> result;
-    if (decoded) {
-        result.assign(decoded, decoded + outlen);
-        g_free(decoded);
-    }
-    return result;
 }
 
 static std::vector<uint8_t> compress(const std::string& str)
@@ -177,66 +153,304 @@ static uint32_t crc_checksum(const std::string& str)
 
 } // namespace
 
-struct CookieJar::CookieJarPrivate
+class CookieJar::CookieJarPrivate
 {
-    CookieJarCrypto _cookieJarCrypto;
-
-    uint32_t Pack(const std::vector<std::string> &cookies, uint32_t& version, uint32_t& checksum, string& payload)
+public:
+    CookieJarPrivate()
+        : _lock()
+        , _connector()
+        , _key()
     {
-        uint32_t rc;
-        std::string serialized;
-        std::vector<uint8_t> encrypted;
+    }
+    ~CookieJarPrivate() = default;
 
-        serialized = serialize(cookies);
-        checksum = crc_checksum(serialized);
+    CookieJarPrivate(const CookieJarPrivate&) = delete;
+    CookieJarPrivate& operator=(const CookieJarPrivate&) = delete;
 
-        rc = _cookieJarCrypto.Encrypt(compress(serialized), version, encrypted);
+public:
+    uint32_t Configure(const string& connector, const string& key)
+    {
+        uint32_t rc = Core::ERROR_NONE;
 
-        if (rc != Core::ERROR_NONE) {
-            TRACE_GLOBAL(Trace::Error,(_T("Encryption failed, rc = %u"), rc));
-        } else {
-            payload = toBase64(encrypted);
+        _lock.Lock();
+
+        if (key.empty() == false) {
+            ASSERT(connector.empty() == false);
+
+            if ((_key != key) || (_connector != connector))  {
+
+                _connector = connector;
+                _key = key;
+
+                TRACE_GLOBAL(Trace::Information, (_T("CookieJar crypto configured (%s)"), _connector.c_str()));
+            }
+        }
+        else {
+            ASSERT(connector.empty() == true);
+
+            _connector.clear();
+            _key.clear();
+
+            TRACE_GLOBAL(Trace::Information, (_T("CookieJar crypto unconfigured")));
         }
 
-        return rc;
+        _lock.Unlock();
+
+        return (rc);
     }
 
-    uint32_t Unpack(const uint32_t version, const uint32_t checksum, const string& payload, std::vector<std::string>& cookies)
+public:
+    uint32_t Pack(const std::vector<std::string> &cookies, uint32_t& version, uint32_t& checksum, string& payload) const
     {
         uint32_t rc = Core::ERROR_GENERAL;
-        std::vector<uint8_t> decrypted;
 
-        rc = _cookieJarCrypto.Decrypt(fromBase64(payload), version, decrypted);
+        payload.clear();
 
-        if (rc != Core::ERROR_NONE)
-        {
-            TRACE_GLOBAL(Trace::Error,(_T("Decryption failed, rc = %u"), rc));
+        const string serialized = serialize(cookies);
+
+        if (serialized.size() == 0) {
+            rc = Core::ERROR_NONE;
         }
-        else
-        {
-            std::string serialized;
-            uint32_t actualChecksum;
+        else {
+            const std::vector<uint8_t> compressed = compress(serialized);
+            ASSERT(compressed.size() != 0);
 
-            serialized = uncompress(decrypted);
-            actualChecksum = crc_checksum(serialized);
-            if (actualChecksum != checksum) {
-                rc = Core::ERROR_GENERAL;
-                TRACE_GLOBAL(Trace::Error,(_T("Checksum does not match: actual=%d expected=%d"), actualChecksum, checksum));
-            } else {
-                deserialize(serialized, cookies);
+            if (compressed.size() == 0) {
+                TRACE_GLOBAL(Trace::Error, (_T("Compression failed")));
+            }
+            else {
+                uint32_t encryptedSize = (compressed.size() + 32 /* some headroom for padding and IV */);
+                uint8_t* const encrypted = new (std::nothrow) uint8_t[encryptedSize];
+                ASSERT(encrypted != nullptr);
+
+                encryptedSize = Cipher(true, compressed.size(), compressed.data(), encryptedSize, encrypted);
+
+                if (encryptedSize == 0) {
+                    TRACE_GLOBAL(Trace::Error,(_T("Encryption failed")));
+                }
+                else {
+                    Core::ToString(encrypted, encryptedSize, true, payload);
+                    ASSERT(payload.empty() == false);
+
+                    if (payload.empty() == true) {
+                        TRACE_GLOBAL(Trace::Error,(_T("Encoding failed")));
+                    }
+                    else {
+                        version = PAYLOAD_VERSION;
+                        checksum = crc_checksum(serialized);
+                        rc = Core::ERROR_NONE;
+                    }
+                }
+
+                delete[] encrypted;
             }
         }
 
         return rc;
     }
+
+    uint32_t Unpack(const uint32_t version, const uint32_t checksum, const string& payload, std::vector<std::string>& cookies) const
+    {
+        uint32_t rc = Core::ERROR_GENERAL;
+
+        cookies.clear();
+
+        if (payload.size() == 0) {
+            rc = Core::ERROR_NONE;
+        }
+        else if (version != PAYLOAD_VERSION) {
+            TRACE_GLOBAL(Trace::Error,(_T("Unsupported payload version (%d)"), version));
+        }
+        else {
+            uint32_t unencodedSize = ((payload.size() * 3) / 4); // base64
+            uint8_t* const unencoded = new (std::nothrow) uint8_t[unencodedSize];
+            ASSERT(unencoded != nullptr);
+
+            const uint32_t decoded = Core::FromString(payload, unencoded, unencodedSize);
+
+            if ((unencodedSize == 0) || (decoded != payload.size())) {
+                TRACE_GLOBAL(Trace::Error,(_T("Decoding failed")));
+            }
+            else {
+                std::vector<uint8_t> decrypted(unencodedSize + 32);
+
+                const uint32_t decryptedSize = Cipher(false, unencodedSize, unencoded, decrypted.size(), decrypted.data());
+                decrypted.resize(decryptedSize); // does not realloc!
+
+                if (decryptedSize == 0) {
+                    TRACE_GLOBAL(Trace::Error,(_T("Decryption failed")));
+                }
+                else {
+                    const string serialized = uncompress(decrypted);
+
+                    if (serialized.size() == 0) {
+                        TRACE_GLOBAL(Trace::Error,(_T("Decompression failed")));
+                    }
+                    else {
+                        const uint32_t actualChecksum = crc_checksum(serialized);
+
+                        if (actualChecksum != checksum) {
+                            TRACE_GLOBAL(Trace::Error,(_T("Checksum does not match: actual=%04x expected=%04x"), actualChecksum, checksum));
+                        }
+                        else {
+                            deserialize(serialized, cookies);
+                            rc = Core::ERROR_NONE;
+                        }
+                    }
+                }
+            }
+
+            delete[] unencoded;
+        }
+
+        return rc;
+    }
+
+private:
+    uint32_t Cipher(const bool encrypt, const uint32_t inputSize, const uint8_t input[], const uint32_t outputSize, uint8_t output[]) const
+    {
+        uint32_t rc = 0;
+
+        ASSERT(inputSize != 0);
+        ASSERT(input != nullptr);
+        ASSERT(outputSize != 0);
+        ASSERT(output != nullptr);
+
+        _lock.Lock();
+
+        uint32_t id = 0;
+        Exchange::IVault* vault = nullptr;
+        Exchange::ICryptography* crypto = nullptr;
+
+        if (_connector.empty() == false) {
+            // Don't allow local cryptography instance.
+            crypto = Exchange::ICryptography::Instance(_connector);
+        }
+
+        if (crypto == nullptr) {
+            TRACE_GLOBAL(Trace::Error, (_T("Cryptography is not available")));
+        }
+        else {
+            Exchange::IDeviceObjects* const objects = Exchange::IDeviceObjects::Instance();
+            if (objects != nullptr) {
+                id = objects->Id(_key, vault);
+
+                if (vault == nullptr) {
+                    ASSERT(id == 0);
+                    TRACE_GLOBAL(Trace::Error, (_T("CookieJar encryption key '%s' not provisioned"), _key.c_str()));
+                }
+
+                objects->Release();
+            }
+            else {
+                TRACE_GLOBAL(Trace::Error, (_T("Svalbard not available")));
+            }
+        }
+
+        if (vault != nullptr) {
+            ASSERT(id != 0);
+
+            Exchange::ICipher* const cipher = vault->AES(Exchange::aesmode::CBC, id);
+
+            if (cipher == nullptr) {
+                TRACE_GLOBAL(Trace::Error, (_T("Cipher failed (unsupported method)")));
+            }
+            else {
+                static constexpr uint16_t IV_SIZE = 16;
+
+                const uint8_t* iv = nullptr;
+                const uint8_t* inputBuffer = nullptr;
+                uint32_t inputBufferSize = 0;
+                uint8_t* outputBuffer = nullptr;
+                uint32_t outputBufferSize = 0;
+
+                if (encrypt == true) {
+                    if (outputSize >= IV_SIZE) {
+                        Exchange::IRandom* const random = crypto->Random();
+                        ASSERT(random != nullptr);
+
+                        if (random != nullptr) {
+                            uint8_t* newIV = output;
+
+                            if (random->Generate(IV_SIZE, newIV) == IV_SIZE) {
+                                iv = newIV;
+                                inputBuffer = input;
+                                inputBufferSize = inputSize;
+                                outputBuffer = (output + IV_SIZE);
+                                outputBufferSize = (outputSize - IV_SIZE);
+                            }
+
+                            random->Release();
+                        }
+                    }
+                }
+                else if (inputSize >= IV_SIZE) {
+                    iv = input;
+                    inputBuffer = (input + IV_SIZE);
+                    inputBufferSize = (inputSize - IV_SIZE);
+                    outputBuffer = output;
+                    outputBufferSize = outputSize;
+                }
+
+                if (inputBufferSize == 0) {
+                    TRACE_GLOBAL(Trace::Error, (_T("Cipher failed (invalid input)")));
+                }
+                else {
+                    ASSERT(iv != nullptr);
+                    ASSERT(inputBuffer != nullptr);
+                    ASSERT(outputBuffer != nullptr);
+
+                    if (encrypt == true) {
+                        rc = cipher->Encrypt(IV_SIZE, iv, inputBufferSize, inputBuffer, outputBufferSize, outputBuffer);
+
+                        if (rc != 0) {
+                            rc += IV_SIZE;
+                        }
+                    }
+                    else {
+                        rc = cipher->Decrypt(IV_SIZE, iv, inputBufferSize, inputBuffer, outputBufferSize, outputBuffer);
+                    }
+
+                    if (rc == 0) {
+                        TRACE_GLOBAL(Trace::Error, (_T("Cipher failed")));
+                    }
+                }
+
+                cipher->Release();
+            }
+
+            vault->Release();
+        }
+
+        if (crypto != nullptr) {
+            crypto->Release();
+        }
+
+        _lock.Unlock();
+
+        return (rc);
+    }
+
+private:
+    mutable Core::CriticalSection _lock;
+    string _connector;
+    string _key;
 };
 
 CookieJar::CookieJar()
-    : _priv(new CookieJarPrivate)
+    : _priv()
+{
+    _priv = std::unique_ptr<CookieJar::CookieJarPrivate>(new CookieJar::CookieJarPrivate());
+}
+
+CookieJar::~CookieJar()
 {
 }
 
-CookieJar::~CookieJar() = default;
+uint32_t CookieJar::Configure(const string& connector, const string& key)
+{
+    return (_priv->Configure(connector, key));
+}
 
 uint32_t CookieJar::Pack(uint32_t& version, uint32_t& checksum, string& payload) const
 {
@@ -270,4 +484,4 @@ std::vector<std::string> CookieJar::GetCookies() const
 }
 
 } // namespace Plugin
-} // namespace WPEFramework
+}
