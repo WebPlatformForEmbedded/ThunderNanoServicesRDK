@@ -268,6 +268,11 @@ POP_WARNING()
 
         Exchange::JTimeZone::Event::TimeZoneChanged(const_cast<PluginHost::JSONRPC&>(static_cast<const PluginHost::JSONRPC&>(*this)), timezone);
         SYSLOG(Logging::Startup, (_T("TimeZone change to \"%s\", local date time is now %s."), timezone.c_str(), Core::Time::Now().ToRFC1123(true).c_str()));
+        // TO-DO: Don't forget to remove the lines below when it work, as they are just for testing
+        REPORT_OUTOFBOUNDS_WARNING(WarningReporting::TooLongWaitingForLock, 3000);
+        printf("@ [STDOUT] Testing Operational Streams - StandardOut category, LocationSync::NotifyTimeZoneChanged()\n");
+        fprintf(stderr, "@ [STDERR] Testing Operational Streams - StandardError category, LocationSync::NotifyTimeZoneChanged()\n");
+        fflush(stderr);
     }
 
     void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {
