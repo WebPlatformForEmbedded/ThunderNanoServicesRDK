@@ -69,17 +69,17 @@ namespace Publishers {
                 data.Module = metadata.Module();
             }
 
+            const Core::Time now(metadata.TimeStamp());
+            if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
+                data.Time = now.ToRFC1123(true);
+            }
+            else {
+                data.Time = now.ToTimeOnly(true);
+            }
+
             if (metadata.Type() == Core::Messaging::Metadata::type::TRACING) {
                 ASSERT(dynamic_cast<const Core::Messaging::IStore::Tracing*>(&metadata) != nullptr);
                 const Core::Messaging::IStore::Tracing& trace = static_cast<const Core::Messaging::IStore::Tracing&>(metadata);
-                const Core::Time now(trace.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
 
                 if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
                     data.FileName = trace.FileName();
@@ -93,29 +93,9 @@ namespace Publishers {
                     data.ClassName = trace.ClassName();
                 }
             }
-            else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING) {
-                ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
-                const Core::Messaging::IStore::Logging& log = static_cast<const Core::Messaging::IStore::Logging&>(metadata);
-                const Core::Time now(log.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
-            }
             else if (metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
                 ASSERT(dynamic_cast<const Core::Messaging::IStore::WarningReporting*>(&metadata) != nullptr);
                 const Core::Messaging::IStore::WarningReporting& report = static_cast<const Core::Messaging::IStore::WarningReporting&>(metadata);
-                const Core::Time now(report.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
 
                 if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CALLSIGN)) != 0) {
                     data.Callsign = report.Callsign();
