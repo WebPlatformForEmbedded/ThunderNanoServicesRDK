@@ -26,6 +26,10 @@
 
 #include "Module.h"
 
+#include <interfaces/IBrowser.h>
+#include <interfaces/IApplication.h>
+
+
 #ifdef WEBKIT_GLIB_API
 #include <wpe/webkit.h>
 #include "Tags.h"
@@ -67,7 +71,6 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #include <glib.h>
 
 #include "HTML5Notification.h"
-#include "WebKitBrowser.h"
 
 #if defined(ENABLE_CLOUD_COOKIE_JAR)
 #include "CookieJar.h"
@@ -369,15 +372,28 @@ static GSourceFuncs _handlerIntervention =
         }
     }
 
+    static bool EnvironmentOverride(const bool configFlag)
+    {
+        bool result = configFlag;
+
+        if (result == false) {
+            string value;
+            Core::SystemInfo::GetEnvironment(_T("WPE_ENVIRONMENT_OVERRIDE"), value);
+            result = (value == "1");
+        }
+        return (result);
+    }
+
     class WebKitImplementation : public Core::Thread,
                                  public Exchange::IBrowser,
                                  public Exchange::IWebBrowser,
                                  public Exchange::IApplication,
                                  public Exchange::IBrowserScripting,
-                                 #if defined(ENABLE_CLOUD_COOKIE_JAR)
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
                                  public Exchange::IBrowserCookieJar,
-                                 #endif
-                                 public PluginHost::IStateControl {
+#endif
+                                 public PluginHost::IStateControl,
+                                 public PluginHost::ISubSystem::INotification {
     public:
         class BundleConfig : public Core::JSON::Container {
         private:
@@ -566,7 +582,11 @@ static GSourceFuncs _handlerIntervention =
                 , Whitelist()
                 , PageGroup(_T("WPEPageGroup"))
                 , CookieStorage()
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
                 , CloudCookieJarEnabled(false)
+                , CloudCookieJarKeyName(_T("WebKitBrowser.cookiejar"))
+                , CryptoConnector(_T("/tmp/svalbard"))
+#endif
                 , LocalStorage()
                 , LocalStorageEnabled(false)
                 , LocalStorageSize()
@@ -630,7 +650,11 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("whitelist"), &Whitelist);
                 Add(_T("pagegroup"), &PageGroup);
                 Add(_T("cookiestorage"), &CookieStorage);
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
                 Add(_T("cloudcookiejarenabled"), &CloudCookieJarEnabled);
+                Add(_T("cloudcookiejarkeyname"), &CloudCookieJarKeyName);
+                Add(_T("cryptoconnector"), &CryptoConnector);
+#endif
                 Add(_T("localstorage"), &LocalStorage);
                 Add(_T("localstorageenabled"), &LocalStorageEnabled);
                 Add(_T("localstoragesize"), &LocalStorageSize);
@@ -701,7 +725,11 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::String Whitelist;
             Core::JSON::String PageGroup;
             Core::JSON::String CookieStorage;
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
             Core::JSON::Boolean CloudCookieJarEnabled;
+            Core::JSON::String CloudCookieJarKeyName;
+            Core::JSON::String CryptoConnector;
+#endif
             Core::JSON::String LocalStorage;
             Core::JSON::Boolean LocalStorageEnabled;
             Core::JSON::DecUInt16 LocalStorageSize;
@@ -928,7 +956,35 @@ static GSourceFuncs _handlerIntervention =
                 TRACE(Trace::Information, (_T("Bailed out before the end of the WPE main app was reached. %d"), 6000));
             }
 
+            if (_service != nullptr) {
+                _service->Release();
+                _service = nullptr;
+            }
+
             implementation = nullptr;
+        }
+
+    private:
+        void SubSystemsChanged()
+        {
+            ASSERT(_service != nullptr);
+
+#if defined(ENABLE_CLOUD_COOKIE_JAR)
+            PluginHost::ISubSystem* subsystems = _service->SubSystems();
+
+            if (subsystems != nullptr) {
+                if (subsystems->IsActive(PluginHost::ISubSystem::CRYPTOGRAPHY) == true) {
+                    if (_cookieJar.Configure(_config.CryptoConnector.Value(), _config.CloudCookieJarKeyName.Value()) != Core::ERROR_NONE) {
+                        TRACE(Trace::Error, (_T("Failed to configure cloud CookieJar handler")));
+                    }
+                }
+                else {
+                    _cookieJar.Configure();
+                }
+
+                subsystems->Release();
+            }
+#endif // defined(ENABLE_CLOUD_COOKIE_JAR)
         }
 
     public:
@@ -1927,7 +1983,6 @@ static GSourceFuncs _handlerIntervention =
 
         uint32_t Identifier(string& id) const override
         {
-
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
             if (subSystem) {
                 const PluginHost::ISubSystem::IIdentifier* identifier(subSystem->Get<PluginHost::ISubSystem::IIdentifier>());
@@ -2199,12 +2254,23 @@ static GSourceFuncs _handlerIntervention =
             _httpStatusCode = code;
         }
 
+        // PluginHost::ISubSystem::INotification overrides
+        void Updated() override
+        {
+            SubSystemsChanged();
+        }
+
+        // Exchange::IConfiguration overrides
         uint32_t Configure(PluginHost::IShell* service) override
         {
+            ASSERT(service != nullptr);
+
             #ifndef WEBKIT_GLIB_API
             _consoleLogPrefix = service->Callsign();
             #endif
+
             _service = service;
+            _service->AddRef();
 
             _dataPath = service->DataPath();
 
@@ -2226,7 +2292,7 @@ static GSourceFuncs _handlerIntervention =
             }
             #endif
 
-            bool environmentOverride(WebKitBrowser::EnvironmentOverride(_config.EnvironmentOverride.Value()));
+            const bool environmentOverride = EnvironmentOverride(_config.EnvironmentOverride.Value());
 
             if ((environmentOverride == false) || (Core::SystemInfo::GetEnvironment(_T("WPE_WEBKIT_URL"), _URL) == false)) {
                 _URL = _config.URL.Value();
@@ -2514,6 +2580,7 @@ static GSourceFuncs _handlerIntervention =
         INTERFACE_ENTRY (Exchange::IBrowserCookieJar)
 #endif
         INTERFACE_ENTRY(PluginHost::IStateControl)
+        INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
         END_INTERFACE_MAP
 
     private:

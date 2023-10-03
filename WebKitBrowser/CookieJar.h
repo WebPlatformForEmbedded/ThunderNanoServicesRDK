@@ -25,6 +25,7 @@
 #include <vector>
 #include <memory>
 
+
 namespace WPEFramework {
 namespace Plugin {
 
@@ -33,6 +34,8 @@ class CookieJar
 public:
     CookieJar();
     ~CookieJar();
+
+    uint32_t Configure(const string& connector = _T(""), const string& key = _T(""));
 
     bool IsStale() const { return _refreshed.GetState() == false; }
     void MarkAsStale() { _refreshed.SetState( false ); }
