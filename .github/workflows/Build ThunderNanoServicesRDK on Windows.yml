@@ -2,7 +2,7 @@ name: Build ThunderNanoServicesRDK on Windows
 
 on:
   push:
-    branches: ["master"]
+    # branches: ["master"]
   pull_request:
     branches: ["master"]
 
@@ -74,14 +74,14 @@ jobs:
 
     - name: Build ThunderNanoServicesRDK
       shell: cmd
-      run: |
+      run: >
         cd ThunderOnWindows
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%deviceInfo%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%locationSync%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messenger%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%monitor%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%openCDMi%"  "%solution%"
-        "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%securityAgent%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%deviceInfo%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%locationSync%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messenger%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%monitor%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%openCDMi%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%securityAgent%"  "%solution%"
 
     - name: Tar files
       run: tar -czvf ${{matrix.type}}${{matrix.version}}.tar.gz artifacts
