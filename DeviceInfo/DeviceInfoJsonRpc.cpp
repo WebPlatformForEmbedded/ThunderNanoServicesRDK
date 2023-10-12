@@ -233,9 +233,9 @@ namespace Plugin {
     // Return codes:
     //  - ERROR_NONE: Success
     //  - ERROR_UNAVAILABLE: FirmwareVersion information is not available
-    uint32_t DeviceInfo::endpoint_get_firmwareversion(FirmwareversionData& /* response */) const
+    uint32_t DeviceInfo::endpoint_get_firmwareversion(FirmwareversionData& response) const
     {
-        return Core::ERROR_UNAVAILABLE;
+        return FirmwareVersion(response);
     }
 
     // Property: serialnumber - Serial number set by manufacturer
@@ -246,7 +246,7 @@ namespace Plugin {
     {
         uint32_t result = Core::ERROR_NONE;
         string serialNumber;
-	result = _deviceInfo->SerialNumber(serialNumber);
+	result = _devmceInfo->SerialNumber(serialNumber);
 
 	response.Serialnumber = serialNumber;
         return result;

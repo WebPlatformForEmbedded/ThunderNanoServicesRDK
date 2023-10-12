@@ -19,22 +19,27 @@
 
 #include "DeviceInfo.h"
 
+#define API_VERSION_NUMBER_MAJOR 1
+#define API_VERSION_NUMBER_MINOR 0
+#define API_VERSION_NUMBER_PATCH 5
+
 namespace WPEFramework {
+namespace {
+    static Plugin::Metadata<Plugin::DeviceInfo> metadata(
+        // Version (Major, Minor, Patch)
+        API_VERSION_NUMBER_MAJOR, API_VERSION_NUMBER_MINOR, API_VERSION_NUMBER_PATCH,
+        // Preconditions
+        {},
+        // Terminations
+        {},
+        // Controls
+        {}
+    );
+}
+
 namespace Plugin {
 
-    namespace {
-
-        static Metadata<DeviceInfo> metadata(
-            // Version
-            1, 0, 0,
-            // Preconditions
-            {},
-            // Terminations
-            {},
-            // Controls
-            {}
-        );
-    }
+    SERVICE_REGISTRATION(DeviceInfo, API_VERSION_NUMBER_MAJOR, API_VERSION_NUMBER_MINOR, API_VERSION_NUMBER_PATCH);
 
     static Core::ProxyPoolType<Web::JSONBodyType<DeviceInfo::Data>> jsonResponseFactory(4);
 
@@ -54,6 +59,14 @@ namespace Plugin {
         _service->AddRef();
         _service->Register(&_notification);
         _subSystem = service->SubSystems();
+#ifndef USE_THUNDER_R4
+        _systemId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
+#else
+        _systemId = string();
+#endif /* USE_THUNDER_R4 */
+
+
+
 
         if (_subSystem == nullptr) {
             message = _T("DeviceInfo Susbsystem could not be obtained");
@@ -75,6 +88,10 @@ namespace Plugin {
                     if (_deviceVideoCapabilityInterface == nullptr) {
                         message = _T("DeviceInfo Video Capabilities Interface could not be instantiated");
                     } else {
+                        _deviceFirmwareVersionInterface = _deviceInfo->QueryInterface<Exchange::IFirmwareVersion>();
+			if (_deviceFirmwareVersionInterface == nullptr) {
+                            SYSLOG(Logging::Startup, (_T("DeviceInfo Firmware Version Interface could not be instantiated")));
+			}
                         RegisterAll();
                     }
                 }
@@ -100,6 +117,10 @@ namespace Plugin {
 
             if (_deviceInfo != nullptr){
 
+                if (_deviceFirmwareVersionInterface != nullptr) {
+                    _deviceFirmwareVersionInterface->Release();
+                    _deviceFirmwareVersionInterface = nullptr;
+		}
                 if (_deviceAudioCapabilityInterface != nullptr) {
                     _deviceAudioCapabilityInterface->Release();
                     _deviceAudioCapabilityInterface = nullptr;
@@ -175,7 +196,11 @@ namespace Plugin {
             // TODO RB: I guess we should do something here to return other info (e.g. time) as well.
 
             result->ContentType = Web::MIMETypes::MIME_JSON;
+#ifndef USE_THUNDER_R4
+            result->Body(Core::proxy_cast<Web::IBody>(response));
+#else
             result->Body(Core::ProxyType<Web::IBody>(response));
+#endif /* USE_THUNDER_R4 */
         } else {
             result->ErrorCode = Web::STATUS_BAD_REQUEST;
             result->Message = _T("Unsupported request for the [DeviceInfo] service.");
@@ -193,12 +218,26 @@ namespace Plugin {
         systemInfo.Uptime = singleton.GetUpTime();
         systemInfo.Freeram = singleton.GetFreeRam();
         systemInfo.Totalram = singleton.GetTotalRam();
+        systemInfo.Totalswap = singleton.GetTotalSwap();
+        systemInfo.Freeswap = singleton.GetFreeSwap();
         systemInfo.Devicename = singleton.GetHostName();
         systemInfo.Cpuload = Core::NumberType<uint32_t>(static_cast<uint32_t>(singleton.GetCpuLoad())).Text();
+        systemInfo.Serialnumber = _systemId;
 
         _adminLock.Lock();
         systemInfo.Serialnumber = _deviceId;
         _adminLock.Unlock();
+
+        auto cpuloadavg = singleton.GetCpuLoadAvg();
+        if (cpuloadavg != nullptr) {
+            systemInfo.Cpuloadavg.Avg1min = *(cpuloadavg);
+            if (++cpuloadavg != nullptr) {
+                systemInfo.Cpuloadavg.Avg5min = *(cpuloadavg);
+                if (++cpuloadavg != nullptr) {
+                    systemInfo.Cpuloadavg.Avg15min = *(cpuloadavg);
+                }
+            }
+        }
     }
 
     void DeviceInfo::AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const
@@ -468,6 +507,35 @@ namespace Plugin {
         if (_deviceInfo->Sku(localresult) == Core::ERROR_NONE) {
             response.Sku = localresult;
         }
+    }
+
+    uint32_t FirmwareVersion(JsonData::DeviceInfo::FirmwareversionData& response) const
+    {
+        uint32_t result = Core::ERROR_GENERAL;
+
+        // imagename is required
+        string value;
+        if (_deviceFirmwareVersionInterface->Imagename(value) == Core::ERROR_NONE) {
+            response.Imagename = value;
+            result = Core::ERROR_NONE;
+
+            if (_deviceFirmwareVersionInterface->Sdk(value) == Core::ERROR_NONE)
+                response.Sdk = value;
+            if (_deviceFirmwareVersionInterface->Mediarite(value) == Core::ERROR_NONE)
+                response.Mediarite = value;
+
+            if (_deviceFirmwareVersionInterface->Yocto(value) == Core::ERROR_NONE) {
+                Core::EnumerateType<FirmwareversionData::YoctoType> yocto(value.c_str(), false);
+                if (yocto.IsSet()) {
+                    response.Yocto = yocto.Value();
+                } else {
+                    TRACE(Trace::Fatal, (_T("Unknown value %s"), value.c_str()));
+                    result = Core::ERROR_GENERAL;
+                }
+            }
+        }
+
+        return result;
     }
 
     void DeviceInfo::UpdateDeviceIdentifier()

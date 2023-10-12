@@ -21,7 +21,12 @@
 #define DEVICEINFO_DEVICEINFO_H
 
 #include "Module.h"
+//#ifdef USE_THUNDER_R4
 #include <interfaces/IDeviceInfo.h>
+//#else
+//#include <interfaces/IDeviceInfo2.h>
+//#endif /* USE_THUNDER_R4 */
+#include <interfaces/IFirmwareVersion.h> // Not available for R4, tobe discussed
 #include <interfaces/json/JsonData_DeviceInfo.h>
 
 namespace WPEFramework {
@@ -134,6 +139,7 @@ namespace Plugin {
             , _deviceInfo(nullptr)
             , _deviceAudioCapabilityInterface(nullptr)
             , _deviceVideoCapabilityInterface(nullptr)
+            , _deviceFirmwareVersionInterface(nullptr)
             , _connectionId(0)
             , _adminLock()
             , _notification(*this)
@@ -149,6 +155,7 @@ namespace Plugin {
         INTERFACE_AGGREGATE(Exchange::IDeviceInfo, _deviceInfo)
         INTERFACE_AGGREGATE(Exchange::IDeviceAudioCapabilities, _deviceAudioCapabilityInterface)
         INTERFACE_AGGREGATE(Exchange::IDeviceVideoCapabilities, _deviceVideoCapabilityInterface)
+        INTERFACE_AGGREGATE(Exchange::IFirmwareVersion, _deviceFirmwareVersionInterface)
         END_INTERFACE_MAP
 
     public:
@@ -230,7 +237,8 @@ namespace Plugin {
             }
             return status;
         }
-
+	uint32_t FirmwareVersion(JsonData::DeviceInfo::FirmwareversionData& response) const;
+ 
     private:
         uint8_t _skipURL;
         PluginHost::IShell* _service;
@@ -239,6 +247,7 @@ namespace Plugin {
         Exchange::IDeviceInfo* _deviceInfo;
         Exchange::IDeviceAudioCapabilities* _deviceAudioCapabilityInterface;
         Exchange::IDeviceVideoCapabilities* _deviceVideoCapabilityInterface;
+        Exchange::IFirmwareVersion* _deviceFirmwareVersionInterface;
         uint32_t _connectionId;
         mutable Core::CriticalSection _adminLock;
         Core::Sink<Notification> _notification;

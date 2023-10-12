@@ -28,6 +28,8 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_DEVICEINFO_AUTOSTART "true" CACHE STRING "Automatically start DeviceInfo plugin")
+set(PLUGIN_DEVICEINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
+set(PLUGIN_DEVICEINFO_STARTUPORDER "" CACHE STRING "Start-up order for DeviceInfo plugin")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
@@ -36,20 +38,51 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
 add_library(${MODULE_NAME} SHARED
     DeviceInfo.cpp
     DeviceInfoJsonRpc.cpp
-    DeviceInfoImplementation.cpp
     Module.cpp)
 
 set_target_properties(${MODULE_NAME} PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED YES)
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES)
 
-target_link_libraries(${MODULE_NAME} 
-    PRIVATE
-        CompileSettingsDebug::CompileSettingsDebug
+target_link_libraries(${MODULE_NAME}
+PRIVATE
+    CompileSettingsDebug::CompileSettingsDebug
+    ${NAMESPACE}Definitions::${NAMESPACE}Definitions
+    ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
+
+if (USE_DEVICESETTINGS)
+    find_package(DS REQUIRED)
+    find_package(IARMBus REQUIRED)
+    find_package(RFC REQUIRED)
+
+    target_include_directories(${MODULE_NAME} PRIVATE
+        ${RFC_INCLUDE_DIRS}
+        ${DS_INCLUDE_DIRS}
+        ${IARMBUS_INCLUDE_DIRS}
+        ../helpers)
+
+    target_link_libraries(${MODULE_NAME} PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
-        ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
+        ${IARMBUS_LIBRARIES}
+        ${DS_LIBRARIES})
 
-install(TARGETS ${MODULE_NAME} 
+    target_sources(${MODULE_NAME}
+    PRIVATE
+        Implementation/DeviceSettings/DeviceInfoImplementation.cpp)
+
+    set_source_files_properties(
+        Implementation/DeviceSettings/DeviceInfoImplementation.cpp
+        PROPERTIES
+        COMPILE_FLAGS "-fexceptions")
+
+else ()
+    target_sources(${MODULE_NAME}
+    PRIVATE
+        Implementation/Generic/DeviceInfoImplementation.cpp)
+endif ()
+
+
+install(TARGETS ${MODULE_NAME}
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
 
 write_config()
