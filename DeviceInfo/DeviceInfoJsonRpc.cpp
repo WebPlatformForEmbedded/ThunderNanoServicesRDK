@@ -246,7 +246,7 @@ namespace Plugin {
     {
         uint32_t result = Core::ERROR_NONE;
         string serialNumber;
-	result = _devmceInfo->SerialNumber(serialNumber);
+	result = _deviceInfo->SerialNumber(serialNumber);
 
 	response.Serialnumber = serialNumber;
         return result;

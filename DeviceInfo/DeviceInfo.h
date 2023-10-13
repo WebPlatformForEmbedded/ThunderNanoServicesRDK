@@ -21,12 +21,19 @@
 #define DEVICEINFO_DEVICEINFO_H
 
 #include "Module.h"
-//#ifdef USE_THUNDER_R4
+
+#ifdef USE_DEVICESETTINGS
+#ifdef USE_THUNDER_R4
 #include <interfaces/IDeviceInfo.h>
-//#else
-//#include <interfaces/IDeviceInfo2.h>
-//#endif /* USE_THUNDER_R4 */
-#include <interfaces/IFirmwareVersion.h> // Not available for R4, tobe discussed
+#else
+#include <interfaces/IDeviceInfo2.h>
+#endif /* USE_THUNDER_R4 */
+#include <interfaces/IFirmwareVersion.h>
+
+#else
+#include <interfaces/IDeviceInfo.h>
+#endif /* USE_DEVICESETTINGS */
+
 #include <interfaces/json/JsonData_DeviceInfo.h>
 
 namespace WPEFramework {
@@ -55,7 +62,12 @@ namespace Plugin {
         };
 
     private:
-        class Notification : public PluginHost::ISubSystem::INotification, public RPC::IRemoteConnection::INotification {
+        class Notification : 
+#ifndef USE_DEVICESETTINGS
+		             public PluginHost::ISubSystem::INotification,
+#endif
+	                     public RPC::IRemoteConnection::INotification {
+#ifndef USE_DEVICESETTINGS
         private:
             class Job {
             public:
@@ -74,7 +86,7 @@ namespace Plugin {
             private:
                 DeviceInfo& _parent;
             };
-
+#endif
         public:
             Notification() = delete;
             Notification(const Notification&) = delete;
@@ -82,17 +94,25 @@ namespace Plugin {
 
             explicit Notification(DeviceInfo& parent)
                 : _parent(parent)
-                , _job(parent) {
+#ifndef USE_DEVICESETTINGS
+                , _job(parent)
+#endif
+            {
             }
-            ~Notification() override {
+            ~Notification() override
+	    {
+#ifndef USE_DEVICESETTINGS
                 _job.Revoke();
+#endif
             }
 
         public:
+#ifndef USE_DEVICESETTINGS
             // Some changes happened in the subsystems
             void Updated() override {
                 _job.Submit();
             }
+#endif
             void Activated(RPC::IRemoteConnection* /* connection */) override {
             }
             void Deactivated(RPC::IRemoteConnection* connection) override {
@@ -102,31 +122,18 @@ namespace Plugin {
             }
 
             BEGIN_INTERFACE_MAP(Notification)
+#ifndef USE_DEVICESETTINGS
                 INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
+#endif
                 INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
             END_INTERFACE_MAP
 
         private:
             DeviceInfo& _parent;
+#ifndef USE_DEVICESETTINGS
             Core::WorkerPool::JobType<Job> _job;
+#endif
         };
-
-    private:
-        uint32_t addresses(const Core::JSON::String&, Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response)
-        {
-            AddressInfo(response);
-            return (Core::ERROR_NONE);
-        }
-        uint32_t system(const Core::JSON::String&, JsonData::DeviceInfo::SysteminfoData& response)
-        {
-            SysInfo(response);
-            return (Core::ERROR_NONE);
-        }
-        uint32_t sockets(const Core::JSON::String&, JsonData::DeviceInfo::SocketinfoData& response)
-        {
-            SocketPortInfo(response);
-            return (Core::ERROR_NONE);
-        }
 
     public:
         DeviceInfo(const DeviceInfo&) = delete;
@@ -139,7 +146,9 @@ namespace Plugin {
             , _deviceInfo(nullptr)
             , _deviceAudioCapabilityInterface(nullptr)
             , _deviceVideoCapabilityInterface(nullptr)
+#ifdef USE_DEVICESETTINGS
             , _deviceFirmwareVersionInterface(nullptr)
+#endif
             , _connectionId(0)
             , _adminLock()
             , _notification(*this)
@@ -155,7 +164,9 @@ namespace Plugin {
         INTERFACE_AGGREGATE(Exchange::IDeviceInfo, _deviceInfo)
         INTERFACE_AGGREGATE(Exchange::IDeviceAudioCapabilities, _deviceAudioCapabilityInterface)
         INTERFACE_AGGREGATE(Exchange::IDeviceVideoCapabilities, _deviceVideoCapabilityInterface)
+#ifdef USE_DEVICESETTINGS
         INTERFACE_AGGREGATE(Exchange::IFirmwareVersion, _deviceFirmwareVersionInterface)
+#endif
         END_INTERFACE_MAP
 
     public:
@@ -247,7 +258,9 @@ namespace Plugin {
         Exchange::IDeviceInfo* _deviceInfo;
         Exchange::IDeviceAudioCapabilities* _deviceAudioCapabilityInterface;
         Exchange::IDeviceVideoCapabilities* _deviceVideoCapabilityInterface;
+#ifdef USE_DEVICESETTINGS
         Exchange::IFirmwareVersion* _deviceFirmwareVersionInterface;
+#endif
         uint32_t _connectionId;
         mutable Core::CriticalSection _adminLock;
         Core::Sink<Notification> _notification;

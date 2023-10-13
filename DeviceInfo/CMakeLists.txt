@@ -75,6 +75,10 @@ if (USE_DEVICESETTINGS)
         PROPERTIES
         COMPILE_FLAGS "-fexceptions")
 
+    target_compile_definitions(${MODULE_NAME}
+    PRIVATE
+        USE_DEVICESETTINGS=1)
+
 else ()
     target_sources(${MODULE_NAME}
     PRIVATE

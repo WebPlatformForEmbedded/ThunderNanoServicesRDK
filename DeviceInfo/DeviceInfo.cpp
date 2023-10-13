@@ -19,27 +19,21 @@
 
 #include "DeviceInfo.h"
 
-#define API_VERSION_NUMBER_MAJOR 1
-#define API_VERSION_NUMBER_MINOR 0
-#define API_VERSION_NUMBER_PATCH 5
-
 namespace WPEFramework {
-namespace {
-    static Plugin::Metadata<Plugin::DeviceInfo> metadata(
-        // Version (Major, Minor, Patch)
-        API_VERSION_NUMBER_MAJOR, API_VERSION_NUMBER_MINOR, API_VERSION_NUMBER_PATCH,
-        // Preconditions
-        {},
-        // Terminations
-        {},
-        // Controls
-        {}
-    );
-}
-
 namespace Plugin {
+namespace {
 
-    SERVICE_REGISTRATION(DeviceInfo, API_VERSION_NUMBER_MAJOR, API_VERSION_NUMBER_MINOR, API_VERSION_NUMBER_PATCH);
+        static Metadata<DeviceInfo> metadata(
+            // Version
+            1, 0, 0,
+            // Preconditions
+            {},
+            // Terminations
+            {},
+            // Controls
+            {}
+        );
+    }
 
     static Core::ProxyPoolType<Web::JSONBodyType<DeviceInfo::Data>> jsonResponseFactory(4);
 
@@ -57,23 +51,25 @@ namespace Plugin {
         _skipURL = static_cast<uint8_t>(service->WebPrefix().length());
         _service = service;
         _service->AddRef();
-        _service->Register(&_notification);
-        _subSystem = service->SubSystems();
+
+#ifdef USE_DEVICESETTINGS
 #ifndef USE_THUNDER_R4
-        _systemId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
+        _deviceId = Core::SystemInfo::Instance().Id(Core::SystemInfo::Instance().RawDeviceId(), ~0);
 #else
-        _systemId = string();
+        _deviceId = string();
 #endif /* USE_THUNDER_R4 */
+#else
+        _service->Register(&_notification);
+#endif
 
-
-
-
+        _subSystem = service->SubSystems();
         if (_subSystem == nullptr) {
             message = _T("DeviceInfo Susbsystem could not be obtained");
         } else {
             _subSystem->AddRef();
+#ifndef USE_DEVICESETTINGS
             _subSystem->Register(&_notification);
-
+#endif
             _deviceInfo = _service->Root<Exchange::IDeviceInfo>(_connectionId, 2000, _T("DeviceInfoImplementation"));
             if (_deviceInfo == nullptr) {
                 message = _T("DeviceInfo could not be instantiated");
@@ -88,10 +84,12 @@ namespace Plugin {
                     if (_deviceVideoCapabilityInterface == nullptr) {
                         message = _T("DeviceInfo Video Capabilities Interface could not be instantiated");
                     } else {
+#ifdef USE_DEVICESETTINGS
                         _deviceFirmwareVersionInterface = _deviceInfo->QueryInterface<Exchange::IFirmwareVersion>();
 			if (_deviceFirmwareVersionInterface == nullptr) {
                             SYSLOG(Logging::Startup, (_T("DeviceInfo Firmware Version Interface could not be instantiated")));
 			}
+#endif
                         RegisterAll();
                     }
                 }
@@ -108,19 +106,22 @@ namespace Plugin {
             ASSERT(_service == service);
 
             _service->Unregister(&_notification);
-
             if (_subSystem != nullptr) {
+#ifndef USE_DEVICESETTINGS
                 _subSystem->Unregister(&_notification);
+#endif
                 _subSystem->Release();
                 _subSystem = nullptr;
             }
 
             if (_deviceInfo != nullptr){
 
+#ifdef USE_DEVICESETTINGS
                 if (_deviceFirmwareVersionInterface != nullptr) {
                     _deviceFirmwareVersionInterface->Release();
                     _deviceFirmwareVersionInterface = nullptr;
 		}
+#endif
                 if (_deviceAudioCapabilityInterface != nullptr) {
                     _deviceAudioCapabilityInterface->Release();
                     _deviceAudioCapabilityInterface = nullptr;
@@ -196,11 +197,15 @@ namespace Plugin {
             // TODO RB: I guess we should do something here to return other info (e.g. time) as well.
 
             result->ContentType = Web::MIMETypes::MIME_JSON;
+#ifdef USE_DEVICESETTINGS
 #ifndef USE_THUNDER_R4
             result->Body(Core::proxy_cast<Web::IBody>(response));
 #else
             result->Body(Core::ProxyType<Web::IBody>(response));
 #endif /* USE_THUNDER_R4 */
+#else
+            result->Body(Core::ProxyType<Web::IBody>(response));
+#endif
         } else {
             result->ErrorCode = Web::STATUS_BAD_REQUEST;
             result->Message = _T("Unsupported request for the [DeviceInfo] service.");
@@ -222,12 +227,8 @@ namespace Plugin {
         systemInfo.Freeswap = singleton.GetFreeSwap();
         systemInfo.Devicename = singleton.GetHostName();
         systemInfo.Cpuload = Core::NumberType<uint32_t>(static_cast<uint32_t>(singleton.GetCpuLoad())).Text();
-        systemInfo.Serialnumber = _systemId;
-
-        _adminLock.Lock();
+#ifdef USE_DEVICESETTIGNS
         systemInfo.Serialnumber = _deviceId;
-        _adminLock.Unlock();
-
         auto cpuloadavg = singleton.GetCpuLoadAvg();
         if (cpuloadavg != nullptr) {
             systemInfo.Cpuloadavg.Avg1min = *(cpuloadavg);
@@ -238,6 +239,12 @@ namespace Plugin {
                 }
             }
         }
+#else
+        _adminLock.Lock();
+        systemInfo.Serialnumber = _deviceId;
+        _adminLock.Unlock();
+#endif
+
     }
 
     void DeviceInfo::AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const
@@ -509,10 +516,11 @@ namespace Plugin {
         }
     }
 
-    uint32_t FirmwareVersion(JsonData::DeviceInfo::FirmwareversionData& response) const
+    uint32_t DeviceInfo::FirmwareVersion(JsonData::DeviceInfo::FirmwareversionData& response VARIABLE_IS_NOT_USED) const
     {
         uint32_t result = Core::ERROR_GENERAL;
 
+#ifdef USE_DEVICESETTINGS
         // imagename is required
         string value;
         if (_deviceFirmwareVersionInterface->Imagename(value) == Core::ERROR_NONE) {
@@ -534,7 +542,7 @@ namespace Plugin {
                 }
             }
         }
-
+#endif
         return result;
     }
 
