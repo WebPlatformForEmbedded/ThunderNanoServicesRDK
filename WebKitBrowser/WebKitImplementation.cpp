@@ -1058,6 +1058,7 @@ static GSourceFuncs _handlerIntervention =
             auto* data = new SetUserAgentData(this, useragent);
 
             TRACE(Trace::Information, (_T("New user agent: %s"), useragent.c_str()));
+
             g_main_context_invoke_full(
                 _context,
                 G_PRIORITY_DEFAULT,
@@ -1341,7 +1342,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
 
 #if WEBKIT_CHECK_VERSION(2, 40, 0)
-                    // @length: length of @script, or -1 if @script is a nul-terminated string
+                    // length: size of script, or -1 if script is a nul-terminated string
                     webkit_web_view_evaluate_javascript(object->_view, script.c_str(), -1, nullptr, nullptr, nullptr, nullptr, nullptr);
 #else
                     webkit_web_view_run_javascript(object->_view, script.c_str(), nullptr, nullptr, nullptr);
