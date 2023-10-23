@@ -37,6 +37,7 @@ configuration.add("cookiestorage", "@PLUGIN_SEARCH_AND_DISCOVERY_APP_COOKIESTORA
 configuration.add("indexeddbenabled", "@PLUGIN_SEARCH_AND_DISCOVERY_APP_INDEXEDDB_ENABLE@")
 configuration.add("indexeddbpath", "@PLUGIN_SEARCH_AND_DISCOVERY_APP_INDEXEDDB_PATH@")
 configuration.add("indexeddbsize", "@PLUGIN_SEARCH_AND_DISCOVERY_APP_INDEXEDDB_SIZE@")
+configuration.add("indexeddbtotalsize", "@PLUGIN_SEARCH_AND_DISCOVERY_APP_INDEXEDDB_TOTAL_SIZE@")
 
 if "@PLUGIN_WEBKITBROWSER_CLIENT_CERT@" != "" and "@PLUGIN_WEBKITBROWSER_CLIENT_CERT_KEY@" != "":
     configuration.add("clientcert", "@PLUGIN_WEBKITBROWSER_CLIENT_CERT@")

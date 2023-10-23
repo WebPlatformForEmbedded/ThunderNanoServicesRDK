@@ -38,6 +38,7 @@ configuration.add("cookiestorage", "@PLUGIN_HTML_APP_COOKIESTORAGE@")
 configuration.add("indexeddbenabled", "@PLUGIN_HTML_APP_INDEXEDDB_ENABLE@")
 configuration.add("indexeddbpath", "@PLUGIN_HTML_APP_INDEXEDDB_PATH@")
 configuration.add("indexeddbsize", "@PLUGIN_HTML_APP_INDEXEDDB_SIZE@")
+configuration.add("indexeddbtotalsize", "@PLUGIN_HTML_APP_INDEXEDDB_TOTAL_SIZE@")
 
 if boolean("@PLUGIN_HTML_APP_WINDOWCLOSE@"):
     configuration.add("windowclose", "true")

@@ -39,6 +39,7 @@ configuration.add("cookiestorage", "@PLUGIN_JSPP_COOKIESTORAGE@")
 configuration.add("indexeddbenabled", "@PLUGIN_JSPP_INDEXEDDB_ENABLE@")
 configuration.add("indexeddbpath", "@PLUGIN_JSPP_INDEXEDDB_PATH@")
 configuration.add("indexeddbsize", "@PLUGIN_JSPP_INDEXEDDB_SIZE@")
+configuration.add("indexeddbtotalsize", "@PLUGIN_JSPP_INDEXEDDB_TOTAL_SIZE@")
 
 if boolean("@PLUGIN_JSPP_WINDOWCLOSE@"):
     configuration.add("windowclose", "true")

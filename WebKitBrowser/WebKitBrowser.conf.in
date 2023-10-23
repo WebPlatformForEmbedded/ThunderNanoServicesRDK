@@ -44,6 +44,7 @@ configuration.add("cookiestorage", "@PLUGIN_WEBKITBROWSER_COOKIESTORAGE@")
 configuration.add("indexeddbenabled", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_ENABLE@")
 configuration.add("indexeddbpath", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_PATH@")
 configuration.add("indexeddbsize", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_SIZE@")
+configuration.add("indexeddbtotalsize", "@PLUGIN_WEBKITBROWSER_INDEXEDDB_TOTAL_SIZE@")
 
 if boolean("@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@"):
     configuration.add("windowclose", "@PLUGIN_WEBKITBROWSER_WINDOWCLOSE@")
