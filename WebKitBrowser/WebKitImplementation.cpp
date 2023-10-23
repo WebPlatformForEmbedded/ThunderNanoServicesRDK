@@ -85,7 +85,7 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #if !WEBKIT_GLIB_API
 #define HAS_MEMORY_PRESSURE_SETTINGS_API 0
 #else
-#define HAS_MEMORY_PRESSURE_SETTINGS_API WEBKIT_CHECK_VERSION(2, 38, 0)
+#define HAS_MEMORY_PRESSURE_SETTINGS_API WEBKIT_CHECK_VERSION(2, 42, 0)
 #endif
 
 
@@ -593,6 +593,7 @@ static GSourceFuncs _handlerIntervention =
                 , IndexedDBEnabled(false)
                 , IndexedDBPath()
                 , IndexedDBSize()
+                , IndexedDBTotalSize()
                 , Secure(false)
                 , InjectedBundle()
                 , Transparent(false)
@@ -661,6 +662,7 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("indexeddbenabled"), &IndexedDBEnabled);
                 Add(_T("indexeddbpath"), &IndexedDBPath);
                 Add(_T("indexeddbsize"), &IndexedDBSize);
+                Add(_T("indexeddbtotalsize"), &IndexedDBTotalSize);
                 Add(_T("secure"), &Secure);
                 Add(_T("injectedbundle"), &InjectedBundle);
                 Add(_T("transparent"), &Transparent);
@@ -735,7 +737,8 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::DecUInt16 LocalStorageSize;
             Core::JSON::Boolean IndexedDBEnabled;
             Core::JSON::String IndexedDBPath;
-            Core::JSON::DecUInt16 IndexedDBSize; // [KB]
+            Core::JSON::Double IndexedDBSize; // [percentage of volume space for each domain]
+            Core::JSON::Double IndexedDBTotalSize; // [percentage of volume space for all domains]
             Core::JSON::Boolean Secure;
             Core::JSON::String InjectedBundle;
             Core::JSON::Boolean Transparent;
@@ -1055,7 +1058,6 @@ static GSourceFuncs _handlerIntervention =
             auto* data = new SetUserAgentData(this, useragent);
 
             TRACE(Trace::Information, (_T("New user agent: %s"), useragent.c_str()));
-
             g_main_context_invoke_full(
                 _context,
                 G_PRIORITY_DEFAULT,
@@ -1337,7 +1339,14 @@ static GSourceFuncs _handlerIntervention =
                     WebKitImplementation* object = std::get<0>(data);
                     auto& script = std::get<1>(data);
 #ifdef WEBKIT_GLIB_API
+
+#if WEBKIT_CHECK_VERSION(2, 40, 0)
+                    // @length: length of @script, or -1 if @script is a nul-terminated string
+                    webkit_web_view_evaluate_javascript(object->_view, script.c_str(), -1, nullptr, nullptr, nullptr, nullptr, nullptr);
+#else
                     webkit_web_view_run_javascript(object->_view, script.c_str(), nullptr, nullptr, nullptr);
+#endif
+
 #else
                     auto scriptRef = WKStringCreateWithUTF8CString(script.c_str());
                     WKPageRunJavaScriptInMainFrame(object->_page, scriptRef, nullptr, [](WKSerializedScriptValueRef, WKErrorRef, void*){});
@@ -1522,6 +1531,25 @@ static GSourceFuncs _handlerIntervention =
             #ifdef WEBKIT_GLIB_API
             WebKitWebContext* context = webkit_web_view_get_context(_view);
             WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+            webkit_cookie_manager_get_all_cookies(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
+                GList* cookies_list = webkit_cookie_manager_get_all_cookies_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
+
+                std::vector<std::string> cookieVector;
+                cookieVector.reserve(g_list_length(cookies_list));
+                for (GList* it = cookies_list; it != NULL; it = g_list_next(it)) {
+                    SoupCookie* soupCookie = (SoupCookie*)it->data;
+                    gchar *cookieHeader = soup_cookie_to_set_cookie_header(soupCookie);
+                    cookieVector.push_back(cookieHeader);
+                    g_free(cookieHeader);
+                }
+
+                WebKitImplementation& browser = *static_cast< WebKitImplementation*>(user_data);
+                browser._adminLock.Lock();
+                browser._cookieJar.SetCookies(std::move(cookieVector));
+                browser._adminLock.Unlock();
+            }, this);
+#else
             webkit_cookie_manager_get_cookie_jar(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
                 GList* cookies_list = webkit_cookie_manager_get_cookie_jar_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
 
@@ -1539,6 +1567,7 @@ static GSourceFuncs _handlerIntervention =
                 browser._cookieJar.SetCookies(std::move(cookieVector));
                 browser._adminLock.Unlock();
             }, this);
+#endif
             #else
             static const auto toSoupCookie = [](WKCookieRef cookie) -> SoupCookie*
             {
@@ -1640,7 +1669,11 @@ static GSourceFuncs _handlerIntervention =
 
             WebKitWebContext* context = webkit_web_view_get_context(_view);
             WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+            webkit_cookie_manager_replace_cookies(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
+#else
             webkit_cookie_manager_set_cookie_jar(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
+#endif
 
             g_list_free_full(cookies_list, reinterpret_cast<GDestroyNotify>(soup_cookie_free));
             #else
@@ -2877,11 +2910,6 @@ static GSourceFuncs _handlerIntervention =
                 }
                 g_mkdir_with_parents(indexedDBPath, 0700);
 
-                uint64_t indexedDBSizeBytes = 0;    // No limit by default, use WebKit defaults (1G at the moment of writing)
-                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
-                    indexedDBSizeBytes = _config.IndexedDBSize.Value() * 1024;
-                }
-
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
                 if ((_config.Memory.IsSet() == true) && (_config.Memory.NetworkProcessSettings.IsSet() == true)) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
@@ -2895,6 +2923,32 @@ static GSourceFuncs _handlerIntervention =
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 }
 #endif
+
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+                double originStorageRatio = -1.0;    // -1.0 means WebKit will use the default quota (1GB)
+                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != -1.0) {
+                    originStorageRatio = _config.IndexedDBSize.Value();
+                }
+
+                double totalStorageRatio = -1.0;    // -1.0 means there's no limit for the total storage
+                if (_config.IndexedDBTotalSize.IsSet() && _config.IndexedDBTotalSize.Value() != -1.0) {
+                    totalStorageRatio = _config.IndexedDBTotalSize.Value();
+                }
+
+                auto* websiteDataManager = webkit_website_data_manager_new(
+                    "local-storage-directory", wpeStoragePath,
+                    "disk-cache-directory", wpeDiskCachePath,
+                    "local-storage-quota", localStorageDatabaseQuotaInBytes,
+                    "indexeddb-directory", indexedDBPath,
+                    "origin-storage-ratio", originStorageRatio,
+                    "total-storage-ratio", totalStorageRatio,
+                     nullptr);
+#else
+                uint64_t indexedDBSizeBytes = 0;    // No limit by default, use WebKit defaults (1G at the moment of writing)
+                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != -1.0) {
+                    indexedDBSizeBytes = static_cast<uint64_t>(localStorageDatabaseQuotaInBytes * _config.IndexedDBSize.Value());
+                }
+
                 auto* websiteDataManager = webkit_website_data_manager_new(
                     "local-storage-directory", wpeStoragePath,
                     "disk-cache-directory", wpeDiskCachePath,
@@ -2902,12 +2956,13 @@ static GSourceFuncs _handlerIntervention =
                     "indexeddb-directory", indexedDBPath,
                     "per-origin-storage-quota", indexedDBSizeBytes,
                      nullptr);
+#endif
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
                 g_free(indexedDBPath);
 
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
-                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true))
+                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true)) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
                     if (_config.Memory.WebProcessSettings.Limit.IsSet() == true) {
                         webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.Memory.WebProcessSettings.Limit.Value());
@@ -2964,7 +3019,11 @@ static GSourceFuncs _handlerIntervention =
             }
 
             if (!_config.CertificateCheck) {
+#if WEBKIT_CHECK_VERSION(2, 32, 0)
+                webkit_website_data_manager_set_tls_errors_policy(webkit_web_context_get_website_data_manager(wkContext), WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+#else
                 webkit_web_context_set_tls_errors_policy(wkContext, WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+#endif
             }
 
             auto* languages = static_cast<char**>(g_new0(char*, _config.Languages.Length() + 1));
@@ -3028,7 +3087,7 @@ static GSourceFuncs _handlerIntervention =
 
             // Allow mixed content.
             bool enableWebSecurity = _config.Secure.Value();
-#if WEBKIT_CHECK_VERSION(2, 38, 0)
+#if WEBKIT_CHECK_VERSION(2, 40, 0)
             g_object_set(G_OBJECT(preferences),
                      "disable-web-security", !enableWebSecurity,
                      "allow-running-of-insecure-content", !enableWebSecurity,
