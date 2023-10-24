@@ -85,7 +85,7 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #if !WEBKIT_GLIB_API
 #define HAS_MEMORY_PRESSURE_SETTINGS_API 0
 #else
-#define HAS_MEMORY_PRESSURE_SETTINGS_API WEBKIT_CHECK_VERSION(2, 42, 0)
+#define HAS_MEMORY_PRESSURE_SETTINGS_API WEBKIT_CHECK_VERSION(2, 38, 0)
 #endif
 
 
@@ -1341,7 +1341,7 @@ static GSourceFuncs _handlerIntervention =
                     auto& script = std::get<1>(data);
 #ifdef WEBKIT_GLIB_API
 
-#if WEBKIT_CHECK_VERSION(2, 40, 0)
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
                     // length: size of script, or -1 if script is a nul-terminated string
                     webkit_web_view_evaluate_javascript(object->_view, script.c_str(), -1, nullptr, nullptr, nullptr, nullptr, nullptr);
 #else
@@ -1535,25 +1535,10 @@ static GSourceFuncs _handlerIntervention =
 #if WEBKIT_CHECK_VERSION(2, 42, 0)
             webkit_cookie_manager_get_all_cookies(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
                 GList* cookies_list = webkit_cookie_manager_get_all_cookies_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
-
-                std::vector<std::string> cookieVector;
-                cookieVector.reserve(g_list_length(cookies_list));
-                for (GList* it = cookies_list; it != NULL; it = g_list_next(it)) {
-                    SoupCookie* soupCookie = (SoupCookie*)it->data;
-                    gchar *cookieHeader = soup_cookie_to_set_cookie_header(soupCookie);
-                    cookieVector.push_back(cookieHeader);
-                    g_free(cookieHeader);
-                }
-
-                WebKitImplementation& browser = *static_cast< WebKitImplementation*>(user_data);
-                browser._adminLock.Lock();
-                browser._cookieJar.SetCookies(std::move(cookieVector));
-                browser._adminLock.Unlock();
-            }, this);
 #else
             webkit_cookie_manager_get_cookie_jar(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
                 GList* cookies_list = webkit_cookie_manager_get_cookie_jar_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
-
+#endif
                 std::vector<std::string> cookieVector;
                 cookieVector.reserve(g_list_length(cookies_list));
                 for (GList* it = cookies_list; it != NULL; it = g_list_next(it)) {
@@ -1568,7 +1553,7 @@ static GSourceFuncs _handlerIntervention =
                 browser._cookieJar.SetCookies(std::move(cookieVector));
                 browser._adminLock.Unlock();
             }, this);
-#endif
+
             #else
             static const auto toSoupCookie = [](WKCookieRef cookie) -> SoupCookie*
             {
@@ -2946,8 +2931,8 @@ static GSourceFuncs _handlerIntervention =
                      nullptr);
 #else
                 uint64_t indexedDBSizeBytes = 0;    // No limit by default, use WebKit defaults (1G at the moment of writing)
-                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != -1.0) {
-                    indexedDBSizeBytes = static_cast<uint64_t>(localStorageDatabaseQuotaInBytes * _config.IndexedDBSize.Value());
+                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
+                    indexedDBSizeBytes = static_cast<uint64_t>(_config.IndexedDBSize.Value());
                 }
 
                 auto* websiteDataManager = webkit_website_data_manager_new(
@@ -3020,7 +3005,7 @@ static GSourceFuncs _handlerIntervention =
             }
 
             if (!_config.CertificateCheck) {
-#if WEBKIT_CHECK_VERSION(2, 32, 0)
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
                 webkit_website_data_manager_set_tls_errors_policy(webkit_web_context_get_website_data_manager(wkContext), WEBKIT_TLS_ERRORS_POLICY_IGNORE);
 #else
                 webkit_web_context_set_tls_errors_policy(wkContext, WEBKIT_TLS_ERRORS_POLICY_IGNORE);
@@ -3088,7 +3073,7 @@ static GSourceFuncs _handlerIntervention =
 
             // Allow mixed content.
             bool enableWebSecurity = _config.Secure.Value();
-#if WEBKIT_CHECK_VERSION(2, 40, 0)
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
             g_object_set(G_OBJECT(preferences),
                      "disable-web-security", !enableWebSecurity,
                      "allow-running-of-insecure-content", !enableWebSecurity,
