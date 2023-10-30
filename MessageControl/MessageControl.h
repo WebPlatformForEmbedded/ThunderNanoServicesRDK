@@ -169,12 +169,13 @@ namespace Plugin {
                 // Seems the ID is already in here, thats odd, and impossible :-)
                 Observers::iterator index = _observing.find(id);
 
-                ASSERT(index == _observing.end());
-
                 if (index == _observing.end()) {
                     _observing.emplace(std::piecewise_construct,
                         std::make_tuple(id),
                         std::make_tuple(state::ATTACHING));
+                }
+                else if (index->second == state::DETACHING) {
+                    index->second = state::OBSERVING;
                 }
 
                 _adminLock.Unlock();
