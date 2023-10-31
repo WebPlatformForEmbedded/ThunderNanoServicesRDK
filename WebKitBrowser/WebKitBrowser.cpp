@@ -31,7 +31,7 @@ namespace Plugin {
             // Preconditions
             { subsystem::GRAPHICS },
             // Terminations
-            {},
+            { subsystem::NOT_GRAPHICS },
             // Controls
             {} 
         );
