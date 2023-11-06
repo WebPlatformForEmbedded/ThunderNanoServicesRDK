@@ -55,7 +55,7 @@ namespace Plugin {
         private:
             MessageControl& _parent;
         };
-    
+
     private:
         struct ICollect {
 
@@ -185,8 +185,10 @@ namespace Plugin {
 
             void Deactivated(RPC::IRemoteConnection* connection) override
             {
+                ASSERT(connection != nullptr);
+
                 RPC::IMonitorableProcess* controlled (connection->QueryInterface<RPC::IMonitorableProcess>());
-                
+
                 if (controlled != nullptr) {
                     // This is a connection that is controleld by WPEFramework. For this we can wait till we
                     // receive a terminated.
@@ -201,6 +203,7 @@ namespace Plugin {
 
             void Terminated(RPC::IRemoteConnection* connection) override
             {
+                ASSERT(connection != nullptr);
                 Drop(connection->Id());
             }
 
@@ -217,6 +220,8 @@ namespace Plugin {
 
                 // Seems the ID is already in here, thats odd, and impossible :-)
                 Observers::iterator index = _observing.find(id);
+
+                ASSERT(index != _observing.end());
 
                 if (index != _observing.end()) {
                     if (index->second == state::ATTACHING) {
@@ -236,20 +241,35 @@ namespace Plugin {
             {
                 _adminLock.Lock();
 
-                Observers::iterator index = _observing.begin();
+                bool done = false;
 
-                while (index != _observing.end()) {
-                    if (index->second == state::ATTACHING) {
-                        index->second = state::OBSERVING;
-                        _parent.Attach(index->first);
-                        index++;
-                    }
-                    else if (index->second == state::DETACHING) {
-                        _parent.Detach(index->first);
-                        index = _observing.erase(index);
-                    }
-                    else {
-                        index++;
+                while (done == false) {
+                    Observers::iterator index = _observing.begin();
+
+                    while (done == false) {
+                        if (index->second == state::ATTACHING) {
+                            const uint32_t id = index->first;
+                            index->second = state::OBSERVING;
+                            _adminLock.Unlock();
+                            _parent.Attach(id);
+                            _adminLock.Lock();
+                            break;
+                        }
+                        else if (index->second == state::DETACHING) {
+                            const uint32_t id = index->first;
+                            _observing.erase(index);
+                            _adminLock.Unlock();
+                            _parent.Detach(id);
+                            _adminLock.Lock();
+                            break;
+                        }
+                        else {
+                            index++;
+
+                            if (index == _observing.end()) {
+                                done = true;
+                            }
+                        }
                     }
                 }
 
@@ -319,7 +339,7 @@ namespace Plugin {
 
             _outputLock.Unlock();
         }
-        
+
     public:
         uint32_t Callback(Plugin::MessageControl::ICollect::ICallback* callback)
         {
@@ -355,7 +375,7 @@ namespace Plugin {
 
             _adminLock.Unlock();
         }
-        
+
         void Detach(const uint32_t id)
         {
             _adminLock.Lock();
@@ -363,7 +383,7 @@ namespace Plugin {
             _client.RemoveInstance(id);
             _cleaning.emplace_back(id);
             Cleanup();
-            
+
             _adminLock.Unlock();
         }
 
@@ -384,7 +404,7 @@ namespace Plugin {
                 }
 
                 if (destructed == true) {
-                    index = _cleaning.erase(index); 
+                    index = _cleaning.erase(index);
                 }
                 else {
                     index++;
@@ -395,7 +415,7 @@ namespace Plugin {
         uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
             _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
-            
+
             return (Core::ERROR_NONE);
         }
 
@@ -404,14 +424,14 @@ namespace Plugin {
             std::list<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
             _client.Controls(index);
-            
+
             while (index.Next() == true) {
                 list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
-            
+
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
             controls = Core::Service<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
-            
+
             return (Core::ERROR_NONE);
         }
 
