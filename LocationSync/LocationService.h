@@ -39,6 +39,7 @@ namespace Plugin {
             ACTIVE,
             IPV6_INPROGRESS,
             IPV4_INPROGRESS,
+            LOADING,
             LOADED,
             FAILED
         };

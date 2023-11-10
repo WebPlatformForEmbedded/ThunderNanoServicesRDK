@@ -72,20 +72,32 @@ namespace Plugin {
     uint32_t LocationSync::get_location(LocationData& response) const
     {
         uint32_t status = Core::ERROR_UNAVAILABLE;
+
         PluginHost::ISubSystem* subSystem = _service->SubSystems();
         ASSERT(subSystem != nullptr);
 
-        const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
-        const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
+        if (subSystem != nullptr) {
+            const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
 
-        if ((internet != nullptr) && (location != nullptr)) {
-            response.Publicip = internet->PublicIPAddress();
+            if (internet != nullptr) {
+                response.Publicip = internet->PublicIPAddress();
 
-            response.Timezone = location->TimeZone();
-            response.Region = location->Region();
-            response.Country = location->Country();
-            response.City = location->City();
-            status = Core::ERROR_NONE;
+                const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
+
+                if (location != nullptr) {
+                    response.Timezone = location->TimeZone();
+                    response.Region = location->Region();
+                    response.Country = location->Country();
+                    response.City = location->City();
+
+                    location->Release();
+                }
+
+                status = Core::ERROR_NONE;
+                internet->Release();
+            }
+
+            subSystem->Release();
         }
 
         return status;
