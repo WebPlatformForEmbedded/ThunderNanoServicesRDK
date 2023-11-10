@@ -488,13 +488,14 @@ POP_WARNING()
             } else {
                 _publicIPAddress = _infoCarrier->IP();
             }
-            _state = LOADED;
+
 
             ASSERT(!_publicIPAddress.empty());
 
             Core::NodeId node(_publicIPAddress.c_str(), Core::NodeId::TYPE_UNSPECIFIED);
 
             if (node.IsValid() != true) {
+                _state = FAILED;
                 TRACE(Trace::Information, (_T("Could not determine the external public IP address [%s]"), _publicIPAddress.c_str()));
             }
             else {
@@ -502,8 +503,7 @@ POP_WARNING()
                     Core::NodeId::ClearIPV6Enabled();
                 }
 
-                TRACE(Trace::Information, (_T("Network connectivity established. Type: %s, on %s"), (node.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), node.HostAddress().c_str()));
-                _callback->Dispatch();
+                _state = LOADING;
             }
 
             ASSERT(_infoCarrier.IsValid() == true);
@@ -543,6 +543,8 @@ POP_WARNING()
     void LocationService::Dispatch()
     {
         uint32_t result = Core::infinite;
+        bool dispatch = false;
+
         TRACE(Trace::Information, (_T("LocationService: job is dispatched")));
 
         if ((Close(100) != Core::ERROR_NONE) || (IsClosed() == false)) {
@@ -561,7 +563,7 @@ POP_WARNING()
                 }
             }
 
-            if ((_state != LOADED) && (_state != FAILED)) {
+            if ((_state != LOADING) && (_state != LOADED) && (_state != FAILED)) {
 
                 Core::NodeId remote(_remoteId.c_str(), ((_state == ACTIVE) && (Core::NodeId::IsIPV6Enabled()) ? Core::NodeId::TYPE_IPV6 : Core::NodeId::TYPE_IPV4));
 
@@ -599,17 +601,31 @@ POP_WARNING()
                 }
             }
 
-            if (_state == FAILED) {
+
+            if (_state == LOADING) {
+                _state = LOADED;
+
+                Core::NodeId node(_publicIPAddress.c_str(), Core::NodeId::TYPE_UNSPECIFIED);
+
+                TRACE(Trace::Information, (_T("Network connectivity established. Type: %s, on %s"),
+                        (node.Type() == Core::NodeId::TYPE_IPV6 ? _T("IPv6") : _T("IPv4")), node.HostAddress().c_str()));
+
+                dispatch = true;
+            }
+            else if (_state == FAILED) {
+                Core::NodeId::ClearIPV6Enabled();
+
+                TRACE(Trace::Error, (_T("LocationSync: Network connectivity could *NOT* be established. Falling back to IPv4. %d"), __LINE__));
+
                 _infoCarrier.Release();
+
+                dispatch = true;
             }
 
             _adminLock.Unlock();
         }
 
-        if (_state == FAILED) {
-            Core::NodeId::ClearIPV6Enabled();
-
-            TRACE(Trace::Error, (_T("LocationSync: Network connectivity could *NOT* be established. Falling back to IPv4. %d"), __LINE__));
+        if (dispatch == true) {
             _callback->Dispatch();
         }
 
