@@ -155,24 +155,35 @@ POP_WARNING()
             Core::ProxyType<Web::JSONBodyType<Data>> response(jsonResponseFactory.Element());
 
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
-
             ASSERT(subSystem != nullptr);
 
-            const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
-            const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
+            if (subSystem != nullptr) {
+                const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
 
-            if ((internet != nullptr) && (location != nullptr)) {
-                response->PublicIp = internet->PublicIPAddress();
-                response->TimeZone = location->TimeZone();
-                response->Region = location->Region();
-                response->Country = location->Country();
-                response->City = location->City();
+                if (internet != nullptr) {
+                    response->PublicIp = internet->PublicIPAddress();
 
-                result->ContentType = Web::MIMETypes::MIME_JSON;
-                result->Body(Core::ProxyType<Web::IBody>(response));
-            } else {
-                result->ErrorCode = Web::STATUS_SERVICE_UNAVAILABLE;
-                result->Message = _T("Internet and Location Service not yet available");
+                    const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
+
+                    if (location != nullptr) {
+                        response->TimeZone = location->TimeZone();
+                        response->Region = location->Region();
+                        response->Country = location->Country();
+                        response->City = location->City();
+
+                        location->Release();
+                    }
+
+                    result->ContentType = Web::MIMETypes::MIME_JSON;
+                    result->Body(Core::ProxyType<Web::IBody>(response));
+
+                    internet->Release();
+                } else {
+                    result->ErrorCode = Web::STATUS_SERVICE_UNAVAILABLE;
+                    result->Message = _T("Internet and Location Service not yet available");
+                }
+
+                subSystem->Release();
             }
         } else if (request.Verb == Web::Request::HTTP_POST) {
             index.Next();
