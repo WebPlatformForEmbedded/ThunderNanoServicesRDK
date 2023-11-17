@@ -2891,9 +2891,17 @@ static GSourceFuncs _handlerIntervention =
                 gchar* indexedDBPath = nullptr;
                 if (_config.IndexedDBPath.IsSet() && !_config.IndexedDBPath.Value().empty()) {
                     _config.IndexedDBPath = _service->Substitute(_config.IndexedDBPath.Value());
+#ifdef USE_EXACT_PATHS
+                    indexedDBPath = g_build_filename(_config.IndexedDBPath.Value().c_str(), nullptr);
+#else
                     indexedDBPath = g_build_filename(_config.IndexedDBPath.Value().c_str(), "wpe", "databases", "indexeddb", nullptr);
+#endif
                 } else {
+#ifdef USE_EXACT_PATHS
+                    indexedDBPath = g_build_filename(g_get_user_cache_dir(), nullptr);
+#else
                     indexedDBPath = g_build_filename(g_get_user_cache_dir(), "wpe", "databases", "indexeddb", nullptr);
+#endif
                 }
                 g_mkdir_with_parents(indexedDBPath, 0700);
 
