@@ -737,8 +737,8 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::DecUInt16 LocalStorageSize;
             Core::JSON::Boolean IndexedDBEnabled;
             Core::JSON::String IndexedDBPath;
-            Core::JSON::Double IndexedDBSize; // [percentage of volume space for each domain]
-            Core::JSON::Double IndexedDBTotalSize; // [percentage of volume space for all domains]
+            Core::JSON::DecUInt16 IndexedDBSize; // [percentage of volume space for each domain]
+            Core::JSON::DecUInt16 IndexedDBTotalSize; // [percentage of volume space for all domains]
             Core::JSON::Boolean Secure;
             Core::JSON::String InjectedBundle;
             Core::JSON::Boolean Transparent;
@@ -2921,13 +2921,13 @@ static GSourceFuncs _handlerIntervention =
 
 #if WEBKIT_CHECK_VERSION(2, 42, 0)
                 double originStorageRatio = -1.0;    // -1.0 means WebKit will use the default quota (1GB)
-                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != -1.0) {
-                    originStorageRatio = _config.IndexedDBSize.Value();
+                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
+                    originStorageRatio = static_cast<double>(_config.IndexedDBSize.Value());
                 }
 
                 double totalStorageRatio = -1.0;    // -1.0 means there's no limit for the total storage
-                if (_config.IndexedDBTotalSize.IsSet() && _config.IndexedDBTotalSize.Value() != -1.0) {
-                    totalStorageRatio = _config.IndexedDBTotalSize.Value();
+                if (_config.IndexedDBTotalSize.IsSet() && _config.IndexedDBTotalSize.Value() != 0) {
+                    totalStorageRatio = static_cast<double>(_config.IndexedDBTotalSize.Value());
                 }
 
                 auto* websiteDataManager = webkit_website_data_manager_new(
@@ -2941,7 +2941,7 @@ static GSourceFuncs _handlerIntervention =
 #else
                 uint64_t indexedDBSizeBytes = 0;    // No limit by default, use WebKit defaults (1G at the moment of writing)
                 if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
-                    indexedDBSizeBytes = static_cast<uint64_t>(_config.IndexedDBSize.Value());
+                    indexedDBSizeBytes = _config.IndexedDBSize.Value() * 1024;
                 }
 
                 auto* websiteDataManager = webkit_website_data_manager_new(
