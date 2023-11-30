@@ -1644,8 +1644,11 @@ static GSourceFuncs _handlerIntervention =
 
             WebKitWebContext* context = webkit_web_view_get_context(_view);
             WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+            webkit_cookie_manager_replace_cookies(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
+#else
             webkit_cookie_manager_set_cookie_jar(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
-
+#endif
             g_list_free_full(cookies_list, reinterpret_cast<GDestroyNotify>(soup_cookie_free));
             #else
             auto toWKCookie = [](SoupCookie* cookie) -> WKCookieRef
