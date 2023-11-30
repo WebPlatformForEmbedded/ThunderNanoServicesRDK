@@ -2907,7 +2907,7 @@ static GSourceFuncs _handlerIntervention =
                 g_free(indexedDBPath);
 
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
-                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true))
+                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true)) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
                     if (_config.Memory.WebProcessSettings.Limit.IsSet() == true) {
                         webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.Memory.WebProcessSettings.Limit.Value());
