@@ -30,6 +30,10 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 set(PLUGIN_SECURITYAGENT_AUTOSTART "true" CACHE STRING "Automatically start SecurityAgent plugin")
 set(PLUGIN_SECURITYAGENT_STARTUPORDER "" CACHE STRING "To configure startup order of SecurityAgent plugin")
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
