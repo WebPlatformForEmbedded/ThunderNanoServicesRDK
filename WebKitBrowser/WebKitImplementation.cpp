@@ -1542,7 +1542,6 @@ static GSourceFuncs _handlerIntervention =
                 browser._cookieJar.SetCookies(std::move(cookieVector));
                 browser._adminLock.Unlock();
             }, this);
-
             #else
             static const auto toSoupCookie = [](WKCookieRef cookie) -> SoupCookie*
             {
