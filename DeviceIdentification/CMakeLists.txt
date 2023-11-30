@@ -35,6 +35,10 @@ set(PLUGIN_DEVICEIDENTIFICATION_MODE "Off" CACHE STRING "Controls if the plugin 
 set(PLUGIN_DEVICEIDENTIFICATION_INTERFACE_NAME "eth0" CACHE STRING "Ethernet Card name which has to be associated for the Raw Device Id creation")
 option(PLUGIN_DEVICEIDENTIFICATION_USE_MFR "Get device identification details using MFR library" OFF)
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(NEXUS QUIET)
 find_package(BCM_HOST QUIET)
 find_package(MFRFWLibs QUIET)
