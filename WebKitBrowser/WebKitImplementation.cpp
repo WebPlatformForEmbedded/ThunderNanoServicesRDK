@@ -2938,19 +2938,6 @@ static GSourceFuncs _handlerIntervention =
                     "origin-storage-ratio", originStorageRatio,
                     "total-storage-ratio", totalStorageRatio,
                      nullptr);
-#else
-                uint64_t indexedDBSizeBytes = 0;    // No limit by default, use WebKit defaults (1G at the moment of writing)
-                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
-                    indexedDBSizeBytes = _config.IndexedDBSize.Value() * 1024;
-                }
-
-                auto* websiteDataManager = webkit_website_data_manager_new(
-                    "local-storage-directory", wpeStoragePath,
-                    "disk-cache-directory", wpeDiskCachePath,
-                    "local-storage-quota", localStorageDatabaseQuotaInBytes,
-                    "indexeddb-directory", indexedDBPath,
-                    "per-origin-storage-quota", indexedDBSizeBytes,
-                     nullptr);
 #endif
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
