@@ -33,6 +33,10 @@ set(PLUGIN_TRACECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_TRACECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
 set(PLUGIN_TRACECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)

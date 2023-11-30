@@ -31,6 +31,10 @@ set(PLUGIN_LOCATIONSYNC_AUTOSTART "true" CACHE STRING "Automatically start Locat
 set(PLUGIN_LOCATIONSYNC_URI "location.webplatformforembedded.org" CACHE STRING "URI to request the location information")
 set(PLUGIN_LOCATIONSYNC_OVERRIDE_TIMEZONE CACHE STRING "Override Timezone value")
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
