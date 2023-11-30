@@ -34,6 +34,10 @@ set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details en
 set(PLUGIN_MESSAGECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_MESSAGECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(${NAMESPACE}Messaging REQUIRED)

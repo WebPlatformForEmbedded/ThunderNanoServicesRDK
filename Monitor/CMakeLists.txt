@@ -71,6 +71,10 @@ if(PLUGIN_MONITOR_YOUTUBE_MEMORYLIMIT)
     unset(PLUGIN_MONITOR_YOUTUBE_MEMORYLIMIT CACHE)
 endif()
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 

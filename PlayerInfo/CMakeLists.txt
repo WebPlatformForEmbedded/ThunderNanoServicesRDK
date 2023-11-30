@@ -34,6 +34,10 @@ set(PLUGIN_PLAYERINFO_AUTOSTART "true" CACHE STRING "Automatically start PlayerI
 set(PLUGIN_PLAYERINFO_STARTUPORDER "" CACHE STRING "Automatically start PlayerInfo plugin")
 set(PLUGIN_PLAYERINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
+
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
