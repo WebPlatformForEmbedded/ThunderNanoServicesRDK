@@ -1340,7 +1340,14 @@ static GSourceFuncs _handlerIntervention =
                     WebKitImplementation* object = std::get<0>(data);
                     auto& script = std::get<1>(data);
 #ifdef WEBKIT_GLIB_API
+
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+                    // length: size of script, or -1 if script is a nul-terminated string
+                    webkit_web_view_evaluate_javascript(object->_view, script.c_str(), -1, nullptr, nullptr, nullptr, nullptr, nullptr);
+#else
                     webkit_web_view_run_javascript(object->_view, script.c_str(), nullptr, nullptr, nullptr);
+#endif
+
 #else
                     auto scriptRef = WKStringCreateWithUTF8CString(script.c_str());
                     WKPageRunJavaScriptInMainFrame(object->_page, scriptRef, nullptr, [](WKSerializedScriptValueRef, WKErrorRef, void*){});
@@ -1525,9 +1532,13 @@ static GSourceFuncs _handlerIntervention =
             #ifdef WEBKIT_GLIB_API
             WebKitWebContext* context = webkit_web_view_get_context(_view);
             WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+            webkit_cookie_manager_get_all_cookies(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
+                GList* cookies_list = webkit_cookie_manager_get_all_cookies_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
+#else
             webkit_cookie_manager_get_cookie_jar(manager, NULL, [](GObject* object, GAsyncResult* result, gpointer user_data) {
                 GList* cookies_list = webkit_cookie_manager_get_cookie_jar_finish(WEBKIT_COOKIE_MANAGER(object), result, nullptr);
-
+#endif
                 std::vector<std::string> cookieVector;
                 cookieVector.reserve(g_list_length(cookies_list));
                 for (GList* it = cookies_list; it != NULL; it = g_list_next(it)) {
@@ -1643,8 +1654,11 @@ static GSourceFuncs _handlerIntervention =
 
             WebKitWebContext* context = webkit_web_view_get_context(_view);
             WebKitCookieManager* manager = webkit_web_context_get_cookie_manager(context);
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
+            webkit_cookie_manager_replace_cookies(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
+#else
             webkit_cookie_manager_set_cookie_jar(manager, g_list_reverse(cookies_list), nullptr, nullptr, nullptr);
-
+#endif
             g_list_free_full(cookies_list, reinterpret_cast<GDestroyNotify>(soup_cookie_free));
             #else
             auto toWKCookie = [](SoupCookie* cookie) -> WKCookieRef
@@ -2928,7 +2942,7 @@ static GSourceFuncs _handlerIntervention =
                 g_free(indexedDBPath);
 
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
-                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true))
+                if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true)) {
                     WebKitMemoryPressureSettings* memoryPressureSettings = webkit_memory_pressure_settings_new();
                     if (_config.Memory.WebProcessSettings.Limit.IsSet() == true) {
                         webkit_memory_pressure_settings_set_memory_limit(memoryPressureSettings, _config.Memory.WebProcessSettings.Limit.Value());
@@ -2985,7 +2999,11 @@ static GSourceFuncs _handlerIntervention =
             }
 
             if (!_config.CertificateCheck) {
+#if WEBKIT_CHECK_VERSION(2, 38, 0)
+                webkit_website_data_manager_set_tls_errors_policy(webkit_web_context_get_website_data_manager(wkContext), WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+#else
                 webkit_web_context_set_tls_errors_policy(wkContext, WEBKIT_TLS_ERRORS_POLICY_IGNORE);
+#endif
             }
 
             auto* languages = static_cast<char**>(g_new0(char*, _config.Languages.Length() + 1));
