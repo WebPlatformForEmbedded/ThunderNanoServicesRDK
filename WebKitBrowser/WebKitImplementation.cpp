@@ -2936,10 +2936,16 @@ static GSourceFuncs _handlerIntervention =
                     "origin-storage-ratio", originStorageRatio,
                     "total-storage-ratio", totalStorageRatio,
                      nullptr);
+                g_free(indexedDBPath);
+#else
+                auto* websiteDataManager = webkit_website_data_manager_new(
+                    "local-storage-directory", wpeStoragePath,
+                    "disk-cache-directory", wpeDiskCachePath,
+                    "local-storage-quota", localStorageDatabaseQuotaInBytes,
+                     nullptr);
 #endif
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
-                g_free(indexedDBPath);
 
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
                 if ((_config.Memory.IsSet() == true) && (_config.Memory.WebProcessSettings.IsSet() == true)) {
