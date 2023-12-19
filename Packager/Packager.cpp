@@ -71,7 +71,7 @@ namespace {
         return (result);
     }
 
-    void Packager::Deinitialize(PluginHost::IShell* service)
+    void Packager::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
         if (_service != nullptr) {
             ASSERT(_service == service);
