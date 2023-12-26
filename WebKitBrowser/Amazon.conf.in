@@ -1,5 +1,5 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_AMAZON_AUTOSTART@"
+startmode = "@PLUGIN_AMAZON_STARTMODE@"
 startuporder = "@PLUGIN_AMAZON_STARTUPORDER@"
 
 configuration = JSON()

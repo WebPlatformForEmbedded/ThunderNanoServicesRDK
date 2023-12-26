@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_DEVICEINFO_AUTOSTART@"
+startmode = "@PLUGIN_DEVICEINFO_STARTMODE@"
 
 configuration = JSON()
 configuration.add("modelName", "@PLUGIN_DEVICEINFO_MODELNAME@")

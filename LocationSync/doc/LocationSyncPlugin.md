@@ -76,7 +76,7 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *LocationSync*) |
 | classname | string | Class name: *LocationSync* |
 | locator | string | Library name: *libWPELocationSync.so* |
-| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | configuration | object | <sup>*(optional)*</sup>  |
 | configuration?.interval | number | <sup>*(optional)*</sup> Maximum time duration between each request to the Location Server (default: 10) |
 | configuration?.retries | number | <sup>*(optional)*</sup> Maximum number of request reties to the Location Server (default:20) |

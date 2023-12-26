@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_PERFORMANCEMETRICS_AUTOSTART@"
+startmode = "@PLUGIN_PERFORMANCEMETRICS_STARTMODE@"
 
 configuration = JSON()
 

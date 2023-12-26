@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_MONITOR_AUTOSTART@"
+startmode = "@PLUGIN_MONITOR_STARTMODE@"
 
 configuration = JSON()
 
