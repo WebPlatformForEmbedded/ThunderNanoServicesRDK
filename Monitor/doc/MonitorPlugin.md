@@ -13,6 +13,7 @@ Monitor plugin for Thunder framework.
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
+- [Interfaces](#head.Interfaces)
 - [Methods](#head.Methods)
 - [Properties](#head.Properties)
 - [Notifications](#head.Notifications)
@@ -23,12 +24,12 @@ Monitor plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the Monitor plugin. It includes detailed specification of its configuration, methods and properties provided, as well as notifications sent.
+This document describes purpose and functionality of the Monitor plugin. It includes detailed specification about its configuration, methods and properties as well as sent notifications.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
 
-All identifiers on the interface described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
+All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
 <a name="head.Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
@@ -75,7 +76,14 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *Monitor*) |
 | classname | string | Class name: *Monitor* |
 | locator | string | Library name: *libWPEFrameworkMonitor.so* |
-| autostart | boolean | Determines if the plugin is to be started automatically along with the framework |
+| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+
+<a name="head.Interfaces"></a>
+# Interfaces
+
+This plugin implements the following interfaces:
+
+- [Monitor.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/Monitor.json) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -90,7 +98,7 @@ Monitor interface methods:
 | [resetstats](#method.resetstats) | Resets memory and process statistics for a single service watched by the Monitor |
 
 <a name="method.restartlimits"></a>
-## *restartlimits <sup>method</sup>*
+## *restartlimits [<sup>method</sup>](#head.Methods)*
 
 Sets new restart limits for a service.
 
@@ -101,8 +109,8 @@ Sets new restart limits for a service.
 | params | object |  |
 | params.callsign | string | The callsign of a service to reset measurements snapshot of |
 | params.restart | object |  |
-| params.restart.limit | number | Maximum number or restarts to be attempted |
-| params.restart.window | number | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+| params.restart.limit | integer | Maximum number or restarts to be attempted |
+| params.restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Result
 
@@ -116,29 +124,31 @@ Sets new restart limits for a service.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "Monitor.1.restartlimits",
-    "params": {
-        "callsign": "WebServer",
-        "restart": {
-            "limit": 3,
-            "window": 60
-        }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.restartlimits",
+  "params": {
+    "callsign": "WebServer",
+    "restart": {
+      "limit": 3,
+      "window": 60
     }
+  }
 }
 ```
+
 #### Response
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": null
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
 }
 ```
+
 <a name="method.resetstats"></a>
-## *resetstats <sup>method</sup>*
+## *resetstats [<sup>method</sup>](#head.Methods)*
 
 Resets memory and process statistics for a single service watched by the Monitor.
 
@@ -156,31 +166,31 @@ Resets memory and process statistics for a single service watched by the Monitor
 | result | object | Measurements for the service before reset |
 | result.measurements | object | Measurements for the service |
 | result.measurements.resident | object | Resident memory measurement |
-| result.measurements.resident.min | number | Minimal value measured |
-| result.measurements.resident.max | number | Maximal value measured |
-| result.measurements.resident.average | number | Average of all measurements |
-| result.measurements.resident.last | number | Last measured value |
+| result.measurements.resident.min | integer | Minimal value measured |
+| result.measurements.resident.max | integer | Maximal value measured |
+| result.measurements.resident.average | integer | Average of all measurements |
+| result.measurements.resident.last | integer | Last measured value |
 | result.measurements.allocated | object | Allocated memory measurement |
-| result.measurements.allocated.min | number | Minimal value measured |
-| result.measurements.allocated.max | number | Maximal value measured |
-| result.measurements.allocated.average | number | Average of all measurements |
-| result.measurements.allocated.last | number | Last measured value |
+| result.measurements.allocated.min | integer | Minimal value measured |
+| result.measurements.allocated.max | integer | Maximal value measured |
+| result.measurements.allocated.average | integer | Average of all measurements |
+| result.measurements.allocated.last | integer | Last measured value |
 | result.measurements.shared | object | Shared memory measurement |
-| result.measurements.shared.min | number | Minimal value measured |
-| result.measurements.shared.max | number | Maximal value measured |
-| result.measurements.shared.average | number | Average of all measurements |
-| result.measurements.shared.last | number | Last measured value |
+| result.measurements.shared.min | integer | Minimal value measured |
+| result.measurements.shared.max | integer | Maximal value measured |
+| result.measurements.shared.average | integer | Average of all measurements |
+| result.measurements.shared.last | integer | Last measured value |
 | result.measurements.process | object | Processes measurement |
-| result.measurements.process.min | number | Minimal value measured |
-| result.measurements.process.max | number | Maximal value measured |
-| result.measurements.process.average | number | Average of all measurements |
-| result.measurements.process.last | number | Last measured value |
+| result.measurements.process.min | integer | Minimal value measured |
+| result.measurements.process.max | integer | Maximal value measured |
+| result.measurements.process.average | integer | Average of all measurements |
+| result.measurements.process.last | integer | Last measured value |
 | result.measurements.operational | boolean | Whether the service is up and running |
-| result.measurements.count | number | Number of measurements |
+| result.measurements.count | integer | Number of measurements |
 | result.observable | string | A callsign of the watched service |
-| result.restart | object | Restart limits for memory/operational failures applying to the service |
-| result.restart.limit | number | Maximum number or restarts to be attempted |
-| result.restart.window | number | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+| result.restart | object | Restart limits for failures applying to the service |
+| result.restart.limit | integer | Maximum number or restarts to be attempted |
+| result.restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Example
 
@@ -188,57 +198,59 @@ Resets memory and process statistics for a single service watched by the Monitor
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "Monitor.1.resetstats",
-    "params": {
-        "callsign": "WebServer"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.resetstats",
+  "params": {
+    "callsign": "WebServer"
+  }
 }
 ```
+
 #### Response
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": {
-        "measurements": {
-            "resident": {
-                "min": 0,
-                "max": 100,
-                "average": 50,
-                "last": 100
-            },
-            "allocated": {
-                "min": 0,
-                "max": 100,
-                "average": 50,
-                "last": 100
-            },
-            "shared": {
-                "min": 0,
-                "max": 100,
-                "average": 50,
-                "last": 100
-            },
-            "process": {
-                "min": 0,
-                "max": 100,
-                "average": 50,
-                "last": 100
-            },
-            "operational": true,
-            "count": 100
-        },
-        "observable": "callsign",
-        "restart": {
-            "limit": 3,
-            "window": 60
-        }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "measurements": {
+      "resident": {
+        "min": 0,
+        "max": 100,
+        "average": 50,
+        "last": 100
+      },
+      "allocated": {
+        "min": 0,
+        "max": 100,
+        "average": 50,
+        "last": 100
+      },
+      "shared": {
+        "min": 0,
+        "max": 100,
+        "average": 50,
+        "last": 100
+      },
+      "process": {
+        "min": 0,
+        "max": 100,
+        "average": 50,
+        "last": 100
+      },
+      "operational": true,
+      "count": 100
+    },
+    "observable": "callsign",
+    "restart": {
+      "limit": 3,
+      "window": 60
     }
+  }
 }
 ```
+
 <a name="head.Properties"></a>
 # Properties
 
@@ -248,10 +260,10 @@ Monitor interface properties:
 
 | Property | Description |
 | :-------- | :-------- |
-| [status](#property.status) <sup>RO</sup> | Service statistics |
+| [status](#property.status) (read-only) | Service statistics |
 
 <a name="property.status"></a>
-## *status <sup>property</sup>*
+## *status [<sup>property</sup>](#head.Properties)*
 
 Provides access to the service statistics.
 
@@ -259,39 +271,41 @@ Provides access to the service statistics.
 
 ### Value
 
+> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.status@WebServer``. If omitted then all observed objects will be returned on read.
+
+### Result
+
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| (property) | array | Service statistics |
-| (property)[#] | object |  |
-| (property)[#].measurements | object | Measurements for the service |
-| (property)[#].measurements.resident | object | Resident memory measurement |
-| (property)[#].measurements.resident.min | number | Minimal value measured |
-| (property)[#].measurements.resident.max | number | Maximal value measured |
-| (property)[#].measurements.resident.average | number | Average of all measurements |
-| (property)[#].measurements.resident.last | number | Last measured value |
-| (property)[#].measurements.allocated | object | Allocated memory measurement |
-| (property)[#].measurements.allocated.min | number | Minimal value measured |
-| (property)[#].measurements.allocated.max | number | Maximal value measured |
-| (property)[#].measurements.allocated.average | number | Average of all measurements |
-| (property)[#].measurements.allocated.last | number | Last measured value |
-| (property)[#].measurements.shared | object | Shared memory measurement |
-| (property)[#].measurements.shared.min | number | Minimal value measured |
-| (property)[#].measurements.shared.max | number | Maximal value measured |
-| (property)[#].measurements.shared.average | number | Average of all measurements |
-| (property)[#].measurements.shared.last | number | Last measured value |
-| (property)[#].measurements.process | object | Processes measurement |
-| (property)[#].measurements.process.min | number | Minimal value measured |
-| (property)[#].measurements.process.max | number | Maximal value measured |
-| (property)[#].measurements.process.average | number | Average of all measurements |
-| (property)[#].measurements.process.last | number | Last measured value |
-| (property)[#].measurements.operational | boolean | Whether the service is up and running |
-| (property)[#].measurements.count | number | Number of measurements |
-| (property)[#].observable | string | A callsign of the watched service |
-| (property)[#].restart | object | Restart limits for memory/operational failures applying to the service |
-| (property)[#].restart.limit | number | Maximum number or restarts to be attempted |
-| (property)[#].restart.window | number | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
-
-> The *callsign* shall be passed as the index to the property, e.g. *Monitor.1.status@WebServer*. If omitted then all observed objects will be returned on read.
+| result | array | Service statistics |
+| result[#] | object |  |
+| result[#].measurements | object | Measurements for the service |
+| result[#].measurements.resident | object | Resident memory measurement |
+| result[#].measurements.resident.min | integer | Minimal value measured |
+| result[#].measurements.resident.max | integer | Maximal value measured |
+| result[#].measurements.resident.average | integer | Average of all measurements |
+| result[#].measurements.resident.last | integer | Last measured value |
+| result[#].measurements.allocated | object | Allocated memory measurement |
+| result[#].measurements.allocated.min | integer | Minimal value measured |
+| result[#].measurements.allocated.max | integer | Maximal value measured |
+| result[#].measurements.allocated.average | integer | Average of all measurements |
+| result[#].measurements.allocated.last | integer | Last measured value |
+| result[#].measurements.shared | object | Shared memory measurement |
+| result[#].measurements.shared.min | integer | Minimal value measured |
+| result[#].measurements.shared.max | integer | Maximal value measured |
+| result[#].measurements.shared.average | integer | Average of all measurements |
+| result[#].measurements.shared.last | integer | Last measured value |
+| result[#].measurements.process | object | Processes measurement |
+| result[#].measurements.process.min | integer | Minimal value measured |
+| result[#].measurements.process.max | integer | Maximal value measured |
+| result[#].measurements.process.average | integer | Average of all measurements |
+| result[#].measurements.process.last | integer | Last measured value |
+| result[#].measurements.operational | boolean | Whether the service is up and running |
+| result[#].measurements.count | integer | Number of measurements |
+| result[#].observable | string | A callsign of the watched service |
+| result[#].restart | object | Restart limits for failures applying to the service |
+| result[#].restart.limit | integer | Maximum number or restarts to be attempted |
+| result[#].restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Example
 
@@ -299,60 +313,62 @@ Provides access to the service statistics.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "Monitor.1.status@WebServer"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.status@WebServer"
 }
 ```
+
 #### Get Response
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": [
-        {
-            "measurements": {
-                "resident": {
-                    "min": 0,
-                    "max": 100,
-                    "average": 50,
-                    "last": 100
-                },
-                "allocated": {
-                    "min": 0,
-                    "max": 100,
-                    "average": 50,
-                    "last": 100
-                },
-                "shared": {
-                    "min": 0,
-                    "max": 100,
-                    "average": 50,
-                    "last": 100
-                },
-                "process": {
-                    "min": 0,
-                    "max": 100,
-                    "average": 50,
-                    "last": 100
-                },
-                "operational": true,
-                "count": 100
-            },
-            "observable": "callsign",
-            "restart": {
-                "limit": 3,
-                "window": 60
-            }
-        }
-    ]
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "measurements": {
+        "resident": {
+          "min": 0,
+          "max": 100,
+          "average": 50,
+          "last": 100
+        },
+        "allocated": {
+          "min": 0,
+          "max": 100,
+          "average": 50,
+          "last": 100
+        },
+        "shared": {
+          "min": 0,
+          "max": 100,
+          "average": 50,
+          "last": 100
+        },
+        "process": {
+          "min": 0,
+          "max": 100,
+          "average": 50,
+          "last": 100
+        },
+        "operational": true,
+        "count": 100
+      },
+      "observable": "callsign",
+      "restart": {
+        "limit": 3,
+        "window": 60
+      }
+    }
+  ]
 }
 ```
+
 <a name="head.Notifications"></a>
 # Notifications
 
-Notifications are autonomous events, triggered by the internals of the implementation, and broadcasted via JSON-RPC to all registered observers.Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
+Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
 
 The following events are provided by the Monitor plugin:
 
@@ -363,7 +379,7 @@ Monitor interface events:
 | [action](#event.action) | Signals an action taken by the Monitor |
 
 <a name="event.action"></a>
-## *action <sup>event</sup>*
+## *action [<sup>event</sup>](#head.Notifications)*
 
 Signals an action taken by the Monitor.
 
@@ -380,12 +396,13 @@ Signals an action taken by the Monitor.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "method": "client.events.1.action",
-    "params": {
-        "callsign": "WebServer",
-        "action": "Deactivate",
-        "reason": "EXCEEDED_MEMORY"
-    }
+  "jsonrpc": "2.0",
+  "method": "client.events.1.action",
+  "params": {
+    "callsign": "WebServer",
+    "action": "Deactivate",
+    "reason": "EXCEEDED_MEMORY"
+  }
 }
 ```
+
