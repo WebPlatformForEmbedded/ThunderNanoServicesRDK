@@ -80,7 +80,7 @@ namespace Plugin {
             return pair.first;
         });
 
-        audioOutputs = Core::Service<AudioOutputIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>(audioOutputList);
+        audioOutputs = Core::ServiceType<AudioOutputIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>(audioOutputList);
         return (audioOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
@@ -88,7 +88,7 @@ namespace Plugin {
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.AudioCapabilities.size() > 0)) {
-             audioCapabilities = Core::Service<AudioCapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator>(index->second.AudioCapabilities);
+             audioCapabilities = Core::ServiceType<AudioCapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator>(index->second.AudioCapabilities);
         }
         return (audioCapabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
@@ -97,7 +97,7 @@ namespace Plugin {
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.MS12Capabilities.size() > 0)) {
-             ms12Capabilities = Core::Service<MS12CapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>(index->second.MS12Capabilities);
+             ms12Capabilities = Core::ServiceType<MS12CapabilityIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>(index->second.MS12Capabilities);
         }
         return (ms12Capabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
@@ -106,7 +106,7 @@ namespace Plugin {
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.MS12Profiles.size() > 0)) {
-             ms12AudioProfiles = Core::Service<MS12ProfileIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>(index->second.MS12Profiles);
+             ms12AudioProfiles = Core::ServiceType<MS12ProfileIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>(index->second.MS12Profiles);
         }
         return (ms12AudioProfiles != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
@@ -120,7 +120,7 @@ namespace Plugin {
             return pair.first;
         });
 
-        videoOutputs = Core::Service<VideoOutputIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>(videoOutputList);
+        videoOutputs = Core::ServiceType<VideoOutputIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>(videoOutputList);
 
         return (videoOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
@@ -139,7 +139,7 @@ namespace Plugin {
     {
         VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
         if ((index != _videoOutputMap.end()) && (index->second.Resolutions.size() > 0)) {
-            resolutions = Core::Service<ResolutionIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>(index->second.Resolutions);
+            resolutions = Core::ServiceType<ResolutionIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>(index->second.Resolutions);
         }
 
         return (resolutions != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);

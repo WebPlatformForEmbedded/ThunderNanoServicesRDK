@@ -248,7 +248,7 @@ namespace Plugin {
         Exchange::IApplication* _application;
         Exchange::IBrowserScripting* _browserScripting;
         Exchange::IBrowserCookieJar* _cookieJar;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
         Core::ProxyPoolType<Web::JSONBodyType<WebKitBrowser::Data>> _jsonBodyDataFactory;
         string _persistentStoragePath;
     };

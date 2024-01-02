@@ -119,7 +119,7 @@ namespace Plugin {
         Exchange::IConnectionProperties* _connectionProperties;
         Exchange::IHDRProperties* _hdrProperties;
         Exchange::IDisplayProperties* _displayProperties;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
         PluginHost::IShell* _service;
     };
 

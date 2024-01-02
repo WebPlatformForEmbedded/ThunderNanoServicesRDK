@@ -255,8 +255,8 @@ namespace WPEFramework {
             uint32_t _timeOut;
             uint32_t _connectionId;
             Exchange::IRustBridge* _module;
-            Core::Sink<Notification> _notification;
-            Core::Sink< BridgeCallback> _callback;
+            Core::SinkType<Notification> _notification;
+            Core::SinkType< BridgeCallback> _callback;
             Core::WorkerPool::JobType<RustBridge&> _cleaner;
         };
 

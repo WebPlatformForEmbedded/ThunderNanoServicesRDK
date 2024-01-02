@@ -425,7 +425,7 @@ namespace Plugin {
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
-            controls = Core::Service<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
+            controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
 
             return (Core::ERROR_NONE);
         }
@@ -448,7 +448,7 @@ namespace Plugin {
         OutputList _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
         MessageControl::ICollect::ICallback* _callback;
-        Core::Sink<Observer> _observer;
+        Core::SinkType<Observer> _observer;
         PluginHost::IShell* _service;
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;

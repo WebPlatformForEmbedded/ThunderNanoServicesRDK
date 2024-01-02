@@ -104,7 +104,7 @@ namespace Plugin {
         PluginHost::ISubSystem::IIdentifier* _identifier;
 
         uint32_t _connectionId;
-         Core::Sink<Notification> _notification;
+         Core::SinkType<Notification> _notification;
     };
 
 } // namespace Plugin

@@ -152,8 +152,8 @@ namespace Plugin {
         Exchange::IPlayerProperties::IAudioCodecIterator* _audioCodecs;
         Exchange::IPlayerProperties::IVideoCodecIterator* _videoCodecs;
         Exchange::Dolby::IOutput* _dolbyOut;
-        Core::Sink<DolbyNotification> _dolbyNotification;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<DolbyNotification> _dolbyNotification;
+        Core::SinkType<Notification> _notification;
         PluginHost::IShell* _service;
     };
 

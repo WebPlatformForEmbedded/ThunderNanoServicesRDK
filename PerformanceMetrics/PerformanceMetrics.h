@@ -682,7 +682,7 @@ POP_WARNING()
         void PluginDeactivated(PluginHost::IShell& service);
 
     private:
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
         std::unique_ptr<IPerfMetricsHandler> _handler;
     };
 

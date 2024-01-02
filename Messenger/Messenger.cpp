@@ -122,7 +122,7 @@ namespace Plugin {
 
         string roomId = GenerateRoomId(roomName, userName);
 
-        MsgNotification* sink = Core::Service<MsgNotification>::Create<MsgNotification>(this, roomId);
+        MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(this, roomId);
         ASSERT(sink != nullptr);
 
         if (sink != nullptr) {
@@ -155,7 +155,7 @@ namespace Plugin {
             Callback* cb = nullptr;
 
             if (subscribe) {
-                cb = Core::Service<Callback>::Create<Callback>(this, roomId);
+                cb = Core::ServiceType<Callback>::Create<Callback>(this, roomId);
                 ASSERT(cb != nullptr);
             }
 

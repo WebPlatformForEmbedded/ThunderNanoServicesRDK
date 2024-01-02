@@ -121,7 +121,7 @@ namespace {
         uint32_t _connectionId;
         PluginHost::IShell* _service;
         Exchange::IPackager* _implementation;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
     };
 
 }  // namespace Plugin
