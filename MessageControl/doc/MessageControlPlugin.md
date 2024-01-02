@@ -75,7 +75,7 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *MessageControl*) |
 | classname | string | Class name: *MessageControl* |
 | locator | string | Library name: *libWPEFrameworkMessageControl.so* |
-| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | console | boolean | <sup>*(optional)*</sup> Enables message output messages to the console |
 | syslog | boolean | <sup>*(optional)*</sup> Enables message ouutput to syslog |
 | filepath | string | <sup>*(optional)*</sup> Path to file (inside VolatilePath) where messages will be stored |

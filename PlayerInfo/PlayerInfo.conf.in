@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_PLAYERINFO_AUTOSTART@"
+startmode = "@PLUGIN_PLAYERINFO_STARTMODE@"
 
 configuration = JSON()
 

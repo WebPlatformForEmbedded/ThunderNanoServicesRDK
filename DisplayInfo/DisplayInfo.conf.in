@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_DISPLAYINFO_AUTOSTART@"
+startmode = "@PLUGIN_DISPLAYINFO_STARTMODE@"
 
 configuration = JSON()
 

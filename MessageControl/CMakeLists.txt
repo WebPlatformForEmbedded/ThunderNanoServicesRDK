@@ -27,7 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_MESSAGECONTROL_AUTOSTART true CACHE STRING "Automatically start plugin")
+set(PLUGIN_MESSAGECONTROL_STARTMODE "activated" CACHE STRING "Automatically start plugin")
 set(PLUGIN_MESSAGECONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
 set(PLUGIN_MESSAGECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")

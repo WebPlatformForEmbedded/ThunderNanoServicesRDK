@@ -75,7 +75,7 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *DeviceInfo*) |
 | classname | string | Class name: *DeviceInfo* |
 | locator | string | Library name: *libWPEFrameworkDeviceInfo.so* |
-| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | hdr | boolean | Does the device support HDR (true or false) |
 | atmos | boolean | Does the device support Dolby Atmos (true or false) |
 | cec | boolean | Does the device support HDMI CEC (true or false) |

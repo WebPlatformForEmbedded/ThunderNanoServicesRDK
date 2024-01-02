@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_MESSENGER_AUTOSTART@"
+startmode = "@PLUGIN_MESSENGER_STARTMODE@"
 
 configuration = JSON()
 

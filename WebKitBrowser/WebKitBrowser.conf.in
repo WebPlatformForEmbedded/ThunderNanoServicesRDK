@@ -1,7 +1,7 @@
 if boolean("@PLUGIN_WEBSERVER@"):
     precondition = ["WebSource"]
 
-autostart = "@PLUGIN_WEBKITBROWSER_AUTOSTART@"
+startmode = "@PLUGIN_WEBKITBROWSER_STARTMODE@"
 resumed =  "@PLUGIN_WEBKITBROWSER_RESUMED@"
 
 persistentpathpostfix = "@PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX@"

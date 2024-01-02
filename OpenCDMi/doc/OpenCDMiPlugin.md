@@ -65,7 +65,7 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *OCDM*) |
 | classname | string | Class name: *OCDM* |
 | locator | string | Library name: *libWPEFrameworkOCDM.so* |
-| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | configuration | object | <sup>*(optional)*</sup>  |
 | configuration?.location | string | <sup>*(optional)*</sup> Location |
 | configuration?.connector | string | <sup>*(optional)*</sup> Connector |
