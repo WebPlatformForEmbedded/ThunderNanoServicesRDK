@@ -226,7 +226,7 @@ POP_WARNING()
         std::set<string> _rooms;
         std::map<string, std::list<string>> _roomACL;
         mutable Core::CriticalSection _adminLock;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
     }; // class Messenger
 
 } // namespace Plugin

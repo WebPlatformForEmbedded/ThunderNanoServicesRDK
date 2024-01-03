@@ -68,7 +68,7 @@ namespace OCDM {
             Core::ProcessInfo _main;
         };
 
-        Exchange::IMemory* result = Core::Service<MemoryObserverImpl>::Create<Exchange::IMemory>(connection);
+        Exchange::IMemory* result = Core::ServiceType<MemoryObserverImpl>::Create<Exchange::IMemory>(connection);
 
         return (result);
     }

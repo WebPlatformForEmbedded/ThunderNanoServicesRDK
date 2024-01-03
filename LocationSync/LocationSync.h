@@ -78,7 +78,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                 , _source()
                 , _interval()
                 , _retries()
-                , _locator(Core::Service<LocationService>::Create<LocationService>(this))
+                , _locator(Core::ServiceType<LocationService>::Create<LocationService>(this))
             {
                 ASSERT(parent != nullptr);
             }
@@ -289,10 +289,10 @@ POP_WARNING()
 
         uint16_t _skipURL;
         string _source;
-        Core::Sink<Notification> _sink;
+        Core::SinkType<Notification> _sink;
         PluginHost::IShell* _service; 
         bool _timezoneoverriden; 
-        Core::Sink<LocationInfo> _locationinfo;
+        Core::SinkType<LocationInfo> _locationinfo;
         mutable Core::CriticalSection _adminLock;
         TimeZoneObservers _timezoneoberservers;
         bool _activateOnFailure;

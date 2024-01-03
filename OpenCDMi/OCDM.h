@@ -203,7 +203,7 @@ POP_WARNING()
         PluginHost::IShell* _service;
         Exchange::IContentDecryption* _opencdmi;
         Exchange::IMemory* _memory;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
     };
 } //namespace Plugin
 

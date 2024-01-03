@@ -612,7 +612,7 @@ public:
             TRACE(Trace::Error, (_T("HDMI not connected!")));
             ret = Core::ERROR_GENERAL;
         }
-        colorimetry = Core::Service<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(colorimetryCaps);
+        colorimetry = Core::ServiceType<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(colorimetryCaps);
         return (colorimetry != nullptr && ret == Core::ERROR_NONE ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
@@ -683,7 +683,7 @@ public:
         if(capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
 
-        type = Core::Service<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
@@ -711,7 +711,7 @@ public:
         if(capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
 
-        type = Core::Service<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
