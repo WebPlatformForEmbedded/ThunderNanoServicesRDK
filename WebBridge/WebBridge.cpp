@@ -217,7 +217,6 @@ namespace WPEFramework {
             // -------------------------------------------------------------------------------------------------------
             Core::hresult 
                 WebBridge::Invoke(
-                    IDispatcher::ICallback* callback, 
                     const uint32_t channelId, 
                     const uint32_t id, 
                     const string& token,
@@ -234,7 +233,7 @@ namespace WPEFramework {
                 }
                 else if (realMethod == _T("exists")) {
                     result = Core::ERROR_NONE;
-                    if (handler->Exists(realMethod) == Core::ERROR_NONE) {
+                    if (handler->Exists(parameters) == Core::ERROR_NONE) {
                         response = _T("1");
                     }
                     else {
@@ -251,7 +250,7 @@ namespace WPEFramework {
 
                     _pendingRequests.emplace(std::piecewise_construct,
                         std::forward_as_tuple(newId),
-                        std::forward_as_tuple(callback, channelId, id, waitTill));
+                        std::forward_as_tuple(channelId, id, waitTill));
 
                     switch (_mode) {
                     case WebBridge::context::ADDED: {
@@ -295,25 +294,6 @@ namespace WPEFramework {
 
                 return (result);
             }
-            Core::hresult WebBridge::Revoke(IDispatcher::ICallback* callback) /* override*/ {
-                // Remove the interface from the pendings..
-                _adminLock.Lock();
-
-                PendingMap::iterator index = _pendingRequests.begin();
-
-                while (index != _pendingRequests.end()) {
-                    if (index->second != callback) {
-                        index++;
-                    }
-                    else {
-                        index = _pendingRequests.erase(index);
-                    }
-                }
-
-                _adminLock.Lock();
-
-                return (PluginHost::JSONRPC::Revoke(callback));
-            }
 
             // -------------------------------------------------------------------------------------------------------
             //   IWebSocket methods
@@ -347,22 +327,13 @@ namespace WPEFramework {
                         _adminLock.Lock();
                         PendingMap::iterator index = _pendingRequests.find(message->Id.Value());
                         if (index != _pendingRequests.end()) {
-                            uint32_t requestId, channelId;
-                            IDispatcher::ICallback* callback;
 
-                            channelId = index->second.ChannelId();
-                            requestId = index->second.SequenceId();
-                            callback = index->second.Callback();
+                            message->Id = index->second.SequenceId();
 
-                            ASSERT(callback != nullptr);
+                            TRACE(Trace::Information, (_T("Response: [%d] to [%d]"), index->second.SequenceId(), index->second.ChannelId()));
 
-                            TRACE(Trace::Information, (_T("Response: [%d] to [%d]"), requestId, channelId));
-
-                            if (callback != nullptr) {
-                                // Oke, there is someone waiting for a response!
-                                callback->Response(channelId, requestId, message->Result.Value());
-                                callback->Release();
-                            }
+                            // Oke, there is someone waiting for a response!
+                            _service->Submit(index->second.ChannelId(), element);
 
                             _pendingRequests.erase(index);
                         }
@@ -386,19 +357,18 @@ namespace WPEFramework {
                 PendingMap::iterator index(_pendingRequests.begin());
                 while (index != _pendingRequests.end()) {
                     if (now >= index->second.Issued()) {
-                        // Send and Error to the requester..
-                        IDispatcher::ICallback* callback = index->second.Callback();
+                        // Send and Error to the requester, create a frame to send back..
+                        Core::ProxyType<Core::JSONRPC::Message> response = Core::ProxyType<Core::JSONRPC::Message>(PluginHost::IFactories::Instance().JSONRPC());
 
-                        ASSERT(callback != nullptr);
+                        response->Id = index->second.SequenceId();
+                        response->Error.SetError(Core::ERROR_TIMEDOUT);
+                        response->Error.Text = _T("There is no response form the server within time!!!");
 
-                        if (callback != nullptr) {
-                            callback->Error(index->second.ChannelId(), index->second.SequenceId(), Core::ERROR_TIMEDOUT, _T("There is no response form the server within time!!!"));
-                            callback->Release();
-                        }
-                            
                         TRACE(Trace::Warning, (_T("Got a timeout on channelId [%d] for request [%d]"), index->second.ChannelId(), index->second.SequenceId()));
 
                         index = _pendingRequests.erase(index);
+
+                        _service->Submit(index->second.ChannelId(), Core::ProxyType<Core::JSON::IElement>(response));
                     }
                     else {
                         if ((nextSlot.IsValid() == false) || (nextSlot > index->second.Issued())) {
