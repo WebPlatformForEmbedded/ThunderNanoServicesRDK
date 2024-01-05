@@ -2042,7 +2042,7 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t Visible(const bool& visiblity) override
+        uint32_t Visible(const bool visiblity) override
         {
             Hide(!visiblity);
             return Core::ERROR_NONE;
