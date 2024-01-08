@@ -130,12 +130,12 @@ public:
 public:
     uint32_t AudioCodecs(Exchange::IPlayerProperties::IAudioCodecIterator*& codec) const override
     {
-        codec = (Core::Service<AudioIteratorImplementation>::Create<Exchange::IPlayerProperties::IAudioCodecIterator>(_audioCodecs));
+        codec = (Core::ServiceType<AudioIteratorImplementation>::Create<Exchange::IPlayerProperties::IAudioCodecIterator>(_audioCodecs));
         return (codec != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     uint32_t VideoCodecs(Exchange::IPlayerProperties::IVideoCodecIterator*& codec) const override
     {
-        codec = (Core::Service<VideoIteratorImplementation>::Create<Exchange::IPlayerProperties::IVideoCodecIterator>(_videoCodecs));
+        codec = (Core::ServiceType<VideoIteratorImplementation>::Create<Exchange::IPlayerProperties::IVideoCodecIterator>(_videoCodecs));
         return (codec != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     uint32_t Resolution(PlaybackResolution&) const override

@@ -744,7 +744,7 @@ POP_WARNING()
                 std::string _sessionId;
                 CDMi::IMediaKeySession* _mediaKeySession;
                 CDMi::IMediaKeySessionExt* _mediaKeySessionExt;
-                Core::Sink<Sink> _sink;
+                Core::SinkType<Sink> _sink;
                 DataExchange* _buffer;
                 CommonEncryptionData _cencData;
             };
@@ -840,7 +840,7 @@ POP_WARNING()
                          if (sessionInterface != nullptr)
                          {
                                  SessionImplementation *newEntry =
-                                    Core::Service<SessionImplementation>::Create<SessionImplementation>(this,
+                                    Core::ServiceType<SessionImplementation>::Create<SessionImplementation>(this,
                                                  keySystem, sessionInterface,
                                                 callback, &keyIds);
 
@@ -1338,7 +1338,7 @@ POP_WARNING()
                 _group = config.Group.Value();
             }
 
-            _entryPoint = Core::Service<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
+            _entryPoint = Core::ServiceType<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
             _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
@@ -1414,19 +1414,19 @@ POP_WARNING()
         }
         virtual RPC::IStringIterator* Systems() const
         {
-            return (Core::Service<RPC::StringIterator>::Create<RPC::IStringIterator>(_keySystems));
+            return (Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(_keySystems));
         }
         virtual RPC::IStringIterator* Designators(const string& keySystem) const
         {
             std::list<string> designators;
             LoadDesignators(keySystem, designators);
-            return (Core::Service<RPC::StringIterator>::Create<RPC::IStringIterator>(designators));
+            return (Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(designators));
         }
         virtual RPC::IStringIterator* Sessions(const string& keySystem) const
         {
             std::list<string> sessions;
             LoadSessions(keySystem, sessions);
-            return (Core::Service<RPC::StringIterator>::Create<RPC::IStringIterator>(sessions));
+            return (Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(sessions));
         }
 
     public:

@@ -1,5 +1,5 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_JSPP_AUTOSTART@"
+startmode = "@PLUGIN_JSPP_STARTMODE@"
 persistentpathpostfix = "@PLUGIN_JSPP_PERSISTENTPATHPOSTFIX@"
 startuporder = "@PLUGIN_JSPP_STARTUPORDER@"
 

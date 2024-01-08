@@ -1,5 +1,5 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_APPS_AUTOSTART@"
+startmode = "@PLUGIN_APPS_STARTMODE@"
 startuporder = "@PLUGIN_APPS_STARTUPORDER@"
 
 configuration = JSON()

@@ -40,7 +40,7 @@ namespace Plugin {
 
         if (it == _roomMap.end()) {
             // Room not found, so create one, already emplacing the first user.
-            newRoomUser = Core::Service<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
+            newRoomUser = Core::ServiceType<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
             it = _roomMap.emplace(roomId, std::list<RoomImpl*>({newRoomUser})).first;
 
             TRACE(Trace::Information, (_T("Room Maintainer: Room '%s' created"), roomId.c_str()));
@@ -58,7 +58,7 @@ namespace Plugin {
             std::list<RoomImpl*>& users = (*it).second;
 
             if (std::find_if(users.begin(), users.end(), [&userId](const RoomImpl* user) { return (user->UserId() == userId);}) == users.end()) {
-                newRoomUser = Core::Service<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
+                newRoomUser = Core::ServiceType<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
 
                 // Notify the room about a joining user.
                 // No point in sending the notification to the joining user as it cannot have its callback registered yet.

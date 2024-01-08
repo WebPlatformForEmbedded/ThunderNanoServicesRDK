@@ -46,7 +46,7 @@ option(PLUGIN_WEBKITBROWSER_LOGGING_UTILS "Enable possibility to redirect stdout
 
 set(PLUGIN_WEBKITBROWSER_IMPLEMENTATION "${MODULE_NAME}Impl" CACHE STRING "Specify a library with a webkit implementation." )
 
-set(PLUGIN_WEBKITBROWSER_AUTOSTART "false" CACHE STRING "Automatically start WebKitBrowser plugin")
+set(PLUGIN_WEBKITBROWSER_STARTMODE "deactivated" CACHE STRING "Automatically start WebKitBrowser plugin")
 set(PLUGIN_WEBKITBROWSER_STARTUPORDER "" CACHE STRING "To configure startup order of WebKitBrowser plugin")
 set(PLUGIN_WEBKITBROWSER_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_WEBKITBROWSER_RESUMED "true" CACHE STRING "Set WebKitBrowser plugin resume state")
@@ -84,7 +84,7 @@ set(PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT "100" CACH
 set(PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL "1" CACHE STRING "WebkitBrower Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_YOUTUBE_AUTOSTART "false" CACHE STRING "Automatically start Youtube plugin")
+set(PLUGIN_YOUTUBE_STARTMODE "deactivated" CACHE STRING "Automatically start Youtube plugin")
 set(PLUGIN_YOUTUBE_STARTUPORDER "" CACHE STRING "To configure startup order of YouTube plugin")
 set(PLUGIN_YOUTUBE_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_YOUTUBE_STARTURL "https://www.youtube.com/tv" CACHE STRING "Initial URL for YouTube plugin")
@@ -103,7 +103,7 @@ set(PLUGIN_YOUTUBE_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKITB
 set(PLUGIN_YOUTUBE_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "YouTube Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_UX_AUTOSTART "false" CACHE STRING "Automatically start UX plugin")
+set(PLUGIN_UX_STARTMODE "deactivated" CACHE STRING "Automatically start UX plugin")
 set(PLUGIN_UX_STARTUPORDER "" CACHE STRING "To configure startup order of UX plugin")
 set(PLUGIN_UX_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_UX_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for UX")
@@ -118,7 +118,7 @@ set(PLUGIN_UX_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKITBROWSE
 set(PLUGIN_UX_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "UX Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_APPS_AUTOSTART "false" CACHE STRING "Automatically start Apps plugin")
+set(PLUGIN_APPS_STARTMODE "deactivated" CACHE STRING "Automatically start Apps plugin")
 set(PLUGIN_APPS_STARTUPORDER "" CACHE STRING "To configure startup order of Apps plugin")
 set(PLUGIN_APPS_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_APPS_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Apps")
@@ -134,7 +134,7 @@ set(PLUGIN_APPS_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKITBROW
 set(PLUGIN_APPS_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Apps Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_RESIDENT_APP_AUTOSTART "false" CACHE STRING "Automatically start Resident App plugin")
+set(PLUGIN_RESIDENT_APP_STARTMODE "deactivated" CACHE STRING "Automatically start Resident App plugin")
 set(PLUGIN_RESIDENT_APP_STARTUPORDER "" CACHE STRING "To configure startup order of Resident App plugin")
 set(PLUGIN_RESIDENT_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_RESIDENT_APP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Resident App")
@@ -151,7 +151,7 @@ set(PLUGIN_RESIDENT_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WE
 set(PLUGIN_RESIDENT_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Resident App Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_SEARCH_AND_DISCOVERY_APP_AUTOSTART "false" CACHE STRING "Automatically start Search&Discovery App plugin")
+set(PLUGIN_SEARCH_AND_DISCOVERY_APP_STARTMODE "deactivated" CACHE STRING "Automatically start Search&Discovery App plugin")
 set(PLUGIN_SEARCH_AND_DISCOVERY_APP_STARTUPORDER "" CACHE STRING "To configure startup order of Search&Discovery App plugin")
 set(PLUGIN_SEARCH_AND_DISCOVERY_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_SEARCH_AND_DISCOVERY_APP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Search&Discovery App")
@@ -167,7 +167,7 @@ set(PLUGIN_SEARCH_AND_DISCOVERY_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT
 set(PLUGIN_SEARCH_AND_DISCOVERY_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Search and Discovery App Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_HTML_APP_AUTOSTART "false" CACHE STRING "Automatically start Htmp App plugin")
+set(PLUGIN_HTML_APP_STARTMODE "deactivated" CACHE STRING "Automatically start Htmp App plugin")
 set(PLUGIN_HTML_APP_STARTUPORDER "" CACHE STRING "To configure startup order of Html App plugin")
 set(PLUGIN_HTML_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_HTML_APP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Html App")
@@ -183,7 +183,7 @@ set(PLUGIN_HTML_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKIT
 set(PLUGIN_HTML_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Html App Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_LIGHTNING_APP_AUTOSTART "false" CACHE STRING "Automatically start Lightning App plugin")
+set(PLUGIN_LIGHTNING_APP_STARTMODE "deactivated" CACHE STRING "Automatically start Lightning App plugin")
 set(PLUGIN_LIGHTNING_APP_STARTUPORDER "" CACHE STRING "To configure startup order of Lightning App plugin")
 set(PLUGIN_LIGHTNING_APP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_LIGHTNING_APP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Lightning App")
@@ -199,7 +199,7 @@ set(PLUGIN_LIGHTNING_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_W
 set(PLUGIN_LIGHTNING_APP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Lightning App Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_JSPP_AUTOSTART "false" CACHE STRING "Automatically start JSPP plugin")
+set(PLUGIN_JSPP_STARTMODE "deactivated" CACHE STRING "Automatically start JSPP plugin")
 set(PLUGIN_JSPP_STARTUPORDER "" CACHE STRING "To configure startup order of JSPP plugin")
 set(PLUGIN_JSPP_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_JSPP_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for JSPP")
@@ -214,7 +214,7 @@ set(PLUGIN_JSPP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKITBROW
 set(PLUGIN_JSPP_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "JSPP App Memory Pressure Networkprocess Poll Interval")
 
 
-set(PLUGIN_AMAZON_AUTOSTART "false" CACHE STRING "Automatically start Amazon plugin")
+set(PLUGIN_AMAZON_STARTMODE "deactivated" CACHE STRING "Automatically start Amazon plugin")
 set(PLUGIN_AMAZON_STARTUPORDER "" CACHE STRING "To configure startup order of Amazon plugin")
 set(PLUGIN_AMAZON_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
 set(PLUGIN_AMAZON_USERAGENT "${PLUGIN_WEBKITBROWSER_USERAGENT}" CACHE STRING "User agent string for Amazon App")

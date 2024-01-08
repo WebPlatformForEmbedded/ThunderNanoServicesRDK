@@ -568,7 +568,7 @@ namespace WebKitBrowser {
                 processes.push_back(children.Current().Name());
             }
 
-            processnames = Core::Service<RPC::StringIterator>::Create<RPC::IStringIterator>(processes);
+            processnames = Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(processes);
 
             return Core::ERROR_NONE;
         }

@@ -27,7 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_LOCATIONSYNC_AUTOSTART "true" CACHE STRING "Automatically start LocationSync plugin")
+set(PLUGIN_LOCATIONSYNC_STARTMODE "activated" CACHE STRING "Automatically start LocationSync plugin")
 set(PLUGIN_LOCATIONSYNC_URI "location.webplatformforembedded.org" CACHE STRING "URI to request the location information")
 set(PLUGIN_LOCATIONSYNC_OVERRIDE_TIMEZONE CACHE STRING "Override Timezone value")
 

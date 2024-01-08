@@ -142,7 +142,7 @@ namespace Plugin {
             } else {
                 if (subSystem != nullptr) {
                     Core::SystemInfo::SetEnvironment(_T("SECURITYAGENT_PATH"), _dispatcher->Connector().c_str(), true);
-                    Core::Sink<SecurityCallsign> information(callsign);
+                    Core::SinkType<SecurityCallsign> information(callsign);
 
                     if (subSystem->IsActive(PluginHost::ISubSystem::SECURITY) != false) {
                         SYSLOG(Logging::Startup, (_T("Security is not defined as External !!")));
@@ -211,13 +211,13 @@ namespace Plugin {
 
                         if (load != static_cast<uint16_t>(~0)) {
                             // Seems like we extracted a valid payload, time to create an security context
-                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload, _servicePrefix);
+                            result = Core::ServiceType<SecurityContext>::Create<SecurityContext>(&_acl, load, payload, _servicePrefix);
                         }
                     }
             }
 #ifdef SECURITY_TESTING_MODE
             else {
-                result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(SecurityAgent::TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(SecurityAgent::TestTokenContent), _servicePrefix);
+                result = Core::ServiceType<SecurityContext>::Create<SecurityContext>(&_acl, static_cast<uint16_t>(sizeof(SecurityAgent::TestTokenContent) - 1), reinterpret_cast<const uint8_t*>(SecurityAgent::TestTokenContent), _servicePrefix);
             }
 #endif
         }

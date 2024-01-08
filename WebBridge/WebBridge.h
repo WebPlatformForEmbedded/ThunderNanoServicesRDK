@@ -47,30 +47,14 @@ namespace WPEFramework {
                 Request(const Request&) = delete;
                 Request& operator=(const Request&) = delete;
 
-                Request(IDispatcher::ICallback* callback, const uint32_t channelId, const uint32_t sequenceId, const Core::Time& timeOut)
-                    : _callback(callback)
-                    , _channelId(channelId)
+                Request(const uint32_t channelId, const uint32_t sequenceId, const Core::Time& timeOut)
+                    : _channelId(channelId)
                     , _sequenceId(sequenceId)
                     , _issued(timeOut) {
-                    _callback->AddRef();
                 }
-                ~Request() {
-                    ASSERT(_callback != nullptr);
-                    _callback->Release();
-                    _callback = nullptr;
-                }
-                bool operator== (const IDispatcher::ICallback* callback) const {
-                    return (_callback == callback);
-                }
-                bool operator!= (const IDispatcher::ICallback* callback) const {
-                    return (!operator==(callback));
-                }
+                ~Request() = default;
 
             public:
-                IDispatcher::ICallback* Callback() {
-                    _callback->AddRef();
-                    return (_callback);
-                }
                 uint32_t ChannelId() const {
                     return (_channelId);
                 }
@@ -82,7 +66,6 @@ namespace WPEFramework {
                 }
 
             private:
-                IDispatcher::ICallback* _callback;
                 uint32_t _channelId;
                 uint32_t _sequenceId;
                 Core::Time _issued;
@@ -158,8 +141,7 @@ namespace WPEFramework {
             // IDispatcher (override message)
             // -------------------------------------------------------------------------------------------------------
             //! ==================================== CALLED ON THREADPOOL THREAD ======================================
-            Core::hresult Invoke(IDispatcher::ICallback* callback, const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) override;
-            Core::hresult Revoke(IDispatcher::ICallback* callback) override;
+            Core::hresult Invoke(const uint32_t channelId, const uint32_t id, const string& token, const string& method, const string& parameters, string& response) override;
 
             // IPluginExtended
             // -------------------------------------------------------------------------------------------------------

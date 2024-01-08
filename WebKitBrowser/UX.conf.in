@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_UX_AUTOSTART@"
+startmode = "@PLUGIN_UX_STARTMODE@"
 startuporder = "@PLUGIN_UX_STARTUPORDER@"
 
 configuration = JSON()

@@ -178,8 +178,8 @@ namespace Plugin {
 
             if (_opkgInitialized) {
                 if (name && version && arch) {
-                    _inProgress.Package = Core::Service<PackageInfo>::Create<PackageInfo>(*name, *version, *arch);
-                    _inProgress.Install = Core::Service<InstallInfo>::Create<InstallInfo>();
+                    _inProgress.Package = Core::ServiceType<PackageInfo>::Create<PackageInfo>(*name, *version, *arch);
+                    _inProgress.Install = Core::ServiceType<InstallInfo>::Create<InstallInfo>();
                 } else {
                     _isSyncing = true;
                 }

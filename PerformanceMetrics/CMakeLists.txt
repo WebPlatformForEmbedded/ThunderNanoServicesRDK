@@ -27,7 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_PERFORMANCEMETRICS_AUTOSTART "true" CACHE STRING "Automatically start Performance Metrics plugin")
+set(PLUGIN_PERFORMANCEMETRICS_STARTMODE "activated" CACHE STRING "Automatically start Performance Metrics plugin")
 set(PLUGIN_PERFORMANCEMETRICS_LOGGER_IMPLEMENTATION "TRACING" CACHE STRING "Defines what implementation to use for logging the Performance Metrics")
 
 # Plugins built from this repository that can be autmatically enabled or enabled manually when built externally

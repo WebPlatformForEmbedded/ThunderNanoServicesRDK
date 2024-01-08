@@ -138,12 +138,12 @@ public:
 public:
     uint32_t AudioCodecs(Exchange::IPlayerProperties::IAudioCodecIterator*& iterator) const override
     {
-        iterator = Core::Service<AudioIteratorImplementation>::Create<Exchange::IPlayerProperties::IAudioCodecIterator>(_audioCodecs);
+        iterator = Core::ServiceType<AudioIteratorImplementation>::Create<Exchange::IPlayerProperties::IAudioCodecIterator>(_audioCodecs);
         return (iterator != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     uint32_t VideoCodecs(Exchange::IPlayerProperties::IVideoCodecIterator*& iterator) const override
     {
-        iterator = Core::Service<VideoIteratorImplementation>::Create<Exchange::IPlayerProperties::IVideoCodecIterator>(_videoCodecs);
+        iterator = Core::ServiceType<VideoIteratorImplementation>::Create<Exchange::IPlayerProperties::IVideoCodecIterator>(_videoCodecs);
         return (iterator != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 

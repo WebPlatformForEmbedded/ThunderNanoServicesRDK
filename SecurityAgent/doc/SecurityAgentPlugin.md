@@ -73,7 +73,7 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *SecurityAgent*) |
 | classname | string | Class name: *SecurityAgent* |
 | locator | string | Library name: *libWPEFrameworkSecurityAgent.so* |
-| autostart | boolean | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | configuration | object | <sup>*(optional)*</sup>  |
 | configuration?.acl | string | <sup>*(optional)*</sup> ACL |
 | configuration?.connector | string | <sup>*(optional)*</sup> Connector |

@@ -485,12 +485,12 @@ namespace Plugin {
             , Config::GetValue(_config.hdcpLevelFilepath)
             , Config::GetValue(_config.usePreferredMode)));
 
-            _graphics = Core::Service<GraphicsProperties>::Create<Exchange::IGraphicsProperties>(Config::GetValue(_config.gpuMemoryFile)
+            _graphics = Core::ServiceType<GraphicsProperties>::Create<Exchange::IGraphicsProperties>(Config::GetValue(_config.gpuMemoryFile)
                 , Config::GetValue(_config.gpuMemoryFreePattern)
                 , Config::GetValue(_config.gpuMemoryTotalPattern)
                 , Config::GetValue(_config.gpuMemoryUnitMultiplier));
 
-            _hdr = Core::Service<HDRProperties>::Create<Exchange::IHDRProperties>(Config::GetValue(_config.hdrLevelFilepath));
+            _hdr = Core::ServiceType<HDRProperties>::Create<Exchange::IHDRProperties>(Config::GetValue(_config.hdrLevelFilepath));
             /* clang-format on */
 
             return Core::ERROR_NONE;

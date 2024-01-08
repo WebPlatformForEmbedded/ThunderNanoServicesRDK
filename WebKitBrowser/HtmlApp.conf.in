@@ -1,5 +1,5 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_HTML_APP_AUTOSTART@"
+startmode = "@PLUGIN_HTML_APP_STARTMODE@"
 persistentpathpostfix = "@PLUGIN_HTML_APP_PERSISTENTPATHPOSTFIX@"
 startuporder = "@PLUGIN_HTML_APP_STARTUPORDER@"
 

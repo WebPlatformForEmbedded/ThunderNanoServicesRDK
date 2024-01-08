@@ -1,7 +1,7 @@
-autostart = "@PLUGIN_RESIDENT_APP_AUTOSTART@"
-resumed = "true"
+startmode = "@PLUGIN_RESIDENT_APP_STARTMODE@"
 persistentpathpostfix = "@PLUGIN_RESIDENT_APP_PERSISTENTPATHPOSTFIX@"
 startuporder = "@PLUGIN_RESIDENT_APP_STARTUPORDER@"
+resumed = "true"
 
 configuration = JSON()
 

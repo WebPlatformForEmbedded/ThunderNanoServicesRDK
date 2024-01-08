@@ -241,7 +241,7 @@ namespace Plugin {
         Exchange::IDeviceVideoCapabilities* _deviceVideoCapabilityInterface;
         uint32_t _connectionId;
         mutable Core::CriticalSection _adminLock;
-        Core::Sink<Notification> _notification;
+        Core::SinkType<Notification> _notification;
     };
 
 } // namespace Plugin
