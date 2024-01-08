@@ -2045,7 +2045,7 @@ static GSourceFuncs _handlerIntervention =
             return Core::ERROR_NONE;
         }
 
-        uint32_t Visible(const bool& visiblity) override
+        uint32_t Visible(const bool visiblity) override
         {
             Hide(!visiblity);
             return Core::ERROR_NONE;
@@ -2886,6 +2886,7 @@ static GSourceFuncs _handlerIntervention =
                 }
                 g_mkdir_with_parents(wpeDiskCachePath, 0700);
 
+#if WEBKIT_CHECK_VERSION(2, 42, 0)
                 gchar* indexedDBPath = nullptr;
                 if (_config.IndexedDBPath.IsSet() && !_config.IndexedDBPath.Value().empty()) {
                     _config.IndexedDBPath = _service->Substitute(_config.IndexedDBPath.Value());
@@ -2902,6 +2903,7 @@ static GSourceFuncs _handlerIntervention =
 #endif
                 }
                 g_mkdir_with_parents(indexedDBPath, 0700);
+#endif
 
 #if HAS_MEMORY_PRESSURE_SETTINGS_API
                 if ((_config.Memory.IsSet() == true) && (_config.Memory.NetworkProcessSettings.IsSet() == true)) {

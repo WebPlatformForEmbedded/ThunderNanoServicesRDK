@@ -1,5 +1,5 @@
 precondition = ["Internet"]
-autostart = "@PLUGIN_YOUTUBE_AUTOSTART@"
+startmode = "@PLUGIN_YOUTUBE_STARTMODE@"
 startuporder = "@PLUGIN_YOUTUBE_STARTUPORDER@"
 
 configuration = JSON()

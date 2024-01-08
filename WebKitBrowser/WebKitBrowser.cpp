@@ -584,7 +584,7 @@ namespace WebKitBrowser {
             children.Reset();
             while (children.Next() == true ) {
                 if (children.Current().Name() == processname ) {
-                    process = Core::Service<ProcessMemoryObserverImpl>::Create<Exchange::IProcessMemory>(children.Current().Id());
+                    process = Core::ServiceType<ProcessMemoryObserverImpl>::Create<Exchange::IProcessMemory>(children.Current().Id());
                     result = Core::ERROR_NONE;
                     break;
                 }
@@ -613,7 +613,7 @@ namespace WebKitBrowser {
 
     Exchange::IMemory* MemoryObserver(const RPC::IRemoteConnection* connection)
     {
-        Exchange::IMemory* result = Core::Service<MemoryObserverImpl>::Create<Exchange::IMemory>(connection);
+        Exchange::IMemory* result = Core::ServiceType<MemoryObserverImpl>::Create<Exchange::IMemory>(connection);
         return (result);
     }
 } // namespace WebKitBrowser
