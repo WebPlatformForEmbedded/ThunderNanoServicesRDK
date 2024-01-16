@@ -2,7 +2,7 @@
  "locator":"libWPEFrameworkRustAdapter.so",
  "classname":"RustAdapter",
  "callsign":"hello_world",
- "startmode":"activated",
+ "startmode":"Activated",
  "configuration": {
    "outofprocess": true
  }

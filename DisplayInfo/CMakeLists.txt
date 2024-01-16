@@ -28,7 +28,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-set(PLUGIN_DISPLAYINFO_STARTMODE "activated" CACHE STRING "Automatically start DisplayInfo plugin")
+set(PLUGIN_DISPLAYINFO_STARTMODE "Activated" CACHE STRING "Automatically start DisplayInfo plugin")
 set(PLUGIN_DISPLAYINFO_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process, in process or remote.")
 
 # deprecated/legacy flags support
