@@ -592,8 +592,8 @@ static GSourceFuncs _handlerIntervention =
                 , LocalStorageSize()
                 , IndexedDBEnabled(false)
                 , IndexedDBPath()
-                , IndexedDBSize()
-                , IndexedDBTotalSize()
+                , OriginStorageRatio()
+                , TotalStorageRatio()
                 , Secure(false)
                 , InjectedBundle()
                 , Transparent(false)
@@ -661,8 +661,8 @@ static GSourceFuncs _handlerIntervention =
                 Add(_T("localstoragesize"), &LocalStorageSize);
                 Add(_T("indexeddbenabled"), &IndexedDBEnabled);
                 Add(_T("indexeddbpath"), &IndexedDBPath);
-                Add(_T("indexeddbsize"), &IndexedDBSize);
-                Add(_T("indexeddbtotalsize"), &IndexedDBTotalSize);
+                Add(_T("originstorageratio"), &OriginStorageRatio);
+                Add(_T("totalstorageratio"), &TotalStorageRatio);
                 Add(_T("secure"), &Secure);
                 Add(_T("injectedbundle"), &InjectedBundle);
                 Add(_T("transparent"), &Transparent);
@@ -737,8 +737,8 @@ static GSourceFuncs _handlerIntervention =
             Core::JSON::DecUInt16 LocalStorageSize;
             Core::JSON::Boolean IndexedDBEnabled;
             Core::JSON::String IndexedDBPath;
-            Core::JSON::DecUInt16 IndexedDBSize; // [percentage of volume space for each domain]
-            Core::JSON::DecUInt16 IndexedDBTotalSize; // [percentage of volume space for all domains]
+            Core::JSON::DecUInt8 OriginStorageRatio; // [percentage of volume space for each domain]
+            Core::JSON::DecUInt8 TotalStorageRatio; // [percentage of volume space for all domains]
             Core::JSON::Boolean Secure;
             Core::JSON::String InjectedBundle;
             Core::JSON::Boolean Transparent;
@@ -2921,13 +2921,13 @@ static GSourceFuncs _handlerIntervention =
 
 #if WEBKIT_CHECK_VERSION(2, 42, 0)
                 double originStorageRatio = -1.0;    // -1.0 means WebKit will use the default quota (1GB)
-                if (_config.IndexedDBSize.IsSet() && _config.IndexedDBSize.Value() != 0) {
-                    originStorageRatio = static_cast<double>(_config.IndexedDBSize.Value());
+                if (_config.OriginStorageRatio.IsSet() && _config.OriginStorageRatio.Value() != 0) {
+                    originStorageRatio = static_cast<double>(_config.OriginStorageRatio.Value());
                 }
 
                 double totalStorageRatio = -1.0;    // -1.0 means there's no limit for the total storage
-                if (_config.IndexedDBTotalSize.IsSet() && _config.IndexedDBTotalSize.Value() != 0) {
-                    totalStorageRatio = static_cast<double>(_config.IndexedDBTotalSize.Value());
+                if (_config.TotalStorageRatio.IsSet() && _config.TotalStorageRatio.Value() != 0) {
+                    totalStorageRatio = static_cast<double>(_config.TotalStorageRatio.Value());
                 }
 
                 auto* websiteDataManager = webkit_website_data_manager_new(
