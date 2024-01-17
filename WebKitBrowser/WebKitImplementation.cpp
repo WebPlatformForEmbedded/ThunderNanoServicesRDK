@@ -2909,12 +2909,16 @@ static GSourceFuncs _handlerIntervention =
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 }
 #endif
+                string persistentPath = _service->PersistentPath();
+                string volatilePath = _service->VolatilePath();
                 auto* websiteDataManager = webkit_website_data_manager_new(
                     "local-storage-directory", wpeStoragePath,
                     "disk-cache-directory", wpeDiskCachePath,
                     "local-storage-quota", localStorageDatabaseQuotaInBytes,
                     "indexeddb-directory", indexedDBPath,
                     "per-origin-storage-quota", indexedDBSizeBytes,
+                    "base-data-directory", persistentPath,
+                    "base-cache-directory", volatilePath,
                      nullptr);
                 g_free(wpeStoragePath);
                 g_free(wpeDiskCachePath);
