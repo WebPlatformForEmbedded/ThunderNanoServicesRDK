@@ -38,7 +38,8 @@ configuration.add("localstoragesize", "@PLUGIN_JSPP_LOCALSTORAGESIZE@")
 configuration.add("cookiestorage", "@PLUGIN_JSPP_COOKIESTORAGE@")
 configuration.add("indexeddbenabled", "@PLUGIN_JSPP_INDEXEDDB_ENABLE@")
 configuration.add("indexeddbpath", "@PLUGIN_JSPP_INDEXEDDB_PATH@")
-configuration.add("indexeddbsize", "@PLUGIN_JSPP_INDEXEDDB_SIZE@")
+configuration.add("originstorageratio", "@PLUGIN_JSPP_ORIGIN_STORAGE_RATIO@")
+configuration.add("totalstorageratio", "@PLUGIN_JSPP_TOTAL_STORAGE_RATIO@")
 
 if boolean("@PLUGIN_JSPP_WINDOWCLOSE@"):
     configuration.add("windowclose", "true")
