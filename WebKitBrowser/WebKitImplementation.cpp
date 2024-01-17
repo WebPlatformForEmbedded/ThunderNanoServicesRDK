@@ -2918,6 +2918,7 @@ static GSourceFuncs _handlerIntervention =
                     webkit_memory_pressure_settings_free(memoryPressureSettings);
                 }
 #endif
+
 #if WEBKIT_CHECK_VERSION(2, 42, 0)
                 double originStorageRatio = -1.0;    // -1.0 means WebKit will use the default quota (1GB)
                 if (_config.OriginStorageRatio.IsSet() && _config.OriginStorageRatio.Value() != 0) {
