@@ -2929,8 +2929,6 @@ static GSourceFuncs _handlerIntervention =
                 if (_config.TotalStorageRatio.IsSet() && _config.TotalStorageRatio.Value() != 0) {
                     totalStorageRatio = static_cast<double>(_config.TotalStorageRatio.Value());
                 }
-                string persistentPath = _service->PersistentPath();
-                string volatilePath = _service->VolatilePath();
 
                 auto* websiteDataManager = webkit_website_data_manager_new(
                     "local-storage-directory", wpeStoragePath,
@@ -2939,8 +2937,8 @@ static GSourceFuncs _handlerIntervention =
                     "indexeddb-directory", indexedDBPath,
                     "origin-storage-ratio", originStorageRatio,
                     "total-storage-ratio", totalStorageRatio,
-                    "base-data-directory", persistentPath,
-                    "base-cache-directory", volatilePath,
+                    "base-data-directory", _service->PersistentPath(),
+                    "base-cache-directory", _service->VolatilePath(),
                      nullptr);
                 g_free(indexedDBPath);
 #else
