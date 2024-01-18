@@ -184,15 +184,6 @@ namespace Plugin {
                 }
             }
 
-            PluginHost::ISubSystem* subSystem = service->SubSystems();
-
-            if (subSystem != nullptr) {
-                if (subSystem->IsActive(PluginHost::ISubSystem::DECRYPTION) == true) {
-                    subSystem->Set(PluginHost::ISubSystem::NOT_DECRYPTION, nullptr);
-                    subSystem->Release();
-                }
-            }
-
             _service->Release();
             _service = nullptr;
             _connectionId = 0;
