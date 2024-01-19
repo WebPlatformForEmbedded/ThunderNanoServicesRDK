@@ -76,7 +76,17 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *Monitor*) |
 | classname | string | Class name: *Monitor* |
 | locator | string | Library name: *libWPEFrameworkMonitor.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines in which state the plugin should be moved to at startup of the framework |
+| configuration | object | <sup>*(optional)*</sup>  |
+| configuration?.observables | array | <sup>*(optional)*</sup> List of observable plugin details |
+| configuration?.observables[#] | object | <sup>*(optional)*</sup>  |
+| configuration?.observables[#]?.callsign | string | <sup>*(optional)*</sup> Callsign of the plugin to be monitored |
+| configuration?.observables[#]?.memory | integer | <sup>*(optional)*</sup> Interval(in seconds) for a memory measurement |
+| configuration?.observables[#]?.memorylimit | integer | <sup>*(optional)*</sup> Memory threshold in bytes |
+| configuration?.observables[#]?.operational | integer | <sup>*(optional)*</sup> Interval(in seconds) to check the monitored processes |
+| configuration?.observables[#]?.restart | object | <sup>*(optional)*</sup> Restart limits for failures applying to the plugin |
+| configuration?.observables[#]?.restart?.window | integer | <sup>*(optional)*</sup> Time period(in seconds) within which failures must happen for the limit to be considered crossed |
+| configuration?.observables[#]?.restart?.limit | integer | <sup>*(optional)*</sup> Maximum number or restarts to be attempted |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -108,7 +118,7 @@ Sets new restart limits for a service.
 | :-------- | :-------- | :-------- |
 | params | object |  |
 | params.callsign | string | The callsign of a service to reset measurements snapshot of |
-| params.restart | object |  |
+| params.restart | object | Restart limits for failures applying to the service |
 | params.restart.limit | integer | Maximum number or restarts to be attempted |
 | params.restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 

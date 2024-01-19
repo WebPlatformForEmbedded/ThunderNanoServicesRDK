@@ -8,6 +8,56 @@
     "description": "The Monitor plugin provides a watchdog-like functionality for framework processes.",
     "version": "1.0"
   },
+  "configuration": {
+    "type": "object",
+    "properties": {
+      "configuration": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "observables": {
+            "type": "array",
+            "description": "List of observable plugin details",
+            "items": {
+              "type": "object",
+              "properties": {
+                "callsign": {
+                  "type": "string",
+                  "description": "Callsign of the plugin to be monitored"
+                },
+                "memory": {
+                  "type": "number",
+                  "description": "Interval(in seconds) for a memory measurement"
+                },
+                "memorylimit": {
+                  "type": "number",
+                  "description": "Memory threshold in bytes"
+                },
+                "operational": {
+                  "type": "number",
+                  "description": "Interval(in seconds) to check the monitored processes"
+                },
+                "restart": {
+                  "type": "object",
+                  "description": "Restart limits for failures applying to the plugin",
+                  "properties": {
+                    "window": {
+                      "type": "number",
+                      "description": "Time period(in seconds) within which failures must happen for the limit to be considered crossed"
+                    },
+                    "limit": {
+                      "type": "number",
+                      "description": "Maximum number or restarts to be attempted"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "interface": {
     "$ref": "{interfacedir}/Monitor.json#"
   }
