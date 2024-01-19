@@ -27,7 +27,7 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_SECURITYAGENT_STARTMODE "activated" CACHE STRING "Automatically start SecurityAgent plugin")
+set(PLUGIN_SECURITYAGENT_STARTMODE "Activated" CACHE STRING "Automatically start SecurityAgent plugin")
 set(PLUGIN_SECURITYAGENT_STARTUPORDER "" CACHE STRING "To configure startup order of SecurityAgent plugin")
 
 if(BUILD_REFERENCE)
