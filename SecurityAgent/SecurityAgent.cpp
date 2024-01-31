@@ -160,14 +160,6 @@ namespace Plugin {
 
     /* virtual */ void SecurityAgent::Deinitialize(PluginHost::IShell* service)
     {
-        PluginHost::ISubSystem* subSystem = service->SubSystems();
-
-        ASSERT(subSystem != nullptr);
-
-        if (subSystem != nullptr) {
-            subSystem->Set(PluginHost::ISubSystem::NOT_SECURITY, nullptr);
-            subSystem->Release();
-        }
         _acl.Clear();
         _dispatcher.reset(nullptr);
 
