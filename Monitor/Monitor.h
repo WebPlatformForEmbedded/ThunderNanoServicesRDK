@@ -305,6 +305,17 @@ namespace Plugin {
 
                     return (*this);
                 }
+                MetaData& operator=(const Monitor::MetaData& RHS)
+                {
+                    Allocated = RHS.Allocated();
+                    Resident = RHS.Resident();
+                    Shared = RHS.Shared();
+                    Process = RHS.Process();
+                    Operational = RHS.Operational();
+                    Count = RHS.Allocated().Measurements();
+
+                    return (*this);
+                }
 
             public:
                 Measurement Allocated;

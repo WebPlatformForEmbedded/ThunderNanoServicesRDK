@@ -22,6 +22,10 @@
 #include "TokenFactory.h"
 
 namespace WPEFramework {
+ENUM_CONVERSION_BEGIN(Plugin::SecurityAgent::tokentype)
+    { Plugin::SecurityAgent::DAC, _TXT("dac") },
+ENUM_CONVERSION_END(Plugin::SecurityAgent::tokentype)
+
 namespace Plugin {
 
     namespace {
@@ -37,6 +41,7 @@ namespace Plugin {
             { subsystem::SECURITY } 
         );
     }
+
 
     static Core::ProxyPoolType<Web::TextBody> textFactory(1);
 
@@ -104,7 +109,7 @@ namespace Plugin {
             aclFile = service->DataPath() + config.ACL.Value();
         }
 
-        TRACE(Security, (_T("SecurityAgent: Reading acl file %s"), aclFile.Name().c_str()));
+        SYSLOG(Logging::Startup, (_T("SecurityAgent: Reading acl file %s"), aclFile.Name().c_str()));
 
         if ((aclFile.Exists() == true) && (aclFile.Open(true) == true)) {
 
@@ -120,6 +125,15 @@ namespace Plugin {
             }
         }
 
+        _dacDir = config.DAC.Value();
+        if (!_dacDir.empty()) {
+            _dacDirCallback = Core::ProxyType<DirectoryCallback>::Create(_dacDir, _dac);
+            _dacDirCallback->Updated();
+
+            Core::Directory(_dacDir.c_str()).CreatePath();
+            Core::FileSystemMonitor::Instance().Register(&(*_dacDirCallback), _dacDir);
+        }
+
         ASSERT(_dispatcher == nullptr);
         ASSERT(subSystem != nullptr);
 
@@ -129,7 +143,7 @@ namespace Plugin {
             connector = service->VolatilePath() + _T("token");
         }
 
-        TRACE(Security, (_T("SecurityAgent TokenDispatcher connector path %s"),connector.c_str()));
+        SYSLOG(Logging::Notification, (_T("SecurityAgent TokenDispatcher connector path %s"),connector.c_str()));
 
         _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
         _dispatcher.reset(new TokenDispatcher(Core::NodeId(connector.c_str()), service->ProxyStubPath(), this, _engine));
@@ -166,6 +180,12 @@ namespace Plugin {
         if (_engine.IsValid()) {
             _engine.Release();
         }
+
+	if (_dacDirCallback.IsValid()) {
+            Core::FileSystemMonitor::Instance().Unregister(&(*_dacDirCallback), _dacDir);
+            _dacDirCallback.Release();
+        }
+        _dac.Clear();
     }
 
     /* virtual */ string SecurityAgent::Information() const
@@ -176,7 +196,7 @@ namespace Plugin {
 
     /* virtual */ uint32_t SecurityAgent::CreateToken(const uint16_t length, const uint8_t buffer[], string& token)
     {
-        TRACE(Security, (_T("Creating Token for %.*s"), length, buffer));
+        SYSLOG(Logging::Notification, (_T("Creating Token for %.*s"), length, buffer));
 
         // Generate the token from the buffer coming in...
         auto newToken = JWTFactory::Instance().Element();
@@ -192,20 +212,27 @@ namespace Plugin {
             if (token != _testtoken) {
 
                 auto webToken = JWTFactory::Instance().Element();
-                    uint16_t load = webToken->PayloadLength(token);
+                uint16_t load = webToken->PayloadLength(token);
 
-                    // Validate the token
+                // Validate the token
+                if (load != static_cast<uint16_t>(~0)) {
+                    // It is potentially a valid token, extract the payload.
+                    uint8_t* payload = reinterpret_cast<uint8_t*>(ALLOCA(load));
+
+                    load = webToken->Decode(token, load, payload);
+
                     if (load != static_cast<uint16_t>(~0)) {
-                        // It is potentially a valid token, extract the payload.
-                        uint8_t* payload = reinterpret_cast<uint8_t*>(ALLOCA(load));
+                        // Seems like we extracted a valid payload, time to create an security context
+                        Payload payloadJson;
+                        payloadJson.FromString(string(reinterpret_cast<const TCHAR*>(payload), load));
 
-                            load = webToken->Decode(token, load, payload);
-
-                        if (load != static_cast<uint16_t>(~0)) {
-                            // Seems like we extracted a valid payload, time to create an security context
-                            result = Core::ServiceType<SecurityContext>::Create<SecurityContext>(&_acl, load, payload, _servicePrefix);
+                        if (payloadJson.Type.IsSet() && (payloadJson.Type == tokentype::DAC)) {
+                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_dac, load, payload, _servicePrefix);
+                        } else {
+                            result = Core::Service<SecurityContext>::Create<SecurityContext>(&_acl, load, payload, _servicePrefix);
                         }
                     }
+                }
             }
 #ifdef SECURITY_TESTING_MODE
             else {
@@ -277,7 +304,7 @@ namespace Plugin {
                         } else {
                             result->ErrorCode = Web::STATUS_OK;
                             result->Message = _T("Valid token");
-                            TRACE(Security, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
+                            TRACE(Trace::Information, (_T("Token contents: %s"), reinterpret_cast<const TCHAR*>(payload)));
                         }
                     }
                 }

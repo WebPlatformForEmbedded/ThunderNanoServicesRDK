@@ -214,7 +214,8 @@ namespace Plugin {
             class Group : public Core::JSON::Container {
             public:
                 Group()
-                    : URL()
+                    : Core::JSON::Container()
+                    , URL()
                     , Role()
                 {
                     Add(_T("url"), &URL);
@@ -331,7 +332,7 @@ namespace Plugin {
             }
 
         public:
-            bool Allowed(const string callsign, const string& method) const
+            bool Allowed(const string& callsign, const string& method) const
             {
                 bool pluginFound = false;
 
@@ -382,6 +383,8 @@ namespace Plugin {
         }
         void Clear()
         {
+            Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
+
             _urlMap.clear();
             _filterMap.clear();
             _unusedRoles.clear();
@@ -390,6 +393,8 @@ namespace Plugin {
         const Filter* FilterMapFromURL(const string& URL) const
         {
             auto origin = GetUrlOrigin(URL);
+
+            Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
             const Filter* result = nullptr;
             std::smatch matchList;
@@ -411,6 +416,14 @@ namespace Plugin {
 
             return (result);
         }
+        bool Allowed(const string& URL, const string& callsign, const string& method) const
+        {
+            Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
+
+            const Filter* filter = FilterMapFromURL(URL);
+
+            return ((filter != nullptr) && (filter->Allowed(callsign, method)));
+        }
         uint32_t Load(Core::File& source)
         {
             JSONACL controlList;
@@ -419,6 +432,7 @@ namespace Plugin {
             if (error.IsSet() == true) {
                 SYSLOG(Logging::ParsingError, (_T("Parsing failed with %s"), ErrorDisplayMessage(error.Value()).c_str()));
             }
+            Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
             _unusedRoles.clear();
 
             JSONACL::Roles::Iterator rolesIndex = controlList.ACL.Elements();
@@ -453,9 +467,17 @@ namespace Plugin {
                     
                     // create regex for url
                     string url_regex = CreateUrlRegex(index.Current().URL.Value());
-                    
-                    _urlMap.emplace_back(std::pair<string, Filter&>(
-                        url_regex, entry));
+
+                    if (std::find_if(
+                            _urlMap.begin(), _urlMap.end(),
+                            [&](const std::pair<string, Filter&>& x) {
+                                // check if already exists
+                                return ((x.first == url_regex) && (&x.second == &entry));
+                            })
+                        == _urlMap.end()) {
+                        _urlMap.emplace_back(std::pair<string, Filter&>(
+                            url_regex, entry));
+                    }
 
                     std::list<string>::iterator found = std::find(_unusedRoles.begin(), _unusedRoles.end(), role);
 
@@ -473,6 +495,7 @@ namespace Plugin {
         std::map<string, Filter> _filterMap;
         std::list<string> _unusedRoles;
         std::list<string> _undefinedURLS;
+        mutable Core::CriticalSection _adminLock;
     };
 }
 }
