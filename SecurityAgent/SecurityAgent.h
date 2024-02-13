@@ -72,7 +72,7 @@ namespace Plugin {
                     _parentInterface->AddRef();
 
 
-                    TRACE(Trace::Information, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
+                    TRACE(Security, ("SecurityAgent interface(IAuthenticate) acquired => %p", this));
                     result = _parentInterface;
                 }
                 return (result);
