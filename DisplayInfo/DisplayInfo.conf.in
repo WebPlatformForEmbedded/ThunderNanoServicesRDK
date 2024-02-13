@@ -1,4 +1,5 @@
 startmode = "@PLUGIN_DISPLAYINFO_STARTMODE@"
+startuporder = "@PLUGIN_DISPLAYINFO_STARTUPORDER@"
 
 configuration = JSON()
 
@@ -14,7 +15,6 @@ configuration.add("gpuMemoryFreePattern", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_FREE_P
 configuration.add("gpuMemoryTotalPattern", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_TOTAL_PATTERN@")
 configuration.add("gpuMemoryUnitMultiplier", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_UNIT_MULTIPLIER@")
 configuration.add("hdcplevel", "@PLUGIN_DISPLAYINFO_HDCP_LEVEL@")
-configuration.add("startuporder", "@PLUGIN_DISPLAYINFO_STARTUPORDER@")
 
 root = JSON()
 root.add("mode", "@PLUGIN_DISPLAYINFO_MODE@")

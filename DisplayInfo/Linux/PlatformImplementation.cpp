@@ -132,7 +132,7 @@ namespace Plugin {
         }
 
     private:
-        /** 
+        /**
          * The following are structures copied from udev in order to properly parse messages coming in through
          * the socket connection(UdevObserver class).
          * Found @ https://github.com/systemd/systemd/blob/master/src/libsystemd/sd-device/device-monitor.c#L50
@@ -784,6 +784,6 @@ namespace Plugin {
         mutable std::mutex _observersLock;
     };
 
-    SERVICE_REGISTRATION(DisplayInfoImplementation, 1, 0);
+    SERVICE_REGISTRATION(DisplayInfoImplementation, 1, 0)
 }
 }

@@ -29,6 +29,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_LOCATIONSYNC_STARTMODE "Activated" CACHE STRING "Automatically start LocationSync plugin")
 set(PLUGIN_LOCATIONSYNC_URI "location.webplatformforembedded.org" CACHE STRING "URI to request the location information")
+set(PLUGIN_LOCATIONSYNC_STARTUPORDER "" CACHE STRING "To configure startup order of LocationSync plugin")
 set(PLUGIN_LOCATIONSYNC_OVERRIDE_TIMEZONE CACHE STRING "Override Timezone value")
 
 if(BUILD_REFERENCE)
@@ -49,7 +50,6 @@ add_library(${MODULE_NAME} SHARED
 set_target_properties(${MODULE_NAME} PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED YES)
-
 target_compile_options (${MODULE_NAME} PRIVATE -Wno-psabi)
 
 target_link_libraries(${MODULE_NAME} 

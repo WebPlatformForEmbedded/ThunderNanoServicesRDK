@@ -555,7 +555,7 @@ POP_WARNING()
             _adminLock.Lock();
 
             if (_state == IPV4_INPROGRESS) {
-                if(_retries != UINT32_MAX) {
+                if (_retries != UINT32_MAX) {
                     _state = (_retries-- == 0 ? FAILED : ACTIVE);
                 }
                 else {
@@ -600,7 +600,6 @@ POP_WARNING()
                     }
                 }
             }
-
 
             if (_state == LOADING) {
                 _state = LOADED;
