@@ -29,6 +29,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_PACKAGER_STARTMODE "Activated" CACHE STRING "Automatically start Packager plugin")
 set(PLUGIN_PACKAGER_MODE "Local" CACHE STRING "Controls if the plugin should run in its own process, in process or remote")
+set(PLUGIN_PACKAGER_STARTUPORDER "" CACHE STRING "To configure startup order of Packager plugin")
 
 # deprecated/legacy flags support
 if(PLUGIN_PACKAGER_OUTOFPROCESS STREQUAL "false")

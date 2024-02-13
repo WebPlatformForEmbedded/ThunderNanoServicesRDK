@@ -92,7 +92,7 @@ namespace Plugin {
 
                 return (*this);
             }
- 
+
         public:
             bool HasMeasurements() const {
                 return ((_resident.Measurements() != 0) || (_allocated.Measurements() != 0) || (_shared.Measurements() != 0) || (_process.Measurements() != 0));
@@ -579,7 +579,7 @@ namespace Plugin {
                     _operational = (memory != nullptr);
                 }
 
-                Core::ProxyType<const Exchange::IMemory> Source() const 
+                Core::ProxyType<const Exchange::IMemory> Source() const
                 {
                     Core::ProxyType<const Exchange::IMemory> source;
                     _adminLock.Lock();
@@ -641,7 +641,7 @@ namespace Plugin {
                 std::atomic<uint16_t> _restartWindow; // no ordering needed, atomic should suffice
                 Core::Time _restartWindowStart; // only used in job (indirectly), no protection needed
                 uint32_t _restartCount; // only used in job (indirectly), no protection needed
-                std::atomic<uint8_t> _restartLimit;  // no ordering needed, atomic should suffice
+                std::atomic<uint8_t> _restartLimit; // no ordering needed, atomic should suffice
                 MetaData _measurement;
                 std::atomic<bool> _operational; // no ordering needed, atomic should suffice
                 const bool _operationalEvaluate;
@@ -715,12 +715,12 @@ POP_WARNING()
                         _monitor.emplace(std::piecewise_construct,
                                          std::forward_as_tuple(callSign),
                                          std::forward_as_tuple(
-                                            element.Operational.Value() >= 0, 
-                                            interval, 
-                                            memory, 
-                                            memoryThreshold, 
-                                            baseTime, 
-                                            restartWindow, 
+                                            element.Operational.Value() >= 0,
+                                            interval,
+                                            memory,
+                                            memoryThreshold,
+                                            baseTime,
+                                            restartWindow,
                                             restartLimit)
                                     );
                     }
@@ -741,7 +741,6 @@ POP_WARNING()
             void Activated (const string& callsign, PluginHost::IShell* service) override
             {
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
-                
 
                 if (index != _monitor.end()) {
 
@@ -758,9 +757,7 @@ POP_WARNING()
                     if (_job.Submit() == true) {
                         TRACE(Trace::Information, (_T("Starting to probe as active observee appeared.")));
                     }
-
-                } 
-
+                }
             }
             void Deactivated (const string& callsign, PluginHost::IShell* service) override
             {
@@ -789,7 +786,7 @@ POP_WARNING()
                             TRACE(Trace::Error, (_T("Restarting %s again because we detected it misbehaved."), callsign.c_str()));
                             Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::AUTOMATIC));
                         }
-                    } 
+                    }
                 }
 
             }
@@ -829,7 +826,7 @@ POP_WARNING()
                 return (found);
             }
 
-            void AddElementToRespone( Core::JSON::ArrayType<JsonData::Monitor::InfoInfo>& response, const string& callsign, const MonitorObject& object) const {
+            void AddElementToResponse( Core::JSON::ArrayType<JsonData::Monitor::InfoInfo>& response, const string& callsign, const MonitorObject& object) const {
                 const MetaData& metaData = object.Measurement();
                 JsonData::Monitor::InfoInfo info;
                 info.Observable = callsign;
@@ -859,11 +856,11 @@ POP_WARNING()
                 if (callsign.empty() == false) {
                     auto element = _monitor.find(callsign);
                     if (element != _monitor.end()) {
-                        AddElementToRespone(*response, element->first, element->second);
+                        AddElementToResponse(*response, element->first, element->second);
                     }
                 } else {
                     for (auto& element : _monitor) {
-                        AddElementToRespone(*response, element.first, element.second);
+                        AddElementToResponse(*response, element.first, element.second);
                     }
                 }
             }

@@ -25,7 +25,7 @@ namespace WPEFramework {
 
 namespace Plugin {
 
-    SERVICE_REGISTRATION(RoomMaintainer, 1, 0);
+    SERVICE_REGISTRATION(RoomMaintainer, 1, 0)
 
     /* virtual */ Exchange::IRoomAdministrator::IRoom* RoomMaintainer::Join(const string& roomId, const string& userId,
                                                                             Exchange::IRoomAdministrator::IRoom::IMsgNotification* messageSink)

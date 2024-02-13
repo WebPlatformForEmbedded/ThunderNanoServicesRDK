@@ -1,4 +1,5 @@
 startmode = "@PLUGIN_MESSENGER_STARTMODE@"
+startuporder = "@PLUGIN_MESSENGER_STARTUPORDER@"
 
 configuration = JSON()
 
