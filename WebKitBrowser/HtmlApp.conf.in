@@ -1,5 +1,6 @@
 precondition = ["Internet"]
 startmode = "@PLUGIN_HTML_APP_STARTMODE@"
+resumed =  "true"
 persistentpathpostfix = "@PLUGIN_HTML_APP_PERSISTENTPATHPOSTFIX@"
 startuporder = "@PLUGIN_HTML_APP_STARTUPORDER@"
 
