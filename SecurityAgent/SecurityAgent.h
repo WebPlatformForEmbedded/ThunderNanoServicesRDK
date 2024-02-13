@@ -22,8 +22,9 @@
 #include "Module.h"
 #include "AccessControlList.h"
 
-#include <securityagent/IPCSecurityToken.h>
 #include <interfaces/json/JsonData_SecurityAgent.h>
+
+#include <core/FileObserver.h>
 
 namespace WPEFramework {
 namespace Plugin {

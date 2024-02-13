@@ -171,7 +171,7 @@ namespace Plugin {
         return _T("");
     }
 
-    /* virtual */ void SecurityAgent::Deinitialize(PluginHost::IShell* service)
+    /* virtual */ void SecurityAgent::Deinitialize(PluginHost::IShell* /* service */)
     {
         _acl.Clear();
         _dispatcher.reset(nullptr);
