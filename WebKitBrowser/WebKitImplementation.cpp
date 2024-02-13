@@ -532,7 +532,7 @@ static GSourceFuncs _handlerIntervention =
                     Core::JSON::DecUInt32 Limit;
                 };
 
-		class WebProcess : public Settings {
+                class WebProcess : public Settings {
                 public:
                     WebProcess(const WebProcess&) = delete;
                     WebProcess& operator=(const WebProcess&) = delete;

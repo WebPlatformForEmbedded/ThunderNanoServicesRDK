@@ -1,5 +1,6 @@
 precondition = ["Internet"]
 startmode = "@PLUGIN_LIGHTNING_APP_STARTMODE@"
+resumed =  "true"
 persistentpathpostfix = "@PLUGIN_LIGHTNING_APP_PERSISTENTPATHPOSTFIX@"
 startuporder = "@PLUGIN_LIGHTNING_APP_STARTUPORDER@"
 
