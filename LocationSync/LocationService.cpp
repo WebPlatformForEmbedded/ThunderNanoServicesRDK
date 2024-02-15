@@ -266,12 +266,7 @@ namespace Plugin {
         }
         void FromString(const string& data) override {
             TRACE(Trace::Information, (_T("Metrological: Received a response: [%s]!"), data.c_str()));
-
-                _data.IElement::FromString(data);
-
- string parsed;
-		_data.IElement::ToString(parsed);
-            TRACE(Trace::Information, (_T("Metrological: reverted response: [%s]!"), parsed.c_str()));
+            _data.IElement::FromString(data);
         }
 
     private:
@@ -514,7 +509,7 @@ POP_WARNING()
         }
 
         // Finish the cycle..
-        _activity.Submit();
+        _activity.Reschedule(Core::Time::Now());
     }
 
     void LocationService::Send(const Core::ProxyType<Web::Request>& element VARIABLE_IS_NOT_USED) /* override */
@@ -534,7 +529,7 @@ POP_WARNING()
         } else if (Link().HasError() == true) {
             Close(0);
 
-            _activity.Submit();
+            _activity.Reschedule(Core::Time::Now());
         }
     }
 
@@ -569,13 +564,13 @@ POP_WARNING()
 
                 if (remote.IsValid() == false) {
 
-                    TRACE(Trace::Warning, (_T("DNS resolving failed. Sleep for %d mS for attempt %u"), _tryInterval, _retries));
+                    TRACE(Trace::Warning, (_T("DNS resolving failed. Sleep for %d mS for attempt %u"), _tryInterval/10, _retries));
 
                     // Name resolving does not even work. Retry this after a few seconds, if we still can..
                     if (_retries != UINT32_MAX && _retries-- == 0)
                         _state = FAILED;
                     else
-                        result = _tryInterval;
+                        result = _tryInterval/10;
                 } else {
                     Link().LocalNode(remote.AnyInterface());
                     Link().RemoteNode(remote);
