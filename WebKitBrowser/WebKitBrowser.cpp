@@ -438,10 +438,10 @@ namespace WebKitBrowser {
 
                 result = _main.Resident();
 
-                _children.Reset();
+                children.Reset();
 
-                while (_children.Next() == true) {
-                    result += _children.Current().Resident();
+                while (children.Next() == true) {
+                    result += children.Current().Resident();
                 }
             }
 
@@ -465,10 +465,10 @@ namespace WebKitBrowser {
 
                 result = _main.Allocated();
 
-                _children.Reset();
+                children.Reset();
 
-                while (_children.Next() == true) {
-                    result += _children.Current().Allocated();
+                while (children.Next() == true) {
+                    result += children.Current().Allocated();
                 }
             }
 
@@ -490,10 +490,10 @@ namespace WebKitBrowser {
 
                 result = _main.Shared();
 
-                _children.Reset();
+                children.Reset();
 
-                while (_children.Next() == true) {
-                    result += _children.Current().Shared();
+                while (children.Next() == true) {
+                    result += children.Current().Shared();
                 }
             }
 
@@ -504,9 +504,10 @@ namespace WebKitBrowser {
             // Refresh the children list !!!
             _adminLock.Lock();
             _children = Core::ProcessInfo::Iterator(_main.Id());
+            uint32_t nbrchildren = _children.Count();
             _adminLock.Unlock();
 
-            return ((_startTime == TimePoint::min()) || (_main.IsActive() == true) ? 1 : 0) + _children.Count();
+            return ((_startTime == TimePoint::min()) || (_main.IsActive() == true) ? 1 : 0) + nbrchildren;
         }
         bool IsOperational() const override
         {
@@ -527,15 +528,15 @@ namespace WebKitBrowser {
                 _adminLock.Unlock();
 
                 //!< If there are less children than in the the mandatoryProcesses struct, we are done and return false.
-                if (_children.Count() >= RequiredChildren) {
+                if (children.Count() >= RequiredChildren) {
 
-                    _children.Reset();
+                    children.Reset();
 
                     //!< loop over all child processes as long as we are operational.
-                    while ((requiredProcesses != 0) && (true == _children.Next())) {
+                    while ((requiredProcesses != 0) && (true == children.Next())) {
 
                         uint8_t count(0);
-                        string name(_children.Current().Name());
+                        string name(children.Current().Name());
 
                         while ((count < RequiredChildren) && (name != mandatoryProcesses[count])) {
                             ++count;
@@ -543,7 +544,7 @@ namespace WebKitBrowser {
 
                         //<! this is a mandatory process and if its still active reset its bit in requiredProcesses.
                         //   If not we are not completely operational.
-                        if ((count < RequiredChildren) && (_children.Current().IsActive() == true)) {
+                        if ((count < RequiredChildren) && (children.Current().IsActive() == true)) {
                             requiredProcesses &= (~(1 << count));
                         }
                     }
