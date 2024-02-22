@@ -24,8 +24,6 @@
 
 #include <interfaces/json/JsonData_SecurityAgent.h>
 
-#include <core/FileObserver.h>
-
 namespace WPEFramework {
 namespace Plugin {
 
