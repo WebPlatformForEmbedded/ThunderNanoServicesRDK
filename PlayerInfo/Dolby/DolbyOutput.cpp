@@ -95,7 +95,7 @@ namespace WPEFramework
             mutable Core::CriticalSection _adminLock;
         };
 
-        SERVICE_REGISTRATION(DolbyOutputImplementation, 1, 0);
+        SERVICE_REGISTRATION(DolbyOutputImplementation, 1, 0)
 
     } // namespace Plugin
 } // namespace WPEFramework

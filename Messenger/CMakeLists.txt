@@ -29,6 +29,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_MESSENGER_STARTMODE "Activated" CACHE STRING "Automatically start Messenger plugin")
 set(PLUGIN_MESSENGER_MODE "Off" CACHE STRING "Controls if the plugin should run in its own process")
+set(PLUGIN_MESSENGER_STARTUPORDER "" CACHE STRING "Automatically start Messenger plugin")
 
 # deprecated/legacy flags support
 if(PLUGIN_MESSENGER_OUTOFPROCESS STREQUAL "false")

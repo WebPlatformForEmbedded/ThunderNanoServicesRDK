@@ -339,7 +339,7 @@ namespace WPEFramework {
             ICallback* _callback;
         };
 
-        SERVICE_REGISTRATION(RustBridgeImplementation, 1, 0);
+        SERVICE_REGISTRATION(RustBridgeImplementation, 1, 0)
     }
 } // namespace WPEFramework
 

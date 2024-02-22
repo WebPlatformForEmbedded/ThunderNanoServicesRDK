@@ -33,6 +33,8 @@
 #include "libIBusDaemon.h"
 #include "dsMgr.h"
 
+#include "manager.hpp"
+
 namespace WPEFramework {
 namespace Plugin {
 
@@ -100,7 +102,7 @@ private:
         static inline FeatureList GstRegistryGetElementForMediaType(GList* elementsFactories, MediaTypes&& mediaTypes) {
             FeatureList candidates{gst_element_factory_list_filter(elementsFactories, mediaTypes.get(), GST_PAD_SINK, false)};
 
-            return std::move(candidates);
+            return (candidates);
         }
 
     };
@@ -119,6 +121,7 @@ public:
         UpdateAudioCodecInfo();
         UpdateVideoCodecInfo();
         Utils::IARM::init();
+        device::Manager::Initialize();
         IARM_Result_t res;
         IARM_CHECK( IARM_Bus_RegisterEventHandler(IARM_BUS_DSMGR_NAME,IARM_BUS_DSMGR_EVENT_AUDIO_MODE, AudioModeHandler) );
         PlayerInfoImplementation::_instance = this;
@@ -131,7 +134,7 @@ public:
         _audioCodecs.clear();
         _videoCodecs.clear();
         IARM_Result_t res;
-        IARM_CHECK( IARM_Bus_UnRegisterEventHandler(IARM_BUS_DSMGR_NAME,IARM_BUS_DSMGR_EVENT_AUDIO_MODE) );
+        IARM_CHECK( IARM_Bus_RemoveEventHandler(IARM_BUS_DSMGR_NAME,IARM_BUS_DSMGR_EVENT_AUDIO_MODE, AudioModeHandler) );
         PlayerInfoImplementation::_instance = nullptr;
     }
 
@@ -461,6 +464,8 @@ private:
             {"video/x-h264, profile=(string)high", Exchange::IPlayerProperties::VideoCodec::VIDEO_H264},
             {"video/x-h265", Exchange::IPlayerProperties::VideoCodec::VIDEO_H265},
             {"video/mpeg, mpegversion=(int){1,2}, systemstream=(boolean)false", Exchange::IPlayerProperties::VideoCodec::VIDEO_MPEG},
+            {"video/mpeg, mpegversion=(int)2, systemstream=(boolean)false", Exchange::IPlayerProperties::VideoCodec::VIDEO_MPEG2},
+            {"video/mpeg, mpegversion=(int)4, systemstream=(boolean)false", Exchange::IPlayerProperties::VideoCodec::VIDEO_MPEG4},
             {"video/x-vp8", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP8},
             {"video/x-vp9", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP9},
             {"video/x-vp10", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP10}

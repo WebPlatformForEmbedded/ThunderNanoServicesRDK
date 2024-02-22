@@ -1,4 +1,5 @@
 startmode = "@PLUGIN_PLAYERINFO_STARTMODE@"
+startuporder = "@PLUGIN_PLAYERINFO_STARTUPORDER@"
 
 configuration = JSON()
 
