@@ -1,4 +1,5 @@
 startmode = "@PLUGIN_LOCATIONSYNC_STARTMODE@"
+startuporder = "@PLUGIN_LOCATIONSYNC_STARTUPORDER@"
 
 configuration = JSON()
 
@@ -6,5 +7,3 @@ configuration.add("interval", 10)
 configuration.add("retries", 20)
 configuration.add("source", "@PLUGIN_LOCATIONSYNC_URI@")
 configuration.add("timezone", "@PLUGIN_LOCATIONSYNC_OVERRIDE_TIMEZONE@")
-
-
