@@ -53,6 +53,10 @@
 #include "TimeZoneSupport.h"
 #endif
 
+#if defined(ENABLE_TESTING)
+#include <TestRunnerJS.h>
+#endif
+
 using namespace WPEFramework;
 
 static Core::NodeId GetConnectionNode()
@@ -174,6 +178,11 @@ private:
         JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
+#ifdef  ENABLE_TESTING
+        if (host->_enableTesting)
+            JavaScript::TestRunner::InjectJS(world, page, frame);
+#endif  // ENABLE_TESTING
+
     }
     static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
                                     WebKitWebPage* page,
@@ -216,6 +225,11 @@ POP_WARNING()
             JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
         }
 #endif
+#ifdef ENABLE_TESTING
+        else if (g_str_has_prefix(name, Testing::Tags::TestRunnerPrefix)) {
+            JavaScript::TestRunner::HandleMessageToPage(page, message);
+        }
+#endif
         return TRUE;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
@@ -244,6 +258,7 @@ private:
 
     string _consoleLogPrefix;
     gboolean _logToSystemConsoleEnabled;
+    gboolean _enableTesting;
     WebKitWebExtension* _extension;
 } _wpeFrameworkClient;
 
@@ -267,4 +282,3 @@ G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(WebKitWebExt
 // explicit instantiation so that -O1/2/3 flags do not introduce undefined symbols
 template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Input, 4u>::AddRef() const;
 template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Output, 5u>::AddRef() const;
-
