@@ -64,16 +64,17 @@ POP_WARNING()
     {
         string result;
         Config config;
+        ASSERT(service != nullptr);
         config.FromString(service->ConfigLine());
 
         if (LocationService::IsSupported(config.Source.Value()) == Core::ERROR_NONE) {
-            if( ( config.TimeZone.IsSet() == true ) && ( config.TimeZone.Value().empty() == false ) ) {
+            if ((config.TimeZone.IsSet() == true) && ( config.TimeZone.Value().empty() == false)) {
                 _locationinfo.TimeZone(config.TimeZone.Value());
                 _timezoneoverriden = true;
                 UpdateSystemTimeZone(config.TimeZone.Value());
             }
 
-            if( ( config.Latitude.IsSet() == true ) && ( config.Longitude.IsSet() == true ) ) {
+            if ((config.Latitude.IsSet() == true) && ( config.Longitude.IsSet() == true)) {
                 _locationinfo.Latitude(config.Latitude.Value());
                 _locationinfo.Longitude(config.Longitude.Value());
             }
@@ -112,13 +113,15 @@ POP_WARNING()
 
             Exchange::Controller::IConfiguration* controller = nullptr;
             if ( (_timezoneoverriden == true) &&
-               ( _locationinfo.TimeZone() != config.TimeZone.Value() ) &&
-               ( ( controller = _service->QueryInterfaceByCallsign<Exchange::Controller::IConfiguration>(_T("")) ) != nullptr )
+               ( _locationinfo.TimeZone() != config.TimeZone.Value()) &&
+               ( ( controller = _service->QueryInterfaceByCallsign<Exchange::Controller::IConfiguration>(_T(""))) != nullptr)
             ) {
                 config.TimeZone = _locationinfo.TimeZone();
                 string newconfig;
                 config.ToString(newconfig);
                 _service->ConfigLine(newconfig);
+
+                ASSERT(controller != nullptr);
                 controller->Persist();
                 controller->Release();
             }
@@ -240,7 +243,7 @@ POP_WARNING()
 
         _timezoneoverriden = true;
 
-        if(_locationinfo.TimeZone() != timeZone) {
+        if (_locationinfo.TimeZone() != timeZone) {
 
             _locationinfo.TimeZone(timeZone);
 
@@ -251,7 +254,7 @@ POP_WARNING()
             // let's check if we need to update the subsystem. As there is no support in this plugin for unsetting the Location subsystem that is not taken into account
             PluginHost::ISubSystem* subSystem = _service->SubSystems();
             ASSERT(subSystem != nullptr);
-            if(subSystem != nullptr) {
+            if (subSystem != nullptr) {
                 SetLocationSubsystem(*subSystem, true);
                 subSystem->Release();
             }
@@ -282,13 +285,13 @@ POP_WARNING()
     }
 
     void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {
-        if(update == false) {
+        if (update == false) {
             _adminLock.Lock();
             subsystem.Set(PluginHost::ISubSystem::LOCATION, &_locationinfo);
             _adminLock.Unlock();
         } else {
             _adminLock.Lock();
-            if(subsystem.IsActive(PluginHost::ISubSystem::LOCATION) == true) {
+            if (subsystem.IsActive(PluginHost::ISubSystem::LOCATION) == true) {
                 subsystem.Set(PluginHost::ISubSystem::LOCATION, &_locationinfo);
             }
             _adminLock.Unlock();
@@ -300,27 +303,27 @@ POP_WARNING()
         if ((_sink.Location() != nullptr) && (_sink.Valid() == true)) {  // _sink.Location() != nullptr basically is always true
             string newtimezone;
             _adminLock.Lock();
-            if( (_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min()) ) {
+            if ((_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min())) {
                 _locationinfo.Latitude(_sink.Location()->Latitude());
                 _locationinfo.Longitude(_sink.Location()->Longitude());
             } 
             _locationinfo.Country(_sink.Location()->Country());
             _locationinfo.Region(_sink.Location()->Region());
             _locationinfo.City(_sink.Location()->City());
-            if( (_sink.Location()->TimeZone().empty() == false) && (_timezoneoverriden == false) ) {
+            if ((_sink.Location()->TimeZone().empty() == false) && (_timezoneoverriden == false)) {
                 newtimezone = _sink.Location()->TimeZone();
                 _locationinfo.TimeZone(newtimezone);
             }
             _adminLock.Unlock();
 
-            if(newtimezone.empty() == false) {
+            if (newtimezone.empty() == false) {
                 UpdateSystemTimeZone(newtimezone);
                 NotifyTimeZoneChanged(newtimezone);
             }
         } else {
             _adminLock.Lock();
             // if they are not overriden in the config and we cannot get them from the lookup, set them to default
-            if( (_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min()) ) {
+            if ((_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min())) {
                 _locationinfo.Latitude(51977956);
                 _locationinfo.Longitude(5726384);
             } 
@@ -331,7 +334,7 @@ POP_WARNING()
         ASSERT(subSystem != nullptr);
 
         if (subSystem != nullptr) { 
-            if( (_activateOnFailure == true) || (_sink.Location() == nullptr) || ( _sink.Valid() == true ) ) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
+            if ((_activateOnFailure == true) || (_sink.Location() == nullptr) || ( _sink.Valid() == true)) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
                 subSystem->Set(PluginHost::ISubSystem::INTERNET, _sink.Network());
                 SetLocationSubsystem(*subSystem, false);
                 event_locationchange();
@@ -345,7 +348,7 @@ POP_WARNING()
 
     void LocationSync::UpdateSystemTimeZone(const string& newtimezone) 
     {
-        if( newtimezone != FactorySetTimeZone ) {
+        if (newtimezone != FactorySetTimeZone) {
             Core::SystemInfo::Instance().SetTimeZone(newtimezone, false);
         }
     }

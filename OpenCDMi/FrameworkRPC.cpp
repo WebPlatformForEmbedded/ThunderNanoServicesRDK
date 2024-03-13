@@ -355,7 +355,7 @@ namespace Plugin {
                                         Size(clearContentSize);
                                     }
 
-                                    if(payloadBuffer != clearContent) {
+                                    if (payloadBuffer != clearContent) {
                                         // This wasn't a case of in-place decryption. So, make sure the decrypted buffer is copied to memory mapped file and released
                                         // Adjust the buffer on our side (this process) on what we will write back
                                         SetBuffer(0, clearContentSize, clearContent);
@@ -394,6 +394,7 @@ namespace Plugin {
                         : _parent(*parent)
                         , _callback(callback)
                     {
+                        ASSERT(_callback != nullptr);
                         _callback->AddRef();
                     }
                     Sink(SessionImplementation* parent)
@@ -573,6 +574,7 @@ POP_WARNING()
 
                 std::string Metadata() const override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return _mediaKeySession->GetMetadata();
                 }
 
@@ -602,10 +604,9 @@ POP_WARNING()
 
                     Exchange::OCDM_RESULT result = Exchange::OCDM_SUCCESS;
                     _adminLock.Lock();
-                    if( _buffer == nullptr ) {
+                    if (_buffer == nullptr ) {
 
-                        if (_parent._administrator.AcquireBuffer(bufferID) == true)
-                        {
+                        if (_parent._administrator.AcquireBuffer(bufferID) == true) {
                             _buffer = new DataExchange(_mediaKeySession, bufferID, _parent.DefaultSize());
                             _adminLock.Unlock();
                             
@@ -641,10 +642,10 @@ POP_WARNING()
                 {
                     std::string bufferid;
                     _adminLock.Lock();
-                    if( _buffer != nullptr ) {
-                        _adminLock.Unlock();
+                    if (_buffer != nullptr) {
                         bufferid = _buffer->Name();
                     }
+                    _adminLock.Unlock();
                     return bufferid;
                 }
 
@@ -664,6 +665,7 @@ POP_WARNING()
                 void Update(const uint8_t* keyMessage, const uint16_t keyLength) override
                 {
                     TRACE(Trace::Information, ("Update(%d)", keyLength));
+                    ASSERT(_mediaKeySession != nullptr);
                     return (_mediaKeySession->Update(keyMessage, keyLength));
                 }
 
@@ -671,6 +673,7 @@ POP_WARNING()
                 Exchange::OCDM_RESULT Remove() override
                 {
                     TRACE(Trace::Information, ("Remove()"));
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)(_mediaKeySession->Remove());
                 }
 
@@ -678,12 +681,14 @@ POP_WARNING()
                 void Close() override
                 {
                     TRACE(Trace::Information, ("Close()"));
+                    ASSERT(_mediaKeySession != nullptr);
 
                     _mediaKeySession->Close();
                 }
 
                 void ResetOutputProtection() override {
                     TRACE(Trace::Information, (_T("ResetOutputProtection! %p"), this));
+                    ASSERT(_mediaKeySession != nullptr);
                     _mediaKeySession->ResetOutputProtection();
                 }
 
@@ -694,16 +699,19 @@ POP_WARNING()
 
                 uint32_t SessionIdExt() const override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return _mediaKeySessionExt->GetSessionIdExt();
                 }
 
                 Exchange::OCDM_RESULT SetDrmHeader(const uint8_t drmHeader[], uint16_t drmHeaderLength) override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)_mediaKeySessionExt->SetDrmHeader(drmHeader, drmHeaderLength);
                 }
 
                 Exchange::OCDM_RESULT GetChallengeDataExt(uint8_t* challenge, uint16_t& challengeSize, uint32_t isLDL) override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     uint32_t resultSize = challengeSize;
                     Exchange::OCDM_RESULT outcome = static_cast<Exchange::OCDM_RESULT>(_mediaKeySessionExt->GetChallengeDataExt(challenge, resultSize, isLDL));
                     challengeSize = (resultSize & 0xFFFF);
@@ -712,21 +720,25 @@ POP_WARNING()
 
                 Exchange::OCDM_RESULT CancelChallengeDataExt() override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)_mediaKeySessionExt->CancelChallengeDataExt();
                 }
 
                 Exchange::OCDM_RESULT StoreLicenseData(const uint8_t licenseData[], uint16_t licenseDataSize, unsigned char* secureStopId) override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)_mediaKeySessionExt->StoreLicenseData(licenseData, licenseDataSize, secureStopId);
                 }
 
                 Exchange::OCDM_RESULT SelectKeyId(const uint8_t keyLength, const uint8_t keyId[]) override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)_mediaKeySessionExt->SelectKeyId(keyLength, keyId);
                 }
 
                 Exchange::OCDM_RESULT CleanDecryptContext() override
                 {
+                    ASSERT(_mediaKeySession != nullptr);
                     return (Exchange::OCDM_RESULT)_mediaKeySessionExt->CleanDecryptContext();
                 }
 
@@ -823,52 +835,49 @@ POP_WARNING()
                 std::string& sessionId,
                 Exchange::ISession*& session) override
             {
-                 CDMi::IMediaKeys *system = _parent.KeySystem(keySystem);
+                CDMi::IMediaKeys *system = _parent.KeySystem(keySystem);
 
-                 session = nullptr;
-                 if (system != nullptr)
-                 {
-                     CDMi::IMediaKeySession *sessionInterface = nullptr;
-                     CommonEncryptionData keyIds(initData, initDataLength);
+                session = nullptr;
+                if (system != nullptr) {
+                    CDMi::IMediaKeySession *sessionInterface = nullptr;
+                    CommonEncryptionData keyIds(initData, initDataLength);
 
-                     // OKe we got a buffer machanism to transfer the raw data, now create
-                     // the session.
-                     if (system->CreateMediaKeySession(keySystem, licenseType,
-                                        initDataType.c_str(), initData, initDataLength,
-                                        CDMData, CDMDataLength, &sessionInterface) == 0)
-                     {
-                         if (sessionInterface != nullptr)
-                         {
-                                 SessionImplementation *newEntry =
-                                    Core::ServiceType<SessionImplementation>::Create<SessionImplementation>(this,
-                                                 keySystem, sessionInterface,
-                                                callback, &keyIds);
+                    // OKe we got a buffer machanism to transfer the raw data, now create
+                    // the session.
+                    if (system->CreateMediaKeySession(keySystem, licenseType,
+                                       initDataType.c_str(), initData, initDataLength,
+                                       CDMData, CDMDataLength, &sessionInterface) == 0) {
+                        if (sessionInterface != nullptr) {
+                            SessionImplementation *newEntry =
+                                Core::ServiceType<SessionImplementation>::Create<SessionImplementation>(this,
+                                           keySystem, sessionInterface,
+                                           callback, &keyIds);
 
-                                 session = newEntry;
-                                 sessionId = newEntry->SessionId();
+                            ASSERT(newEntry != nullptr);
+                            session = newEntry;
+                            sessionId = newEntry->SessionId();
 
-                                 _adminLock.Lock();
+                            _adminLock.Lock();
 
-                                 _sessionList.push_front(newEntry);
+                            _sessionList.push_front(newEntry);
 
-                                if(false == keyIds.IsEmpty())
-                                {
-                                    CommonEncryptionData::Iterator index(keyIds.Keys());
-                                    while (index.Next() == true) {
-                                        const CommonEncryptionData::KeyId& entry(index.Current());
-                                        callback->OnKeyStatusUpdate( entry.Id(), entry.Length(), Exchange::ISession::StatusPending);
-                                    }
+                            if (false == keyIds.IsEmpty()) {
+                                CommonEncryptionData::Iterator index(keyIds.Keys());
+                                while (index.Next() == true) {
+                                    const CommonEncryptionData::KeyId& entry(index.Current());
+                                    callback->OnKeyStatusUpdate( entry.Id(), entry.Length(), Exchange::ISession::StatusPending);
                                 }
-                                _adminLock.Unlock();
-                         }
-                     }
-                 }
+                            }
+                            _adminLock.Unlock();
+                        }
+                    }
+                }
 
-                 if (session == nullptr) {
-                     TRACE(Trace::Error, (_T("Could not create a DRM session! [%d]"), __LINE__));
-                 }
+                if (session == nullptr) {
+                    TRACE(Trace::Error, (_T("Could not create a DRM session! [%d]"), __LINE__));
+                }
 
-                 return (session != nullptr ? Exchange::OCDM_RESULT::OCDM_SUCCESS : Exchange::OCDM_RESULT::OCDM_S_FALSE);
+                return (session != nullptr ? Exchange::OCDM_RESULT::OCDM_SUCCESS : Exchange::OCDM_RESULT::OCDM_S_FALSE);
             }
 
             // Set Server Certificate
@@ -1072,7 +1081,7 @@ POP_WARNING()
 
                     string bufferid = session->BufferId();
 
-                    if( bufferid.empty() == false ) {
+                    if (bufferid.empty() == false) {
                         _administrator.ReleaseBuffer(bufferid);
                     }
 
@@ -1238,6 +1247,7 @@ POP_WARNING()
         uint32_t Initialize(PluginHost::IShell* service) override
         {
             uint32_t result = Core::ERROR_NONE;
+            ASSERT(service != nullptr);
 
             _shell = service;
 
@@ -1250,6 +1260,7 @@ POP_WARNING()
         uint32_t InitializeAsync()
         {
             uint32_t result = Core::ERROR_NONE;
+            ASSERT(_shell != nullptr);
 
             // On activation subscribe, on deactivation un-subscribe
             PluginHost::ISubSystem* subSystem = _shell->SubSystems();
@@ -1339,7 +1350,9 @@ POP_WARNING()
             }
 
             _entryPoint = Core::ServiceType<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
+            ASSERT(_entryPoint != nullptr);
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
+            ASSERT(_engine != nullptr);
             _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
             if (_service != nullptr) {

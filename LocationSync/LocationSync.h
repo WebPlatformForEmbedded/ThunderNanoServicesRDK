@@ -85,6 +85,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
 POP_WARNING()
             ~Notification()
             {
+                ASSERT(_locator != nullptr);
                 _locator->Release();
             }
 

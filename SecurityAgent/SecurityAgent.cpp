@@ -211,6 +211,7 @@ namespace Plugin {
             if (token != _testtoken) {
 
                 auto webToken = JWTFactory::Instance().Element();
+                ASSERT(webToken != nullptr);
                 uint16_t load = webToken->PayloadLength(token);
 
                 // Validate the token
@@ -287,6 +288,7 @@ namespace Plugin {
 
                 if (request.WebToken.IsSet()) {
                     auto webToken = JWTFactory::Instance().Element();
+                    ASSERT(webToken != nullptr);
                     const string& token = request.WebToken.Value().Token();
                     uint16_t load = webToken->PayloadLength(token);
 

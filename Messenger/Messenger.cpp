@@ -126,6 +126,7 @@ namespace Plugin {
         ASSERT(sink != nullptr);
 
         if (sink != nullptr) {
+            ASSERT(_roomAdmin != nullptr);
             Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
 
             // Note: Join() can return nullptr if the user has already joined the room.
@@ -231,6 +232,7 @@ namespace Plugin {
 
     void Messenger::Deactivated(RPC::IRemoteConnection* connection)
     {
+        ASSERT(connection != nullptr);
         if (connection->Id() == _connectionId) {
 
             ASSERT(_service != nullptr);

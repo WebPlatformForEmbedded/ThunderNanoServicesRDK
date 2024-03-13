@@ -114,6 +114,7 @@ namespace Publishers {
         : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::DataSize, 0)
         , _loaded(0)
     {
+        ::memset(_sendBuffer, 0, sizeof(_sendBuffer));
     }
     UDPOutput::Channel::~Channel() {
         Close(Core::infinite);

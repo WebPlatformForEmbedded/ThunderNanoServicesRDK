@@ -45,6 +45,8 @@ namespace Plugin {
     bool OCDM::KeySystems(const string& name, Core::JSON::ArrayType<Core::JSON::String>& response) const
     {
         bool result = false;
+
+        ASSERT(_opencdmi != nullptr);
         RPC::IStringIterator* keySystemsIter(_opencdmi->Designators(name));
         if (keySystemsIter != nullptr) {
             string element;
@@ -70,6 +72,7 @@ namespace Plugin {
     //  - ERROR_NONE: Success
     uint32_t OCDM::get_drms(Core::JSON::ArrayType<DrmData>& response) const
     {
+        ASSERT(_opencdmi != nullptr);
         RPC::IStringIterator* drmsIter(_opencdmi->Systems());
         if (drmsIter != nullptr) {
             string element;

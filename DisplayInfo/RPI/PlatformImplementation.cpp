@@ -47,6 +47,7 @@ public:
         , _audioPassthrough(false)
         , _EDID()
         , _value(HDCP_Unencrypted)
+        , _observers()
         , _adminLock()
         , _activity(*this) {
 
@@ -410,6 +411,8 @@ private:
     mutable Core::CriticalSection _adminLock;
 
     Core::WorkerPool::JobType< DisplayInfoImplementation& > _activity;
+
+
 };
 
     SERVICE_REGISTRATION(DisplayInfoImplementation, 1, 0)
