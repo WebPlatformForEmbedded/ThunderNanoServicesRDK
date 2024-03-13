@@ -1,5 +1,7 @@
 startmode = "@PLUGIN_PERFORMANCEMETRICS_STARTMODE@"
 
 configuration = JSON()
-
-configuration.add("callsign", "WebKitBrowser")
+if boolean("@PLUGIN_PERFORMANCEMETRICS_WEBKITBROWSER_CLASSNAME@"):
+    configuration.add("classname", "WebKitBrowser")
+else:
+    configuration.add("callsign", "WebKitBrowser")
