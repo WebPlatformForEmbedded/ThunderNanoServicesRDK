@@ -29,6 +29,8 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
 set(PLUGIN_SECURITYAGENT_STARTMODE "Activated" CACHE STRING "Automatically start SecurityAgent plugin")
 set(PLUGIN_SECURITYAGENT_STARTUPORDER "" CACHE STRING "To configure startup order of SecurityAgent plugin")
+set(PLUGIN_SECURITYAGENT_ACL_FILE_NAME "acl.json" CACHE STRING "SecurityAgent ACL file name")
+set(PLUGIN_SECURITYAGENT_DAC_FOLDER "" CACHE STRING "Folder with ACL files for DAC apps")
 
 if(BUILD_REFERENCE)
     add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})

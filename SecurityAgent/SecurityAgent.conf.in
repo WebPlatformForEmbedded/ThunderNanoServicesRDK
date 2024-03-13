@@ -1,8 +1,7 @@
 startmode = "@PLUGIN_SECURITYAGENT_STARTMODE@"
-
-if boolean("@PLUGIN_SECURITYAGENT_STARTUPORDER@"):
-    startuporder = "@PLUGIN_SECURITYAGENT_STARTUPORDER@"
+startuporder = "@PLUGIN_SECURITYAGENT_STARTUPORDER@"
 
 configuration = JSON()
 
-configuration.add("acl", "acl.json")
+configuration.add("acl", "@PLUGIN_SECURITYAGENT_ACL_FILE_NAME@")
+configuration.add("dac", "@PLUGIN_SECURITYAGENT_DAC_FOLDER@")
