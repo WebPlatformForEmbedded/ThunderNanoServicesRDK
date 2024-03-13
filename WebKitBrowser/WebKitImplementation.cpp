@@ -88,6 +88,9 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #define HAS_MEMORY_PRESSURE_SETTINGS_API WEBKIT_CHECK_VERSION(2, 38, 0)
 #endif
 
+#ifdef ENABLE_TESTING
+#include <testrunner.h>
+#endif // ENABLE_TESTING
 
 namespace WPEFramework {
 namespace Plugin {
@@ -251,10 +254,7 @@ namespace Plugin {
         nullptr, // checkUserMediaPermissionForOrigin
         nullptr, // runBeforeUnloadConfirmPanel
         nullptr, // fullscreenMayReturnToInline
-        // willAddDetailedMessageToConsole
-        [](WKPageRef, WKStringRef /* source */, WKStringRef, uint64_t line, uint64_t column, WKStringRef message, WKStringRef, const void* /* clientInfo */) {
-            TRACE_GLOBAL(BrowserConsoleLog, (message, line, column));
-        },
+        willAddDetailedMessageToConsole,
         nullptr, // requestPointerLock
         nullptr  // didLosePointerLock
     };
@@ -2832,6 +2832,12 @@ static GSourceFuncs _handlerIntervention =
                 string payloadStr(payloadPtr);
                 browser->OnBridgeQuery(payloadStr);
             }
+#ifdef ENABLE_TESTING
+            else if (browser->_config.Testing.Value() && g_str_has_prefix(name, Testing::Tags::TestRunnerPrefix)) {
+                Testing::TestRunner::Instance()->EnsureInitialized(view, browser->_extensionPath.c_str());
+                Testing::TestRunner::Instance()->handleUserMessage(message);
+            }
+#endif // ENABLE_TESTING
             return true;
         }
 #if defined(ENABLE_CLOUD_COOKIE_JAR)

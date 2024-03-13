@@ -53,6 +53,10 @@
 #include "TimeZoneSupport.h"
 #endif
 
+#if defined(ENABLE_TESTING)
+#include <TestRunnerJS.h>
+#endif
+
 using namespace WPEFramework;
 
 static Core::NodeId GetConnectionNode()
@@ -174,6 +178,11 @@ private:
         JavaScript::AAMP::LoadJSBindings(world, frame);
 #endif
 
+#ifdef  ENABLE_TESTING
+        if (host->_enableTesting)
+            JavaScript::TestRunner::InjectJS(world, page, frame);
+#endif  // ENABLE_TESTING
+
     }
     static void pageCreatedCallback(VARIABLE_IS_NOT_USED WebKitWebExtension* webExtension,
                                     WebKitWebPage* page,
@@ -216,6 +225,11 @@ POP_WARNING()
             JavaScript::BridgeObject::HandleMessageToPage(page, name, message);
         }
 #endif
+#ifdef ENABLE_TESTING
+        else if (g_str_has_prefix(name, Testing::Tags::TestRunnerPrefix)) {
+            JavaScript::TestRunner::HandleMessageToPage(page, message);
+        }
+#endif
         return TRUE;
     }
     static gboolean sendRequestCallback(WebKitWebPage* page, WebKitURIRequest* request, WebKitURIResponse*)
@@ -244,6 +258,7 @@ private:
 
     string _consoleLogPrefix;
     gboolean _logToSystemConsoleEnabled;
+    gboolean _enableTesting;
     WebKitWebExtension* _extension;
 } _wpeFrameworkClient;
 
