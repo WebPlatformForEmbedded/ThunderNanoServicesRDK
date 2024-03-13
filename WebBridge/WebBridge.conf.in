@@ -1,1 +1,2 @@
 startmode = "Activated"
+startuporder = "@PLUGIN_WEBBRIDGE_STARTUPORDER@"
