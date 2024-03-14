@@ -68,13 +68,13 @@ POP_WARNING()
         config.FromString(service->ConfigLine());
 
         if (LocationService::IsSupported(config.Source.Value()) == Core::ERROR_NONE) {
-            if ((config.TimeZone.IsSet() == true) && ( config.TimeZone.Value().empty() == false)) {
+            if ((config.TimeZone.IsSet() == true) && (config.TimeZone.Value().empty() == false)) {
                 _locationinfo.TimeZone(config.TimeZone.Value());
                 _timezoneoverriden = true;
                 UpdateSystemTimeZone(config.TimeZone.Value());
             }
 
-            if ((config.Latitude.IsSet() == true) && ( config.Longitude.IsSet() == true)) {
+            if ((config.Latitude.IsSet() == true) && (config.Longitude.IsSet() == true)) {
                 _locationinfo.Latitude(config.Latitude.Value());
                 _locationinfo.Longitude(config.Longitude.Value());
             }
@@ -84,7 +84,7 @@ POP_WARNING()
             _activateOnFailure = config.ActivateOnFailure.Value();
             _service = service;
             _service->AddRef();
-            
+
             _sink.Initialize(config.Source.Value(), config.Interval.Value(), config.Retries.Value());
 
             RegisterAll();
@@ -306,7 +306,7 @@ POP_WARNING()
             if ((_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min())) {
                 _locationinfo.Latitude(_sink.Location()->Latitude());
                 _locationinfo.Longitude(_sink.Location()->Longitude());
-            } 
+            }
             _locationinfo.Country(_sink.Location()->Country());
             _locationinfo.Region(_sink.Location()->Region());
             _locationinfo.City(_sink.Location()->City());
@@ -326,19 +326,19 @@ POP_WARNING()
             if ((_locationinfo.Latitude() == std::numeric_limits<int32_t>::min()) || (_locationinfo.Longitude() == std::numeric_limits<int32_t>::min())) {
                 _locationinfo.Latitude(51977956);
                 _locationinfo.Longitude(5726384);
-            } 
+            }
             _adminLock.Unlock();
         }
 
         PluginHost::ISubSystem* subSystem = _service->SubSystems();
         ASSERT(subSystem != nullptr);
 
-        if (subSystem != nullptr) { 
-            if ((_activateOnFailure == true) || (_sink.Location() == nullptr) || ( _sink.Valid() == true)) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
+        if (subSystem != nullptr) {
+            if ((_activateOnFailure == true) || (_sink.Location() == nullptr) || (_sink.Valid() == true)) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
                 subSystem->Set(PluginHost::ISubSystem::INTERNET, _sink.Network());
                 SetLocationSubsystem(*subSystem, false);
                 event_locationchange();
-            } else if(_timezoneoverriden == true) { // if the probing failed but the timezone was explicitely set we only set the location subsystem to pass on the timezone info
+            } else if (_timezoneoverriden == true) { // if the probing failed but the timezone was explicitely set we only set the location subsystem to pass on the timezone info
                 SetLocationSubsystem(*subSystem, false);
                 event_locationchange();
             }
@@ -346,7 +346,7 @@ POP_WARNING()
         }
     }
 
-    void LocationSync::UpdateSystemTimeZone(const string& newtimezone) 
+    void LocationSync::UpdateSystemTimeZone(const string& newtimezone)
     {
         if (newtimezone != FactorySetTimeZone) {
             Core::SystemInfo::Instance().SetTimeZone(newtimezone, false);

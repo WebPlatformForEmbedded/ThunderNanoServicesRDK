@@ -230,8 +230,7 @@ namespace Plugin {
                 static_cast<const WPEFramework::Exchange::IApplication*>(_application)->Visible(visible);
                 PluginHost::IStateControl::state currentState = stateControl->State();
                 Core::ProxyType<Web::JSONBodyType<WebKitBrowser::Data>> body(_jsonBodyDataFactory.Element());
-                ASSERT(body != nullptr);
-
+                ASSERT(body.IsValid() == true);
                 string url;
                 static_cast<const WPEFramework::Exchange::IWebBrowser*>(_browser)->URL(url);
                 body->URL = url;
@@ -437,7 +436,7 @@ namespace WebKitBrowser {
             , _children(_main.Id())
             , _startTime(connection == nullptr ? (TimePoint::min()) : (SteadyClock::now() + std::chrono::seconds(TYPICAL_STARTUP_TIME)))
             , _adminLock()
-        { 
+        {
         }
         ~MemoryObserverImpl() override = default;
 

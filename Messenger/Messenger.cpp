@@ -58,7 +58,7 @@ namespace Plugin {
         _service->Register(&_notification);
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
-        if(_roomAdmin == nullptr) {
+        if (_roomAdmin == nullptr) {
             message = _T("RoomMaintainer couldnt be instantiated");
         }
         else {

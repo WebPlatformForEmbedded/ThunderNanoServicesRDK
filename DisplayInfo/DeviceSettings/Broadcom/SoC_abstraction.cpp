@@ -132,7 +132,7 @@ string parse_proc_brcm_display()
     {
         while (getline(procfile,line))
         {
-            if(line.find("graphics") != string::npos)
+            if (line.find("graphics") != string::npos)
             {
                 tokens.clear();
                 sanitizeLine(line);

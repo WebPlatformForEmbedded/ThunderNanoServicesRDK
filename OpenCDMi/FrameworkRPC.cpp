@@ -279,13 +279,12 @@ namespace Plugin {
                 class DataExchange : public Exchange::DataExchange, public Core::Thread {
                 private:
                     DataExchange() = delete;
-                    DataExchange(const DataExchange
-                    &) = delete;
+                    DataExchange(const DataExchange&) = delete;
                     DataExchange& operator=(const DataExchange&) = delete;
 
                 public:
                     DataExchange(CDMi::IMediaKeySession* mediaKeys, const string& name, const uint32_t defaultSize)
-                        :  Exchange::DataExchange(name, defaultSize)
+                        : Exchange::DataExchange(name, defaultSize)
                         , Core::Thread(Core::Thread::DefaultStackSize(), _T("DRMSessionThread"))
                         , _mediaKeys(mediaKeys)
                         , _mediaKeysExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeys))
@@ -609,13 +608,13 @@ POP_WARNING()
                         if (_parent._administrator.AcquireBuffer(bufferID) == true) {
                             _buffer = new DataExchange(_mediaKeySession, bufferID, _parent.DefaultSize());
                             _adminLock.Unlock();
-                            
+
                             ASSERT(_buffer != nullptr);
 
                             if (_buffer->IsValid() == false) {
                                 SYSLOG(Logging::Fatal, ("Could not open session buffer %s", BufferId().c_str()));
                             }
-                            
+
                             if (_parent.Group().IsSet() == true) {
                                 _buffer->Group(_parent.Group().Value());
                                 _buffer->Permission(OcdmAccessMode);
@@ -748,7 +747,6 @@ POP_WARNING()
                 END_INTERFACE_MAP
 
             private:
-            private:
                 AccessorOCDM& _parent;
                 mutable Core::CriticalSection _adminLock;
                 mutable uint32_t _refCount;
@@ -771,13 +769,13 @@ POP_WARNING()
             {
                 ASSERT(parent != nullptr);
             }
-            virtual ~AccessorOCDM()
+            ~AccessorOCDM() override
             {
                 TRACE(Trace::Information, (_T("Released the AccessorOCDM server side [%d]"), __LINE__));
             }
 
         public:
-            virtual bool IsTypeSupported(
+            bool IsTypeSupported(
                 const std::string& keySystem,
                 const std::string& mimeType) const override
             {
@@ -785,7 +783,7 @@ POP_WARNING()
                 return (_parent.IsTypeSupported(keySystem, mimeType) ? true : false);
             }
 
-            virtual Exchange::OCDM_RESULT Metadata(
+            Exchange::OCDM_RESULT Metadata(
                 const std::string& keySystem,
                 std::string& metadata) const override
             {
@@ -823,7 +821,7 @@ POP_WARNING()
             }
 
             // Create a MediaKeySession using the supplied init data and CDM data.
-            virtual Exchange::OCDM_RESULT CreateSession(
+            Exchange::OCDM_RESULT CreateSession(
                 const std::string& keySystem,
                 const int32_t licenseType,
                 const std::string& initDataType,
@@ -881,7 +879,7 @@ POP_WARNING()
             }
 
             // Set Server Certificate
-            virtual Exchange::OCDM_RESULT SetServerCertificate(
+            Exchange::OCDM_RESULT SetServerCertificate(
                 const std::string& keySystem,
                 const uint8_t* serverCertificate,
                 const uint16_t serverCertificateLength) override
@@ -899,7 +897,7 @@ POP_WARNING()
                 return result;
             }
 
-            virtual uint64_t GetDrmSystemTime(const std::string& keySystem) const override
+            uint64_t GetDrmSystemTime(const std::string& keySystem) const override
             {
                 CDMi::IMediaKeysExt* systemExt = dynamic_cast<CDMi::IMediaKeysExt*>(_parent.KeySystem(keySystem));
                 if (systemExt) {
@@ -1345,7 +1343,7 @@ POP_WARNING()
                 SYSLOG(Logging::Startup, (_T("No DRM factories specified. OCDM can not service any DRM requests.")));
             }
 
-            if((config.Group.IsSet() == true) && (config.Group.Value().empty() == false)){
+            if ((config.Group.IsSet() == true) && (config.Group.Value().empty() == false)){
                 _group = config.Group.Value();
             }
 

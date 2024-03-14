@@ -60,7 +60,7 @@ namespace Publishers {
         ExtraOutputOptions options = _outputOptions;
 
         if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PAUSED)) == 0) {
-            
+
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
                 data.Category = metadata.Category();
             }

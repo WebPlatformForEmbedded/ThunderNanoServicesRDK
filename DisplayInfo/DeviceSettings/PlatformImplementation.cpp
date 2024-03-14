@@ -287,7 +287,7 @@ public:
             try
             {
                 device::VideoOutputPort vPort = device::Host::getInstance().getVideoOutputPort(portname);
-                if(!vPort.SetHdmiPreference(hdcpversion))
+                if (!vPort.SetHdmiPreference(hdcpversion))
                 {
                     TRACE(Trace::Information, (_T("HDCPProtection: SetHdmiPreference failed")));
                 }
@@ -312,7 +312,7 @@ public:
         if (Core::ERROR_NONE == ret)
         {
             std::string strVideoPort = device::Host::getInstance().getDefaultVideoPortName();
-            if(edidVec.size() > EDID_MAX_VERTICAL_SIZE)
+            if (edidVec.size() > EDID_MAX_VERTICAL_SIZE)
             {
                 width = edidVec[EDID_MAX_HORIZONTAL_SIZE];
                 TRACE(Trace::Information, (_T("Width in cm = %d"), width));
@@ -338,7 +338,7 @@ public:
 
                 vPort.getDisplay().getEDIDBytes(edidVec);
 
-                if(edidVec.size() > EDID_MAX_VERTICAL_SIZE)
+                if (edidVec.size() > EDID_MAX_VERTICAL_SIZE)
                 {
                     height = edidVec[EDID_MAX_VERTICAL_SIZE];
                     TRACE(Trace::Information, (_T("Height in cm = %d"), height));

@@ -762,7 +762,6 @@ POP_WARNING()
             }
             void Deactivated (const string& callsign, PluginHost::IShell* service) override
             {
-
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -789,7 +788,6 @@ POP_WARNING()
                         }
                     }
                 }
-
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {

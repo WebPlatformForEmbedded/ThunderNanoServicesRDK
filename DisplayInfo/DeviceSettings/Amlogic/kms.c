@@ -23,7 +23,7 @@
 #include <string.h>
 #include "kms.h"
 
-void kms_setup_encoder( int fd, kms_ctx *kms )
+void kms_setup_encoder(int fd, kms_ctx *kms)
 {
     if (kms != NULL && kms->res != NULL) {
         for (int i = 0; i < kms->res->count_encoders; i++) {
@@ -61,7 +61,7 @@ exit:
 
 
 
-void kms_setup_connector( int fd, kms_ctx *kms )
+void kms_setup_connector(int fd, kms_ctx *kms)
 {
     int i = 0;
     drmModeConnector *connector = NULL;
@@ -89,7 +89,7 @@ void kms_setup_connector( int fd, kms_ctx *kms )
 }
 
 
-void kms_setup_crtc( int fd, kms_ctx *kms )
+void kms_setup_crtc(int fd, kms_ctx *kms)
 {
     if (kms != NULL && kms->encoder) {
 
@@ -106,7 +106,7 @@ void kms_setup_crtc( int fd, kms_ctx *kms )
 }
 
 
-kms_ctx* kms_setup( int fd )
+kms_ctx* kms_setup(int fd)
 {
     kms_ctx *kms = NULL;
     kms = (kms_ctx*)calloc(1,sizeof(*kms));
@@ -122,7 +122,7 @@ kms_ctx* kms_setup( int fd )
 }
 
 
-void kms_cleanup_context( kms_ctx *kms )
+void kms_cleanup_context(kms_ctx *kms)
 {
     if (kms != NULL) {
         if (kms->connector) {
@@ -165,7 +165,7 @@ uint32_t kms_get_properties(int fd, drmModeObjectProperties *props, const char *
 }
 
 
-void kms_get_plane( int fd, kms_ctx *kms )
+void kms_get_plane(int fd, kms_ctx *kms)
 {
     int n = 0, j = 0;
 
@@ -192,7 +192,7 @@ void kms_get_plane( int fd, kms_ctx *kms )
                 props = drmModeObjectGetProperties(fd, planeRes->planes[n], DRM_MODE_OBJECT_PLANE);
                 if (props) {
 
-                    for(j= 0; j < props->count_props; ++j) {
+                    for (j= 0; j < props->count_props; ++j) {
 
                         prop = drmModeGetProperty(fd, props->props[j]);
                         if (prop) {

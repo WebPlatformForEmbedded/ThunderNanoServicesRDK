@@ -286,13 +286,13 @@ POP_WARNING()
         void UpdateSystemTimeZone(const string& timezone);
 
     private:
-        using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;        
+        using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;
 
         uint16_t _skipURL;
         string _source;
         Core::SinkType<Notification> _sink;
-        PluginHost::IShell* _service; 
-        bool _timezoneoverriden; 
+        PluginHost::IShell* _service;
+        bool _timezoneoverriden;
         Core::SinkType<LocationInfo> _locationinfo;
         mutable Core::CriticalSection _adminLock;
         TimeZoneObservers _timezoneoberservers;

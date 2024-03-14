@@ -45,13 +45,13 @@ namespace Plugin {
 
         string result;
 
-        if (( config.ObservableCallsign.IsSet() == true) && (config.ObservableClassname.IsSet() == true)) {
+        if ((config.ObservableCallsign.IsSet() == true) && (config.ObservableClassname.IsSet() == true)) {
             result = _T("Both callsign and classname set to observe for metrics");
         }
-        else if (( config.ObservableCallsign.IsSet() == true) && ( config.ObservableCallsign.Value().empty() == false)) {
+        else if ((config.ObservableCallsign.IsSet() == true) && ( config.ObservableCallsign.Value().empty() == false)) {
             _handler.reset(new CallsignPerfMetricsHandler(config.ObservableCallsign.Value()));
         }
-        else if (( config.ObservableClassname.IsSet() == true) && ( config.ObservableClassname.Value().empty() == false)) {
+        else if ((config.ObservableClassname.IsSet() == true) && ( config.ObservableClassname.Value().empty() == false)) {
             _handler.reset(new ClassnamePerfMetricsHandler(config.ObservableClassname.Value()));
         } else {
             result = _T("No callsign or classname set to observe for metrics");

@@ -90,6 +90,7 @@ namespace Plugin {
 
     /* virtual */ const string SecurityAgent::Initialize(PluginHost::IShell* service)
     {
+        string message;
         string webPrefix = service->WebPrefix();
         string callsign = service->Callsign();
 
@@ -166,9 +167,12 @@ namespace Plugin {
                 }
             }
         }
+  	else {
+            message = _T("SecurityAgent failed to create TokenDispatcher");
+	}
 
         // On success return empty, to indicate there is no error text.
-        return _T("");
+        return message;
     }
 
     /* virtual */ void SecurityAgent::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
@@ -180,7 +184,7 @@ namespace Plugin {
             _engine.Release();
         }
 
-	if (_dacDirCallback.IsValid()) {
+        if (_dacDirCallback.IsValid()) {
             Core::FileSystemMonitor::Instance().Unregister(&(*_dacDirCallback), _dacDir);
             _dacDirCallback.Release();
         }
