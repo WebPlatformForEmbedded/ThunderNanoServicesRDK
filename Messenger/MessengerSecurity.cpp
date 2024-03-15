@@ -32,6 +32,7 @@ namespace {
     {
         bool result = false;
 
+        ASSERT(service != nullptr);
         auto auth = service->QueryInterfaceByCallsign<WPEFramework::PluginHost::IAuthenticate>("SecurityAgent");
         if (auth != nullptr) {
             string encoded;
@@ -122,6 +123,7 @@ namespace Plugin {
 
                 if (!aclSet) {
                     TRACE(Trace::Information, (_T("Joining room '%s' w/o ACL"), room.c_str()));
+                    ASSERT(_service != nullptr);
 
                     if (!settingAcl || index.Count() == 0) {
                         TRACE(Trace::Error, (_T("ACL is empty")));

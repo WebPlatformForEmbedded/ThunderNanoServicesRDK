@@ -45,8 +45,11 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
             IIdentifierData& identifierData = *static_cast<IIdentifierData*>(userData);
 
             PluginHost::IShell* controller = std::get<0>(identifierData);
+            ASSERT(controller != nullptr);
             const PluginHost::ISubSystem* subsysInterface = std::get<1>(identifierData);
+            ASSERT(subsysInterface != nullptr);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = std::get<2>(identifierData);
+            ASSERT(identifierInterface != nullptr);
 
             identifierInterface->Release();
             subsysInterface->Release();
@@ -61,9 +64,12 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         nullptr,
         GCallback(+[](gpointer userData) -> gpointer {
             Core::ProxyType<RPC::CommunicatorClient>& comClient = *static_cast<Core::ProxyType<RPC::CommunicatorClient>*>(userData);
+            ASSERT(comClient != nullptr);
 
             PluginHost::IShell* controller = comClient->Acquire<PluginHost::IShell>(10000, _T("Controller"), ~0);
+            ASSERT(controller != nullptr);
             const PluginHost::ISubSystem* subsysInterface = controller->SubSystems();
+            ASSERT(subsysInterface != nullptr);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = subsysInterface->Get<PluginHost::ISubSystem::IIdentifier>();
 
             auto* identifierData = new IIdentifierData(controller, subsysInterface, identifierInterface);
@@ -84,6 +90,7 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         G_CALLBACK(+[](gpointer userData) -> char* {
             IIdentifierData& identifierData = *static_cast<IIdentifierData*>(userData);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = std::get<2>(identifierData);
+            ASSERT(identifierInterface != nullptr);
 
             uint8_t buffer[64] = {};
             buffer[0] = identifierInterface->Identifier(sizeof(buffer) - 1, &(buffer[1]));
@@ -106,6 +113,7 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         G_CALLBACK(+[](gpointer userData) -> char* {
             IIdentifierData& identifierData = *static_cast<IIdentifierData*>(userData);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = std::get<2>(identifierData);
+            ASSERT(identifierInterface != nullptr);
 
             string architecture = identifierInterface->Architecture();
             if (architecture.length() > 0) {
@@ -126,6 +134,7 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         G_CALLBACK(+[](gpointer userData) -> char* {
             IIdentifierData& identifierData = *static_cast<IIdentifierData*>(userData);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = std::get<2>(identifierData);
+            ASSERT(identifierInterface != nullptr);
 
             string chipset = identifierInterface->Chipset();
             if (chipset.length() > 0) {
@@ -146,6 +155,7 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
         G_CALLBACK(+[](gpointer userData) -> char* {
             IIdentifierData& identifierData = *static_cast<IIdentifierData*>(userData);
             const PluginHost::ISubSystem::IIdentifier* identifierInterface = std::get<2>(identifierData);
+            ASSERT(identifierInterface != nullptr);
 
             string firmwareVersion = identifierInterface->FirmwareVersion();
             if (firmwareVersion.length() > 0) {

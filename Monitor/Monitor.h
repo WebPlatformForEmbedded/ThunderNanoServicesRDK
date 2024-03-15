@@ -107,6 +107,7 @@ namespace Plugin {
 
             void Measure(Exchange::IMemory* memInterface)
             {
+                ASSERT(memInterface != nullptr);
                 _resident.Set(memInterface->Resident());
                 _allocated.Set(memInterface->Allocated());
                 _shared.Set(memInterface->Shared());
@@ -583,7 +584,7 @@ namespace Plugin {
                 {
                     Core::ProxyType<const Exchange::IMemory> source;
                     _adminLock.Lock();
-                    if(_source != nullptr) {
+                    if (_source != nullptr) {
                         source = Core::ProxyType<const Exchange::IMemory>(*_source, *_source);
                     }
                     _adminLock.Unlock();
@@ -761,7 +762,6 @@ POP_WARNING()
             }
             void Deactivated (const string& callsign, PluginHost::IShell* service) override
             {
-
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -788,7 +788,6 @@ POP_WARNING()
                         }
                     }
                 }
-
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
@@ -964,6 +963,7 @@ POP_WARNING()
             template <typename T>
             void translate(const Core::MeasurementType<T>& from, JsonData::Monitor::MeasurementInfo* to) const
             {
+                ASSERT(to != nullptr);
                 to->Min = from.Min();
                 to->Max = from.Max();
                 to->Average = from.Average();

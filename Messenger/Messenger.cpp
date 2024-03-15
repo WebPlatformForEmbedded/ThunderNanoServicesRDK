@@ -58,7 +58,7 @@ namespace Plugin {
         _service->Register(&_notification);
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
-        if(_roomAdmin == nullptr) {
+        if (_roomAdmin == nullptr) {
             message = _T("RoomMaintainer couldnt be instantiated");
         }
         else {
@@ -126,6 +126,7 @@ namespace Plugin {
         ASSERT(sink != nullptr);
 
         if (sink != nullptr) {
+            ASSERT(_roomAdmin != nullptr);
             Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
 
             // Note: Join() can return nullptr if the user has already joined the room.
@@ -231,6 +232,7 @@ namespace Plugin {
 
     void Messenger::Deactivated(RPC::IRemoteConnection* connection)
     {
+        ASSERT(connection != nullptr);
         if (connection->Id() == _connectionId) {
 
             ASSERT(_service != nullptr);

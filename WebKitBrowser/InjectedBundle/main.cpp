@@ -91,7 +91,6 @@ public:
         : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
     {
-        _engine->Announcements(_comClient->Announcement());
     }
     ~PluginHost()
     {
@@ -102,6 +101,7 @@ public:
 public:
     void Initialize(WKBundleRef)
     {
+        ASSERT(_comClient.IsValid() == true);
         // We have something to report back, do so...
         uint32_t result = _comClient->Open(RPC::CommunicationTimeOut);
         if (result != Core::ERROR_NONE) {
@@ -128,6 +128,10 @@ public:
         if (_comClient.IsValid() == true) {
             _comClient.Release();
         }
+        if (_engine.IsValid() == true) {
+            _engine.Release();
+        }
+
         Core::Singleton::Dispose();
     }
 

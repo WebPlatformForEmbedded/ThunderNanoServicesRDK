@@ -134,6 +134,7 @@ namespace Plugin {
                 Add(_T("path"), &Path);
             }
             ~Data() = default;
+
         public:
             Core::JSON::String URL;
             Core::JSON::DecUInt32 FPS;

@@ -273,6 +273,7 @@ namespace WPEFramework {
                 uint32_t result = Core::ERROR_INCOMPLETE_CONFIG;
                 Config config;
 
+                ASSERT(framework != nullptr);
                 config.FromString(framework->ConfigLine());
 
                 if (callback != nullptr) {

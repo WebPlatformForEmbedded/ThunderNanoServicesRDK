@@ -45,19 +45,19 @@ namespace Plugin {
 
         string result;
 
-        if( ( config.ObservableCallsign.IsSet() == true ) && (config.ObservableClassname.IsSet() == true) ) {
+        if ((config.ObservableCallsign.IsSet() == true) && (config.ObservableClassname.IsSet() == true)) {
             result = _T("Both callsign and classname set to observe for metrics");
         }
-        else if( ( config.ObservableCallsign.IsSet() == true ) && ( config.ObservableCallsign.Value().empty() == false ) ) {
+        else if ((config.ObservableCallsign.IsSet() == true) && ( config.ObservableCallsign.Value().empty() == false)) {
             _handler.reset(new CallsignPerfMetricsHandler(config.ObservableCallsign.Value()));
         }
-        else if( ( config.ObservableClassname.IsSet() == true ) && ( config.ObservableClassname.Value().empty() == false ) ) {
+        else if ((config.ObservableClassname.IsSet() == true) && ( config.ObservableClassname.Value().empty() == false)) {
             _handler.reset(new ClassnamePerfMetricsHandler(config.ObservableClassname.Value()));
         } else {
             result = _T("No callsign or classname set to observe for metrics");
         }
 
-        if( result.empty() == true ) {
+        if (result.empty() == true) {
             ASSERT(_handler);
             _handler->Initialize();
             service->Register(&_notification);
@@ -68,6 +68,7 @@ namespace Plugin {
 
     void PerformanceMetrics::Deinitialize(PluginHost::IShell* service)
     {
+        ASSERT(service != nullptr);
         if (_handler) {
             service->Unregister(&_notification);
             // as we do this after the unregister the call to Deinitialize should be threadsafe, no more notifications can be received
@@ -101,23 +102,23 @@ namespace Plugin {
         Exchange::IWebBrowser* webbrowser = service.QueryInterface<Exchange::IWebBrowser>();
         PluginHost::IStateControl* statecontrol = service.QueryInterface<PluginHost::IStateControl>();
 
-        if( webbrowser != nullptr ) {
-            TRACE(Trace::Information, (_T("Start oberserving %s as webbrowser"), Callsign().c_str()) );
+        if (webbrowser != nullptr) {
+            TRACE(Trace::Information, (_T("Start oberserving %s as webbrowser"), Callsign().c_str()));
             _observable = Core::ProxyType<WebBrowserObservable<>>::Create(*this, service, *webbrowser, statecontrol);
             webbrowser->Release();
         } else {
             Exchange::IBrowser* browser = service.QueryInterface<Exchange::IBrowser>();
 
-            if( browser != nullptr ) {
-                TRACE(Trace::Information, (_T("Start oberserving %s as browser"), Callsign().c_str()) );
+            if (browser != nullptr) {
+                TRACE(Trace::Information, (_T("Start oberserving %s as browser"), Callsign().c_str()));
                 _observable = Core::ProxyType<BrowserObservable<>>::Create(*this, service, *browser, statecontrol);
                 browser->Release();
             }
-            else if( statecontrol != nullptr ) {
-                TRACE(Trace::Information, (_T("Start oberserving %s as statecontrol"), Callsign().c_str()) );
+            else if (statecontrol != nullptr) {
+                TRACE(Trace::Information, (_T("Start oberserving %s as statecontrol"), Callsign().c_str()));
                 _observable = Core::ProxyType<StateObservable<>>::Create(*this, service, statecontrol);
             } else {
-                TRACE(Trace::Information, (_T("Start oberserving %s as basic"), Callsign().c_str()) );
+                TRACE(Trace::Information, (_T("Start oberserving %s as basic"), Callsign().c_str()));
                 _observable = Core::ProxyType<BasicObservable<>>::Create(*this, service);
             }
         }
@@ -125,7 +126,7 @@ namespace Plugin {
         ASSERT(_observable.IsValid() == true);
         _observable->Enable();
 
-        if( statecontrol != nullptr ) {
+        if (statecontrol != nullptr) {
             statecontrol->Release();
         }
     }
