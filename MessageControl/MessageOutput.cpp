@@ -112,14 +112,11 @@ namespace Publishers {
     //UDPOutput
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
         : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().DataSize(), 0)
-        , _dataSize(Messaging::MessageUnit::Instance().DataSize())
-        , _sendBuffer(static_cast<uint8_t*>(::malloc(_dataSize)))
         , _loaded(0)
     {
     }
     UDPOutput::Channel::~Channel() {
         Close(Core::infinite);
-        free(_sendBuffer);
     }
 
     uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
@@ -151,8 +148,8 @@ namespace Publishers {
         uint16_t length = 0;
         ASSERT(metadata.Type() != Core::Messaging::Metadata::INVALID);
 
-        length += metadata.Serialize(_sendBuffer + length, _dataSize - length);
-        length += message->Serialize(_sendBuffer + length, _dataSize - length);
+        length += metadata.Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
+        length += message->Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
         _loaded = length;
 
         _adminLock.Unlock();

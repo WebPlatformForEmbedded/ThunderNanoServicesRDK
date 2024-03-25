@@ -326,8 +326,7 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            uint32_t _dataSize;
-            uint8_t* _sendBuffer;
+            uint8_t _sendBuffer[Messaging::MessageUnit::TempDataBufferSize];
             uint16_t _loaded;
             Core::CriticalSection _adminLock;
         };
