@@ -260,7 +260,7 @@ namespace Plugin {
                         index++;
                     }
                 }
-				
+
                 _adminLock.Unlock();
 
                 for (const uint32_t& id : detaching) {
