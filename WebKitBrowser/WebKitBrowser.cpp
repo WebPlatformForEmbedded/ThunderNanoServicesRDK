@@ -134,6 +134,19 @@ namespace Plugin {
 
             if (_browser != nullptr) {
 
+                PluginHost::ISubSystem::INotification* subsystemNotify = _browser->QueryInterface<PluginHost::ISubSystem::INotification>();
+
+                if (subsystemNotify != nullptr) {
+                    PluginHost::ISubSystem* subsystems = _service->SubSystems();
+
+                    if (subsystems != nullptr) {
+                        subsystems->Unregister(subsystemNotify);
+                        subsystems->Release();
+                    }
+
+                    subsystemNotify->Release();
+                }
+
                 PluginHost::IStateControl* stateControl(_browser->QueryInterface<PluginHost::IStateControl>());
                 // In case WPE rpcprocess crashed, there is no access to the statecontrol interface, check it !!
                 if (stateControl != nullptr) {
