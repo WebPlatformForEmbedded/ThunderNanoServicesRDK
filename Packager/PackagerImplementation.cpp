@@ -129,6 +129,7 @@ namespace Plugin {
     void PackagerImplementation::Register(Exchange::IPackager::INotification* notification)
     {
         ASSERT(notification);
+
         _adminLock.Lock();
         notification->AddRef();
         _notifications.push_back(notification);
