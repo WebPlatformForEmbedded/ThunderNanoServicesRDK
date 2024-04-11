@@ -54,7 +54,7 @@ namespace Plugin {
         _service = service;
         _service->AddRef();
         _service->Register(static_cast<RPC::IRemoteConnection::INotification*>(&_notification));
-        _service->Register(static_cast<PluginHost::IShell::IJSONRPCLink::INotification*>(&_notification));
+        _service->Register(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
         if(_roomAdmin == nullptr) {
@@ -75,7 +75,7 @@ namespace Plugin {
 
             JMessenger::Unregister(*this);
 
-            _service->Unregister(static_cast<PluginHost::IShell::IJSONRPCLink::INotification*>(&_notification));
+            _service->Unregister(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
             _service->Unregister(static_cast<RPC::IRemoteConnection::INotification*>(&_notification));
 
             if (_roomAdmin != nullptr) {

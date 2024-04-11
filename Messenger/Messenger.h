@@ -42,7 +42,7 @@ namespace Plugin {
 
     private:
         class Notification : public RPC::IRemoteConnection::INotification
-                           , public PluginHost::IShell::IJSONRPCLink::INotification {
+                           , public PluginHost::IShell::IConnectionServer::INotification {
         public:
             Notification() = delete;
             Notification(const Notification&) = delete;
@@ -78,7 +78,7 @@ namespace Plugin {
         public:
             BEGIN_INTERFACE_MAP(Notification)
                 INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
-                INTERFACE_ENTRY(PluginHost::IShell::IJSONRPCLink::INotification)
+                INTERFACE_ENTRY(PluginHost::IShell::IConnectionServer::INotification)
             END_INTERFACE_MAP
 
         private:
