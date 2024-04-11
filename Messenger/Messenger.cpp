@@ -244,7 +244,6 @@ namespace Plugin {
 
     void Messenger::Closed(const uint32_t channel)
     {
-        printf("channel %u\n", channel);
         _adminLock.Lock();
 
         auto it(_roomIds.begin());
@@ -253,8 +252,11 @@ namespace Plugin {
 
             if ((*it).second.second == channel) {
 
-                // The remoto JSON-RPC client was disconnected without leaving the room first!
-                printf("channel %s is room\n", (*it).first.c_str());
+                // The remote JSON-RPC client was disconnected without leaving the room beforehand!
+
+                TRACE(Trace::Information, (_T("Channel that room ID %s was created on (%u) has been disconnected"),
+                    (*it).first.c_str(), channel));
+
                 (*it).second.first->Release();
                 it = _roomIds.erase(it);
             }

@@ -100,7 +100,7 @@ namespace Plugin {
 
             ~MsgNotification() override
             {
-                TRACE(Trace::Information,( _T("MsgNotification object for room '%s' destroyed"), _roomId.c_str()));
+                TRACE(Trace::Text,( _T("MsgNotification object for room '%s' destroyed"), _roomId.c_str()));
             }
 
         public:
@@ -136,7 +136,7 @@ namespace Plugin {
 
             ~Callback()
             {
-                TRACE(Trace::Information,( _T("Callback object for room '%s' destroyed"), _roomId.c_str()));
+                TRACE(Trace::Text, ( _T("Callback object for room '%s' destroyed"), _roomId.c_str()));
             }
 
         public:
@@ -224,7 +224,7 @@ POP_WARNING()
         // JSONRPC::JMessenger::IHandler overrides
         void OnRoomUpdateEventRegistration(const string& client VARIABLE_IS_NOT_USED, const JSONRPCSupportsEventStatus::Status status) override
         {
-            TRACE(Trace::Information, (_T("Client '%s' %s for room-update notification"), client.c_str(),
+            TRACE(Trace::Information, (_T("Client '%s' %s for room-update notifications"), client.c_str(),
                 status == Status::registered? "registered" : "unregistered"));
 
             if (status == Status::registered) {
@@ -241,7 +241,7 @@ POP_WARNING()
         {
             if (SubscribeUserUpdate(client.substr(0, client.find('.')), (status == Status::registered)) == true) {
 
-                TRACE(Trace::Information, (_T("Client '%s' %s for user-update notification"), client.c_str(),
+                TRACE(Trace::Information, (_T("Client '%s' %s for user-update notifications"), client.c_str(),
                     status == Status::registered? "registered" : "unregistered"));
 
             } else {
