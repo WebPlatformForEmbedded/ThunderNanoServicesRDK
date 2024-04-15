@@ -407,24 +407,39 @@ namespace Plugin {
             }
         }
 
-        uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
+        Core::hresult Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
             _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
 
             return (Core::ERROR_NONE);
         }
 
-        uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
+        // TO-DO: Make it so that it does not only returns error none but an actually error if something goes wrong
+        Core::hresult Modules(Exchange::IMessageControl::IStringIterator*& modules) const override
+        {
+            std::list<string> list;
+
+            _client.Modules(list);
+
+            using Implementation = RPC::IteratorType<RPC::IStringIterator>;
+            modules = Core::ServiceType<Implementation>::Create<RPC::IStringIterator>(list);
+
+            return (Core::ERROR_NONE);
+        }
+
+        // TO-DO: Make it so that it does not only returns error none but an actually error if something goes wrong
+        Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
-            _client.Controls(index);
+            _client.Controls(index, module);
 
             while (index.Next() == true) {
                 list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
+            // Testing: make sure that it does not infinately add to this list but it actually creates an empty one with only controls from a given module
             controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
 
             return (Core::ERROR_NONE);
