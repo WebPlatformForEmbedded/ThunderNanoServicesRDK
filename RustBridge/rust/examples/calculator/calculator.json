@@ -1,5 +1,5 @@
 {
- "locator":"libWPEFrameworkRustAdapter.so",
+ "locator":"libThunderRustAdapter.so",
  "classname":"RustAdapter",
  "callsign":"calculator",
  "startmode":"Activated"

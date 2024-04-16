@@ -23,7 +23,7 @@
 
 #include <gst/gst.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 class PlayerInfoImplementation : public Exchange::IPlayerProperties {

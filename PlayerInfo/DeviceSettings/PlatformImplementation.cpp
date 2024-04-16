@@ -35,7 +35,7 @@
 
 #include "manager.hpp"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 class PlayerInfoImplementation : public Exchange::IPlayerProperties, public Exchange::Dolby::IOutput

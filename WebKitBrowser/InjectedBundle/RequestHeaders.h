@@ -24,7 +24,7 @@
 #include <WPE/WebKit/WKBundlePage.h>
 #include <WPE/WebKit/WKURLRequest.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace WebKit {
 
 void SetRequestHeaders(WKBundlePageRef, WKTypeRef);
@@ -32,4 +32,4 @@ void RemoveRequestHeaders(WKBundlePageRef);
 void ApplyRequestHeaders(WKBundlePageRef, WKURLRequestRef);
 
 }  // WebKit
-}  // WPEFramework
+}  // Thunder

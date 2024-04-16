@@ -21,7 +21,7 @@
 #include <interfaces/json/JsonData_LocationSync.h>
 #include "LocationSync.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

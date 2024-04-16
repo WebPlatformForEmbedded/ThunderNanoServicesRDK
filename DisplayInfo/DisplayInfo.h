@@ -27,7 +27,7 @@
 #include <interfaces/json/JDisplayProperties.h>
 #include <interfaces/IConfiguration.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class DisplayInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -125,4 +125,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

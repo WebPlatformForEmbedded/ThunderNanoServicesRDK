@@ -31,7 +31,7 @@ using std::vector;
 using std::cerr;
 using std::endl;
 
-namespace WPEFramework {
+namespace Thunder {
 namespace WebKit {
 
     // Parses JSON containing white listed CORS origin-domain pairs.
@@ -90,8 +90,8 @@ namespace WebKit {
         }
     }
 
-    // Gets white list from WPEFramework via synchronous message.
-    /* static */unique_ptr<WhiteListedOriginDomainsList> WhiteListedOriginDomainsList::RequestFromWPEFramework(const char* /* whitelist */)
+    // Gets white list from Thunder via synchronous message.
+    /* static */unique_ptr<WhiteListedOriginDomainsList> WhiteListedOriginDomainsList::RequestFromThunder(const char* /* whitelist */)
     {
         string messageName(string(Tags::Config) + "Whitelist");
         std::string utf8MessageName = Core::ToString(messageName.c_str());

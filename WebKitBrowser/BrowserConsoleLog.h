@@ -24,7 +24,7 @@
 #ifndef WEBKIT_GLIB_API
 #include "InjectedBundle/Utils.h"
 #endif
-using namespace WPEFramework;
+using namespace Thunder;
 
 class BrowserConsoleLog {
 private:

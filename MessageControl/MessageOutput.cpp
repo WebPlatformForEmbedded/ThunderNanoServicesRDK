@@ -19,7 +19,7 @@
 
 #include "MessageOutput.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Publishers {
 

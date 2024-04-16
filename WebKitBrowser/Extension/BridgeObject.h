@@ -21,7 +21,7 @@
 
 #include <wpe/webkit-web-extension.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace BridgeObject {
 
@@ -30,4 +30,4 @@ void InjectJS(WebKitScriptWorld*, WebKitWebPage*, WebKitFrame*);
 
 }  // BridgeObject
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

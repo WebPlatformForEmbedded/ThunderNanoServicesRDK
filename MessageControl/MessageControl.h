@@ -23,7 +23,7 @@
 #include "MessageOutput.h"
 #include <functional>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -190,7 +190,7 @@ namespace Plugin {
                 RPC::IMonitorableProcess* controlled (connection->QueryInterface<RPC::IMonitorableProcess>());
 
                 if (controlled != nullptr) {
-                    // This is a connection that is controleld by WPEFramework. For this we can wait till we
+                    // This is a connection that is controleld by Thunder. For this we can wait till we
                     // receive a terminated.
                     controlled->Release();
                 }

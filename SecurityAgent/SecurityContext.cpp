@@ -19,7 +19,7 @@
  
 #include "SecurityContext.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     SecurityContext::SecurityContext(const AccessControlList* acl, const uint16_t length, const uint8_t payload[], const string& servicePrefix)

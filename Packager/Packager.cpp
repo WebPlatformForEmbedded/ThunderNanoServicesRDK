@@ -19,7 +19,7 @@
  
 #include "Packager.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 namespace {
 
@@ -176,4 +176,4 @@ namespace {
         }
     }
 }  // namespace Plugin
-}  // namespace WPEFramework
+}  // namespace Thunder

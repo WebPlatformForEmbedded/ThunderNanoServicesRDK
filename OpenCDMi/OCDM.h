@@ -25,7 +25,7 @@
 #include <interfaces/IMemory.h>
 #include <interfaces/json/JsonData_OCDM.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class OCDM : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {

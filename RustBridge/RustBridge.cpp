@@ -19,7 +19,7 @@
 
 #include "RustBridge.h"
 
-namespace WPEFramework {
+namespace Thunder {
     namespace Plugin {
 
         namespace {
@@ -329,4 +329,4 @@ namespace WPEFramework {
             _adminLock.Unlock();
         }
     } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

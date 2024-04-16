@@ -23,7 +23,7 @@
 #include <interfaces/IMessenger.h>
 #include "RoomMaintainer.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -161,4 +161,4 @@ namespace Plugin {
 
 } // namespace Plugin
 
-} // namespace WPEFramework
+} // namespace Thunder

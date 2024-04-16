@@ -23,7 +23,7 @@
 
 #include "TokenFactory.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

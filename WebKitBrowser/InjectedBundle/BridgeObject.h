@@ -22,7 +22,7 @@
 #include "../Tags.h"
 #include "Utils.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace BridgeObject {
 
@@ -31,4 +31,4 @@ void InjectJS(WKBundleFrameRef frame);
 
 }  // BridgeObject
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

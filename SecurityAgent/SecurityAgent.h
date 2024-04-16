@@ -24,7 +24,7 @@
 
 #include <interfaces/json/JsonData_SecurityAgent.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class SecurityAgent : public PluginHost::IAuthenticate,
@@ -228,4 +228,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

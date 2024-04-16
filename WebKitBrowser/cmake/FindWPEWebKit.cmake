@@ -17,12 +17,12 @@
 
 # - Try to find WPEWebKit
 # Once done this will define
-#  WPE_WEBKIT_FOUND - System has WPEFrameworkPlugins
-#  WPE_WEBKIT_INCLUDE_DIRS - The WPEFrameworkPlugins include directories
-#  WPE_WEBKIT_LIBRARIES - The libraries needed to use WPEFrameworkPlugins
+#  WPE_WEBKIT_FOUND - System has ThunderPlugins
+#  WPE_WEBKIT_INCLUDE_DIRS - The ThunderPlugins include directories
+#  WPE_WEBKIT_LIBRARIES - The libraries needed to use ThunderPlugins
 #
-# Be extremely careful! WPEFRAMEWORK_PLUGINS_INCLUDE_DIRS and WPE_WEBKIT_LIBRARIES is already defined in
-# WPEFramework/Source/plugins!!
+# Be extremely careful! THUNDER_PLUGINS_INCLUDE_DIRS and WPE_WEBKIT_LIBRARIES is already defined in
+# Thunder/Source/plugins!!
 # So here we purposely left one underscore away
 
 find_package(PkgConfig)

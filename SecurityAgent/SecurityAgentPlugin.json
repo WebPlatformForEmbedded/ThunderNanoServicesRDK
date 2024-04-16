@@ -3,7 +3,7 @@
   "info": {
     "title": "Security Agent Plugin",
     "callsign": "SecurityAgent",
-    "locator": "libWPEFrameworkSecurityAgent.so",
+    "locator": "libThunderSecurityAgent.so",
     "status": "production",
     "description": "Security Agent of thunder is responsible to allow or block access to the Thunder API.",
     "version": "1.0"

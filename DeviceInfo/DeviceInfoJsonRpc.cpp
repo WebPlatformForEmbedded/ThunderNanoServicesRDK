@@ -21,7 +21,7 @@
 #include "DeviceInfo.h"
 #include <interfaces/json/JsonData_DeviceInfo.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

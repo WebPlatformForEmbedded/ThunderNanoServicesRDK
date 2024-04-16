@@ -21,7 +21,7 @@
 #include "Monitor.h"
 #include <interfaces/json/JsonData_Monitor.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

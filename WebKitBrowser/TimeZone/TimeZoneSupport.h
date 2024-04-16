@@ -23,7 +23,7 @@
 #include "Module.h"
 #include <gio/gio.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace TZ {
     class TimeZoneSupport {
     public:

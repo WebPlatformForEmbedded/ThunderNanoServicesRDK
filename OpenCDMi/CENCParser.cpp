@@ -19,7 +19,7 @@
 
 #include "CENCParser.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -30,4 +30,4 @@ namespace Plugin {
     /* static */ const uint8_t CommonEncryptionData::ClearKey[] = { 0x58, 0x14, 0x7e, 0xc8, 0x04, 0x23, 0x46, 0x59, 0x92, 0xe6, 0xf5, 0x2c, 0x5c, 0xe8, 0xc3, 0xcc };
     /* static */ const    char CommonEncryptionData::JSONKeyIds[] = "{\"kids\":";
 }
-} // namespace WPEFramework::Plugin
+} // namespace Thunder::Plugin

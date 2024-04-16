@@ -22,7 +22,7 @@
 #include "Module.h"
 #include <interfaces/IRustBridge.h>
 
-namespace WPEFramework {
+namespace Thunder {
     namespace Plugin {
 
         class RustBridge :
@@ -243,4 +243,4 @@ namespace WPEFramework {
         };
 
     } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

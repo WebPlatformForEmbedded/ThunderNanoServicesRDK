@@ -21,7 +21,7 @@
 #include "SecurityContext.h"
 #include "TokenFactory.h"
 
-namespace WPEFramework {
+namespace Thunder {
 ENUM_CONVERSION_BEGIN(Plugin::SecurityAgent::tokentype)
     { Plugin::SecurityAgent::DAC, _TXT("dac") },
 ENUM_CONVERSION_END(Plugin::SecurityAgent::tokentype)
@@ -319,4 +319,4 @@ namespace Plugin {
     }
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

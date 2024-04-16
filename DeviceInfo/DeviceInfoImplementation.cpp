@@ -1,6 +1,6 @@
 #include "DeviceInfoImplementation.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     SERVICE_REGISTRATION(DeviceInfoImplementation, 1, 0)
 

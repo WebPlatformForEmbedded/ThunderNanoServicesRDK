@@ -20,7 +20,7 @@
 #include "Module.h"
 #include "AccessControlList.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
     ENUM_CONVERSION_BEGIN(Plugin::AccessControlList::mode)
         { Plugin::AccessControlList::ALLOWED, _TXT("allowed") },

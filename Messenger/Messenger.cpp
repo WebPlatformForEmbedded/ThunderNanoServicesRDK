@@ -21,7 +21,7 @@
 #include "Messenger.h"
 #include "cryptalgo/Hash.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

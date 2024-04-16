@@ -22,7 +22,7 @@
 #include <bcm_host.h>
 #include <fstream>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier {
@@ -92,7 +92,7 @@ namespace Plugin {
         }
         inline void UpdateDeviceIdentifier(string& identifier) const
         {
-            WPEFramework::Core::File serialFile(SerialInfoPath);
+            Thunder::Core::File serialFile(SerialInfoPath);
             if (serialFile.Open(true) == true) {
                 uint8_t* serialInfo = static_cast<uint8_t*>(ALLOCA(serialFile.Size()));
                 uint32_t size = serialFile.Read(serialInfo, static_cast<uint32_t>(serialFile.Size()));

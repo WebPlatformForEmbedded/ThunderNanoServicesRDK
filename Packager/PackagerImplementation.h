@@ -29,7 +29,7 @@
 struct opkg_conf;
 struct _opkg_progress_data_t;
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class PackagerImplementation : public Exchange::IPackager {
@@ -358,4 +358,4 @@ namespace Plugin {
     };
 
 }  // namespace Plugin
-}  // namespace WPEFramework
+}  // namespace Thunder

@@ -24,7 +24,7 @@
 #include <interfaces/IDeviceInfo.h>
 #include <interfaces/json/JsonData_DeviceInfo.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class DeviceInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -245,6 +245,6 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder
 
 #endif // DEVICEINFO_DEVICEINFO_H
