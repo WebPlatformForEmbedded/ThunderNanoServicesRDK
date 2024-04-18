@@ -147,8 +147,9 @@ public:
 #endif
 
         Messaging::MessageUnit::Instance().Close();
-        
+
         if (_comClient.IsValid() == true) {
+            _comClient->Close(RPC::CommunicationTimeOut);
             _comClient.Release();
         }
         if (_engine.IsValid() == true) {
