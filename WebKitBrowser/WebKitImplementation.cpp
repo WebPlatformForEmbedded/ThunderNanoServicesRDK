@@ -3860,7 +3860,7 @@ static GSourceFuncs _handlerIntervention =
 
     /* static */ void webProcessDidCrash(WKPageRef, const void*)
     {
-        SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess crashed: exiting ...")));
+        SYSLOG(Logging::Fatal, (_T("CRASH: WebProcess did crash: exiting ...")));
         exit(1);
     }
 
