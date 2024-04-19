@@ -414,10 +414,9 @@ namespace Plugin {
             return (Core::ERROR_NONE);
         }
 
-        // TO-DO: Make it so that it does not only returns error none but an actually error if something goes wrong
         Core::hresult Modules(Exchange::IMessageControl::IStringIterator*& modules) const override
         {
-            std::list<string> list;
+            std::vector<string> list;
 
             _client.Modules(list);
 
@@ -427,7 +426,6 @@ namespace Plugin {
             return (Core::ERROR_NONE);
         }
 
-        // TO-DO: Make it so that it does not only returns error none but an actually error if something goes wrong
         Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
@@ -439,7 +437,6 @@ namespace Plugin {
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
-            // Testing: make sure that it does not infinately add to this list but it actually creates an empty one with only controls from a given module
             controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
 
             return (Core::ERROR_NONE);
