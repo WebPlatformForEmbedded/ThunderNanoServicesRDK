@@ -1481,21 +1481,27 @@ static GSourceFuncs _handlerIntervention =
 
         void Register(Exchange::IBrowserCookieJar::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
+            auto index(std::find(_cookieJarClients.begin(), _cookieJarClients.end(), sink));
+
             // Make sure a sink is not registered multiple times.
-            ASSERT(std::find(_cookieJarClients.begin(), _cookieJarClients.end(), sink) == _cookieJarClients.end());
+            ASSERT(index == _cookieJarClients.end());
 
-            _cookieJarClients.push_back(sink);
-            sink->AddRef();
-
-            TRACE(Trace::Information, (_T("Registered cookie jar notification client %p"), sink));
+            if (index == _cookieJarClients.end()) {
+                _cookieJarClients.push_back(sink);
+                sink->AddRef();
+                TRACE(Trace::Information, (_T("Registered cookie jar notification client %p"), sink));
+            }
 
             _adminLock.Unlock();
         }
 
         void Unregister(Exchange::IBrowserCookieJar::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
             _adminLock.Lock();
 
             auto index(std::find(_cookieJarClients.begin(), _cookieJarClients.end(), sink));
@@ -1833,21 +1839,27 @@ static GSourceFuncs _handlerIntervention =
 
         void Register(PluginHost::IStateControl::INotification* sink)
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
-            // Make sure a sink is not registered multiple times.
-            ASSERT(std::find(_stateControlClients.begin(), _stateControlClients.end(), sink) == _stateControlClients.end());
+            std::list<PluginHost::IStateControl::INotification*>::iterator index(std::find(_stateControlClients.begin(), _stateControlClients.end(), sink));
 
-            _stateControlClients.push_back(sink);
-            sink->AddRef();
+            // Make sure a sink is not registered multiple times.
+            ASSERT(index  == _stateControlClients.end());
+
+            if (index  == _stateControlClients.end()) {
+                _stateControlClients.push_back(sink);
+                sink->AddRef();
+                TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
+            }
 
             _adminLock.Unlock();
-
-            TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
         }
 
         void Unregister(PluginHost::IStateControl::INotification* sink)
         {
+            ASSERT(sink != nullptr);
             _adminLock.Lock();
 
             std::list<PluginHost::IStateControl::INotification*>::iterator index(std::find(_stateControlClients.begin(), _stateControlClients.end(), sink));
@@ -1894,21 +1906,29 @@ static GSourceFuncs _handlerIntervention =
 
         void Register(Exchange::IWebBrowser::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
-            // Make sure a sink is not registered multiple times.
-            ASSERT(std::find(_notificationClients.begin(), _notificationClients.end(), sink) == _notificationClients.end());
+            std::list<Exchange::IWebBrowser::INotification*>::iterator index(std::find(_notificationClients.begin(), _notificationClients.end(), sink));
 
-            _notificationClients.push_back(sink);
-            sink->AddRef();
+            // Make sure a sink is not registered multiple times.
+            ASSERT(index == _notificationClients.end());
+
+            if (index == _notificationClients.end()) {
+                _notificationClients.push_back(sink);
+                sink->AddRef();
+                TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
+            }
 
             _adminLock.Unlock();
 
-            TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
         }
 
         void Unregister(Exchange::IWebBrowser::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
             std::list<Exchange::IWebBrowser::INotification*>::iterator index(std::find(_notificationClients.begin(), _notificationClients.end(), sink));
@@ -1927,13 +1947,19 @@ static GSourceFuncs _handlerIntervention =
 
         void Register(Exchange::IBrowser::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
-            // Make sure a sink is not registered multiple times.
-            ASSERT(std::find(_notificationBrowserClients.begin(), _notificationBrowserClients.end(), sink) == _notificationBrowserClients.end());
+            auto index(std::find(_notificationBrowserClients.begin(), _notificationBrowserClients.end(), sink));
 
-            _notificationBrowserClients.push_back(sink);
-            sink->AddRef();
+            // Make sure a sink is not registered multiple times.
+            ASSERT(index == _notificationBrowserClients.end());
+
+	    if (index == _notificationBrowserClients.end()) {
+                _notificationBrowserClients.push_back(sink);
+                sink->AddRef();
+            }
 
             _adminLock.Unlock();
 
@@ -1942,6 +1968,8 @@ static GSourceFuncs _handlerIntervention =
 
         void Unregister(Exchange::IBrowser::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
             auto index(std::find(_notificationBrowserClients.begin(), _notificationBrowserClients.end(), sink));
@@ -1962,21 +1990,28 @@ static GSourceFuncs _handlerIntervention =
 
         void Register(Exchange::IApplication::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
-            // Make sure a sink is not registered multiple times.
-            ASSERT(std::find(_applicationClients.begin(), _applicationClients.end(), sink) == _applicationClients.end());
+            std::list<Exchange::IApplication::INotification*>::iterator index(std::find(_applicationClients.begin(), _applicationClients.end(), sink));
 
-            _applicationClients.push_back(sink);
-            sink->AddRef();
+            // Make sure a sink is not registered multiple times.
+            ASSERT(index == _applicationClients.end());
+
+            if (index == _applicationClients.end()) {
+                _applicationClients.push_back(sink);
+                sink->AddRef();
+                TRACE(Trace::Information, (_T("Registered an IApplication sink on the browser %p"), sink));
+            }
 
             _adminLock.Unlock();
-
-            TRACE(Trace::Information, (_T("Registered an IApplication sink on the browser %p"), sink));
         }
 
         void Unregister(Exchange::IApplication::INotification* sink) override
         {
+            ASSERT(sink != nullptr);
+
             _adminLock.Lock();
 
             std::list<Exchange::IApplication::INotification*>::iterator index(std::find(_applicationClients.begin(), _applicationClients.end(), sink));
