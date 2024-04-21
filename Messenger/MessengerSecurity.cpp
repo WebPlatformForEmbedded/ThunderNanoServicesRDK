@@ -107,7 +107,7 @@ namespace Plugin {
             const auto secure = params.Secure.Value();
             const auto& acl = params.Acl;
 
-            if (secure != SecureType::SECURE) {
+            if (secure != IMessenger::security::SECURE) {
                 result = true;
             } else if (user.empty() || room.empty()) {
                 result = true;

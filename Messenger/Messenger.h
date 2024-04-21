@@ -16,34 +16,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #pragma once
 
 #include "Module.h"
 #include <interfaces/IMessenger.h>
-#include <interfaces/json/JsonData_Messenger.h>
+#include <interfaces/json/JMessenger.h>
 #include <map>
 #include <set>
 #include <functional>
 
 namespace WPEFramework {
 
+namespace JMessenger = Exchange::JSONRPC::JMessenger;
+
 namespace Plugin {
 
     class Messenger : public PluginHost::IPlugin
                     , public Exchange::IRoomAdministrator::INotification
-                    , public PluginHost::JSONRPCSupportsEventStatus {
+                    , public PluginHost::JSONRPCSupportsEventStatus
+                    , public Exchange::JSONRPC::JMessenger::IHandler
+                    , public Exchange::JSONRPC::IMessenger {
+
+        using IMessenger = Exchange::JSONRPC::IMessenger;
+
     private:
-        class Notification : public RPC::IRemoteConnection::INotification {
+        class Notification : public RPC::IRemoteConnection::INotification
+                           , public PluginHost::IShell::IConnectionServer::INotification {
         public:
             Notification() = delete;
             Notification(const Notification&) = delete;
             Notification& operator=(const Notification&) = delete;
 
-            explicit Notification(Messenger* parent)
-                : _parent(*parent)
+            explicit Notification(Messenger& parent)
+                : _parent(parent)
             {
-                ASSERT(parent != nullptr);
             }
             ~Notification() override = default;
 
@@ -59,13 +66,101 @@ namespace Plugin {
             {
             }
 
+        public:
+            void Opened(const uint32_t channel VARIABLE_IS_NOT_USED) override
+            {
+            }
+            void Closed(const uint32_t channel) override
+            {
+                _parent.Closed(channel);
+            }
+
+        public:
             BEGIN_INTERFACE_MAP(Notification)
-            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+                INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+                INTERFACE_ENTRY(PluginHost::IShell::IConnectionServer::INotification)
             END_INTERFACE_MAP
 
         private:
             Messenger& _parent;
-        };
+        }; // class Notification
+
+    private:
+        class MsgNotification : public Exchange::IRoomAdministrator::IRoom::IMsgNotification {
+        public:
+            MsgNotification(const MsgNotification&) = delete;
+            MsgNotification& operator=(const MsgNotification&) = delete;
+
+            MsgNotification(Messenger& parent, const string& roomId)
+                : _parent(parent)
+                , _roomId(roomId)
+            {
+                ASSERT(roomId.empty() == false);
+            }
+
+            ~MsgNotification() override
+            {
+                TRACE(Trace::Text,( _T("MsgNotification object for room '%s' destroyed"), _roomId.c_str()));
+            }
+
+        public:
+            // IRoom::IMsgNotification overrides
+            void Message(const string& senderName, const string& message) override
+            {
+                ASSERT(senderName.empty() == false);
+                JMessenger::Event::Message(_parent, _roomId /* index */, senderName, message);
+            }
+
+        public:
+            BEGIN_INTERFACE_MAP(MsgNotification)
+                INTERFACE_ENTRY(Exchange::IRoomAdministrator::IRoom::IMsgNotification)
+            END_INTERFACE_MAP
+
+        private:
+            Messenger& _parent;
+            string _roomId;
+        }; // class MsgNotification
+
+    private:
+        class Callback : public Exchange::IRoomAdministrator::IRoom::ICallback {
+        public:
+            Callback(const Callback&) = delete;
+            Callback& operator=(const Callback&) = delete;
+
+            Callback(Messenger& parent, const string& roomId)
+                : _parent(parent)
+                , _roomId(roomId)
+            {
+                ASSERT(roomId.empty() == false);
+            }
+
+            ~Callback()
+            {
+                TRACE(Trace::Text, ( _T("Callback object for room '%s' destroyed"), _roomId.c_str()));
+            }
+
+        public:
+            // IRoom::ICallback overrides
+            void Joined(const string& userName) override
+            {
+                ASSERT(userName.empty() == false);
+                JMessenger::Event::UserUpdate(_parent, _roomId /* index */, userName, IMessenger::INotification::JOINED);
+            }
+            void Left(const string& userName) override
+            {
+                ASSERT(userName.empty() == false);
+                JMessenger::Event::UserUpdate(_parent, _roomId /* index */, userName, IMessenger::INotification::LEFT);
+            }
+
+        public:
+            BEGIN_INTERFACE_MAP(Callback)
+                INTERFACE_ENTRY(Exchange::IRoomAdministrator::IRoom::ICallback)
+            END_INTERFACE_MAP
+
+        private:
+            Messenger& _parent;
+            string _roomId;
+        }; // class Callback
 
     public:
         Messenger(const Messenger&) = delete;
@@ -79,81 +174,89 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
             , _service(nullptr)
             , _roomAdmin(nullptr)
             , _roomIds()
+            , _rooms()
+            , _roomACL()
             , _adminLock()
-            , _notification(this)
+            , _notification(*this)
         {
         }
 POP_WARNING()
 
         ~Messenger() override = default;
 
-        // IPlugin methods
+        // IPlugin overrides
         const string Initialize(PluginHost::IShell* service) override;
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override  { return { }; }
 
-        // Notification handling
-        class MsgNotification : public Exchange::IRoomAdministrator::IRoom::IMsgNotification {
-        public:
-            MsgNotification(const MsgNotification&) = delete;
-            MsgNotification& operator=(const MsgNotification&) = delete;
+    public:
+        // IRoomAdministrator::INotification overrides
+        void Created(const string& roomName) override
+        {
+            ASSERT(roomName.empty() == false);
 
-            MsgNotification(Messenger* messenger, const string& roomId)
-                : _messenger(messenger)
-                , _roomId(roomId)
-            { /* empty */ }
+            _adminLock.Lock();
 
-            // IRoom::Notification methods
-            void Message(const string& senderName, const string& message) override
-            {
-                ASSERT(_messenger != nullptr);
-                _messenger->MessageHandler(_roomId, senderName, message);
+            ASSERT(_rooms.find(roomName) == _rooms.end());
+
+            _rooms.insert(roomName);
+            JMessenger::Event::RoomUpdate(*this, roomName, IMessenger::INotification::CREATED, IsSecure(roomName));
+
+            _adminLock.Unlock();
+        }
+        void Destroyed(const string& roomName) override
+        {
+            ASSERT(roomName.empty() == false);
+
+            _adminLock.Lock();
+
+            ASSERT(_rooms.find(roomName) != _rooms.end());
+
+            JMessenger::Event::RoomUpdate(*this, roomName, IMessenger::INotification::DESTROYED, IsSecure(roomName));
+
+            _rooms.erase(roomName);
+            _roomACL.erase(roomName);
+
+            _adminLock.Unlock();
+        }
+
+    public:
+        // JSONRPC::JMessenger::IHandler overrides
+        void OnRoomUpdateEventRegistration(const string& client VARIABLE_IS_NOT_USED, const JSONRPCSupportsEventStatus::Status status) override
+        {
+            TRACE(Trace::Information, (_T("Client '%s' %s for room-update notifications"), client.c_str(),
+                status == Status::registered? "registered" : "unregistered"));
+
+            if (status == Status::registered) {
+                _adminLock.Lock();
+
+                for (const string& room : _rooms) {
+                    JMessenger::Event::RoomUpdate(*this, room, IMessenger::INotification::CREATED, IsSecure(room));
+                }
+
+                _adminLock.Unlock();
             }
+        }
+        void OnUserUpdateEventRegistration(const string& client, const JSONRPCSupportsEventStatus::Status status) override
+        {
+            if (SubscribeUserUpdate(client.substr(0, client.find('.')), (status == Status::registered)) == true) {
 
-            // QueryInterface implementation
-            BEGIN_INTERFACE_MAP(Callback)
-                INTERFACE_ENTRY(Exchange::IRoomAdministrator::IRoom::IMsgNotification)
-            END_INTERFACE_MAP
+                TRACE(Trace::Information, (_T("Client '%s' %s for user-update notifications"), client.c_str(),
+                    status == Status::registered? "registered" : "unregistered"));
 
-        private:
-            Messenger* _messenger;
-            string _roomId;
-        }; // class Notification
-
-        // Callback handling
-        class Callback : public Exchange::IRoomAdministrator::IRoom::ICallback {
-        public:
-            Callback(const Callback&) = delete;
-            Callback& operator=(const Callback&) = delete;
-
-            Callback(Messenger* messenger, const string& roomId)
-                : _messenger(messenger)
-                , _roomId(roomId)
-            { /* empty */}
-
-            // IRoom::ICallback methods
-            void Joined(const string& userName) override
-            {
-                ASSERT(_messenger != nullptr);
-                _messenger->UserJoinedHandler(_roomId, userName);
+            } else {
+                TRACE(Trace::Error, (_T("Client id '%s' is invalid"), client.c_str()));
             }
+        }
 
-            void Left(const string& userName) override
-            {
-                ASSERT(_messenger != nullptr);
-                _messenger->UserLeftHandler(_roomId, userName);
-            }
+    public:
+        // JSONRPC::IMessenger overrides
+        Core::hresult Join(const Core::JSONRPC::Context& context, const string& roomName, const string& userName,
+                           const IMessenger::security secure, IMessenger::IStringIterator* const acl, string& roomId) override;
+        Core::hresult Leave(const string& roomId) override;
+        Core::hresult Send(const string& roomId, const string& message) override;
 
-            // QueryInterface implementation
-            BEGIN_INTERFACE_MAP(Callback)
-                INTERFACE_ENTRY(Exchange::IRoomAdministrator::IRoom::ICallback)
-            END_INTERFACE_MAP
-
-        private:
-            Messenger* _messenger;
-            string _roomId;
-        }; // class Callback
-
+    public:
         // QueryInterface implementation
         BEGIN_INTERFACE_MAP(Messenger)
             INTERFACE_ENTRY(PluginHost::IPlugin)
@@ -162,67 +265,26 @@ POP_WARNING()
             INTERFACE_AGGREGATE(Exchange::IRoomAdministrator, _roomAdmin)
         END_INTERFACE_MAP
 
-        string JoinRoom(const string& roomId, const string& userName);
-        bool LeaveRoom(const string& roomId);
-        bool SendMessage(const string& roomId, const string& message);
+    private:
+        void Deactivated(RPC::IRemoteConnection* connection);
+        void Closed(const uint32_t channel);
 
-        void UserJoinedHandler(const string& roomId, const string& userName)
-        {
-            event_userupdate(roomId, userName, JsonData::Messenger::UserupdateParamsData::ActionType::JOINED);
-        }
+        bool SubscribeUserUpdate(const string& roomId, bool subscribe);
 
-        void UserLeftHandler(const string& roomId, const string& userName)
-        {
-            event_userupdate(roomId, userName, JsonData::Messenger::UserupdateParamsData::ActionType::LEFT);
-        }
+        PluginHost::JSONRPC::classification CheckToken(const string& token, const string& method, const string& parameters);
 
-        void MessageHandler(const string& roomId, const string& senderName, const string& message)
-        {
-            event_message(roomId, senderName, message);
-        }
-
-        // IMessenger::INotification methods
-        void Created(const string& roomName) override
-        {
-            _adminLock.Lock();
-            ASSERT(_rooms.find(roomName) == _rooms.end());
-            _rooms.insert(roomName);
-            _adminLock.Unlock();
-
-            event_roomupdate(roomName, JsonData::Messenger::RoomupdateParamsData::ActionType::CREATED);
-        }
-
-        void Destroyed(const string& roomName) override
-        {
-            event_roomupdate(roomName, JsonData::Messenger::RoomupdateParamsData::ActionType::DESTROYED);
-
-            _adminLock.Lock();
-            ASSERT(_rooms.find(roomName) != _rooms.end());
-            _rooms.erase(roomName);
-            _roomACL.erase(roomName);
-            _adminLock.Unlock();
+        IMessenger::security IsSecure(const string& room) const {
+            return (_roomACL.find(room) != _roomACL.end()? IMessenger::SECURE : IMessenger::INSECURE);
         }
 
     private:
-        void Deactivated(RPC::IRemoteConnection* connection);
-        string GenerateRoomId(const string& roomName, const string& userName);
-        bool SubscribeUserUpdate(const string& roomId, bool subscribe);
+        static string GenerateRoomId(const string& roomName, const string& userName);
 
-        // JSON-RPC
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t endpoint_join(const JsonData::Messenger::JoinParamsData& params, JsonData::Messenger::JoinResultInfo& response);
-        uint32_t endpoint_leave(const JsonData::Messenger::JoinResultInfo& params);
-        uint32_t endpoint_send(const JsonData::Messenger::SendParamsData& params);
-        void event_roomupdate(const string& room, const JsonData::Messenger::RoomupdateParamsData::ActionType& action);
-        void event_userupdate(const string& id, const string& user, const JsonData::Messenger::UserupdateParamsData::ActionType& action);
-        void event_message(const string& id, const string& user, const string& message);
-        PluginHost::JSONRPC::classification CheckToken(const string& token, const string& method, const string& parameters);
-
+    private:
         uint32_t _connectionId;
         PluginHost::IShell* _service;
         Exchange::IRoomAdministrator* _roomAdmin;
-        std::map<string, Exchange::IRoomAdministrator::IRoom*> _roomIds;
+        std::map<string, std::pair<Exchange::IRoomAdministrator::IRoom*, uint32_t>> _roomIds;
         std::set<string> _rooms;
         std::map<string, std::list<string>> _roomACL;
         mutable Core::CriticalSection _adminLock;
@@ -231,4 +293,4 @@ POP_WARNING()
 
 } // namespace Plugin
 
-} // namespace WPEFramework
+}

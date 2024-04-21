@@ -63,7 +63,7 @@ namespace Plugin {
             // Release the callback if necessary.
             SetCallback(nullptr);
 
-            if (_messageSink) {
+            if (_messageSink != nullptr) {
                 _messageSink->Release();
             }
 
