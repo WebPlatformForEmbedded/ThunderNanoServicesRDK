@@ -90,13 +90,19 @@ public:
     // Connection Properties interface
     uint32_t Register(INotification* notification) override
     {
+        ASSERT(notification != nullptr);
+
         _adminLock.Lock();
 
-        // Make sure a sink is not registered multiple times.
-        ASSERT(std::find(_observers.begin(), _observers.end(), notification) == _observers.end());
+        std::list<IConnectionProperties::INotification*>::iterator index(std::find(_observers.begin(), _observers.end(), notification));
 
-        _observers.push_back(notification);
-        notification->AddRef();
+        // Make sure a sink is not registered multiple times.
+        ASSERT(index == _observers.end());
+
+        if (index == _observers.end()) {
+            _observers.push_back(notification);
+            notification->AddRef();
+        }
 
         _adminLock.Unlock();
 
@@ -104,6 +110,8 @@ public:
     }
     uint32_t Unregister(INotification* notification) override
     {
+        ASSERT(notification != nullptr);
+
         _adminLock.Lock();
 
         std::list<IConnectionProperties::INotification*>::iterator index(std::find(_observers.begin(), _observers.end(), notification));

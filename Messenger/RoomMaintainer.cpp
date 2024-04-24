@@ -170,15 +170,19 @@ namespace Plugin {
 
         _adminLock.Lock();
 
+        auto const it(std::find(_observers.cbegin(), _observers.cend(), sink));
+
         // Make sure it's not registered multiple times.
-        ASSERT(std::find(_observers.cbegin(), _observers.cend(), sink) == _observers.cend());
+        ASSERT(it == _observers.cend());
 
-        _observers.push_back(sink);
-        sink->AddRef();
+        if (it == _observers.cend()) {
+            _observers.push_back(sink);
+            sink->AddRef();
 
-        // Notify the caller about all rooms created to date.
-        for (auto const& room : _roomMap) {
-            sink->Created(room.first);
+            // Notify the caller about all rooms created to date.
+            for (auto const& room : _roomMap) {
+                sink->Created(room.first);
+            }
         }
 
         _adminLock.Unlock();

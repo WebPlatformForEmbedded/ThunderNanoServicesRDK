@@ -15,9 +15,6 @@
     <ClCompile Include="Messenger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessengerJsonRpc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RoomMaintainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

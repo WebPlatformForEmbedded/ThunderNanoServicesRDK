@@ -47,7 +47,6 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED
     Messenger.cpp
-    MessengerJsonRpc.cpp
     MessengerSecurity.cpp
     RoomMaintainer.cpp
     Module.cpp)
