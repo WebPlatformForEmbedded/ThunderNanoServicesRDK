@@ -221,7 +221,7 @@ namespace Plugin {
                 // Seems the ID is already in here, thats odd, and impossible :-)
                 Observers::iterator index = _observing.find(id);
 
-                ASSERT(index != _observing.end());
+                // ASSERT(index != _observing.end());
 
                 if (index != _observing.end()) {
                     if (index->second == state::ATTACHING) {
