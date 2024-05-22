@@ -710,7 +710,7 @@ POP_WARNING()
                         restartWindow = element.Restart.Window;
                         restartLimit = element.Restart.Limit;
                     }
-                    SYSLOG(Logging::Startup, (_T("Monitoring: %s (%d,%d)."), callSign.c_str(), (interval / 1000000), (memory / 1000000)));
+                    SYSLOG(Logging::Activate, (_T("Monitoring: %s (%d,%d)."), callSign.c_str(), (interval / 1000000), (memory / 1000000)));
                     if ((interval != 0) || (memory != 0)) {
 
                         _monitor.emplace(std::piecewise_construct,

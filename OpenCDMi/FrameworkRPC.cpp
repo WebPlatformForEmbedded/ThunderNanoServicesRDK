@@ -1293,7 +1293,7 @@ POP_WARNING()
                         }
                     }
                 } else {
-                    SYSLOG(Logging::Startup, (_T("Could not load factory [%s], error [%s]"), Core::File::FileNameExtended(entry.Current()).c_str(), library.Error().c_str()));
+                    SYSLOG(Logging::Activate, (_T("Could not load factory [%s], error [%s]"), Core::File::FileNameExtended(entry.Current()).c_str(), library.Error().c_str()));
                     result = Core::ERROR_OPENING_FAILED;
                 }
             }
@@ -1317,7 +1317,7 @@ POP_WARNING()
                                 _systemToFactory.insert(std::pair<const std::string, SystemFactory>(designator, factory->second));
 
                             } else {
-                                SYSLOG(Logging::Startup, (_T("Required factory [%s], not found for [%s]"), system.c_str(), designator.c_str()));
+                                SYSLOG(Logging::Activate, (_T("Required factory [%s], not found for [%s]"), system.c_str(), designator.c_str()));
                                 result = Core::ERROR_OPENING_FAILED;
                             }
                         }
@@ -1340,7 +1340,7 @@ POP_WARNING()
             }
 
             if (_systemToFactory.size() == 0) {
-                SYSLOG(Logging::Startup, (_T("No DRM factories specified. OCDM can not service any DRM requests.")));
+                SYSLOG(Logging::Activate, (_T("No DRM factories specified. OCDM can not service any DRM requests.")));
             }
 
             if ((config.Group.IsSet() == true) && (config.Group.Value().empty() == false)){
@@ -1371,7 +1371,7 @@ POP_WARNING()
                         subSystem->Set(PluginHost::ISubSystem::DECRYPTION, this);
                     }
                     if (_systemToFactory.size() == 0) {
-                        SYSLOG(Logging::Startup, (string(_T("OCDM server has NO key systems registered!!!"))));
+                        SYSLOG(Logging::Activate, (string(_T("OCDM server has NO key systems registered!!!"))));
                     }
                 }
             }

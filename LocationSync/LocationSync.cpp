@@ -281,7 +281,7 @@ POP_WARNING()
         _adminLock.Unlock();
 
         Exchange::JTimeZone::Event::TimeZoneChanged(const_cast<PluginHost::JSONRPC&>(static_cast<const PluginHost::JSONRPC&>(*this)), timezone);
-        SYSLOG(Logging::Startup, (_T("TimeZone change to \"%s\", local date time is now %s."), timezone.c_str(), Core::Time::Now().ToRFC1123(true).c_str()));
+        SYSLOG(Logging::Notification, (_T("TimeZone change to \"%s\", local date time is now %s."), timezone.c_str(), Core::Time::Now().ToRFC1123(true).c_str()));
     }
 
     void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {

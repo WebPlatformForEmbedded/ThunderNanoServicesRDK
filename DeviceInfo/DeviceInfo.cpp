@@ -64,7 +64,7 @@ namespace Plugin {
             _deviceInfo = _service->Root<Exchange::IDeviceInfo>(_connectionId, 2000, _T("DeviceInfoImplementation"));
             if (_deviceInfo == nullptr) {
                 message = _T("DeviceInfo could not be instantiated");
-                SYSLOG(Logging::Startup, (_T("DeviceInfo could not be instantiated")));
+                SYSLOG(Logging::Activate, (_T("DeviceInfo could not be instantiated")));
             } else {
                 _deviceInfo->Configure(_service);
                 _deviceAudioCapabilityInterface = _deviceInfo->QueryInterface<Exchange::IDeviceAudioCapabilities>();
