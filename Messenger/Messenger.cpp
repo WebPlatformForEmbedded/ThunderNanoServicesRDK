@@ -124,11 +124,11 @@ namespace Plugin {
             roomId = GenerateRoomId(roomName, userName);
             ASSERT(roomId.empty() == false);
 
+            MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(*this, roomId);
+            ASSERT(sink != nullptr);
 
             if (sink != nullptr) {
-                ASSERT(sink != nullptr);
-                MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(*this, roomId);
-
+                
                 // Note: Join() can return nullptr if the user has already joined the room.
                 if (room != nullptr) {
 
