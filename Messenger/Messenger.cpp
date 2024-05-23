@@ -128,7 +128,9 @@ namespace Plugin {
             ASSERT(sink != nullptr);
 
             if (sink != nullptr) {
-                
+
+                Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
+
                 // Note: Join() can return nullptr if the user has already joined the room.
                 if (room != nullptr) {
 
