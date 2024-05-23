@@ -47,6 +47,7 @@ public:
         , _audioPassthrough(false)
         , _EDID()
         , _value(HDCP_Unencrypted)
+        , _observers()
         , _adminLock()
         , _activity(*this) {
 

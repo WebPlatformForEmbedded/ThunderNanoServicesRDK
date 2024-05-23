@@ -77,6 +77,7 @@ public:
     PluginHost()
         : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
+        , _extension(nullptr)
     {
     }
     ~PluginHost()
@@ -88,6 +89,7 @@ public:
 public:
     void Initialize(WebKitWebExtension* extension, const void* userData)
     {
+        ASSERT(_comClient.IsValid() == true);
         // We have something to report back, do so...
         uint32_t result = _comClient->Open(RPC::CommunicationTimeOut);
         if (result != Core::ERROR_NONE) {
@@ -161,7 +163,7 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame, VARIABLE_IS_NOT_USED PluginHost* host)
     {
         JavaScript::Milestone::InjectJS(world, frame);
         JavaScript::NotifyWPEFramework::InjectJS(world, frame);
@@ -192,6 +194,7 @@ private:
                                     WebKitWebPage* page,
                                     PluginHost* host)
     {
+        ASSERT(host != nullptr);
         if (host->_logToSystemConsoleEnabled) {
             g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), host);
@@ -210,6 +213,7 @@ private:
 PUSH_WARNING(DISABLE_WARNING_DEPRECATED_USE)
     static void consoleMessageSentCallback(VARIABLE_IS_NOT_USED WebKitWebPage* page, WebKitConsoleMessage* message, PluginHost* host)
     {
+        ASSERT(host != nullptr);
         string messageString = Core::ToString(webkit_console_message_get_text(message));
         uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
 

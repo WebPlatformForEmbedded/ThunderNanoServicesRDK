@@ -57,7 +57,7 @@ namespace Plugin {
         _service->Register(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
-        if(_roomAdmin == nullptr) {
+        if (_roomAdmin == nullptr) {
             message = _T("RoomMaintainer couldnt be instantiated");
         }
         else {
@@ -124,11 +124,10 @@ namespace Plugin {
             roomId = GenerateRoomId(roomName, userName);
             ASSERT(roomId.empty() == false);
 
-            MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(*this, roomId);
-            ASSERT(sink != nullptr);
 
             if (sink != nullptr) {
-                Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
+                ASSERT(sink != nullptr);
+                MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(*this, roomId);
 
                 // Note: Join() can return nullptr if the user has already joined the room.
                 if (room != nullptr) {

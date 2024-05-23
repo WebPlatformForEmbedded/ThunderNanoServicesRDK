@@ -268,6 +268,7 @@ namespace WPEFramework {
 
         void RustBridge::Deactivated(RPC::IRemoteConnection* connection)
         {
+            ASSERT(connection != nullptr);
             // This can potentially be called on a socket thread, so the deactivation (wich in turn kills this object) must be done
             // on a seperate thread. Also make sure this call-stack can be unwound before we are totally destructed.
             if (_connectionId == connection->Id()) {
@@ -293,6 +294,7 @@ namespace WPEFramework {
         }
 
         void RustBridge::RustResponse(const uint32_t id, const string& response, const uint32_t error) {
+            ASSERT(_service != nullptr);
             // This is the response to an invoked method, Let's see who should get this repsonse :-)
             _adminLock.Lock();
 
@@ -300,6 +302,7 @@ namespace WPEFramework {
 
             if (index != _pendingRequests.end()) {
                 Core::ProxyType<Core::JSONRPC::Message> message = Core::ProxyType<Core::JSONRPC::Message>(PluginHost::IFactories::Instance().JSONRPC());
+                ASSERT(message != nullptr);
 
                 message->Id = index->second.SequenceId();
 

@@ -288,6 +288,7 @@ namespace Plugin {
             InstallThread(const InstallThread&) = delete;
 
             uint32_t Worker() override {
+                ASSERT(_parent != nullptr);
                 while(IsRunning() == true) {
                     _parent->_adminLock.Lock(); // The parent may have lock when this starts so wait for it to release.
                     bool isInstall = _parent->_inProgress.Install != nullptr;

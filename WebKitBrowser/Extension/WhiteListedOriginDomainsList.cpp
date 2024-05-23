@@ -84,6 +84,7 @@ namespace WebKit {
     /* static */unique_ptr<WhiteListedOriginDomainsList> WhiteListedOriginDomainsList::Parse(const char* whitelist)
     {
         unique_ptr<WhiteListedOriginDomainsList> whiteList(new WhiteListedOriginDomainsList());
+        ASSERT(whiteList != nullptr);
         ParseWhiteList(whitelist, whiteList->_whiteMap);
         return whiteList;
     }

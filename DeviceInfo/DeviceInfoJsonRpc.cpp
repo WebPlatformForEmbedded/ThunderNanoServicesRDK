@@ -246,9 +246,10 @@ namespace Plugin {
     {
         uint32_t result = Core::ERROR_NONE;
         string serialNumber;
-	result = _deviceInfo->SerialNumber(serialNumber);
+        ASSERT(_deviceInfo != nullptr);
+        result = _deviceInfo->SerialNumber(serialNumber);
 
-	response.Serialnumber = serialNumber;
+        response.Serialnumber = serialNumber;
         return result;
     }
 
@@ -259,7 +260,8 @@ namespace Plugin {
     uint32_t DeviceInfo::endpoint_get_modelid(ModelidData& response) const
     {
         string sku;
-	uint32_t result = _deviceInfo->Sku(sku);
+        ASSERT(_deviceInfo != nullptr);
+        uint32_t result = _deviceInfo->Sku(sku);
         if (result == Core::ERROR_NONE) {
             Core::EnumerateType<JsonData::DeviceInfo::ModelidData::SkuType> value(sku.c_str(), false);
             if (value.IsSet()) {
@@ -279,7 +281,8 @@ namespace Plugin {
     //  - ERROR_GENERAL:
     uint32_t DeviceInfo::endpoint_get_make(MakeData& response) const
     {
-	string make;
+        string make;
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->Make(make);
         if (result == Core::ERROR_NONE) {
             Core::EnumerateType<JsonData::DeviceInfo::MakeData::MakeType> value(make.c_str(), false);
@@ -300,6 +303,7 @@ namespace Plugin {
     uint32_t DeviceInfo::endpoint_get_modelname(ModelnameData& response) const
     {
         string modelName;
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->ModelName(modelName);
 
         response.Model = modelName;
@@ -313,8 +317,9 @@ namespace Plugin {
     uint32_t DeviceInfo::endpoint_get_modelyear(ModelyearData& response) const
     {
         uint16_t year;
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->ModelYear(year);
-	response.Year = year;
+        response.Year = year;
 
         return result;
     }
@@ -326,6 +331,7 @@ namespace Plugin {
     uint32_t DeviceInfo::endpoint_get_friendlyname(FriendlynameInfo& response) const
     {
         string name;
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->FriendlyName(name);
         response.Name = name;
 
@@ -339,6 +345,7 @@ namespace Plugin {
     uint32_t DeviceInfo::endpoint_get_platformname(FriendlynameInfo& response) const
     {
         string name;
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->PlatformName(name);
         response.Name = name;
 
@@ -353,6 +360,7 @@ namespace Plugin {
     {
         string deviceType;
 
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->DeviceType(deviceType);
         if (result == Core::ERROR_NONE) {
             Core::EnumerateType<JsonData::DeviceInfo::DevicetypeData::DevicetypeType> value(deviceType.c_str(), false);
@@ -375,6 +383,7 @@ namespace Plugin {
     {
         string distributorId;
 
+        ASSERT(_deviceInfo != nullptr);
         uint32_t result = _deviceInfo->DistributorId(distributorId);
         if (result == Core::ERROR_NONE) {
             Core::EnumerateType<JsonData::DeviceInfo::DistributoridData::DistributoridType> value(distributorId.c_str(), false);

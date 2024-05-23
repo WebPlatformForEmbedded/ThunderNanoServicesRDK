@@ -39,6 +39,7 @@ namespace Plugin {
 
             explicit Notification(DisplayInfo* parent)
                 : _parent(*parent)
+                , _client(nullptr)
             {
                 ASSERT(parent != nullptr);
             }

@@ -107,6 +107,7 @@ namespace WebKit {
         string jsonString = WebKit::Utils::WKStringToString(returnedString);
 
         unique_ptr<WhiteListedOriginDomainsList> whiteList(new WhiteListedOriginDomainsList());
+        ASSERT(whiteList != nullptr);
         ParseWhiteList(jsonString, whiteList->_whiteMap);
 
         WKRelease(returnData);
