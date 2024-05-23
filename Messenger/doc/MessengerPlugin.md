@@ -4,7 +4,7 @@
 
 **Version: 1.0**
 
-**Status: :black_circle::white_circle::white_circle:**
+**Status: :black_circle::black_circle::black_circle:**
 
 Messenger plugin for Thunder framework.
 
@@ -75,14 +75,14 @@ The table below lists configuration options of the plugin.
 | callsign | string | Plugin instance name (default: *Messenger*) |
 | classname | string | Class name: *Messenger* |
 | locator | string | Library name: *libWPEFrameworkMessenger.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
+| startmode | string | Determines in which state the plugin should be moved to at startup of the framework |
 
 <a name="head.Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
-- [Messenger.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/Messenger.json) (version 1.0.0) (compliant format)
+- IMessenger ([IMessenger.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessenger.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -95,7 +95,7 @@ Messenger interface methods:
 | :-------- | :-------- |
 | [join](#method.join) | Joins a messaging room |
 | [leave](#method.leave) | Leaves a messaging room |
-| [send](#method.send) | Sends a message to a room |
+| [send](#method.send) | Sends a message to a messaging room |
 
 <a name="method.join"></a>
 ## *join [<sup>method</sup>](#head.Methods)*
@@ -104,35 +104,32 @@ Joins a messaging room.
 
 ### Description
 
-Use this method to join a room. If the specified room does not exist, then it will be created.
-
-Also see: [userupdate](#event.userupdate)
+If the specified room does not exist, then it will be created.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
-| params.user | string | User name to join the room under (must not be empty) |
-| params.room | string | Name of the room to join (must not be empty) |
-| params?.secure | string | <sup>*(optional)*</sup> Room security (must be one of the following: *insecure*, *secure*) |
-| params?.acl | array | <sup>*(optional)*</sup> Access-control list for secure room |
-| params?.acl[#] | string | <sup>*(optional)*</sup> URL origin with possible wildcards |
+| params | object | *...* |
+| params.room | string | Name of the room to join |
+| params.user | string | Name of ther user to join as |
+| params?.secure | string | <sup>*(optional)*</sup> Denotes if the room is secure (by default not secure) (must be one of the following: *insecure, secure*) |
+| params?.acl | array | <sup>*(optional)*</sup> List of URL origins with possible wildcards |
+| params?.acl[#] | string | <sup>*(optional)*</sup> *...* |
 
 ### Result
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| result | object |  |
-| result.roomid | string | Unique ID of the room |
+| roomid | string | Token for accessing the room (unique for a user) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 5 | ```ERROR_ILLEGAL_STATE``` | User name is already taken (i.e. the user has already joined the room) |
-| 30 | ```ERROR_BAD_REQUEST``` | User name or room name was invalid |
-| 24 | ```ERROR_PRIVILEGED_REQUEST``` | Room security errors |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_ILLEGAL_STATE``` | User name is already taken (i.e. the user has already joined the room) |
+| ```ERROR_BAD_REQUEST``` | User name or room name is invalid |
+| ```ERROR_PRIVILEGED_REQUEST``` | Room security errors |
 
 ### Example
 
@@ -144,11 +141,11 @@ Also see: [userupdate](#event.userupdate)
   "id": 42,
   "method": "Messenger.1.join",
   "params": {
-    "user": "Bob",
     "room": "Lounge",
-    "secure": "secure",
+    "user": "Bob",
+    "secure": "insecure",
     "acl": [
-      "https://*.github.io"
+      "..."
     ]
   }
 }
@@ -160,9 +157,7 @@ Also see: [userupdate](#event.userupdate)
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": {
-    "roomid": "1e217990dd1cd4f66124"
-  }
+  "result": "1e217990dd1cd4f66124"
 }
 ```
 
@@ -173,16 +168,14 @@ Leaves a messaging room.
 
 ### Description
 
-Use this method to leave a room. The room ID becomes invalid after this call. If there are no more users, the room will be destroyed and related resources freed.
-
-Also see: [userupdate](#event.userupdate)
+The room ID becomes invalid after this call. If there are no more users, the room will be destroyed and related resources freed.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
-| params.roomid | string | ID of the room to leave |
+| params | object | *...* |
+| params.roomid | string | Token of the room to leave |
 
 ### Result
 
@@ -192,9 +185,9 @@ Also see: [userupdate](#event.userupdate)
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 22 | ```ERROR_UNKNOWN_KEY``` | The given room ID was invalid |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_UNKNOWN_KEY``` | The room token is invalid |
 
 ### Example
 
@@ -224,21 +217,15 @@ Also see: [userupdate](#event.userupdate)
 <a name="method.send"></a>
 ## *send [<sup>method</sup>](#head.Methods)*
 
-Sends a message to a room.
-
-### Description
-
-Use this method to send a message to a room.
-
-Also see: [message](#event.message)
+Sends a message to a messaging room.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
-| params.roomid | string | ID of the room to send the message to |
-| params.message | string | The message content to send |
+| params | object | *...* |
+| params.roomid | string | Token of the room to send the message to |
+| params.message | string | Contents of the message to send |
 
 ### Result
 
@@ -248,9 +235,9 @@ Also see: [message](#event.message)
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 22 | ```ERROR_UNKNOWN_KEY``` | The given room ID was invalid |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_UNKNOWN_KEY``` | The room token is invalid |
 
 ### Example
 
@@ -287,20 +274,20 @@ The following events are provided by the Messenger plugin:
 
 Messenger interface events:
 
-| Event | Description |
+| Notification | Description |
 | :-------- | :-------- |
-| [roomupdate](#event.roomupdate) | Notifies about room status updates |
-| [userupdate](#event.userupdate) | Notifies about user status updates |
-| [message](#event.message) | Notifies about new messages in a room |
+| [roomupdate](#notification.roomupdate) | Notifies of room status changes |
+| [userupdate](#notification.userupdate) | Notifies of user status changes |
+| [message](#notification.message) | Notifies of messages sent the the room |
 
-<a name="event.roomupdate"></a>
-## *roomupdate [<sup>event</sup>](#head.Notifications)*
+<a name="notification.roomupdate"></a>
+## *roomupdate [<sup>notification</sup>](#head.Notifications)*
 
-Notifies about room status updates.
+Notifies of room status changes.
 
 ### Description
 
-Register to this event to be notified about room status updates. Immediately after registering to this notification the listener will sequentially receive updates of all rooms that have been created so far.
+Immediately after registering to this notification the listener will sequentially receive updates of all rooms that have been created so far.
 
 > If applicable, this notification may be sent out during registration, reflecting the current status.
 
@@ -308,33 +295,49 @@ Register to this event to be notified about room status updates. Immediately aft
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
-| params.room | string | Name of the room this notification relates to |
-| params?.secure | string | <sup>*(optional)*</sup> Room security (must be one of the following: *insecure*, *secure*) |
-| params.action | string | Specifies the room status change, e.g. created or destroyed (must be one of the following: *created*, *destroyed*) |
+| params | object | *...* |
+| params.room | string | Name of the room that has changed its status |
+| params.action | string | New room status (must be one of the following: *created, destroyed*) |
+| params.secure | string | Denotes if the room is secure (must be one of the following: *insecure, secure*) |
 
 ### Example
+
+#### Registration
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.events.1.roomupdate",
+  "id": 42,
+  "method": "Messenger.1.register",
   "params": {
-    "room": "Lounge",
-    "secure": "secure",
-    "action": "created"
+    "event": "roomupdate",
+    "id": "client"
   }
 }
 ```
 
-<a name="event.userupdate"></a>
-## *userupdate [<sup>event</sup>](#head.Notifications)*
+#### Message
 
-Notifies about user status updates.
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "client.roomupdate",
+  "params": {
+    "room": "Lounge",
+    "action": "created",
+    "secure": "insecure"
+  }
+}
+```
+
+<a name="notification.userupdate"></a>
+## *userupdate [<sup>notification</sup>](#head.Notifications)*
+
+Notifies of user status changes.
 
 ### Description
 
-Register to this event to be notified about room status updates. Immediately after registering to this notification the listener will sequentially receive updates of all users that have joined the room so far.
+Immediately after registering to this notification the listener will sequentially receive updates of all users that have joined the room so far.
 
 > If applicable, this notification may be sent out during registration, reflecting the current status.
 
@@ -342,18 +345,34 @@ Register to this event to be notified about room status updates. Immediately aft
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
-| params.user | string | Name of the user that has this notification relates to |
-| params.action | string | Specifies the user status change, e.g. join or leave a room (must be one of the following: *joined*, *left*) |
+| params | object | *...* |
+| params.user | string | Name of the user that has changed its status |
+| params.action | string | New user status (must be one of the following: *joined, left*) |
 
-> The *room ID* argument shall be passed within the designator, e.g. *1e217990dd1cd4f66124.client.events.1*.
+> The *roomId* argument will be passed within the designator, e.g. *1e217990dd1cd4f66124.client.userupdate*.
 
 ### Example
+
+#### Registration
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "1e217990dd1cd4f66124.client.events.1.userupdate",
+  "id": 42,
+  "method": "Messenger.1.register",
+  "params": {
+    "event": "userupdate",
+    "id": "1e217990dd1cd4f66124.client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "1e217990dd1cd4f66124.client.userupdate",
   "params": {
     "user": "Bob",
     "action": "joined"
@@ -361,31 +380,43 @@ Register to this event to be notified about room status updates. Immediately aft
 }
 ```
 
-<a name="event.message"></a>
-## *message [<sup>event</sup>](#head.Notifications)*
+<a name="notification.message"></a>
+## *message [<sup>notification</sup>](#head.Notifications)*
 
-Notifies about new messages in a room.
-
-### Description
-
-Register to this event to be notified about new messages in a room.
+Notifies of messages sent the the room.
 
 ### Parameters
 
 | Name | Type | Description |
 | :-------- | :-------- | :-------- |
-| params | object |  |
+| params | object | *...* |
 | params.user | string | Name of the user that has sent the message |
-| params.message | string | Content of the message |
+| params.message | string | Contents of the sent message |
 
-> The *room ID* argument shall be passed within the designator, e.g. *1e217990dd1cd4f66124.client.events.1*.
+> The *roomId* argument will be passed within the designator, e.g. *1e217990dd1cd4f66124.client.message*.
 
 ### Example
+
+#### Registration
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "1e217990dd1cd4f66124.client.events.1.message",
+  "id": 42,
+  "method": "Messenger.1.register",
+  "params": {
+    "event": "message",
+    "id": "1e217990dd1cd4f66124.client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "1e217990dd1cd4f66124.client.message",
   "params": {
     "user": "Bob",
     "message": "Hello!"

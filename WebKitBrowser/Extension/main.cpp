@@ -147,7 +147,11 @@ public:
 #if defined(UPDATE_TZ_FROM_FILE)
         _tzSupport.Deinitialize();
 #endif
+
+        Messaging::MessageUnit::Instance().Close();
+
         if (_comClient.IsValid() == true) {
+            _comClient->Close(RPC::CommunicationTimeOut);
             _comClient.Release();
         }
         if (_engine.IsValid() == true) {

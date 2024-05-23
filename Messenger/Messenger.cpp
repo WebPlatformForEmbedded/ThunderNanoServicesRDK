@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "Module.h"
 #include "Messenger.h"
 #include "cryptalgo/Hash.h"
@@ -39,8 +39,6 @@ namespace Plugin {
         );
     }
 
-    // IPlugin methods
-
     /* virtual */ const string Messenger::Initialize(PluginHost::IShell* service)
     {
         string message;
@@ -55,15 +53,16 @@ namespace Plugin {
 
         _service = service;
         _service->AddRef();
-        _service->Register(&_notification);
+        _service->Register(static_cast<RPC::IRemoteConnection::INotification*>(&_notification));
+        _service->Register(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
         if (_roomAdmin == nullptr) {
             message = _T("RoomMaintainer couldnt be instantiated");
         }
         else {
-            RegisterAll();
             _roomAdmin->Register(this);
+            JMessenger::Register(*this, this, this);
         }
 
         return message;
@@ -74,18 +73,20 @@ namespace Plugin {
         if (_service != nullptr) {
             ASSERT(service == _service);
 
-            _service->Unregister(&_notification);
+            JMessenger::Unregister(*this);
+
+            _service->Unregister(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
+            _service->Unregister(static_cast<RPC::IRemoteConnection::INotification*>(&_notification));
 
             if (_roomAdmin != nullptr) {
                 // Exit all the rooms (if any) that were joined by this client
                 for (auto& room : _roomIds) {
-                    room.second->Release();
+                    room.second.first->Release();
                 }
 
                 _roomIds.clear();
                 _roomAdmin->Unregister(this);
                 _rooms.clear();
-                UnregisterAll();
 
                 RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
                 VARIABLE_IS_NOT_USED uint32_t result = _roomAdmin->Release();
@@ -97,7 +98,6 @@ namespace Plugin {
 
                 // If this was running in a (container) proccess...
                 if (connection != nullptr) {
-
                     // Lets trigger the cleanup sequence for
                     // out-of-process code. Which will guard
                     // that unwilling processes, get shot if
@@ -105,8 +105,8 @@ namespace Plugin {
                     connection->Terminate();
                     connection->Release();
                 }
-
             }
+
             _service->Release();
             _service = nullptr;
             _connectionId = 0;
@@ -114,69 +114,46 @@ namespace Plugin {
         }
     }
 
-    // Web request handlers
-
-    string Messenger::JoinRoom(const string& roomName, const string& userName)
+    /* virtual */ uint32_t Messenger::Join(const Core::JSONRPC::Context& context, const string& roomName, const string& userName,
+        const security secure VARIABLE_IS_NOT_USED, IStringIterator* const acl VARIABLE_IS_NOT_USED, string& roomId)
     {
-        bool result = false;
+        uint32_t result = Core::ERROR_BAD_REQUEST;
 
-        string roomId = GenerateRoomId(roomName, userName);
+        if ((roomName.empty() == false) && (userName.empty() == false)) {
 
-        MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(this, roomId);
-        ASSERT(sink != nullptr);
+            roomId = GenerateRoomId(roomName, userName);
+            ASSERT(roomId.empty() == false);
 
-        if (sink != nullptr) {
-            ASSERT(_roomAdmin != nullptr);
-            Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
 
-            // Note: Join() can return nullptr if the user has already joined the room.
-            if (room != nullptr) {
+            if (sink != nullptr) {
+                ASSERT(sink != nullptr);
+                MsgNotification* sink = Core::ServiceType<MsgNotification>::Create<MsgNotification>(*this, roomId);
 
-                _adminLock.Lock();
-                result = _roomIds.emplace(roomId, room).second;
-                _adminLock.Unlock();
-                ASSERT(result);
+                // Note: Join() can return nullptr if the user has already joined the room.
+                if (room != nullptr) {
+
+                    _adminLock.Lock();
+                    result = _roomIds.emplace(roomId, std::pair<Exchange::IRoomAdministrator::IRoom*, uint32_t>(room, context.ChannelId())).second;
+                    _adminLock.Unlock();
+                    ASSERT(result);
+
+                    result = Core::ERROR_NONE;
+                }
+                else {
+                    result = Core::ERROR_ILLEGAL_STATE;
+                    roomId.clear();
+                }
+
+                sink->Release(); // Make room the only owner of the notification object.
             }
-
-            sink->Release(); // Make room the only owner of the notification object.
         }
-
-        return (result? roomId : string{});
-    }
-
-    bool Messenger::SubscribeUserUpdate(const string& roomId, bool subscribe)
-    {
-        bool result = false;
-
-        _adminLock.Lock();
-
-        auto it(_roomIds.find(roomId));
-
-        if (it != _roomIds.end()) {
-            Callback* cb = nullptr;
-
-            if (subscribe) {
-                cb = Core::ServiceType<Callback>::Create<Callback>(this, roomId);
-                ASSERT(cb != nullptr);
-            }
-
-            (*it).second->SetCallback(cb);
-
-            if (cb != nullptr) {
-                cb->Release(); // Make room the only owner of the callback object.
-            }
-
-            result = true;
-        }
-
-        _adminLock.Unlock();
 
         return result;
     }
 
-    bool Messenger::LeaveRoom(const string& roomId)
+    /* virtual */ uint32_t Messenger::Leave(const string& roomId)
     {
-        bool result = false;
+        uint32_t result = Core::ERROR_UNKNOWN_KEY;
 
         _adminLock.Lock();
 
@@ -184,10 +161,10 @@ namespace Plugin {
 
         if (it != _roomIds.end()) {
             // Exit the room.
-            (*it).second->Release();
+            (*it).second.first->Release();
             // Invalidate the room ID.
             _roomIds.erase(it);
-            result = true;
+            result = Core::ERROR_NONE;
         }
 
         _adminLock.Unlock();
@@ -195,9 +172,9 @@ namespace Plugin {
         return result;
     }
 
-    bool Messenger::SendMessage(const string& roomId, const string& message)
+    /* virtual */  uint32_t Messenger::Send(const string& roomId, const string& message)
     {
-        bool result = false;
+        uint32_t result = Core::ERROR_UNKNOWN_KEY;
 
         _adminLock.Lock();
 
@@ -205,8 +182,8 @@ namespace Plugin {
 
         if (it != _roomIds.end()) {
             // Send the message to the room.
-            (*it).second->SendMessage(message);
-            result = true;
+            (*it).second.first->SendMessage(message);
+            result = Core::ERROR_NONE;
         }
 
         _adminLock.Unlock();
@@ -214,10 +191,44 @@ namespace Plugin {
         return result;
     }
 
-    // Helpers
-
-    string Messenger::GenerateRoomId(const string& roomName, const string& userName)
+    bool Messenger::SubscribeUserUpdate(const string& roomId, bool subscribe)
     {
+        bool result = false;
+
+        if (roomId.empty() == false) {
+
+            _adminLock.Lock();
+
+            auto it(_roomIds.find(roomId));
+
+            if (it != _roomIds.end()) {
+                Callback* cb = nullptr;
+
+                if (subscribe == true) {
+                    cb = Core::ServiceType<Callback>::Create<Callback>(*this, roomId);
+                    ASSERT(cb != nullptr);
+                }
+
+                (*it).second.first->SetCallback(cb);
+
+                if (cb != nullptr) {
+                    cb->Release(); // Make room the only owner of the callback object.
+                }
+
+                result = true;
+            }
+
+            _adminLock.Unlock();
+        }
+
+        return result;
+    }
+
+    /* static */ string Messenger::GenerateRoomId(const string& roomName, const string& userName)
+    {
+        ASSERT(roomName.empty() == false);
+        ASSERT(userName.empty() == false);
+
         string timenow;
         Core::Time::Now().ToString(timenow);
 
@@ -230,9 +241,36 @@ namespace Plugin {
         return roomId;
     }
 
+    void Messenger::Closed(const uint32_t channel)
+    {
+        _adminLock.Lock();
+
+        auto it(_roomIds.begin());
+
+        while (it != _roomIds.end()) {
+
+            if ((*it).second.second == channel) {
+
+                // The remote JSON-RPC client was disconnected without leaving the room beforehand!
+
+                TRACE(Trace::Information, (_T("Channel that room ID %s was created on (%u) has been disconnected"),
+                    (*it).first.c_str(), channel));
+
+                (*it).second.first->Release();
+                it = _roomIds.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        _adminLock.Unlock();
+    }
+
     void Messenger::Deactivated(RPC::IRemoteConnection* connection)
     {
         ASSERT(connection != nullptr);
+
         if (connection->Id() == _connectionId) {
 
             ASSERT(_service != nullptr);
@@ -242,7 +280,8 @@ namespace Plugin {
                 PluginHost::IShell::FAILURE));
         }
     }
+
 } // namespace Plugin
 
-} // WPEFramework
+}
 

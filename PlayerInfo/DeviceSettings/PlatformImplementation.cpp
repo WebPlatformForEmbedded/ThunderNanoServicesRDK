@@ -226,13 +226,18 @@ public:
     uint32_t Register(Exchange::Dolby::IOutput::INotification* notification) override
     {
         ASSERT(notification != nullptr);
+        
         _adminLock.Lock();
 
-        // Make sure a sink is not registered multiple times.
-        ASSERT(std::find(_observers.begin(), _observers.end(), notification) == _observers.end());
+        std::list<Exchange::Dolby::IOutput::INotification*>::iterator index(std::find(_observers.begin(), _observers.end(), notification));
 
-        _observers.push_back(notification);
-        notification->AddRef();
+        // Make sure a sink is not registered multiple times.
+        ASSERT(index == _observers.end());
+
+        if (index == _observers.end()) {
+            _observers.push_back(notification);
+            notification->AddRef();
+        }
 
         _adminLock.Unlock();
 
@@ -241,6 +246,8 @@ public:
 
     uint32_t Unregister(Exchange::Dolby::IOutput::INotification* notification) override
     {
+        ASSERT(notification != nullptr);
+
         _adminLock.Lock();
 
         std::list<Exchange::Dolby::IOutput::INotification*>::iterator index(std::find(_observers.begin(), _observers.end(), notification));
