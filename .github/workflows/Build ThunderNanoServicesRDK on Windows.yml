@@ -26,6 +26,7 @@ jobs:
         type: [Debug, Release]
         version: [64, 86]
 
+# ----- Checkout -----
     name: Build type - ${{matrix.type}}${{matrix.version}}
     steps:
     - name: Checkout ThunderOnWindows
@@ -70,6 +71,7 @@ jobs:
         path: ThunderOnWindows/ThunderNanoServicesRDK
         repository: WebPlatformForEmbedded/ThunderNanoServicesRDK
 
+# ----- Install, build & upload artifacts -----
     - name: Install jsonref
       run: pip install jsonref
 
