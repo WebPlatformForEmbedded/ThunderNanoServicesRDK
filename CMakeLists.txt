@@ -18,7 +18,7 @@
 cmake_minimum_required(VERSION 3.3)
 project(NanoServicesRDK)
 
-find_package(WPEFramework)
+find_package(Thunder)
 
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)

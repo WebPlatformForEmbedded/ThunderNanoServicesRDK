@@ -19,7 +19,7 @@
 
 #include "DeviceInfo.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     namespace {
@@ -203,7 +203,7 @@ namespace Plugin {
 
     void DeviceInfo::AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const
     {
-        // Get the point of entry on WPEFramework..
+        // Get the point of entry on Thunder..
         Core::AdapterIterator interfaces;
 
         while (interfaces.Next() == true) {
@@ -314,7 +314,7 @@ namespace Plugin {
             while (audioIt->Next(audioOutput)) {
                 JsonData::DeviceInfo::DeviceaudiocapabilitiesData::AudiooutputcapabilitiesData audiocapabilities;
                 audiocapabilities.AudioPort =
-                    static_cast<WPEFramework::JsonData::DeviceInfo::AudioportType>(audioOutput);
+                    static_cast<Thunder::JsonData::DeviceInfo::AudioportType>(audioOutput);
 
                 AudioCapabilities(audioOutput, audiocapabilities.Audiocapabilities);
                 Ms12Capabilities(audioOutput, audiocapabilities.Ms12capabilities);
@@ -413,7 +413,7 @@ namespace Plugin {
             while (videoIt->Next(videoOutput) == true) {
                 JsonData::DeviceInfo::DevicevideocapabilitiesData::VideooutputcapabilitiesData videocapabilities;
                 videocapabilities.VideoDisplay =
-                    static_cast<WPEFramework::JsonData::DeviceInfo::VideodisplayType>(videoOutput);
+                    static_cast<Thunder::JsonData::DeviceInfo::VideodisplayType>(videoOutput);
 
                 Hdcp(videoOutput, videocapabilities.Hdcp);
 
@@ -500,4 +500,4 @@ namespace Plugin {
         }
     }
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

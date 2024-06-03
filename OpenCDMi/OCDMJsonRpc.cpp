@@ -21,7 +21,7 @@
 #include "OCDM.h"
 #include <interfaces/json/JsonData_OCDM.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 

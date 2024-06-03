@@ -3,7 +3,7 @@
   "info": {
     "title": "Device Info Plugin",
     "callsign": "DeviceInfo",
-    "locator": "libWPEFrameworkDeviceInfo.so",
+    "locator": "libThunderDeviceInfo.so",
     "status": "production",
     "description": "The DeviceInfo plugin allows retrieving of various device-related information.",
     "version": "1.0"

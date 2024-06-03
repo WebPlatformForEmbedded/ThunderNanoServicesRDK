@@ -26,7 +26,7 @@
 
 #include <vector>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace WebKit {
 
     class WhiteListedOriginDomainsList {
@@ -40,7 +40,7 @@ namespace WebKit {
         typedef std::map<string, Domains> WhiteMap;
 
     public:
-        static std::unique_ptr<WhiteListedOriginDomainsList> RequestFromWPEFramework(const char* whitelist = nullptr);
+        static std::unique_ptr<WhiteListedOriginDomainsList> RequestFromThunder(const char* whitelist = nullptr);
         ~WhiteListedOriginDomainsList()
         {
         }

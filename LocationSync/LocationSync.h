@@ -27,7 +27,7 @@
 
 #include <limits>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class LocationSync : public PluginHost::IPlugin, public Exchange::ITimeZone, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -300,6 +300,6 @@ POP_WARNING()
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder
 
 #endif // LOCATIONSYNC_LOCATIONSYNC_H

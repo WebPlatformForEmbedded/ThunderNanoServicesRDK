@@ -20,7 +20,7 @@
 #include "../../Module.h"
 #include "Dolby.h"
 
-namespace WPEFramework
+namespace Thunder
 {
     namespace Plugin
     {
@@ -106,4 +106,4 @@ namespace WPEFramework
         SERVICE_REGISTRATION(DolbyOutputImplementation, 1, 0)
 
     } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

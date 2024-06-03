@@ -21,7 +21,7 @@
 
 #include <interfaces/json/JTimeZone.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     namespace {
@@ -354,4 +354,4 @@ POP_WARNING()
     }
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

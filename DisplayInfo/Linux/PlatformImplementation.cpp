@@ -32,7 +32,7 @@
 #include <mutex>
 #include <string>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     std::string getLine(const std::string& filepath)

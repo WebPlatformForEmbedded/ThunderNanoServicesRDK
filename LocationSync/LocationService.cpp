@@ -19,7 +19,7 @@
  
 #include "LocationService.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     struct IGeography {
@@ -657,4 +657,4 @@ POP_WARNING()
     }
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

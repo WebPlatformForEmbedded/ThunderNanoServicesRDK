@@ -3,7 +3,7 @@
   "info": {
     "title": "OpenCDMi Plugin",
     "callsign": "OCDM",
-    "locator": "libWPEFrameworkOCDM.so",
+    "locator": "libThunderOCDM.so",
     "status": "production",
     "version": "1.0"
   },

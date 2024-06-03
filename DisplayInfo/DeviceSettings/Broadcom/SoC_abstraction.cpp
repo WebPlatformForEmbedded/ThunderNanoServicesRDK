@@ -35,7 +35,7 @@
 #define PROC_BRCM_DISPLAY_PATH "/proc/brcm/display"
 
 using namespace std;
-using namespace WPEFramework;
+using namespace Thunder;
 
 /**
  * Sanitizeline

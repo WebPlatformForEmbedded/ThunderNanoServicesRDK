@@ -33,7 +33,7 @@
 #include <syslog.h>
 
 #include "ClassDefinition.h"
-#include "NotifyWPEFramework.h"
+#include "NotifyThunder.h"
 #include "Utils.h"
 #include "WhiteListedOriginDomainsList.h"
 #include "RequestHeaders.h"
@@ -50,13 +50,13 @@
 #include "TimeZoneSupport.h"
 #endif
 
-using namespace WPEFramework;
+using namespace Thunder;
 using JavaScript::ClassDefinition;
 
 WKBundleRef g_Bundle;
 std::string g_currentURL;
 
-namespace WPEFramework {
+namespace Thunder {
 namespace WebKit {
 namespace Utils {
 
@@ -110,7 +110,7 @@ public:
             // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
             Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
         }
-        _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromWPEFramework();
+        _whiteListedOriginDomainPairs = WhiteListedOriginDomainsList::RequestFromThunder();
 
 #if defined(UPDATE_TZ_FROM_FILE)
         _tzSupport.Initialize();
@@ -154,13 +154,13 @@ private:
     // White list for CORS.
     std::unique_ptr<WhiteListedOriginDomainsList> _whiteListedOriginDomainPairs;
 
-} _wpeFrameworkClient;
+} _thunderClient;
 
 extern "C" {
 
 __attribute__((destructor)) static void unload()
 {
-    _wpeFrameworkClient.Deinitialize();
+    _thunderClient.Deinitialize();
 }
 
 // Adds class to JS world.
@@ -404,7 +404,7 @@ static WKBundleClientV1 s_bundleClient = {
 
         WKBundlePageSetResourceLoadClient(page, &s_resourceLoadClient.base);
 
-        _wpeFrameworkClient.WhiteList(bundle);
+        _thunderClient.WhiteList(bundle);
     },
     willDestroyPage, // willDestroyPage
     nullptr, // didInitializePageGroup
@@ -419,7 +419,7 @@ EXTERNAL void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
 {
     g_Bundle = bundle;
 
-    _wpeFrameworkClient.Initialize(bundle);
+    _thunderClient.Initialize(bundle);
 
     WKBundleSetClient(bundle, &s_bundleClient.base);
 }
@@ -427,5 +427,5 @@ EXTERNAL void WKBundleInitialize(WKBundleRef bundle, WKTypeRef)
 }
 
 // explicit instantiation so that -O1/2/3 flags do not introduce undefined symbols
-template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Input, 4u>::AddRef() const;
-template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Output, 5u>::AddRef() const;
+template uint32_t Thunder::Core::IPCMessageType<2u, Thunder::RPC::Data::Input, Thunder::RPC::Data::Output>::RawSerializedType<Thunder::RPC::Data::Input, 4u>::AddRef() const;
+template uint32_t Thunder::Core::IPCMessageType<2u, Thunder::RPC::Data::Input, Thunder::RPC::Data::Output>::RawSerializedType<Thunder::RPC::Data::Output, 5u>::AddRef() const;

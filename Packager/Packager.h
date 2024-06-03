@@ -22,7 +22,7 @@
 #include "Module.h"
 #include <interfaces/IPackager.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 namespace {
     constexpr auto* kInstallMethodName = _T("install");
@@ -125,4 +125,4 @@ namespace {
     };
 
 }  // namespace Plugin
-}  // namespace WPEFramework
+}  // namespace Thunder

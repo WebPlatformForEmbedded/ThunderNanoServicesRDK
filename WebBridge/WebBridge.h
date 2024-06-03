@@ -21,7 +21,7 @@
 
 #include "Module.h"
 
-namespace WPEFramework {
+namespace Thunder {
     namespace Plugin {
 
         class WebBridge :
@@ -176,4 +176,4 @@ namespace WPEFramework {
         };
 
     } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

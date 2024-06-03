@@ -24,7 +24,7 @@
 #include <interfaces/json/JDolbyOutput.h>
 #include <interfaces/json/JPlayerProperties.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class PlayerInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -160,4 +160,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

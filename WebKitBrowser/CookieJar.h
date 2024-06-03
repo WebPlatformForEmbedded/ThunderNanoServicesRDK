@@ -26,7 +26,7 @@
 #include <memory>
 
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 class CookieJar
@@ -58,4 +58,4 @@ private:
 };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

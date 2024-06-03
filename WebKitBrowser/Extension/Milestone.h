@@ -21,7 +21,7 @@
 
 #include <wpe/webkit-web-extension.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace Milestone {
 
@@ -29,4 +29,4 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame);
 
 }  // Milestone
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

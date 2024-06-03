@@ -92,7 +92,7 @@ WK_EXPORT void WKPreferencesSetPageCacheEnabled(WKPreferencesRef preferences, bo
 #include <testrunner.h>
 #endif // ENABLE_TESTING
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 #ifndef WEBKIT_GLIB_API
@@ -2761,7 +2761,7 @@ static GSourceFuncs _handlerIntervention =
             GVariant* data = g_variant_new("(smsb)", std::to_string(browser->_guid).c_str(), !browser->_config.Whitelist.Value().empty() ? browser->_config.Whitelist.Value().c_str() : nullptr, browser->_config.LogToSystemConsoleEnabled.Value());
             webkit_web_context_set_web_extensions_initialization_user_data(context, data);
         }
-        static void wpeNotifyWPEFrameworkMessageReceivedCallback(WebKitUserContentManager*, WebKitJavascriptResult* message, WebKitImplementation* browser)
+        static void wpeNotifyThunderMessageReceivedCallback(WebKitUserContentManager*, WebKitJavascriptResult* message, WebKitImplementation* browser)
         {
             ASSERT(browser != nullptr);
             JSCValue* args = webkit_javascript_result_get_js_value(message);
@@ -3176,10 +3176,10 @@ static GSourceFuncs _handlerIntervention =
             }
 
             auto* userContentManager = webkit_web_view_get_user_content_manager(_view);
-            // webkit_user_content_manager_register_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
-            g_signal_connect(userContentManager, "script-message-received::wpeNotifyWPEFramework",
-                reinterpret_cast<GCallback>(wpeNotifyWPEFrameworkMessageReceivedCallback), this);
-            webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
+            // webkit_user_content_manager_register_script_message_handler_in_world(userContentManager, "wpeNotifyThunder", std::to_string(_guid).c_str());
+            g_signal_connect(userContentManager, "script-message-received::wpeNotifyThunder",
+                reinterpret_cast<GCallback>(wpeNotifyThunderMessageReceivedCallback), this);
+            webkit_user_content_manager_register_script_message_handler(userContentManager, "wpeNotifyThunder");
 
             SetupUserContentFilter();
             TryLoadingUserScripts();
@@ -3222,8 +3222,8 @@ static GSourceFuncs _handlerIntervention =
 
             if (frameDisplayedCallbackID)
                 webkit_web_view_remove_frame_displayed_callback(_view, frameDisplayedCallbackID);
-            // webkit_user_content_manager_unregister_script_message_handler_in_world(userContentManager, "wpeNotifyWPEFramework", std::to_string(_guid).c_str());
-            webkit_user_content_manager_unregister_script_message_handler(userContentManager, "wpeNotifyWPEFramework");
+            // webkit_user_content_manager_unregister_script_message_handler_in_world(userContentManager, "wpeNotifyThunder", std::to_string(_guid).c_str());
+            webkit_user_content_manager_unregister_script_message_handler(userContentManager, "wpeNotifyThunder");
 
             g_clear_object(&_view);
             g_main_context_pop_thread_default(_context);
@@ -3248,7 +3248,7 @@ static GSourceFuncs _handlerIntervention =
                 std::unique_ptr<gchar, GCharDeleter> bundlePath(
                     g_build_filename(_dataPath.c_str(), _config.InjectedBundle.Value().c_str(), nullptr) );
                 if (g_file_test(bundlePath.get(), G_FILE_TEST_EXISTS) == false) {
-                    bundlePath.reset( g_build_filename("/usr/share/WPEFramework/WebKitBrowser/", _config.InjectedBundle.Value().c_str(), nullptr) );
+                    bundlePath.reset( g_build_filename("/usr/share/Thunder/WebKitBrowser/", _config.InjectedBundle.Value().c_str(), nullptr) );
                 }
                 WKStringRef injectedBundlePathString = WKStringCreateWithUTF8CString(bundlePath.get());
                 WKContextConfigurationSetInjectedBundlePath(contextConfiguration, injectedBundlePathString);
@@ -3954,4 +3954,4 @@ static GSourceFuncs _handlerIntervention =
 #endif // !WEBKIT_GLIB_API
 } // namespace Plugin
 
-} // namespace WPEFramework
+} // namespace Thunder

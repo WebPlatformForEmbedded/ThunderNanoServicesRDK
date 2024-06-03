@@ -22,7 +22,7 @@
 #include "Module.h"
 #include <interfaces/json/JsonData_DeviceIdentification.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class DeviceIdentification : public PluginHost::IPlugin, public PluginHost::JSONRPC {
@@ -108,4 +108,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

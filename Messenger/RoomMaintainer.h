@@ -22,7 +22,7 @@
 #include "Module.h"
 #include <interfaces/IMessenger.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -62,4 +62,4 @@ namespace Plugin {
 
 } // namespace Plugin
 
-} // namespace WPEFramework
+} // namespace Thunder

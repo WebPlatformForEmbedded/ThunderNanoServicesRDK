@@ -3,7 +3,7 @@
   "info": {
     "title": "Packager Plugin",
     "callsign": "Packager",
-    "locator": "libWPEFrameworkPackager.so",
+    "locator": "libThunderPackager.so",
     "status": "alpha",
     "description": [
       "The Packager plugin allows installation of OPKG, IPKG and DEB packages to the system from a remote repository."

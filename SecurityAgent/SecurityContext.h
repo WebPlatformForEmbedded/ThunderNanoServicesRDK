@@ -22,7 +22,7 @@
 #include "Module.h"
 #include "AccessControlList.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class SecurityContext : public PluginHost::ISecurity {

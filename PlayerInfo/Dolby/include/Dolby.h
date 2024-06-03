@@ -35,7 +35,7 @@ extern "C" {
  *  - ERROR_GENERAL - Setting the parameter has failed.
  */
 uint32_t 
-set_audio_output_type(const enum WPEFramework::Exchange::Dolby::IOutput::Type type);
+set_audio_output_type(const enum Thunder::Exchange::Dolby::IOutput::Type type);
 
 
 /**
@@ -49,7 +49,7 @@ set_audio_output_type(const enum WPEFramework::Exchange::Dolby::IOutput::Type ty
  *    mapped to Dolby::IOutput::Type enumeration.
  */
 EXTERNAL uint32_t 
-get_audio_output_type(enum WPEFramework::Exchange::Dolby::IOutput::Type* type);
+get_audio_output_type(enum Thunder::Exchange::Dolby::IOutput::Type* type);
 
 #ifdef __cplusplus
 }

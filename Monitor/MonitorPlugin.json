@@ -3,7 +3,7 @@
   "info": {
     "title": "Monitor Plugin",
     "callsign": "Monitor",
-    "locator": "libWPEFrameworkMonitor.so",
+    "locator": "libThunderMonitor.so",
     "status": "production",
     "description": "The Monitor plugin provides a watchdog-like functionality for framework processes.",
     "version": "1.0"

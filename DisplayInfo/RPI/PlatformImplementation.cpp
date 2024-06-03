@@ -26,7 +26,7 @@
 #include <bcm_host.h>
 #include <fstream>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 class DisplayInfoImplementation : public Exchange::IHDRProperties,
@@ -344,7 +344,7 @@ private:
             index++;
         }
 
-        result = WPEFramework::Core::NumberType<VALUE>(WPEFramework::Core::TextFragment(start, (index - start))).Value();
+        result = Thunder::Core::NumberType<VALUE>(Thunder::Core::TextFragment(start, (index - start))).Value();
 
         // Convert into bytes, if necessary.
         if ( (*index == 'M') && (index[1] == '\0') ) {

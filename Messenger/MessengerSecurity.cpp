@@ -28,21 +28,21 @@
 // helper functions
 namespace {
 
-    bool IsAllowed(WPEFramework::PluginHost::IShell* service, const string& token, const string& designator)
+    bool IsAllowed(Thunder::PluginHost::IShell* service, const string& token, const string& designator)
     {
         bool result = false;
 
         ASSERT(service != nullptr);
-        auto auth = service->QueryInterfaceByCallsign<WPEFramework::PluginHost::IAuthenticate>("SecurityAgent");
+        auto auth = service->QueryInterfaceByCallsign<Thunder::PluginHost::IAuthenticate>("SecurityAgent");
         if (auth != nullptr) {
             string encoded;
             if (auth->CreateToken(
                     static_cast<uint16_t>(token.length()),
                     reinterpret_cast<const uint8_t *>(token.c_str()),
-                    encoded) == WPEFramework::Core::ERROR_NONE) {
-                WPEFramework::PluginHost::ISecurity *officer = auth->Officer(encoded);
+                    encoded) == Thunder::Core::ERROR_NONE) {
+                Thunder::PluginHost::ISecurity *officer = auth->Officer(encoded);
                 if (officer != nullptr) {
-                    WPEFramework::Core::JSONRPC::Message message;
+                    Thunder::Core::JSONRPC::Message message;
                     message.Designator = designator;
 
                     result = officer->Allowed(message);
@@ -81,7 +81,7 @@ namespace {
     }
 } // namespace
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -180,4 +180,4 @@ namespace Plugin {
 
 } // namespace Plugin
 
-} // WPEFramework
+} // Thunder

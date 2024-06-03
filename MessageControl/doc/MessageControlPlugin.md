@@ -56,12 +56,12 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.HTTP">[HTTP](http://www.w3.org/Protocols)</a> | HTTP specification |
 | <a name="ref.JSON-RPC">[JSON-RPC](https://www.jsonrpc.org/specification)</a> | JSON-RPC 2.0 specification |
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
-| <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20WPEFramework.docx)</a> | Thunder API Reference |
+| <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
 <a name="head.Description"></a>
 # Description
 
-The MessageControl plugin allows reading of the traces from WPEFramework, and controlling them tracing and logging. Allows for outputting logging messages to the websocket.
+The MessageControl plugin allows reading of the traces from Thunder, and controlling them tracing and logging. Allows for outputting logging messages to the websocket.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
@@ -74,7 +74,7 @@ The table below lists configuration options of the plugin.
 | :-------- | :-------- | :-------- |
 | callsign | string | Plugin instance name (default: *MessageControl*) |
 | classname | string | Class name: *MessageControl* |
-| locator | string | Library name: *libWPEFrameworkMessageControl.so* |
+| locator | string | Library name: *libThunderMessageControl.so* |
 | startmode | string | Determines if the plugin shall be started automatically along with the framework |
 | console | boolean | <sup>*(optional)*</sup> Enables message output messages to the console |
 | syslog | boolean | <sup>*(optional)*</sup> Enables message ouutput to syslog |

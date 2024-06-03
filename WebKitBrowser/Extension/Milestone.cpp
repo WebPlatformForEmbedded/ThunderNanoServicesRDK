@@ -20,7 +20,7 @@
 #include "Module.h"
 #include "Milestone.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace Milestone {
 
@@ -50,4 +50,4 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
 
 }  // Milestone
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder
