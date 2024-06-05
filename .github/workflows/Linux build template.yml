@@ -39,7 +39,7 @@ jobs:
         tar -xvzf ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
         rm ${{matrix.build_type}}/${{matrix.build_type}}.tar.gz
 
-# ----- Checkout & regex build options -----
+# ----- Checkout & Options regex -----
     - name: Checkout ThunderNanoServicesRDK
       uses: actions/checkout@v4
       with:
