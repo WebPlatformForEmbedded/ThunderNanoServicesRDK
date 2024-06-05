@@ -19,7 +19,7 @@
  
 #include "Packager.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 namespace {
 
@@ -167,6 +167,7 @@ namespace {
 
     void Packager::Deactivated(RPC::IRemoteConnection* connection)
     {
+        ASSERT(connection != nullptr);
         if (connection->Id() == _connectionId) {
             ASSERT(_service != nullptr);
             Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_service,
@@ -175,4 +176,4 @@ namespace {
         }
     }
 }  // namespace Plugin
-}  // namespace WPEFramework
+}  // namespace Thunder

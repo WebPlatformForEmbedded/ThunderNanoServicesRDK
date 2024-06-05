@@ -27,7 +27,7 @@
 
 #include <limits>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class LocationSync : public PluginHost::IPlugin, public Exchange::ITimeZone, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -85,6 +85,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
 POP_WARNING()
             ~Notification()
             {
+                ASSERT(_locator != nullptr);
                 _locator->Release();
             }
 
@@ -285,13 +286,13 @@ POP_WARNING()
         void UpdateSystemTimeZone(const string& timezone);
 
     private:
-        using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;        
+        using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;
 
         uint16_t _skipURL;
         string _source;
         Core::SinkType<Notification> _sink;
-        PluginHost::IShell* _service; 
-        bool _timezoneoverriden; 
+        PluginHost::IShell* _service;
+        bool _timezoneoverriden;
         Core::SinkType<LocationInfo> _locationinfo;
         mutable Core::CriticalSection _adminLock;
         TimeZoneObservers _timezoneoberservers;
@@ -299,6 +300,6 @@ POP_WARNING()
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder
 
 #endif // LOCATIONSYNC_LOCATIONSYNC_H

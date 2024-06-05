@@ -19,7 +19,7 @@
  
 #include "Monitor.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     namespace {
@@ -42,6 +42,7 @@ namespace Plugin {
 
     /* virtual */ const string Monitor::Initialize(PluginHost::IShell* service)
     {
+        ASSERT(service != nullptr);
 
         _config.FromString(service->ConfigLine());
 
@@ -63,6 +64,8 @@ namespace Plugin {
 
     /* virtual */ void Monitor::Deinitialize(PluginHost::IShell* service)
     {
+        ASSERT(service != nullptr);
+
         UnregisterAll();
 
         service->Unregister(&_monitor);

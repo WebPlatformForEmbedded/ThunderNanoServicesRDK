@@ -3,7 +3,7 @@
   "info": {
     "title": "Display Info Plugin",
     "callsign": "DisplayInfo",
-    "locator": "libWPEFrameworkDisplayInfo.so",
+    "locator": "libThunderDisplayInfo.so",
     "status": "production",
     "description": "The DisplayInfo plugin allows retrieving of various display-related information.",
     "version": "1.0"

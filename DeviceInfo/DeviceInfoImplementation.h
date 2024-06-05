@@ -3,7 +3,7 @@
 #include "Module.h"
 #include <interfaces/IDeviceInfo.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     class DeviceInfoImplementation : public Exchange::IDeviceInfo,
                                      public Exchange::IDeviceAudioCapabilities,
@@ -237,5 +237,5 @@ namespace Plugin {
         string _sku;
         string _platformName;
     };
-} //namespace WPEFramework
+} //namespace Thunder
 } //namespace Plugin

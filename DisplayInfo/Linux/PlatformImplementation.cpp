@@ -32,7 +32,7 @@
 #include <mutex>
 #include <string>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     std::string getLine(const std::string& filepath)
@@ -99,7 +99,7 @@ namespace Plugin {
 
         ~UdevObserverType() override
         {
-            if(Core::SocketDatagram::IsOpen()) {
+            if (Core::SocketDatagram::IsOpen()) {
                 Core::SocketDatagram::Close(Core::infinite);
             }
         }
@@ -415,7 +415,7 @@ namespace Plugin {
 
             std::ifstream instream(_edidNode, std::ios::in);
             _edid.reserve(512);
-            if(instream.is_open()) {
+            if (instream.is_open()) {
                 char asciiHexByte[2];
                 while(!instream.eof()) {
                     instream.read(asciiHexByte, 2);
@@ -457,7 +457,7 @@ namespace Plugin {
             : _config()
             , _udevObserver()
             , _callback([&](const std::string& devtype){
-                if(devtype == "hdcp") {
+                if (devtype == "hdcp") {
                     _eventQueue.Post(Exchange::IConnectionProperties::INotification::Source::HDCP_CHANGE);
                 } else {
                     _eventQueue.Post(Exchange::IConnectionProperties::INotification::Source::HDMI_CHANGE);
@@ -739,7 +739,7 @@ namespace Plugin {
 
             bool Post(IConnectionProperties::INotification::Source type)
             {
-                if(_eventQueue.Post(type)) {
+                if (_eventQueue.Post(type)) {
                     _arrived.SetEvent();
                     return true;
                 } else {

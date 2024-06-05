@@ -27,13 +27,14 @@
 #include <opkg_download.h>
 #include <pkg.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     SERVICE_REGISTRATION(PackagerImplementation, 1, 0)
 
     void PackagerImplementation::UpdateConfig() const {
         ASSERT(!_configFile.empty() && !_tempPath.empty() && !_cachePath.empty());
+        ASSERT(opkg_config != nullptr);
         opkg_config->conf_file = strdup(_configFile.c_str());
         opkg_config->tmp_dir = strdup(_tempPath.c_str());
         opkg_config->host_cache_dir = 1;
@@ -59,6 +60,7 @@ namespace Plugin {
         Config config;
 
         ASSERT(_service == nullptr);
+        ASSERT(service != nullptr);
         _service = service;
         _service->AddRef();
 
@@ -122,6 +124,7 @@ namespace Plugin {
     PackagerImplementation::~PackagerImplementation()
     {
         FreeOPKG();
+        ASSERT(_service != nullptr);
         _service->Release();
         _service = nullptr;
     }
@@ -203,6 +206,8 @@ namespace Plugin {
         if (command) {
             _inProgress.Install->SetState(Exchange::IPackager::INSTALLING);
             NotifyStateChange();
+
+            ASSERT(opkg_config != nullptr);
             opkg_config->pfm = command->pfm;
             std::unique_ptr<char[]> targetCopy(new char [_inProgress.Package->Name().length() + 1]);
             std::copy_n(_inProgress.Package->Name().begin(), _inProgress.Package->Name().length(), targetCopy.get());
@@ -253,6 +258,8 @@ namespace Plugin {
     /* static */ void PackagerImplementation::InstallationProgessNoLock(const opkg_progress_data_t* progress,
                                                                         void* data)
     {
+        ASSERT(data != nullptr);
+        ASSERT(progress != nullptr);
         PackagerImplementation* self = static_cast<PackagerImplementation*>(data);
         self->_inProgress.Install->SetProgress(progress->percentage);
         if (progress->action == OPKG_INSTALL &&
@@ -293,6 +300,8 @@ namespace Plugin {
     string PackagerImplementation::GetCallsignFromMetaDataFile(const string& appName)
     {
         string callsign = "";
+
+        ASSERT(opkg_config != nullptr);
         string metaDataFileName = (string(opkg_config->cache_dir) + "/" + appName + string(AppPath) + appName + string(PackageJSONFile));
         TRACE(Trace::Information, (_T("[RDM]: Metadata is %s"), metaDataFileName.c_str()));
         Core::File metaDataFile(metaDataFileName);
@@ -393,6 +402,7 @@ namespace Plugin {
 
     void PackagerImplementation::BlockingSetupLocalRepoNoLock(RepoSyncMode mode)
     {
+        ASSERT(opkg_config != nullptr);
         string dirPath = Core::ToString(opkg_config->lists_dir);
         Core::Directory dir(dirPath.c_str());
         bool containFiles = false;
@@ -428,4 +438,4 @@ ENUM_CONVERSION_BEGIN(Plugin::PackagerImplementation::PackageType)
     { Plugin::PackagerImplementation::PackageType::NONE, _TXT("none") },
     { Plugin::PackagerImplementation::PackageType::PLUGIN, _TXT("plugin") },
 ENUM_CONVERSION_END(Plugin::PackagerImplementation::PackageType)
-}  // namespace WPEFramework
+}  // namespace Thunder

@@ -19,7 +19,7 @@ project(Packager)
 
 cmake_minimum_required(VERSION 3.3)
 
-find_package(WPEFramework)
+find_package(Thunder)
 
 project_version(1.0.0)
 
@@ -67,7 +67,7 @@ endif (libprovision_FOUND)
 
 string(TOLOWER ${NAMESPACE} STORAGENAME)
 install(TARGETS ${MODULE_NAME}
-    DESTINATION lib/${STORAGENAME}/plugins)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGENAME}/plugins)
 
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"

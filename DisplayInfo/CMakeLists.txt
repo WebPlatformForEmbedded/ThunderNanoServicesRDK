@@ -19,7 +19,7 @@ project(DisplayInfo)
 
 cmake_minimum_required(VERSION 3.3)
 
-find_package(WPEFramework)
+find_package(Thunder)
 
 project_version(1.0.0)
 
@@ -52,7 +52,7 @@ find_package(LibDRM QUIET)
 find_path (STAGING_INCDIR glib-2.0)
 include_directories(include)
 include_directories(${STAGING_INCDIR})
-include_directories(${STAGING_INCDIR}/libdrm)
+include_directories(${STAGING_INCDIR}/${CMAKE_INSTALL_LIBDIR}drm)
 
 add_library(${MODULE_NAME} SHARED
     DisplayInfo.cpp
@@ -147,6 +147,6 @@ else ()
 endif ()
 
 install(TARGETS ${MODULE_NAME}
-    DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins)
 
 write_config()

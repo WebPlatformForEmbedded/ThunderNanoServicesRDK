@@ -19,7 +19,7 @@
  
 #include "LocationService.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     struct IGeography {
@@ -385,6 +385,8 @@ POP_WARNING()
                     }
 
                     _tryInterval = retryTimeSpan * 1000; // Move from seconds to mS.
+
+                    ASSERT(_request.IsValid() == true);
                     _request->Host = hostName;
                     _request->Verb = Web::Request::HTTP_GET;
                     _request->Path = _T("/");
@@ -433,7 +435,7 @@ POP_WARNING()
             _state = FAILED;
         }
 
-        if(_infoCarrier.IsValid() == true) {
+        if (_infoCarrier.IsValid() == true) {
             _infoCarrier.Release();
         }
 
@@ -443,6 +445,7 @@ POP_WARNING()
     // Methods to extract and insert data into the socket buffers
     void LocationService::LinkBody(Core::ProxyType<Web::Response>& element) /* override */
     {
+        ASSERT(element.IsValid() == true);
         if (element->ErrorCode == Web::STATUS_OK) {
 
             ASSERT(_infoCarrier.IsValid() == true);
@@ -453,6 +456,7 @@ POP_WARNING()
 
     void LocationService::Received(Core::ProxyType<Web::Response>& element) /* override */
     {
+        ASSERT(element.IsValid() == true);
         Core::ProxyType<Web::TextBody> textInfo = element->Body<Web::TextBody>();
 
         if (textInfo.IsValid() == false) {
@@ -460,6 +464,7 @@ POP_WARNING()
         }
         else {
 
+            ASSERT(_infoCarrier.IsValid() == true);
             _infoCarrier->FromString(*textInfo);
 
             _adminLock.Lock();
@@ -500,8 +505,6 @@ POP_WARNING()
 
                 _state = LOADING;
             }
-
-            ASSERT(_infoCarrier.IsValid() == true);
 
             _infoCarrier.Release();
 
@@ -611,6 +614,8 @@ POP_WARNING()
 
                 TRACE(Trace::Error, (_T("LocationSync: Network connectivity could *NOT* be established. Falling back to IPv4. %d"), __LINE__));
 
+
+                ASSERT(_infoCarrier.IsValid() == true);
                 _infoCarrier.Release();
 
                 dispatch = true;
@@ -620,6 +625,7 @@ POP_WARNING()
         }
 
         if (dispatch == true) {
+            ASSERT(_callback != nullptr);
             _callback->Dispatch();
         }
 
@@ -651,4 +657,4 @@ POP_WARNING()
     }
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

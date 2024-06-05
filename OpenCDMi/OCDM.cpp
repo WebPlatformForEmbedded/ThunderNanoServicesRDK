@@ -20,7 +20,7 @@
 #include "OCDM.h"
 #include <interfaces/IDRM.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace OCDM {
 
@@ -131,7 +131,7 @@ namespace Plugin {
 
                 if (connection != nullptr) {
 
-                    _memory = WPEFramework::OCDM::MemoryObserver(connection);
+                    _memory = Thunder::OCDM::MemoryObserver(connection);
                     ASSERT(_memory != nullptr);
 
                     connection->Release();
@@ -287,4 +287,4 @@ namespace Plugin {
         }
     }
 }
-} //namespace WPEFramework::Plugin
+} //namespace Thunder::Plugin

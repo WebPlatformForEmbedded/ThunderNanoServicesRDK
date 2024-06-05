@@ -33,7 +33,7 @@ add_library(${MODULE_NAME} SHARED
     main.cpp
     WhiteListedOriginDomainsList.cpp
     Milestone.cpp
-    NotifyWPEFramework.cpp
+    NotifyThunder.cpp
     RequestHeaders.cpp
     ../Tags.cpp
 )

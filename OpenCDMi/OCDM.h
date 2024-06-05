@@ -25,7 +25,7 @@
 #include <interfaces/IMemory.h>
 #include <interfaces/json/JsonData_OCDM.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class OCDM : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -45,7 +45,7 @@ namespace Plugin {
             ~Notification() override = default;
 
         public:
-            void Activated(RPC::IRemoteConnection*  /* connection */) override
+            void Activated(RPC::IRemoteConnection* /* connection */) override
             {
             }
             void Deactivated(RPC::IRemoteConnection* connection) override
@@ -139,7 +139,8 @@ namespace Plugin {
 
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         OCDM()
-            : _connectionId(0)
+            : _skipURL(0)
+            , _connectionId(0)
             , _service(nullptr)
             , _opencdmi(nullptr)
             , _memory(nullptr)

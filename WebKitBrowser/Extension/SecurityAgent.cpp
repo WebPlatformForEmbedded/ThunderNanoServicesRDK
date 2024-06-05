@@ -22,7 +22,7 @@
 
 #include <securityagent/securityagent.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace SecurityAgent {
 
@@ -63,4 +63,4 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
 
 }  // SecurityAgent
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

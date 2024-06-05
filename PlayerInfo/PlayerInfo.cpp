@@ -20,7 +20,7 @@
 #include "PlayerInfo.h"
 
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     namespace {
@@ -181,14 +181,14 @@ namespace Plugin {
         Core::JSON::EnumType<JsonData::PlayerInfo::CodecsData::AudiocodecsType> audioCodec;
         _audioCodecs->Reset(0);
         Exchange::IPlayerProperties::AudioCodec audio;
-        while(_audioCodecs->Next(audio) == true) {
+        while (_audioCodecs->Next(audio) == true) {
             playerInfo.Audio.Add(audioCodec = static_cast<JsonData::PlayerInfo::CodecsData::AudiocodecsType>(audio));
         }
 
         Core::JSON::EnumType<JsonData::PlayerInfo::CodecsData::VideocodecsType> videoCodec;
         Exchange::IPlayerProperties::VideoCodec video;
         _videoCodecs->Reset(0);
-        while(_videoCodecs->Next(video) == true) {
+        while (_videoCodecs->Next(video) == true) {
             playerInfo.Video.Add(videoCodec = static_cast<JsonData::PlayerInfo::CodecsData::VideocodecsType>(video));
         }
     }
@@ -203,4 +203,4 @@ namespace Plugin {
         }
     }
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

@@ -19,7 +19,7 @@
 
 #include "WebBridge.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
     ENUM_CONVERSION_BEGIN(Plugin::WebBridge::context)
 
@@ -406,4 +406,4 @@ namespace WPEFramework {
         }
 
     } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

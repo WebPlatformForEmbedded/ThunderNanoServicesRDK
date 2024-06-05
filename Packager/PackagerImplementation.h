@@ -29,7 +29,7 @@
 struct opkg_conf;
 struct _opkg_progress_data_t;
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class PackagerImplementation : public Exchange::IPackager {
@@ -288,6 +288,7 @@ namespace Plugin {
             InstallThread(const InstallThread&) = delete;
 
             uint32_t Worker() override {
+                ASSERT(_parent != nullptr);
                 while(IsRunning() == true) {
                     _parent->_adminLock.Lock(); // The parent may have lock when this starts so wait for it to release.
                     bool isInstall = _parent->_inProgress.Install != nullptr;
@@ -357,4 +358,4 @@ namespace Plugin {
     };
 
 }  // namespace Plugin
-}  // namespace WPEFramework
+}  // namespace Thunder

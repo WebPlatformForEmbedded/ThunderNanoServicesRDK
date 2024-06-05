@@ -23,14 +23,14 @@
 #include <interfaces/json/JsonData_Browser.h>
 #include <interfaces/json/JsonData_StateControl.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
     using namespace JsonData::Browser;
     using namespace JsonData::WebBrowser;
     using namespace JsonData::StateControl;
-    using namespace WPEFramework::Exchange;
+    using namespace Thunder::Exchange;
 
     // Registration
     //
@@ -188,4 +188,4 @@ namespace Plugin {
 
 } // namespace Plugin
 
-} // namespace WPEFramework
+} // namespace Thunder

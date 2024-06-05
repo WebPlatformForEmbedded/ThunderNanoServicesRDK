@@ -23,7 +23,7 @@
 
 #include "TokenFactory.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -84,6 +84,7 @@ namespace Plugin {
         response.Valid = false;
 
         auto webToken = JWTFactory::Instance().Element();
+        ASSERT(webToken != nullptr);
         uint16_t load = webToken->PayloadLength(token);
 
         // Validate the token

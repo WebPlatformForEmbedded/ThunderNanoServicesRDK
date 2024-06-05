@@ -18,11 +18,11 @@
  */
 
 #include "Module.h"
-#include "NotifyWPEFramework.h"
+#include "NotifyThunder.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
-namespace NotifyWPEFramework {
+namespace NotifyThunder {
 
 void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
 {
@@ -31,20 +31,20 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame)
 
     JSCContext* jsContext = webkit_frame_get_js_context_for_script_world(frame, world);
 
-    static const char wpeNotifyWPEFramework[] = "var wpe = {};\n"
-        "wpe.NotifyWPEFramework = function() {\n"
+    static const char wpeNotifyThunder[] = "var wpe = {};\n"
+        "wpe.NotifyThunder = function() {\n"
         "  let retval = new Array;\n"
         "  for (let i = 0; i < arguments.length; i++) {\n"
         "    retval[i] = arguments[i];\n"
         "  }\n"
-        "  window.webkit.messageHandlers.wpeNotifyWPEFramework.postMessage(retval);\n"
+        "  window.webkit.messageHandlers.wpeNotifyThunder.postMessage(retval);\n"
         "}";
-    JSCValue* result = jsc_context_evaluate(jsContext, wpeNotifyWPEFramework, -1);
+    JSCValue* result = jsc_context_evaluate(jsContext, wpeNotifyThunder, -1);
     g_object_unref(result);
 
     g_object_unref(jsContext);
 }
 
-}  // NotifyWPEFramework
+}  // NotifyThunder
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

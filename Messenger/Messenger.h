@@ -26,7 +26,7 @@
 #include <set>
 #include <functional>
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace JMessenger = Exchange::JSONRPC::JMessenger;
 

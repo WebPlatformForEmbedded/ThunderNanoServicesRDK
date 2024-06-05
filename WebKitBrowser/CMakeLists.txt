@@ -19,7 +19,7 @@ project(WebKitBrowser)
 
 cmake_minimum_required(VERSION 3.3)
 
-find_package(WPEFramework)
+find_package(Thunder)
 project_version(1.0.0)
 
 set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
@@ -315,20 +315,20 @@ set_target_properties(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} PROPERTIES
 
 install(
     TARGETS ${MODULE_NAME}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
 install(
     TARGETS ${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/${STORAGE_DIRECTORY}/plugins
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
-if(WEBKIT_GLIB_API)
-    add_subdirectory(Extension)
-else()
-    # also build injected bundle
-    add_subdirectory(InjectedBundle)
-endif()
+# if(WEBKIT_GLIB_API)
+#     add_subdirectory(Extension)
+# else()
+#     # also build injected bundle
+#     add_subdirectory(InjectedBundle)
+# endif()
 
 # resolution handling
 if(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "720p")

@@ -72,5 +72,5 @@ private:
 
 private:
   static MacGenerator generator;
-  WPEFramework::Web::JSONWebToken jwt;
+  Thunder::Web::JSONWebToken jwt;
 };

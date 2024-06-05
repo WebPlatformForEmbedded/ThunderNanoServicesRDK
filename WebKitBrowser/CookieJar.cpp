@@ -29,7 +29,7 @@
 #include <cryptography/cryptography.h>
 
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 namespace {
@@ -449,11 +449,13 @@ CookieJar::~CookieJar()
 
 uint32_t CookieJar::Configure(const string& connector, const string& key)
 {
+    ASSERT(_priv != nullptr);
     return (_priv->Configure(connector, key));
 }
 
 uint32_t CookieJar::Pack(uint32_t& version, uint32_t& checksum, string& payload) const
 {
+    ASSERT(_priv != nullptr);
     return _priv->Pack(_cookies, version, checksum, payload);
 }
 
@@ -462,9 +464,10 @@ uint32_t CookieJar::Unpack(const uint32_t version, const uint32_t checksum, cons
     uint32_t rc;
     std::vector<std::string> cookies;
 
+    ASSERT(_priv != nullptr);
     rc = _priv->Unpack(version, checksum, payload, cookies);
 
-    if (rc == WPEFramework::Core::ERROR_NONE) {
+    if (rc == Thunder::Core::ERROR_NONE) {
         _cookies = std::move(cookies);
         _refreshed.SetState( false );
     }

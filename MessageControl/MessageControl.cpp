@@ -21,7 +21,7 @@
 #include "MessageOutput.h"
 #include <interfaces/json/JMessageControl.h>
 
-namespace WPEFramework {
+namespace Thunder {
 
     namespace Plugin {
 

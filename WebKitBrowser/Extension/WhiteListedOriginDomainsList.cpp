@@ -22,7 +22,7 @@
 using std::unique_ptr;
 using std::vector;
 
-namespace WPEFramework {
+namespace Thunder {
 namespace WebKit {
 
     // Parses JSON containing white listed CORS origin-domain pairs.
@@ -84,6 +84,7 @@ namespace WebKit {
     /* static */unique_ptr<WhiteListedOriginDomainsList> WhiteListedOriginDomainsList::Parse(const char* whitelist)
     {
         unique_ptr<WhiteListedOriginDomainsList> whiteList(new WhiteListedOriginDomainsList());
+        ASSERT(whiteList != nullptr);
         ParseWhiteList(whitelist, whiteList->_whiteMap);
         return whiteList;
     }

@@ -22,7 +22,7 @@
 
 #include "Module.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -147,6 +147,6 @@ namespace Plugin {
         Core::ProxyType<Web::Request> _request;
     };
 }
-} // namespace WPEFramework:Plugin
+} // namespace Thunder:Plugin
 
 #endif // LOCATIONSYNC_LOCATIONSERVICE_H

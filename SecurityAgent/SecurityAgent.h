@@ -24,7 +24,7 @@
 
 #include <interfaces/json/JsonData_SecurityAgent.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class SecurityAgent : public PluginHost::IAuthenticate,
@@ -47,14 +47,14 @@ namespace Plugin {
                 : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
                 , _parentInterface(parentInterface)
             {   
-                if(_parentInterface != nullptr){
+                if (_parentInterface != nullptr){
                     _parentInterface->AddRef();
                 }
                 Open(Core::infinite);
             }
             ~TokenDispatcher() override
             {
-                if(_parentInterface != nullptr){
+                if (_parentInterface != nullptr){
                     _parentInterface->Release();
                 }
 
@@ -228,4 +228,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

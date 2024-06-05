@@ -21,7 +21,7 @@
 #include "Messenger.h"
 #include "cryptalgo/Hash.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
 namespace Plugin {
 
@@ -57,7 +57,7 @@ namespace Plugin {
         _service->Register(static_cast<PluginHost::IShell::IConnectionServer::INotification*>(&_notification));
 
         _roomAdmin = service->Root<Exchange::IRoomAdministrator>(_connectionId, 2000, _T("RoomMaintainer"));
-        if(_roomAdmin == nullptr) {
+        if (_roomAdmin == nullptr) {
             message = _T("RoomMaintainer couldnt be instantiated");
         }
         else {
@@ -128,6 +128,7 @@ namespace Plugin {
             ASSERT(sink != nullptr);
 
             if (sink != nullptr) {
+
                 Exchange::IRoomAdministrator::IRoom* room = _roomAdmin->Join(roomName, userName, sink);
 
                 // Note: Join() can return nullptr if the user has already joined the room.

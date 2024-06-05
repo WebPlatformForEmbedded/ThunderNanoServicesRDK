@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     class Security {
     public:
@@ -30,4 +30,4 @@ namespace Plugin {
         std::string _text;
     };
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

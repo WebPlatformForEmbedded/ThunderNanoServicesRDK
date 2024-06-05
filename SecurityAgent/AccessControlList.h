@@ -80,7 +80,7 @@ namespace {
     }
 }
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     //Allow -> Check first

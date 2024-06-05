@@ -21,7 +21,7 @@
 
 #include <wpe/webkit-web-extension.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace JavaScript {
 namespace IIdentifier {
 
@@ -29,4 +29,4 @@ void InjectJS(WebKitScriptWorld* world, WebKitFrame* frame, Core::ProxyType<RPC:
 
 }  // IIdentifier
 }  // JavaScript
-}  // WPEFramework
+}  // Thunder

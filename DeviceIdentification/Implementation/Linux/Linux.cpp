@@ -23,7 +23,7 @@
 #include <fstream>
 #include <sys/utsname.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier, public Exchange::IConfiguration {
     private:
@@ -51,7 +51,7 @@ namespace Plugin {
         };
 
     private:
-       class AdapterObserver : public WPEFramework::Core::AdapterObserver::INotification {
+       class AdapterObserver : public Thunder::Core::AdapterObserver::INotification {
         public:
             static int32_t constexpr WaitTime = 5000; //Just wait for 5 seconds
 

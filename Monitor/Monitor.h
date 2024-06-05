@@ -31,7 +31,7 @@ static uint32_t gcd(uint32_t a, uint32_t b)
     return b == 0 ? a : gcd(b, a % b);
 }
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class Monitor : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -107,6 +107,7 @@ namespace Plugin {
 
             void Measure(Exchange::IMemory* memInterface)
             {
+                ASSERT(memInterface != nullptr);
                 _resident.Set(memInterface->Resident());
                 _allocated.Set(memInterface->Allocated());
                 _shared.Set(memInterface->Shared());
@@ -583,7 +584,7 @@ namespace Plugin {
                 {
                     Core::ProxyType<const Exchange::IMemory> source;
                     _adminLock.Lock();
-                    if(_source != nullptr) {
+                    if (_source != nullptr) {
                         source = Core::ProxyType<const Exchange::IMemory>(*_source, *_source);
                     }
                     _adminLock.Unlock();
@@ -761,7 +762,6 @@ POP_WARNING()
             }
             void Deactivated (const string& callsign, PluginHost::IShell* service) override
             {
-
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -788,7 +788,6 @@ POP_WARNING()
                         }
                     }
                 }
-
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
@@ -964,6 +963,7 @@ POP_WARNING()
             template <typename T>
             void translate(const Core::MeasurementType<T>& from, JsonData::Monitor::MeasurementInfo* to) const
             {
+                ASSERT(to != nullptr);
                 to->Min = from.Min();
                 to->Max = from.Max();
                 to->Average = from.Average();
@@ -1008,7 +1008,7 @@ POP_WARNING()
         // The lifetime of the Service object is guaranteed till the deinitialize method is called.
         const string Initialize(PluginHost::IShell* service) override;
 
-        // The plugin is unloaded from WPEFramework. This is call allows the module to notify clients
+        // The plugin is unloaded from Thunder. This is call allows the module to notify clients
         // or to persist information if needed. After this call the plugin will unlink from the service path
         // and be deactivated. The Service object is the same as passed in during the Initialize.
         // After theis call, the lifetime of the Service object ends.

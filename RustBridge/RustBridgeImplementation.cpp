@@ -19,7 +19,7 @@
 
 #include "RustBridge.h"
 
-namespace WPEFramework {
+namespace Thunder {
 
     namespace Plugin {
 
@@ -36,9 +36,9 @@ namespace WPEFramework {
     }
 }
 
-extern "C" void wpe_send_to(uint32_t id, const char* json, WPEFramework::Plugin::Rust::PluginContext* p_ctx);
+extern "C" void wpe_send_to(uint32_t id, const char* json, Thunder::Plugin::Rust::PluginContext* p_ctx);
 
-namespace WPEFramework {
+namespace Thunder {
 
     namespace Plugin {
 
@@ -273,6 +273,7 @@ namespace WPEFramework {
                 uint32_t result = Core::ERROR_INCOMPLETE_CONFIG;
                 Config config;
 
+                ASSERT(framework != nullptr);
                 config.FromString(framework->ConfigLine());
 
                 if (callback != nullptr) {
@@ -341,9 +342,9 @@ namespace WPEFramework {
 
         SERVICE_REGISTRATION(RustBridgeImplementation, 1, 0)
     }
-} // namespace WPEFramework
+} // namespace Thunder
 
-using namespace WPEFramework;
+using namespace Thunder;
 
 // this function is passed into Rust as a pointer
 extern "C" void wpe_send_to(uint32_t id, const char* json, Plugin::Rust::PluginContext * plugin)

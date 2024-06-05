@@ -24,7 +24,7 @@
 #include <interfaces/json/JDolbyOutput.h>
 #include <interfaces/json/JPlayerProperties.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     class PlayerInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
@@ -69,6 +69,7 @@ namespace Plugin {
 
             explicit DolbyNotification(PlayerInfo* parent)
                 : _parent(*parent)
+                , _client(nullptr)
             {
                 ASSERT(parent != nullptr);
             }
@@ -113,6 +114,7 @@ namespace Plugin {
             , _player(nullptr)
             , _audioCodecs(nullptr)
             , _videoCodecs(nullptr)
+            , _dolbyOut(nullptr)
             , _dolbyNotification(this)
             , _notification(this)
             , _service(nullptr)
@@ -158,4 +160,4 @@ namespace Plugin {
     };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

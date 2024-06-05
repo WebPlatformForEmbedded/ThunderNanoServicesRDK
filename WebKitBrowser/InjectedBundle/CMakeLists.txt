@@ -34,7 +34,7 @@ add_library(${MODULE_NAME} SHARED
     RequestHeaders.cpp
     Utils.cpp
     JavaScriptFunction.cpp
-    NotifyWPEFramework.cpp
+    NotifyThunder.cpp
     Milestone.cpp
     ClassDefinition.cpp
     ../Tags.cpp

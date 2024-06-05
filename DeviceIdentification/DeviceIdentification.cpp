@@ -21,7 +21,7 @@
 #include "IdentityProvider.h"
 #include <interfaces/IConfiguration.h>
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     namespace {
@@ -160,6 +160,7 @@ namespace Plugin {
             }
         }
 #else
+        ASSERT(_service != nullptr);
         // extract DeviceId set by Thunder
         if (_service->SubSystems()->IsActive(PluginHost::ISubSystem::IDENTIFIER) == true) {
 
@@ -180,6 +181,7 @@ namespace Plugin {
 
     void DeviceIdentification::Info(JsonData::DeviceIdentification::DeviceidentificationData& deviceInfo) const
     {
+        ASSERT(_identifier != nullptr);
         deviceInfo.Firmwareversion = _identifier->FirmwareVersion();
         deviceInfo.Chipset = _identifier->Chipset();
 
@@ -200,4 +202,4 @@ namespace Plugin {
         }
     }
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

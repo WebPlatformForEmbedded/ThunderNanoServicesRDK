@@ -25,7 +25,7 @@ extern "C" {
 #include <mfrApi.h>
 }
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     class DeviceImplementation : public PluginHost::ISubSystem::IIdentifier {
 

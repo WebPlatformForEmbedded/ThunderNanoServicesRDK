@@ -29,7 +29,7 @@
 
 #include "UtilsTelemetry.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
 class SysLogOuput : public PerformanceMetrics::IBrowserMetricsLogger {
@@ -532,7 +532,7 @@ template std::unique_ptr<PerformanceMetrics::IBrowserMetricsLogger> PerformanceM
 
 }
 
-ENUM_CONVERSION_BEGIN(WPEFramework::Plugin::SysLogOuput::ModeType)
+ENUM_CONVERSION_BEGIN(Thunder::Plugin::SysLogOuput::ModeType)
 
     { Plugin::SysLogOuput::ModeType::COLD, _TXT("Cold") },
     { Plugin::SysLogOuput::ModeType::WARM, _TXT("Warm") },

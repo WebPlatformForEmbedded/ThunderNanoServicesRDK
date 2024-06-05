@@ -29,7 +29,7 @@
 #include "../Tags.h"
 
 #include "Milestone.h"
-#include "NotifyWPEFramework.h"
+#include "NotifyThunder.h"
 #include "RequestHeaders.h"
 #include "WhiteListedOriginDomainsList.h"
 
@@ -57,7 +57,7 @@
 #include <TestRunnerJS.h>
 #endif
 
-using namespace WPEFramework;
+using namespace Thunder;
 
 static Core::NodeId GetConnectionNode()
 {
@@ -77,6 +77,7 @@ public:
     PluginHost()
         : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
+        , _extension(nullptr)
     {
     }
     ~PluginHost()
@@ -88,6 +89,7 @@ public:
 public:
     void Initialize(WebKitWebExtension* extension, const void* userData)
     {
+        ASSERT(_comClient.IsValid() == true);
         // We have something to report back, do so...
         uint32_t result = _comClient->Open(RPC::CommunicationTimeOut);
         if (result != Core::ERROR_NONE) {
@@ -145,7 +147,11 @@ public:
 #if defined(UPDATE_TZ_FROM_FILE)
         _tzSupport.Deinitialize();
 #endif
+
+        Messaging::MessageUnit::Instance().Close();
+
         if (_comClient.IsValid() == true) {
+            _comClient->Close(RPC::CommunicationTimeOut);
             _comClient.Release();
         }
         if (_engine.IsValid() == true) {
@@ -157,10 +163,10 @@ public:
     }
 
 private:
-    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame)
+    static void windowObjectClearedCallback(WebKitScriptWorld* world, WebKitWebPage* page VARIABLE_IS_NOT_USED, WebKitFrame* frame, VARIABLE_IS_NOT_USED PluginHost* host)
     {
         JavaScript::Milestone::InjectJS(world, frame);
-        JavaScript::NotifyWPEFramework::InjectJS(world, frame);
+        JavaScript::NotifyThunder::InjectJS(world, frame);
 
 #ifdef  ENABLE_SECURITY_AGENT
         JavaScript::SecurityAgent::InjectJS(world, frame);
@@ -188,6 +194,7 @@ private:
                                     WebKitWebPage* page,
                                     PluginHost* host)
     {
+        ASSERT(host != nullptr);
         if (host->_logToSystemConsoleEnabled) {
             g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), host);
@@ -206,6 +213,7 @@ private:
 PUSH_WARNING(DISABLE_WARNING_DEPRECATED_USE)
     static void consoleMessageSentCallback(VARIABLE_IS_NOT_USED WebKitWebPage* page, WebKitConsoleMessage* message, PluginHost* host)
     {
+        ASSERT(host != nullptr);
         string messageString = Core::ToString(webkit_console_message_get_text(message));
         uint64_t line = static_cast<uint64_t>(webkit_console_message_get_line(message));
 
@@ -260,13 +268,13 @@ private:
     gboolean _logToSystemConsoleEnabled;
     gboolean _enableTesting;
     WebKitWebExtension* _extension;
-} _wpeFrameworkClient;
+} _thunderClient;
 
 extern "C" {
 
 __attribute__((destructor)) static void unload()
 {
-    _wpeFrameworkClient.Deinitialize();
+    _thunderClient.Deinitialize();
 }
 
 // Declare module name for tracer.
@@ -274,11 +282,11 @@ MODULE_NAME_DECLARATION(BUILD_REFERENCE)
 
 G_MODULE_EXPORT void webkit_web_extension_initialize_with_user_data(WebKitWebExtension* extension, GVariant* userData)
 {
-    _wpeFrameworkClient.Initialize(extension, userData);
+    _thunderClient.Initialize(extension, userData);
 }
 
 }
 
 // explicit instantiation so that -O1/2/3 flags do not introduce undefined symbols
-template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Input, 4u>::AddRef() const;
-template uint32_t WPEFramework::Core::IPCMessageType<2u, WPEFramework::RPC::Data::Input, WPEFramework::RPC::Data::Output>::RawSerializedType<WPEFramework::RPC::Data::Output, 5u>::AddRef() const;
+template uint32_t Thunder::Core::IPCMessageType<2u, Thunder::RPC::Data::Input, Thunder::RPC::Data::Output>::RawSerializedType<Thunder::RPC::Data::Input, 4u>::AddRef() const;
+template uint32_t Thunder::Core::IPCMessageType<2u, Thunder::RPC::Data::Input, Thunder::RPC::Data::Output>::RawSerializedType<Thunder::RPC::Data::Output, 5u>::AddRef() const;
