@@ -11,6 +11,7 @@ env:
   devEnv: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.com
   deviceInfo: ThunderNanoServicesRDK\DeviceInfo\DeviceInfo.vcxproj
   locationSync: ThunderNanoServicesRDK\LocationSync\LocationSync.vcxproj
+  messageControl: ThunderNanoServicesRDK\MessageControl\MessageControl.vcxproj
   messenger: ThunderNanoServicesRDK\Messenger\Messenger.vcxproj
   monitor: ThunderNanoServicesRDK\Monitor\Monitor.vcxproj
   openCDMi: ThunderNanoServicesRDK\OpenCDMi\OpenCDMi.vcxproj
@@ -81,6 +82,7 @@ jobs:
         cd ThunderOnWindows
         && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%deviceInfo%"  "%solution%"
         && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%locationSync%"  "%solution%"
+        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messageControl%"  "%solution%"
         && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messenger%"  "%solution%"
         && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%monitor%"  "%solution%"
         && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%openCDMi%"  "%solution%"
