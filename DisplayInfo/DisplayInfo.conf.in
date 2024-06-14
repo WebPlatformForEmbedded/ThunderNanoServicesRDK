@@ -7,7 +7,7 @@ if boolean("@PLUGIN_DISPLAYINFO_USE_BEST_MODE@"):
     configuration.add("useBestMode", "@PLUGIN_DISPLAYINFO_USE_BEST_MODE@")
 
 configuration.add("drmDeviceName", "@PLUGIN_DISPLAYINFO_DRM_DEVICE_NAME@")
-configuration.add("drmSubsystemPath", "@PLUGIN_DISPLAYINFO_EDID_FILEPATH@")
+configuration.add("edidFilepath", "@PLUGIN_DISPLAYINFO_EDID_FILEPATH@")
 configuration.add("hdcpLevelFilepath", "@PLUGIN_DISPLAYINFO_HDCP_LEVEL_FILEPATH@")
 configuration.add("hdrLevelFilepath", "@PLUGIN_DISPLAYINFO_HDR_LEVEL_FILEPATH@")
 configuration.add("gpuMemoryFile", "@PLUGIN_DISPLAYINFO_GPU_MEMORY_FILE@")
