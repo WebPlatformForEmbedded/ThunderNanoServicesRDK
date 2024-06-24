@@ -55,5 +55,3 @@ if(${DOLBY_IMPLEMENTATION} STREQUAL "AMLogic")
 else()
     message(SEND_ERROR "No DOLBY_IMPLEMENTATION picked. Turn off dolby support or pick one.")
 endif()
-
-

@@ -94,5 +94,3 @@ endif()
 if(PLUGIN_PERFORMANCEMETRICS_WEBKITBROWSER_YOUTUBE)
     write_config( PLUGINS PerfMetricsYouTube )
 endif()
-
-
