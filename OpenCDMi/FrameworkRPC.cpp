@@ -1350,7 +1350,7 @@ POP_WARNING()
             _entryPoint = Core::ServiceType<AccessorOCDM>::Create<Exchange::IAccessorOCDM>(this, config.SharePath.Value(), config.ShareSize.Value());
             ASSERT(_entryPoint != nullptr);
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
-            ASSERT(_engine != nullptr);
+            ASSERT(_engine.IsValid() == true);
             _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
             if (_service != nullptr) {
