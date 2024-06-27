@@ -17,7 +17,7 @@
 
 project(DisplayInfo)
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.15)
 
 find_package(Thunder)
 
@@ -49,10 +49,6 @@ find_package(BCM_HOST QUIET)
 find_package(NEXUS QUIET)
 find_package(NXCLIENT QUIET)
 find_package(LibDRM QUIET)
-find_path (STAGING_INCDIR glib-2.0)
-include_directories(include)
-include_directories(${STAGING_INCDIR})
-include_directories(${STAGING_INCDIR}/${CMAKE_INSTALL_LIBDIR}drm)
 
 add_library(${MODULE_NAME} SHARED
     DisplayInfo.cpp
@@ -141,12 +137,12 @@ elseif (LIBDRM_FOUND)
 
     target_link_libraries(${MODULE_NAME}
         PRIVATE
-            drm)
+            libdrm::libdrm)
 else ()
     message(FATAL_ERROR "There is no graphic backend for display info plugin")
 endif ()
 
 install(TARGETS ${MODULE_NAME}
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins COMPONENT ${NAMESPACE}_Runtime)
 
 write_config()
