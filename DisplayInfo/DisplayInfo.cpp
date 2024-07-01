@@ -84,7 +84,7 @@ namespace Plugin {
                     // if it hasn't been initialized.
                     _displayProperties = _connectionProperties->QueryInterface<Exchange::IDisplayProperties>();
                     if (_displayProperties == nullptr) {
-                        SYSLOG(Logging::Startup, (_T("Display Properties service is unavailable.")));
+                        SYSLOG(Logging::Activate, (_T("Display Properties service is unavailable.")));
                     } else {
                         Exchange::JDisplayProperties::Register(*this, _displayProperties);
                     }
