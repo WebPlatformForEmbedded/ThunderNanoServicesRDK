@@ -17,7 +17,7 @@
 
 project(Packager)
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.15)
 
 find_package(Thunder)
 
@@ -67,7 +67,7 @@ endif (libprovision_FOUND)
 
 string(TOLOWER ${NAMESPACE} STORAGENAME)
 install(TARGETS ${MODULE_NAME}
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGENAME}/plugins)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGENAME}/plugins COMPONENT ${NAMESPACE}_Runtime)
 
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/opkg.conf.in"

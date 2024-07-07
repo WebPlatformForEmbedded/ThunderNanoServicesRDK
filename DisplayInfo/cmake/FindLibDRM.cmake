@@ -1,7 +1,7 @@
 # If not stated otherwise in this file or this component's license file the
 # following copyright and licenses apply:
 #
-# Copyright 2020 RDK Management
+# Copyright 2020 Metrological B.V.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,25 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.7)
-
-# Be compatible even if a newer CMake version is available
-cmake_policy(VERSION 3.7...3.12)
-
 if(LibDRM_FIND_QUIETLY)
-    set(_LIBDRM_MODE QUIET)
+    set(_LibDRM_MODE QUIET)
 elseif(LibDRM_FIND_REQUIRED)
-    set(_LIBDRM_MODE REQUIRED)
+    set(_LibDRM_MODE REQUIRED)
 endif()
 
 find_package(PkgConfig)
 
 # Just check if the libdrm.pc exist, and create the PkgConfig::libdrm target
 # No version requirement (yet)
-pkg_check_modules(LIBDRM ${_LIBDRM_MODE} IMPORTED_TARGET libdrm)
-
-find_library(LIBDRM_ACTUAL_LIBRARY NAMES drm
-    HINTS ${LIBDRM_LIBRARY_DIRS} )
+pkg_check_modules(LibDRM ${_LibDRM_MODE} IMPORTED_TARGET libdrm)
 
 include(FindPackageHandleStandardArgs)
 
@@ -41,23 +33,16 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
     LibDRM
     REQUIRED_VARS
-        LIBDRM_INCLUDE_DIRS
-        LIBDRM_CFLAGS
-        LIBDRM_LDFLAGS
-        LIBDRM_LIBRARIES
-        LIBDRM_ACTUAL_LIBRARY
+        LibDRM_INCLUDE_DIRS
+        LibDRM_CFLAGS
+        LibDRM_LDFLAGS
+        LibDRM_LIBRARIES
+        LibDRM_ACTUAL_LIBRARY
     VERSION_VAR
-        LIBDRM_VERSION
+        LibDRM_VERSION
 )
-mark_as_advanced(LIBDRM_INCLUDE_DIRS LIBDRM_LIBRARIES)
-set(LIBDRM_FOUND ${LibDRM_FOUND})
+mark_as_advanced(LibDRM_INCLUDE_DIRS LibDRM_LIBRARIES)
 
-if(LibDRM_FOUND AND NOT TARGET LibDRM::LibDRM)
-    add_library(LibDRM::LibDRM UNKNOWN IMPORTED)
-    set_target_properties(LibDRM::LibDRM PROPERTIES
-        IMPORTED_LOCATION "${LIBDRM_ACTUAL_LIBRARY}"
-        INTERFACE_LINK_LIBRARIES "${LIBDRM_LIBRARIES}"
-        INTERFACE_COMPILE_OPTIONS "${LIBDRM_CFLAGS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${LIBDRM_INCLUDE_DIRS}"
-        )
+if(LibDRM_FOUND)
+   add_library(libdrm::libdrm ALIAS PkgConfig::LibDRM)
 endif()
