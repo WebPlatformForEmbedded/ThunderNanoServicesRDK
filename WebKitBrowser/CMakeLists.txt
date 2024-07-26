@@ -225,7 +225,7 @@ set(PLUGIN_AMAZON_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_W
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
-find_package(${NAMESPACE}Cryptography REQUIRED)
+find_package(ClientCryptography REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 find_package(WPEWebKit REQUIRED)
 find_package(WPEBackend REQUIRED)
@@ -262,7 +262,7 @@ target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
-        ${NAMESPACE}Cryptography::${NAMESPACE}Cryptography
+	ClientCryptography::ClientCryptography
         WPEBackend::WPEBackend
         WPEWebKit::WPEWebKit)
 
