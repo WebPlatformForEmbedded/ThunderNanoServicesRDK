@@ -309,6 +309,8 @@ namespace Publishers {
 
     class UDPOutput : public IPublish {
     private:
+        static constexpr uint16_t UDPBufferSize = 4 * 1024;
+
         class Channel : public Core::SocketDatagram {
         public:
             Channel() = delete;
@@ -326,9 +328,7 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            // Note: 2048 bytes is too small, casues an ASSERT from Frame - SocketPort picks it up too slowly especially at the framework startup
-            // Question: Do we want this buffer to be configurable? Same as MaxDataBufferSize? Or perhaps instead make FIFO?
-            uint8_t _sendBuffer[4096];
+            uint8_t _sendBuffer[UDPBufferSize];
             uint16_t _loaded;
             Core::CriticalSection _adminLock;
         };
