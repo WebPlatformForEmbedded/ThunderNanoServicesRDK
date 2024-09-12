@@ -114,7 +114,7 @@ namespace Thunder {
             Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value()));
         }
         if ((_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-            Announce(new Publishers::UDPOutput(Core::NodeId(_config.Remote.NodeId())));
+            Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId())));
         }
 
         _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
