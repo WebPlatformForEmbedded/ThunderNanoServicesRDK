@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "Module.h"
 #include "RoomMaintainer.h"
 #include "RoomImpl.h"
@@ -28,20 +28,19 @@ namespace Plugin {
     SERVICE_REGISTRATION(RoomMaintainer, 1, 0)
 
     /* virtual */ Exchange::IRoomAdministrator::IRoom* RoomMaintainer::Join(const string& roomId, const string& userId,
-                                                                            Exchange::IRoomAdministrator::IRoom::IMsgNotification* messageSink)
+        Exchange::IRoomAdministrator::IRoom::IMsgNotification* messageSink)
     {
         // Note: Nullptr message sink is allowed (e.g. for broadcast-only users).
 
-        RoomImpl* newRoomUser = nullptr;
+        Exchange::IRoomAdministrator::IRoom* newRoomUser = nullptr;
 
         _adminLock.Lock();
 
-        auto  it(_roomMap.find(roomId));
+        auto it(_rooms.find(roomId));
 
-        if (it == _roomMap.end()) {
-            // Room not found, so create one, already emplacing the first user.
-            newRoomUser = Core::ServiceType<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
-            it = _roomMap.emplace(roomId, std::list<RoomImpl*>({newRoomUser})).first;
+        if (it == _rooms.end()) {
+            // Room not found, so create one.
+            it = _rooms.emplace(std::piecewise_construct, std::forward_as_tuple(roomId), std::forward_as_tuple()).first;
 
             TRACE(Trace::Information, (_T("Room Maintainer: Room '%s' created"), roomId.c_str()));
             if (roomId.size() == 0) {
@@ -53,30 +52,36 @@ namespace Plugin {
                 observer->Created(roomId);
             }
         }
-        else {
-            // Room already created; try to add another user.
-            std::list<RoomImpl*>& users = (*it).second;
 
-            if (std::find_if(users.begin(), users.end(), [&userId](const RoomImpl* user) { return (user->UserId() == userId);}) == users.end()) {
-                newRoomUser = Core::ServiceType<RoomImpl>::Create<RoomImpl>(this, roomId, userId, messageSink);
+        ASSERT(it != _rooms.end());
 
-                // Notify the room about a joining user.
-                // No point in sending the notification to the joining user as it cannot have its callback registered yet.
-                for (auto& user : users) {
-                    user->UserJoined(userId);
+        bool foundUser(false);
+
+        it->second.Visit([&userId, &foundUser](Core::ProxyType<Exchange::IRoomAdministrator::IRoom>& entry) -> bool {
+            const string& entryUserId = reinterpret_cast<RoomImpl*>(entry.operator->())->UserId();
+            return foundUser = ((userId.size() == entryUserId.size()) && (entryUserId.compare(userId) == 0));
+        });
+
+        if (foundUser == false) {
+            // Add a client to the room;
+            Core::ProxyType<Exchange::IRoomAdministrator::IRoom> client;
+            
+            client = it->second.Instance<RoomImpl>(this, roomId, userId, messageSink);
+
+            if (client.IsValid() == true) {
+                client.AddRef();
+
+                newRoomUser = client.operator->();
+
+                it->second.Visit([&userId](Core::ProxyType<Exchange::IRoomAdministrator::IRoom>& entry) -> bool {
+                    reinterpret_cast<RoomImpl*>(entry.operator->())->UserJoined(userId);
+                    return false;
+                });
+
+                if (newRoomUser) {
+                    TRACE(Trace::Information, (_T("Room Maintainer: User '%s' has joined room '%s'"), userId.c_str(), roomId.c_str()));
                 }
-
-                users.push_back(newRoomUser);
             }
-            else {
-                TRACE(Trace::Error, (_T("Room Maintainer: User '%s' has already joined room '%s'"),
-                        userId.c_str(), roomId.c_str()));
-            }
-        }
-
-        if (newRoomUser) {
-            TRACE(Trace::Information, (_T("Room Maintainer: User '%s' has joined room '%s'"),
-                    userId.c_str(), roomId.c_str()));
         }
 
         _adminLock.Unlock();
@@ -91,36 +96,25 @@ namespace Plugin {
 
         _adminLock.Lock();
 
-        auto it(_roomMap.find(roomUser->RoomId()));
-        ASSERT(it != _roomMap.end());
+        auto it(_rooms.find(roomUser->RoomId()));
+        ASSERT(it != _rooms.end());
 
-        if (it != _roomMap.end()) {
-            std::list<RoomImpl*>& users = (*it).second;
+        if (it != _rooms.end()) {
+            // Notify the room members about a leaving user.
+            it->second.Visit([&](Core::ProxyType<Exchange::IRoomAdministrator::IRoom>& entry) -> bool {
+                reinterpret_cast<RoomImpl*>(entry.operator->())->UserLeft(roomUser->UserId());
+                return false;
+            });
 
-            auto uit(std::find(users.begin(), users.end(), roomUser));
-            ASSERT(uit != users.end());
+            // Was it the last user?
+            if (it->second.Count() == 0) {
+                _rooms.erase(it);
 
-            if (uit != users.end()) {
-                TRACE(Trace::Information, (_T("Room Maintainer: User '%s' is leaving room '%s'"),
-                        roomUser->UserId().c_str(), roomUser->RoomId().c_str()));
+                TRACE(Trace::Information, (_T("Room Maintainer: Room '%s' has been destroyed"), roomUser->RoomId().c_str()));
 
-                // Notify the room members about a leaving user.
-                for (auto& user : users) {
-                    user->UserLeft(roomUser->UserId());
-                }
-
-                users.erase(uit);
-
-                // Was it the last user?
-                if (users.size() == 0) {
-                    _roomMap.erase(it);
-
-                    TRACE(Trace::Information, (_T("Room Maintainer: Room '%s' has been destroyed"), roomUser->RoomId().c_str()));
-
-                    // Notify the observers about the destruction of this room.
-                    for (auto& observer : _observers) {
-                        observer->Destroyed(roomUser->RoomId());
-                    }
+                // Notify the observers about the destruction of this room.
+                for (auto& observer : _observers) {
+                    observer->Destroyed(roomUser->RoomId());
                 }
             }
         }
@@ -134,13 +128,14 @@ namespace Plugin {
 
         _adminLock.Lock();
 
-        auto it = _roomMap.find(roomUser->RoomId());
-        ASSERT(it != _roomMap.end());
+        auto it = _rooms.find(roomUser->RoomId());
+        ASSERT(it != _rooms.end());
 
-        if (it != _roomMap.end()) {
-            for (auto& user : (*it).second) {
-                roomUser->UserJoined(user->UserId());
-            }
+        if (it != _rooms.end()) {
+            it->second.Visit([&](Core::ProxyType<Exchange::IRoomAdministrator::IRoom>& entry) -> bool {
+                roomUser->UserJoined(reinterpret_cast<RoomImpl*>(entry.operator->())->UserId());
+                return false;
+            });
         }
 
         _adminLock.Unlock();
@@ -152,13 +147,15 @@ namespace Plugin {
 
         _adminLock.Lock();
 
-        auto it(_roomMap.find(roomUser->RoomId()));
-        ASSERT(it != _roomMap.end());
+        auto it(_rooms.find(roomUser->RoomId()));
+        ASSERT(it != _rooms.end());
 
-        if (it != _roomMap.end()) {
-            for (RoomImpl* user : (*it).second) {
-                user->MessageReceived(roomUser->UserId(), message);
-            }
+        if (it != _rooms.end()) {
+
+            it->second.Visit([&](Core::ProxyType<Exchange::IRoomAdministrator::IRoom>& entry) -> bool {
+                reinterpret_cast<RoomImpl*>(entry.operator->())->MessageReceived(roomUser->UserId(), message);
+                return false;
+            });
         }
 
         _adminLock.Unlock();
@@ -180,7 +177,7 @@ namespace Plugin {
             sink->AddRef();
 
             // Notify the caller about all rooms created to date.
-            for (auto const& room : _roomMap) {
+            for (auto const& room : _rooms) {
                 sink->Created(room.first);
             }
         }

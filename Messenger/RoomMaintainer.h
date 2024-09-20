@@ -35,7 +35,7 @@ namespace Plugin {
 
         RoomMaintainer()
             : _observers()
-            , _roomMap()
+            , _rooms()
             , _adminLock()
         { /* empty */}
 
@@ -56,7 +56,7 @@ namespace Plugin {
 
     private:
         std::list<INotification*> _observers;
-        std::map<string, std::list<RoomImpl*>> _roomMap;
+        std::map<string, Core::ProxyListType<Exchange::IRoomAdministrator::IRoom>> _rooms;
         mutable Core::CriticalSection _adminLock;
     };
 
