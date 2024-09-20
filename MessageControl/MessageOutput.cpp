@@ -142,32 +142,34 @@ namespace Publishers {
     {
     }
 
-    void UDPOutput::Channel::Output(const Core::Messaging::Metadata& metadata, const Core::Messaging::IEvent* message)
+    void UDPOutput::Channel::Output(const string& text)
     {
         _adminLock.Lock();
 
-        uint16_t length = 0;
-        ASSERT(metadata.Type() != Core::Messaging::Metadata::INVALID);
+        ASSERT((_loaded + text.length() + 1) < sizeof(_sendBuffer));
 
-        length += metadata.Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        length += message->Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        _loaded = length;
+        if ((_loaded + text.length() + 1) < sizeof(_sendBuffer)) {
+            Core::FrameType<0> frame(_sendBuffer + _loaded, sizeof(_sendBuffer) - _loaded, sizeof(_sendBuffer) - _loaded);
+            Core::FrameType<0>::Writer frameWriter(frame, 0);
+            frameWriter.NullTerminatedText(text);
+            _loaded += frameWriter.Offset();
+        }
 
         _adminLock.Unlock();
 
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::NodeId& nodeId)
-        : _output(nodeId) {
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId)
+        : _convertor(abbreviate)
+        , _output(nodeId)
+    {
         _output.Open(0);
     }
 
     void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
-        //yikes, recreating stuff from received pieces
-        Messaging::TextMessage textMessage(text);
-        _output.Output(metadata, &textMessage);
+        _output.Output(_convertor.Convert(metadata, text));
     }
 
 } // namespace Publishers
