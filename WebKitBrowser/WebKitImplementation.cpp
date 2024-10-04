@@ -2960,14 +2960,17 @@ static GSourceFuncs _handlerIntervention =
                      "allow-running-of-insecure-content", !enableWebSecurity,
                      "allow-display-of-insecure-content", !enableWebSecurity, nullptr);
 #endif
+            WebKitWebsitePolicies *defaultWebsitePolicies = webkit_website_policies_new_with_policies("autoplay", WEBKIT_AUTOPLAY_ALLOW, NULL);
             _view = WEBKIT_WEB_VIEW(g_object_new(WEBKIT_TYPE_WEB_VIEW,
                 "backend", webkit_web_view_backend_new(wpe_view_backend_create(), nullptr, nullptr),
                 "web-context", wkContext,
                 "settings", preferences,
                 "is-controlled-by-automation", automationEnabled,
+                "website-policies", defaultWebsitePolicies,
                 nullptr));
             g_object_unref(wkContext);
             g_object_unref(preferences);
+            g_object_unref(defaultWebsitePolicies);
 
             unsigned frameDisplayedCallbackID = 0;
             if (_config.FPS.Value() == true) {
