@@ -116,8 +116,11 @@ namespace Publishers {
     {
         ::memset(_sendBuffer, 0, sizeof(_sendBuffer));
     }
-    UDPOutput::Channel::~Channel() {
-        Close(Core::infinite);
+    UDPOutput::Channel::~Channel()
+    {
+        if (IsOpen() == true) {
+            Close(Core::infinite);
+        }
     }
 
     uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
@@ -160,16 +163,49 @@ namespace Publishers {
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId)
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service)
         : _convertor(abbreviate)
         , _output(nodeId)
+        , _notification(*this)
+        , _subSystem(service->SubSystems())
     {
-        _output.Open(0);
+        ASSERT(_subSystem != nullptr);
+
+        if (_subSystem != nullptr) {
+            _subSystem->AddRef();
+            _subSystem->Register(&_notification);
+
+            if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
+                OpenUDPOutputChannel();
+            }
+        }
+    }
+
+    PluginHost::ISubSystem* UDPOutput::SubSystem() const
+    {
+        return (_subSystem);
+    }
+
+    void UDPOutput::OpenUDPOutputChannel()
+    {
+        if (_output.IsOpen() == false) {
+            _output.Open(0);
+        }
+        ASSERT(_output.IsOpen() == true);
+    }
+
+    void UDPOutput::CloseUDPOutputChannel()
+    {
+        if (_output.IsOpen() == true) {
+            _output.Close(Core::infinite);
+        }
     }
 
     void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
-        _output.Output(_convertor.Convert(metadata, text));
+        if (_output.IsOpen() == true) {
+            _output.Output(_convertor.Convert(metadata, text));
+        }
     }
 
 } // namespace Publishers

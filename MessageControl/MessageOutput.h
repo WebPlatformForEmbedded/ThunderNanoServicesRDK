@@ -333,19 +333,70 @@ namespace Publishers {
             Core::CriticalSection _adminLock;
         };
 
+        class Notification : public PluginHost::ISubSystem::INotification, public RPC::IRemoteConnection::INotification {
+        public:
+            Notification() = delete;
+            Notification(const Notification&) = delete;
+            Notification& operator=(const Notification&) = delete;
+
+            explicit Notification(UDPOutput& parent)
+                : _parent(parent) {
+            }
+            ~Notification() = default;
+
+        public:
+            void Updated() override
+            {
+                if (_parent.SubSystem()->IsActive(PluginHost::ISubSystem::NETWORK)) {
+                    _parent.OpenUDPOutputChannel();
+                }
+                else {
+                    _parent.CloseUDPOutputChannel();
+                }
+            }
+            void Activated(RPC::IRemoteConnection* /* connection */) override {
+            }
+            void Deactivated(RPC::IRemoteConnection* /* connection */) override {
+            }
+            void Terminated(RPC::IRemoteConnection* /* connection */) override {
+            }
+
+        BEGIN_INTERFACE_MAP(Notification)
+            INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
+            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
+        END_INTERFACE_MAP
+
+        private:
+            UDPOutput& _parent;
+        };
+
     public:
         UDPOutput() = delete;
         UDPOutput(const UDPOutput&) = delete;
         UDPOutput& operator=(const UDPOutput&) = delete;
 
-        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId);
-        ~UDPOutput() = default;
+        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service);
+
+        ~UDPOutput() override
+        {
+            if (_subSystem != nullptr) {
+                _subSystem->Unregister(&_notification);
+                _subSystem->Release();
+                _subSystem = nullptr;
+            }
+        }
+
+        PluginHost::ISubSystem* SubSystem() const;
+        void OpenUDPOutputChannel();
+        void CloseUDPOutputChannel();
 
         void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Text _convertor;
         Channel _output;
+        Core::SinkType<Notification> _notification;
+        PluginHost::ISubSystem* _subSystem;
     };
 
     class WebSocketOutput : public IPublish {
