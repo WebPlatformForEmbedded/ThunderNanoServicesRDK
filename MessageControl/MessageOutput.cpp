@@ -174,10 +174,6 @@ namespace Publishers {
         if (_subSystem != nullptr) {
             _subSystem->AddRef();
             _subSystem->Register(&_notification);
-
-            if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
-                OpenUDPOutputChannel();
-            }
         }
     }
 
