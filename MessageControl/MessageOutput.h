@@ -333,11 +333,13 @@ namespace Publishers {
             Core::CriticalSection _adminLock;
         };
 
-        class Notification : public PluginHost::ISubSystem::INotification, public RPC::IRemoteConnection::INotification {
+        class Notification : public PluginHost::ISubSystem::INotification {
         public:
             Notification() = delete;
             Notification(const Notification&) = delete;
+            Notification(Notification&&) = delete;
             Notification& operator=(const Notification&) = delete;
+            Notification& operator=(Notification&&) = delete;
 
             explicit Notification(UDPOutput& parent)
                 : _parent(parent) {
@@ -354,16 +356,9 @@ namespace Publishers {
                     _parent.CloseUDPOutputChannel();
                 }
             }
-            void Activated(RPC::IRemoteConnection* /* connection */) override {
-            }
-            void Deactivated(RPC::IRemoteConnection* /* connection */) override {
-            }
-            void Terminated(RPC::IRemoteConnection* /* connection */) override {
-            }
 
         BEGIN_INTERFACE_MAP(Notification)
             INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
-            INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
         END_INTERFACE_MAP
 
         private:
