@@ -105,18 +105,18 @@ namespace Plugin {
         };
 
         class ExternalAccess : public RPC::Communicator {
-        private:
+        public:
             ExternalAccess() = delete;
             ExternalAccess(const ExternalAccess&) = delete;
             ExternalAccess& operator=(const ExternalAccess&) = delete;
 
-        public:
             ExternalAccess(
-                const Core::NodeId& source,
+                const string& sourceName,
+                const Core::NodeId& sourceNode,
                 Exchange::IAccessorOCDM* parentInterface,
                 const string& proxyStubPath,
                 const Core::ProxyType<RPC::InvokeServer> & engine)
-                : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
+                : RPC::Communicator(sourceName, sourceNode, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
                 , _parentInterface(parentInterface)
             {
                 Open(Core::infinite);
@@ -1351,7 +1351,7 @@ POP_WARNING()
             ASSERT(_entryPoint != nullptr);
             _engine = Core::ProxyType<RPC::InvokeServer>::Create(&Core::IWorkerPool::Instance());
             ASSERT(_engine.IsValid() == true);
-            _service = new ExternalAccess(Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
+            _service = new ExternalAccess('/' + _shell->Callsign() + _T("/Connector"), Core::NodeId(config.Connector.Value().c_str()), _entryPoint, _shell->ProxyStubPath(), _engine);
 
             if (_service != nullptr) {
 
