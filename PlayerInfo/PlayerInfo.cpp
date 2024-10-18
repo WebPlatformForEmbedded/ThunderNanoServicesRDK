@@ -71,7 +71,7 @@ namespace Plugin {
                     // if it hasn't been initialized.
                     _dolbyOut = _player->QueryInterface<Exchange::Dolby::IOutput>();
                     if (_dolbyOut == nullptr) {
-                        SYSLOG(Logging::Startup, (_T("Dolby output switching service is unavailable.")));
+                        SYSLOG(Logging::Activate, (_T("Dolby output switching service is unavailable.")));
                     } else {
                         _dolbyNotification.Initialize(_dolbyOut);
                         Exchange::Dolby::JOutput::Register(*this, _dolbyOut);

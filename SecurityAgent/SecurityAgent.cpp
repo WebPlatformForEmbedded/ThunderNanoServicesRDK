@@ -116,11 +116,11 @@ namespace Plugin {
             if (_acl.Load(aclFile) == Core::ERROR_INCOMPLETE_CONFIG) {
                 AccessControlList::Iterator index(_acl.Unreferenced());
                 while (index.Next()) {
-                    SYSLOG(Logging::Startup, (_T("Role: %s not referenced"), index.Current().c_str()));
+                    SYSLOG(Logging::Activate, (_T("Role: %s not referenced"), index.Current().c_str()));
                 }
                 index = _acl.Undefined();
                 while (index.Next()) {
-                    SYSLOG(Logging::Startup, (_T("Role: %s is undefined"), index.Current().c_str()));
+                    SYSLOG(Logging::Activate, (_T("Role: %s is undefined"), index.Current().c_str()));
                 }
             }
         }
@@ -159,7 +159,7 @@ namespace Plugin {
                     Core::SinkType<SecurityCallsign> information(callsign);
 
                     if (subSystem->IsActive(PluginHost::ISubSystem::SECURITY) != false) {
-                        SYSLOG(Logging::Startup, (_T("Security is not defined as External !!")));
+                        SYSLOG(Logging::Activate, (_T("Security is not defined as External !!")));
                     }
 
                     subSystem->Set(PluginHost::ISubSystem::SECURITY, &information);
