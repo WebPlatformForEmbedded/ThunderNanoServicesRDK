@@ -177,23 +177,18 @@ namespace Publishers {
         }
     }
 
-    PluginHost::ISubSystem* UDPOutput::SubSystem() const
+    void UDPOutput::UpdateChannel()
     {
-        return (_subSystem);
-    }
-
-    void UDPOutput::OpenUDPOutputChannel()
-    {
-        if (_output.IsOpen() == false) {
-            _output.Open(0);
+        if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
+            if (_output.IsOpen() == false) {
+                _output.Open(0);
+            }
+            ASSERT(_output.IsOpen() == true);
         }
-        ASSERT(_output.IsOpen() == true);
-    }
-
-    void UDPOutput::CloseUDPOutputChannel()
-    {
-        if (_output.IsOpen() == true) {
-            _output.Close(Core::infinite);
+        else {
+            if (_output.IsOpen() == true) {
+                _output.Close(Core::infinite);
+            }
         }
     }
 
