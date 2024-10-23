@@ -349,12 +349,7 @@ namespace Publishers {
         public:
             void Updated() override
             {
-                if (_parent.SubSystem()->IsActive(PluginHost::ISubSystem::NETWORK)) {
-                    _parent.OpenUDPOutputChannel();
-                }
-                else {
-                    _parent.CloseUDPOutputChannel();
-                }
+                _parent.UpdateChannel();
             }
 
         BEGIN_INTERFACE_MAP(Notification)
@@ -381,10 +376,7 @@ namespace Publishers {
             }
         }
 
-        PluginHost::ISubSystem* SubSystem() const;
-        void OpenUDPOutputChannel();
-        void CloseUDPOutputChannel();
-
+        void UpdateChannel();
         void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
