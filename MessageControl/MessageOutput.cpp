@@ -118,9 +118,7 @@ namespace Publishers {
     }
     UDPOutput::Channel::~Channel()
     {
-        if (IsOpen() == true) {
-            Close(Core::infinite);
-        }
+        Close(Core::infinite);
     }
 
     uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
@@ -186,9 +184,7 @@ namespace Publishers {
             ASSERT(_output.IsOpen() == true);
         }
         else {
-            if (_output.IsOpen() == true) {
-                _output.Close(Core::infinite);
-            }
+            _output.Close(Core::infinite);
         }
     }
 
