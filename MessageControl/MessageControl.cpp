@@ -113,7 +113,7 @@ namespace Thunder {
             _config.FileName = service->VolatilePath() + _config.FileName.Value();
             Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value()));
         }
-        if ((config.Remote.IsSet() == true) && (_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
+        if ((_config.Remote.IsSet() == true) && (_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
             Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service));
         }
 
