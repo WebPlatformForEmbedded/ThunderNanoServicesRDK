@@ -116,7 +116,8 @@ namespace Publishers {
     {
         ::memset(_sendBuffer, 0, sizeof(_sendBuffer));
     }
-    UDPOutput::Channel::~Channel() {
+    UDPOutput::Channel::~Channel()
+    {
         Close(Core::infinite);
     }
 
@@ -160,16 +161,38 @@ namespace Publishers {
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId)
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service)
         : _convertor(abbreviate)
         , _output(nodeId)
+        , _notification(*this)
+        , _subSystem(service->SubSystems())
     {
-        _output.Open(0);
+        ASSERT(_subSystem != nullptr);
+
+        if (_subSystem != nullptr) {
+            _subSystem->AddRef();
+            _subSystem->Register(&_notification);
+        }
+    }
+
+    void UDPOutput::UpdateChannel()
+    {
+        if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
+            if (_output.IsOpen() == false) {
+                _output.Open(0);
+            }
+            ASSERT(_output.IsOpen() == true);
+        }
+        else {
+            _output.Close(Core::infinite);
+        }
     }
 
     void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
     {
-        _output.Output(_convertor.Convert(metadata, text));
+        if (_output.IsOpen() == true) {
+            _output.Output(_convertor.Convert(metadata, text));
+        }
     }
 
 } // namespace Publishers
