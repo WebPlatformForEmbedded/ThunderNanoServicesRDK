@@ -19,7 +19,7 @@ project(DisplayInfo)
 
 cmake_minimum_required(VERSION 3.15)
 
-find_package(Thunder)
+find_package(bridge)
 
 project_version(1.0.0)
 
@@ -48,7 +48,7 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
 find_package(BCM_HOST QUIET)
 find_package(NEXUS QUIET)
 find_package(NXCLIENT QUIET)
-find_package(LibDRM QUIET)
+find_package(libdrm QUIET)
 
 add_library(${MODULE_NAME} SHARED
     DisplayInfo.cpp

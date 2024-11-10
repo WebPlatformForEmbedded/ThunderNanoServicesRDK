@@ -44,7 +44,7 @@ namespace Plugin {
                 PluginHost::IAuthenticate* parentInterface,
                 const Core::ProxyType<RPC::InvokeServer>& engine
                 )
-                : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
+                : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine), _T("@SecurityAgent"))
                 , _parentInterface(parentInterface)
             {   
                 if (_parentInterface != nullptr){

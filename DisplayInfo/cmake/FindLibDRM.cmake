@@ -1,7 +1,7 @@
 # If not stated otherwise in this file or this component's license file the
 # following copyright and licenses apply:
 #
-# Copyright 2020 Metrological B.V.
+# Copyright 2020 RDK Management
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,34 +15,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if(LibDRM_FIND_QUIETLY)
-    set(_LibDRM_MODE QUIET)
-elseif(LibDRM_FIND_REQUIRED)
-    set(_LibDRM_MODE REQUIRED)
-endif()
-
 find_package(PkgConfig)
 
-# Just check if the libdrm.pc exist, and create the PkgConfig::libdrm target
-# No version requirement (yet)
-pkg_check_modules(LibDRM ${_LibDRM_MODE} IMPORTED_TARGET libdrm)
+if(${PKG_CONFIG_FOUND})
 
-include(FindPackageHandleStandardArgs)
+    # Just check if the libdrm.pc exist, and create the PkgConfig::libdrm target
+    # No version requirement (yet)
+    pkg_check_modules(libdrm QUIET IMPORTED_TARGET libdrm)
 
-# Sets the FOUND variable to TRUE if all required variables are present and set
-find_package_handle_standard_args(
-    LibDRM
-    REQUIRED_VARS
-        LibDRM_INCLUDE_DIRS
-        LibDRM_CFLAGS
-        LibDRM_LDFLAGS
-        LibDRM_LIBRARIES
-        LibDRM_ACTUAL_LIBRARY
-    VERSION_VAR
-        LibDRM_VERSION
-)
-mark_as_advanced(LibDRM_INCLUDE_DIRS LibDRM_LIBRARIES)
+    include(FindPackageHandleStandardArgs)
 
-if(LibDRM_FOUND)
-   add_library(libdrm::libdrm ALIAS PkgConfig::LibDRM)
+    # Sets the FOUND variable to TRUE if all required variables are present and set
+    find_package_handle_standard_args(
+        libdrm
+        REQUIRED_VARS
+            libdrm_INCLUDE_DIRS
+            libdrm_CFLAGS
+            libdrm_LDFLAGS
+            libdrm_LIBRARIES
+        VERSION_VAR
+            libdrm_VERSION
+    )
+
+    find_library(libdrm_ACTUAL_LIBRARY NAMES drm
+        HINTS ${libdrm_LIBRARY_DIRS} )
+
+    if(libdrm_FOUND AND NOT TARGET libdrm::libdrm)
+        add_library(libdrm::libdrm UNKNOWN IMPORTED)
+        set_target_properties(libdrm::libdrm PROPERTIES
+            IMPORTED_LOCATION "${libdrm_ACTUAL_LIBRARY}"
+            INTERFACE_LINK_LIBRARIES "${libdrm_LIBRARIES}"
+            INTERFACE_COMPILE_OPTIONS "${libdrm_CFLAGS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${libdrm_INCLUDE_DIRS}"
+            )
+    endif()
+
+    mark_as_advanced(libdrm_INCLUDE_DIRS libdrm_LIBRARIES)
+
+else()
+
+    message(STATUS "Unable to locate PkgConfig")
+
 endif()
