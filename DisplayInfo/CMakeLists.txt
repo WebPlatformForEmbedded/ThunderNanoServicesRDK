@@ -19,7 +19,7 @@ project(DisplayInfo)
 
 cmake_minimum_required(VERSION 3.15)
 
-find_package(bridge)
+find_package(Thunder)
 
 project_version(1.0.0)
 
