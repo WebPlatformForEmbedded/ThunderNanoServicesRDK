@@ -105,18 +105,17 @@ namespace Plugin {
         };
 
         class ExternalAccess : public RPC::Communicator {
-        private:
+        public:
             ExternalAccess() = delete;
             ExternalAccess(const ExternalAccess&) = delete;
             ExternalAccess& operator=(const ExternalAccess&) = delete;
 
-        public:
             ExternalAccess(
-                const Core::NodeId& source,
+                const Core::NodeId& sourceNode,
                 Exchange::IAccessorOCDM* parentInterface,
                 const string& proxyStubPath,
-                const Core::ProxyType<RPC::InvokeServer> & engine)
-                : RPC::Communicator(source, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine))
+                const Core::ProxyType<RPC::InvokeServer>& engine)
+                : RPC::Communicator(sourceNode, proxyStubPath, Core::ProxyType<Core::IIPCServer>(engine), _T("@OCDM"))
                 , _parentInterface(parentInterface)
             {
                 Open(Core::infinite);
