@@ -490,8 +490,8 @@ namespace Plugin {
                     }
                 }
 
-                MonitorObject(MonitorObject&) = delete;
-                MonitorObject& operator=(MonitorObject&) = delete;
+                MonitorObject(const MonitorObject&) = delete;
+                MonitorObject& operator=(const MonitorObject&) = delete;
                 MonitorObject(MonitorObject&&) = delete;
                 MonitorObject& operator=(MonitorObject&&) = delete;
 
