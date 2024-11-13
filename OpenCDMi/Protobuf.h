@@ -463,7 +463,7 @@ namespace Protobuf {
             }
             return (result);
         }
-        WireType Type() const {
+        WireType Type() const override {
             return (WireType::LENGTH_DELIMITED);
         }
 
