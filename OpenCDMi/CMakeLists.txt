@@ -53,7 +53,9 @@ add_library(${MODULE_NAME} SHARED
         FrameworkRPC.cpp
         Module.cpp)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
+if (CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
+endif()
 
 set_target_properties(${MODULE_NAME} PROPERTIES
         CXX_STANDARD 11
