@@ -97,7 +97,7 @@ public:
         }
     }
 
-    void Activated() 
+    void Activated() override
     {
         if( _memory != nullptr ) {
             TRACE(Trace::Metric, (_T("Plugin %s activated, RSS: %llu"), _callsign.c_str(), _memory->Resident()));
