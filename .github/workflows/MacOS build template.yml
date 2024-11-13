@@ -60,7 +60,7 @@ jobs:
         -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror" \
         -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
         -DCMAKE_MODULE_PATH="${PWD}/${{matrix.build_type}}/install/usr/include/WPEFramework/Modules" \
-        -DPLUGIN_DEVICEIDENTIFICATION=ON \
+        -DPLUGIN_DEVICEIDENTIFICATION=OFF \
         -DPLUGIN_DEVICEINFO=ON \
         -DPLUGIN_LOCATIONSYNC=ON \
         -DPLUGIN_MESSAGECONTROL=ON \
