@@ -440,7 +440,6 @@ namespace Plugin {
             class MonitorObject {
             public:
                 MonitorObject() = delete;
-                MonitorObject& operator=(const MonitorObject&) = delete;
 
                 enum evaluation {
                     SUCCESFULL = 0x00,
