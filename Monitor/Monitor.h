@@ -440,7 +440,6 @@ namespace Plugin {
             class MonitorObject {
             public:
                 MonitorObject() = delete;
-                MonitorObject& operator=(const MonitorObject&) = delete;
 
                 enum evaluation {
                     SUCCESFULL = 0x00,
@@ -490,8 +489,8 @@ namespace Plugin {
                     }
                 }
 
-                MonitorObject(MonitorObject&) = delete;
-                MonitorObject& operator=(MonitorObject&) = delete;
+                MonitorObject(const MonitorObject&) = delete;
+                MonitorObject& operator=(const MonitorObject&) = delete;
                 MonitorObject(MonitorObject&&) = delete;
                 MonitorObject& operator=(MonitorObject&&) = delete;
 

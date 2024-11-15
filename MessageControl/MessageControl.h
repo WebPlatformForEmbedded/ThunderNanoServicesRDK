@@ -300,6 +300,9 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     public:
+	using PluginHost::JSONRPC::Attach;
+	using PluginHost::JSONRPC::Detach;
+
         const string Initialize(PluginHost::IShell* service) override;
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override;

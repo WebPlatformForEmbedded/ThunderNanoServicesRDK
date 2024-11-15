@@ -97,7 +97,7 @@ public:
         }
     }
 
-    void Activated() 
+    void Activated() override
     {
         if( _memory != nullptr ) {
             TRACE(Trace::Metric, (_T("Plugin %s activated, RSS: %llu"), _callsign.c_str(), _memory->Resident()));
@@ -158,7 +158,7 @@ public:
         }
     }
 
-    void Activated() 
+    void Activated() override
     {
     }
 
@@ -226,7 +226,6 @@ std::unique_ptr<PerformanceMetrics::IBrowserMetricsLogger> PerformanceMetrics::L
 
 template std::unique_ptr<PerformanceMetrics::IBasicMetricsLogger> PerformanceMetrics::LoggerFactory<PerformanceMetrics::IBasicMetricsLogger>();                
 template std::unique_ptr<PerformanceMetrics::IStateMetricsLogger> PerformanceMetrics::LoggerFactory<PerformanceMetrics::IStateMetricsLogger>();                
-template std::unique_ptr<PerformanceMetrics::IBrowserMetricsLogger> PerformanceMetrics::LoggerFactory<PerformanceMetrics::IBrowserMetricsLogger>();                
 
 }
 }

@@ -375,9 +375,9 @@ namespace Plugin {
 
                 private:
                     CDMi::IMediaKeySession* _mediaKeys;
-                    CDMi::IMediaKeySessionExt* _mediaKeysExt;
-                    uint8_t* _sessionKey;
-                    uint32_t _sessionKeyLength;
+                    VARIABLE_IS_NOT_USED CDMi::IMediaKeySessionExt* _mediaKeysExt;
+                    VARIABLE_IS_NOT_USED uint8_t* _sessionKey;
+                    VARIABLE_IS_NOT_USED uint32_t _sessionKeyLength;
                 };
 
                 // IMediaKeys defines the MediaKeys interface.
@@ -748,7 +748,7 @@ POP_WARNING()
             private:
                 AccessorOCDM& _parent;
                 mutable Core::CriticalSection _adminLock;
-                mutable uint32_t _refCount;
+                VARIABLE_IS_NOT_USED mutable uint32_t _refCount;
                 std::string _keySystem;
                 std::string _sessionId;
                 CDMi::IMediaKeySession* _mediaKeySession;
@@ -954,7 +954,7 @@ POP_WARNING()
                 const std::string& keySystem,
                 unsigned char Ids[],
                 uint16_t idsLength,
-                uint32_t& count)
+                uint32_t& count) override
             {
                 CDMi::IMediaKeysExt* systemExt = dynamic_cast<CDMi::IMediaKeysExt*>(_parent.KeySystem(keySystem));
                 if (systemExt) {
@@ -982,7 +982,7 @@ POP_WARNING()
                 const unsigned char sessionID[],
                 uint16_t sessionIDLength,
                 const unsigned char serverResponse[],
-                uint16_t serverResponseLength)
+                uint16_t serverResponseLength) override
             {
                 CDMi::IMediaKeysExt* systemExt = dynamic_cast<CDMi::IMediaKeysExt*>(_parent.KeySystem(keySystem));
                 if (systemExt) {
@@ -1418,21 +1418,21 @@ POP_WARNING()
             }
         }
 
-        virtual uint32_t Reset()
+        virtual uint32_t Reset() override
         {
             return (Core::ERROR_NONE);
         }
-        virtual RPC::IStringIterator* Systems() const
+        virtual RPC::IStringIterator* Systems() const override
         {
             return (Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(_keySystems));
         }
-        virtual RPC::IStringIterator* Designators(const string& keySystem) const
+        virtual RPC::IStringIterator* Designators(const string& keySystem) const override
         {
             std::list<string> designators;
             LoadDesignators(keySystem, designators);
             return (Core::ServiceType<RPC::StringIterator>::Create<RPC::IStringIterator>(designators));
         }
-        virtual RPC::IStringIterator* Sessions(const string& keySystem) const
+        virtual RPC::IStringIterator* Sessions(const string& keySystem) const override
         {
             std::list<string> sessions;
             LoadSessions(keySystem, sessions);

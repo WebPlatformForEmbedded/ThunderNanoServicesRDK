@@ -62,7 +62,7 @@ namespace Publishers {
         ~ConsoleOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
 
     private:
         Text _convertor;
@@ -81,7 +81,7 @@ namespace Publishers {
         ~SyslogOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
 
     private:
         Text _convertor;
@@ -111,7 +111,7 @@ namespace Publishers {
         }
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
 
     private:
         Text _convertor;
@@ -377,7 +377,7 @@ namespace Publishers {
         }
 
         void UpdateChannel();
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
 
     private:
         Text _convertor;

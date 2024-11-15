@@ -664,17 +664,17 @@ POP_WARNING()
         // If there is an error, return a string describing the issue why the initialisation failed.
         // The Service object is *NOT* reference counted, lifetime ends if the plugin is deactivated.
         // The lifetime of the Service object is guaranteed till the deinitialize method is called.
-        virtual const string Initialize(PluginHost::IShell* service);
+        virtual const string Initialize(PluginHost::IShell* service) override;
 
         // The plugin is unloaded from Thunder. This is call allows the module to notify clients
         // or to persist information if needed. After this call the plugin will unlink from the service path
         // and be deactivated. The Service object is the same as passed in during the Initialize.
         // After theis call, the lifetime of the Service object ends.
-        virtual void Deinitialize(PluginHost::IShell* service);
+        virtual void Deinitialize(PluginHost::IShell* service) override;
 
         // Returns an interface to a JSON struct that can be used to return specific metadata information with respect
         // to this plugin. This Metadata can be used by the MetData plugin to publish this information to the ouside world.
-        virtual string Information() const;
+        virtual string Information() const override;
 
     private:
 
