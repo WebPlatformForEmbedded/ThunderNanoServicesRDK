@@ -372,12 +372,13 @@ namespace Plugin {
 
                         return (Core::infinite);
                     }
-
                 private:
                     CDMi::IMediaKeySession* _mediaKeys;
-                    VARIABLE_IS_NOT_USED CDMi::IMediaKeySessionExt* _mediaKeysExt;
-                    VARIABLE_IS_NOT_USED uint8_t* _sessionKey;
-                    VARIABLE_IS_NOT_USED uint32_t _sessionKeyLength;
+PUSH_WARNING(DISABLE_WARNING_UNUSED_VARIABLES)
+                    CDMi::IMediaKeySessionExt* _mediaKeysExt;
+                    uint8_t* _sessionKey;
+                    uint32_t _sessionKeyLength;
+POP_WARNING()
                 };
 
                 // IMediaKeys defines the MediaKeys interface.
@@ -748,7 +749,9 @@ POP_WARNING()
             private:
                 AccessorOCDM& _parent;
                 mutable Core::CriticalSection _adminLock;
-                VARIABLE_IS_NOT_USED mutable uint32_t _refCount;
+PUSH_WARNING(DISABLE_WARNING_UNUSED_VARIABLES)
+                mutable uint32_t _refCount;
+POP_WARNING()
                 std::string _keySystem;
                 std::string _sessionId;
                 CDMi::IMediaKeySession* _mediaKeySession;
