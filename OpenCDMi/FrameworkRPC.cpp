@@ -372,6 +372,7 @@ namespace Plugin {
 
                         return (Core::infinite);
                     }
+
                 private:
                     CDMi::IMediaKeySession* _mediaKeys;
 PUSH_WARNING(DISABLE_WARNING_UNUSED_VARIABLES)
