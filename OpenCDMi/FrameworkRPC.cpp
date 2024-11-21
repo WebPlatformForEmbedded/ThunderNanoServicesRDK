@@ -286,9 +286,6 @@ namespace Plugin {
                         : Exchange::DataExchange(name, defaultSize)
                         , Core::Thread(Core::Thread::DefaultStackSize(), _T("DRMSessionThread"))
                         , _mediaKeys(mediaKeys)
-                        , _mediaKeysExt(dynamic_cast<CDMi::IMediaKeySessionExt*>(mediaKeys))
-                        , _sessionKey(nullptr)
-                        , _sessionKeyLength(0)
                     {
                         Core::Thread::Run();
                         TRACE(Trace::Information, (_T("Constructing buffer server side: %p - %s"), this, name.c_str()));
@@ -375,9 +372,6 @@ namespace Plugin {
 
                 private:
                     CDMi::IMediaKeySession* _mediaKeys;
-                    VARIABLE_IS_NOT_USED CDMi::IMediaKeySessionExt* _mediaKeysExt;
-                    VARIABLE_IS_NOT_USED uint8_t* _sessionKey;
-                    VARIABLE_IS_NOT_USED uint32_t _sessionKeyLength;
                 };
 
                 // IMediaKeys defines the MediaKeys interface.
@@ -495,7 +489,6 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                     Exchange::ISession::ICallback* callback,
                     const CommonEncryptionData* sessionData)
                     : _parent(*parent)
-                    , _refCount(1)
                     , _keySystem(keySystem)
                     , _sessionId(mediaKeySession->GetSessionId())
                     , _mediaKeySession(mediaKeySession)
@@ -520,7 +513,6 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                     Exchange::ISession::ICallback* callback,
                     const CommonEncryptionData* sessionData)
                     : _parent(*parent)
-                    , _refCount(1)
                     , _keySystem(keySystem)
                     , _sessionId("")
                     , _mediaKeySession(dynamic_cast<CDMi::IMediaKeySession*>(mediaKeySession))
@@ -748,7 +740,6 @@ POP_WARNING()
             private:
                 AccessorOCDM& _parent;
                 mutable Core::CriticalSection _adminLock;
-                VARIABLE_IS_NOT_USED mutable uint32_t _refCount;
                 std::string _keySystem;
                 std::string _sessionId;
                 CDMi::IMediaKeySession* _mediaKeySession;
