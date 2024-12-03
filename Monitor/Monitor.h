@@ -902,6 +902,27 @@ POP_WARNING()
 
             void Dispatch()
             {
+                /*
+                * The list _monitor in the MonitorObjects class is primarily modified in these scenarios:
+                *
+                *      During the Open Call:
+                *          The _monitor list is populated with objects when Open is called. New MonitorObject instances are constructed and added to _monitor using the emplace function.
+                *
+                *      During the Close Call:
+                *          The _monitor list is cleared in the Close method by invoking _monitor.clear().
+                *
+                * The list _monitor is accessed for read purposes (e.g., iterating over it, querying specific elements) in methods such as:
+                *        Dispatch (evaluation logic)
+                *        Snapshot (generating snapshots)
+                *        Activated and Deactivated (modifying individual MonitorObject entries)
+                *
+                * Many of the member variables in MonitorObject (e.g., _nextSlot, _restartWindow, _active) are declared as std::atomic.
+                * These variables ensure thread-safe access without the need for explicit locking. Some of them are defined as const making them immutable. 
+                *
+                * For the above reasons, It was determined that there is no need to use the adminLock to protect the MonitorObjects list even though the MonitorObjects are accessed from 
+                * multiple threads. 
+                *                 * 
+                */
                 uint64_t scheduledTime(Core::Time::Now().Ticks());
                 uint64_t nextSlot(static_cast<uint64_t>(~0));
 
@@ -973,7 +994,7 @@ POP_WARNING()
 
             using MonitorObjectContainer = std::unordered_map<string, MonitorObject>;
 
-            MonitorObjectContainer _monitor;
+            MonitorObjectContainer ;
             Core::WorkerPool::JobType<MonitorObjects&> _job;
             PluginHost::IShell* _service;
             Monitor& _parent;
@@ -983,7 +1004,7 @@ POP_WARNING()
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Monitor()
             : _skipURL(0)
-            , _monitor(this)
+            , (this)
         {
         }
 POP_WARNING()
@@ -1032,7 +1053,7 @@ POP_WARNING()
     private:
         uint8_t _skipURL;
         Config _config;
-        Core::SinkType<MonitorObjects> _monitor;
+        Core::SinkType<MonitorObjects> ;
 
     private:
         void RegisterAll();
