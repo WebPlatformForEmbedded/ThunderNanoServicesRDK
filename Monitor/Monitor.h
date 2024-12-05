@@ -1009,7 +1009,7 @@ POP_WARNING()
 
             using MonitorObjectContainer = std::unordered_map<string, MonitorObject>;
 
-            MonitorObjectContainer ;
+            MonitorObjectContainer _monitor;
             Core::WorkerPool::JobType<MonitorObjects&> _job;
             PluginHost::IShell* _service;
             Monitor& _parent;
@@ -1019,7 +1019,7 @@ POP_WARNING()
 PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Monitor()
             : _skipURL(0)
-            , (this)
+            , _monitor(this)
         {
         }
 POP_WARNING()
@@ -1068,7 +1068,7 @@ POP_WARNING()
     private:
         uint8_t _skipURL;
         Config _config;
-        Core::SinkType<MonitorObjects> ;
+        Core::SinkType<MonitorObjects> _monitor;
 
     private:
         void RegisterAll();
