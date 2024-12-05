@@ -688,6 +688,8 @@ POP_WARNING()
             }
             inline void Open(PluginHost::IShell* service, Core::JSON::ArrayType<Config::Entry>::Iterator& index)
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                
                 ASSERT((service != nullptr) && (_service == nullptr));
 
                 uint64_t baseTime = Core::Time::Now().Ticks();
@@ -730,6 +732,8 @@ POP_WARNING()
             }
             inline void Close()
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                
                 ASSERT(_service != nullptr);
 
                 _job.Revoke();
@@ -740,6 +744,8 @@ POP_WARNING()
             }
             void Activated (const string& callsign, PluginHost::IShell* service) override
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -761,6 +767,8 @@ POP_WARNING()
             }
             void Deactivated (const string& callsign, PluginHost::IShell* service) override
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -793,6 +801,7 @@ POP_WARNING()
             }
             void Snapshot(Core::JSON::ArrayType<Monitor::Data>& snapshot) const
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 MonitorObjectContainer::const_iterator element(_monitor.cbegin());
 
                 // Go through the list of observations...
@@ -807,6 +816,7 @@ POP_WARNING()
             }
             bool Snapshot(const string& name, Monitor::MetaData& result, bool& operational) const
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 bool found = false;
 
 
@@ -848,7 +858,7 @@ POP_WARNING()
 
             void Snapshot(const string& callsign, Core::JSON::ArrayType<JsonData::Monitor::InfoInfo>* response) const
             {
-
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 ASSERT(response != nullptr);
 
                 if (callsign.empty() == false) {
@@ -865,6 +875,7 @@ POP_WARNING()
 
             bool Reset(const string& name, Monitor::MetaData& result, bool& operational)
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 bool found = false;
 
                 MonitorObjectContainer::iterator index(_monitor.find(name));
@@ -881,6 +892,7 @@ POP_WARNING()
 
             bool Reset(const string& name)
             {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 bool found = false;
 
                 MonitorObjectContainer::iterator index(_monitor.find(name));
@@ -915,6 +927,9 @@ POP_WARNING()
                 *        Dispatch (evaluation logic)
                 *        Snapshot (generating snapshots)
                 *        Activated and Deactivated (modifying individual MonitorObject entries)
+                *
+                * It was made sure in the plugin Initialize/Deinitialze that the Activated/Deactivated notification
+                * cannot happen while Open/Close are called. It is important not to change the sequence of the code in Initialize/Deinitialize.
                 *
                 * Many of the member variables in MonitorObject (e.g., _nextSlot, _restartWindow, _active) are declared as std::atomic.
                 * These variables ensure thread-safe access without the need for explicit locking. Some of them are defined as const making them immutable. 
