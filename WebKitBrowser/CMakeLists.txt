@@ -315,12 +315,12 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins
     COMPONENT ${PROJECT_NAME})
 
-# if(WEBKIT_GLIB_API)
-#     add_subdirectory(Extension)
-# else()
-#     # also build injected bundle
-#     add_subdirectory(InjectedBundle)
-# endif()
+if(WEBKIT_GLIB_API)
+    add_subdirectory(Extension)
+else()
+    # also build injected bundle
+    add_subdirectory(InjectedBundle)
+endif()
 
 # resolution handling
 if(PLUGIN_WEBKITBROWSER_RESOLUTION EQUAL "720p")
