@@ -97,19 +97,20 @@ public:
         } else {
             // Due to the LXC container support all ID's get mapped. For the TraceBuffer, use the host given ID.
             Messaging::MessageUnit::Instance().Open(_comClient->ConnectionId());
+
+            // TRACE_CONTROL(BrowserConsoleLog)::Enable(true);
         }
 
         _extension = WEBKIT_WEB_EXTENSION(g_object_ref(extension));
-        _logToSystemConsoleEnabled = FALSE;
+        gboolean _logToSystemConsoleEnabled = FALSE;
 
         const char *uid;
         const char *whitelist;
 
         g_variant_get((GVariant*) userData, "(&sm&sb)", &uid, &whitelist, &_logToSystemConsoleEnabled);
 
-        if (_logToSystemConsoleEnabled && Core::SystemInfo::GetEnvironment(string(_T("CLIENT_IDENTIFIER")), _consoleLogPrefix)) {
-          _consoleLogPrefix = _consoleLogPrefix.substr(0, _consoleLogPrefix.find(','));
-        }
+        Core::SystemInfo::GetEnvironment(string(_T("CLIENT_IDENTIFIER")), _consoleLogPrefix);
+        _consoleLogPrefix = _consoleLogPrefix.substr(0, _consoleLogPrefix.find(','));
 
         g_signal_connect(
           webkit_script_world_get_default(),
@@ -195,10 +196,8 @@ private:
                                     PluginHost* host)
     {
         ASSERT(host != nullptr);
-        if (host->_logToSystemConsoleEnabled) {
-            g_signal_connect(page, "console-message-sent",
+        g_signal_connect(page, "console-message-sent",
                 G_CALLBACK(consoleMessageSentCallback), host);
-        }
         g_signal_connect(page, "user-message-received",
                 G_CALLBACK(userMessageReceivedCallback), nullptr);
         g_signal_connect(page, "send-request",
@@ -265,7 +264,6 @@ private:
 #endif
 
     string _consoleLogPrefix;
-    gboolean _logToSystemConsoleEnabled;
     gboolean _enableTesting;
     WebKitWebExtension* _extension;
 } _thunderClient;
