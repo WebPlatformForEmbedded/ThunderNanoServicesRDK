@@ -87,6 +87,8 @@ set(PLUGIN_WEBKITBROWSER_THUNDER_DECRYPTOR_PREFERENCE "true" CACHE STRING "Enabl
 set(PLUGIN_WEBKITBROWSER_PERSISTENTPATHPOSTFIX "" CACHE STRING "Specify callsign persistent path postfix")
 set(PLUGIN_WEBKITBROWSER_PTSOFFSET "0" CACHE STRING "Set ptsoffset for webkit")
 set(PLUGIN_WEBKITBROWSER_USE_EXACT_PATHS "false" CACHE STRING "Use paths specified in configuration options without further modifying them")
+set(PLUGIN_WEBKITBROWSER_WEBAUDIO "false" CACHE STRING "Support the HTML5 WebAudio API")
+set(PLUGIN_WEBKITBROWSER_NON_COMPOSITED_WEBGL "false" CACHE STRING "Enable non-composited WebGL (Omits the Webkits DOM compositor)")
 
 set(PLUGIN_YOUTUBE_STARTMODE "Deactivated" CACHE STRING "Automatically start Youtube plugin")
 set(PLUGIN_YOUTUBE_STARTUPORDER "" CACHE STRING "To configure startup order of YouTube plugin")
