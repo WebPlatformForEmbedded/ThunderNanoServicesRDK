@@ -16,8 +16,8 @@ else:
     configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 
 configuration.add("transparent", "@PLUGIN_WEBKITBROWSER_TRANSPARENT@")
-configuration.add("webaudio", "false")
-configuration.add("noncompositedwebgl", "true")
+configuration.add("webaudio", "@PLUGIN_WEBKITBROWSER_WEBAUDIO@")
+configuration.add("noncompositedwebgl", "@PLUGIN_WEBKITBROWSER_NON_COMPOSITED_WEBGL@")
 configuration.add("compositor", "noaa")
 configuration.add("inspector", "@PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS@")
 configuration.add("fps", "true")
