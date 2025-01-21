@@ -22,15 +22,22 @@
 
 #include "Module.h"
 #include "LocationService.h"
-#include <interfaces/json/JsonData_LocationSync.h>
 #include <interfaces/ITimeZone.h>
+#include <interfaces/ILocationSync.h>
+#include <interfaces/json/JTimeZone.h>
+#include <interfaces/json/JLocationSync.h>
 
 #include <limits>
 
 namespace Thunder {
 namespace Plugin {
 
-    class LocationSync : public PluginHost::IPlugin, public Exchange::ITimeZone, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    // Question: Exchange::ITimeZone should be gone?
+    class LocationSync : public Exchange::ILocationSync
+                       , public PluginHost::IPlugin
+                       , public Exchange::ITimeZone
+                       , public PluginHost::IWeb
+                       , public PluginHost::JSONRPC {
     public:
         class Data : public Core::JSON::Container {
         public:
@@ -251,6 +258,7 @@ POP_WARNING()
             INTERFACE_ENTRY(PluginHost::IWeb)
             INTERFACE_ENTRY(PluginHost::IDispatcher)
             INTERFACE_ENTRY(Exchange::ITimeZone)
+            INTERFACE_ENTRY(Exchange::ILocationSync)
         END_INTERFACE_MAP
 
     public:
@@ -267,7 +275,7 @@ POP_WARNING()
 
         //   ITimeZone methods
         // -------------------------------------------------------------------------------------------------------
-        uint32_t Register(ITimeZone::INotification* sink) override ;
+        uint32_t Register(ITimeZone::INotification* sink) override;
         uint32_t Unregister(ITimeZone::INotification* sink) override;
         uint32_t TimeZone(string& timeZone ) const override;
         uint32_t TimeZone(const string& timeZone) override;
@@ -275,18 +283,19 @@ POP_WARNING()
     private:
         string CurrentTimeZone() const;
         void NotifyTimeZoneChanged(const string& timezone) const;
+        void NotifyLocationChanged() const;
         void SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update);
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t endpoint_sync();
-        uint32_t get_location(JsonData::LocationSync::LocationData& response) const;
-        void event_locationchange();
+        Core::hresult Sync();
+        Core::hresult Location(Exchange::ILocationSync::locationinfo& info) const;
+        Core::hresult Register(Exchange::ILocationSync::INotification* const notification) override;
+        Core::hresult Unregister(const Exchange::ILocationSync::INotification* const notification) override;
 
         void SyncedLocation();
         void UpdateSystemTimeZone(const string& timezone);
 
     private:
         using TimeZoneObservers = std::list<Exchange::ITimeZone::INotification*>;
+        using LocationSyncObservers = std::list<Exchange::ILocationSync::INotification*>;
 
         uint16_t _skipURL;
         string _source;
@@ -296,6 +305,7 @@ POP_WARNING()
         Core::SinkType<LocationInfo> _locationinfo;
         mutable Core::CriticalSection _adminLock;
         TimeZoneObservers _timezoneoberservers;
+        LocationSyncObservers _locationSyncObservers;
         bool _activateOnFailure;
     };
 

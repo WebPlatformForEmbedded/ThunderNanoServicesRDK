@@ -19,8 +19,6 @@
  
 #include "LocationSync.h"
 
-#include <interfaces/json/JTimeZone.h>
-
 namespace Thunder {
 namespace Plugin {
 
@@ -55,6 +53,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         , _locationinfo()
         , _adminLock()
         , _timezoneoberservers()
+        , _locationSyncObservers()
         , _activateOnFailure(true)
     {
     }
@@ -87,8 +86,9 @@ POP_WARNING()
 
             _sink.Initialize(config.Source.Value(), config.Interval.Value(), config.Retries.Value());
 
-            RegisterAll();
             Exchange::JTimeZone::Register(*this, this);
+
+            Exchange::JLocationSync::Register(*this, this);
 
         } else {
             result = _T("URL for retrieving location is incorrect !!!");
@@ -103,7 +103,8 @@ POP_WARNING()
         if (_service != nullptr) {
             ASSERT(_service == service);
 
-            UnregisterAll();
+            Exchange::JLocationSync::Unregister(*this);
+
             Exchange::JTimeZone::Unregister(*this);
 
             _sink.Deinitialize();
@@ -284,6 +285,16 @@ POP_WARNING()
         SYSLOG(Logging::Startup, (_T("TimeZone change to \"%s\", local date time is now %s."), timezone.c_str(), Core::Time::Now().ToRFC1123(true).c_str()));
     }
 
+    void LocationSync::NotifyLocationChanged() const {
+        _adminLock.Lock();
+        for (auto observer : _locationSyncObservers) {
+            observer->LocationChange();
+        }
+        _adminLock.Unlock();
+
+        Exchange::JLocationSync::Event::LocationChange(*this);
+    }
+
     void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {
         if (update == false) {
             _adminLock.Lock();
@@ -297,6 +308,100 @@ POP_WARNING()
             _adminLock.Unlock();
         }
     }
+
+    Core::hresult LocationSync::Sync()
+    {
+        Core::hresult result = Core::ERROR_NONE;
+
+        if (_source.empty() == false) {
+            result = _sink.Probe(_source, 1, 1);
+        }
+        else {
+            result = Core::ERROR_GENERAL;
+        }
+
+        return (result);
+    }
+
+    Core::hresult LocationSync::Location(Exchange::ILocationSync::locationinfo& info) const
+    {
+        Core::hresult status = Core::ERROR_UNAVAILABLE;
+
+        PluginHost::ISubSystem* subSystem = _service->SubSystems();
+        ASSERT(subSystem != nullptr);
+
+        if (subSystem != nullptr) {
+            const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
+
+            if (internet != nullptr) {
+                info.publicip = internet->PublicIPAddress();
+
+                const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
+
+                if (location != nullptr) {
+                    info.timezone = location->TimeZone();
+                    info.region = location->Region();
+                    info.country = location->Country();
+                    info.city = location->City();
+
+                    location->Release();
+                }
+
+                status = Core::ERROR_NONE;
+                internet->Release();
+            }
+
+            subSystem->Release();
+        }
+
+        return (status);
+    }
+
+    Core::hresult LocationSync::Register(Exchange::ILocationSync::INotification* const notification)
+    {
+        Core::hresult result = Core::ERROR_ALREADY_CONNECTED;
+
+        ASSERT(notification != nullptr);
+
+        _adminLock.Lock();
+
+        auto it = std::find(_locationSyncObservers.begin(), _locationSyncObservers.end(), notification);
+        ASSERT(it == _locationSyncObservers.end());
+
+        if (it == _locationSyncObservers.end()) {
+            notification->AddRef();
+
+            _locationSyncObservers.push_back(notification);
+
+            result = Core::ERROR_NONE;
+        }
+        _adminLock.Unlock();
+
+        return (result);
+    }
+
+        Core::hresult LocationSync::Unregister(const Exchange::ILocationSync::INotification* const notification)
+        {
+            Core::hresult result = Core::ERROR_ALREADY_RELEASED;
+
+            ASSERT(notification != nullptr);
+
+            _adminLock.Lock();
+
+            auto it = std::find(_locationSyncObservers.cbegin(), _locationSyncObservers.cend(), notification);
+            ASSERT(it != _locationSyncObservers.cend());
+
+            if (it != _locationSyncObservers.cend()) {
+                (*it)->Release();
+
+                _locationSyncObservers.erase(it);
+
+                result = Core::ERROR_NONE;
+            }
+            _adminLock.Unlock();
+
+            return (result);
+        }
 
     void LocationSync::SyncedLocation()
     {
@@ -337,10 +442,10 @@ POP_WARNING()
             if ((_activateOnFailure == true) || (_sink.Location() == nullptr) || (_sink.Valid() == true)) { // again _sink.Location() == nullptr should not happen but added to make it backards compatibe
                 subSystem->Set(PluginHost::ISubSystem::INTERNET, _sink.Network());
                 SetLocationSubsystem(*subSystem, false);
-                event_locationchange();
+                NotifyLocationChanged();
             } else if (_timezoneoverriden == true) { // if the probing failed but the timezone was explicitely set we only set the location subsystem to pass on the timezone info
                 SetLocationSubsystem(*subSystem, false);
-                event_locationchange();
+                NotifyLocationChanged();
             }
             subSystem->Release();
         }
