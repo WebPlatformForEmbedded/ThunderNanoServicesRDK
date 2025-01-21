@@ -32,7 +32,6 @@
 namespace Thunder {
 namespace Plugin {
 
-    // Question: Exchange::ITimeZone should be gone?
     class LocationSync : public Exchange::ILocationSync
                        , public PluginHost::IPlugin
                        , public Exchange::ITimeZone
