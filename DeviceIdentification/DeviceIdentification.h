@@ -89,13 +89,8 @@ namespace Plugin {
         string Information() const override;
 
     private:
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t get_deviceidentification(JsonData::DeviceIdentification::DeviceidentificationData& response) const;
-
+        Core::hresult DeviceIdentification(Exchange::IDeviceIdentification::DeviceInfo& info) const;
         string GetDeviceId() const;
-        void Info(JsonData::DeviceIdentification::DeviceidentificationData&) const;
-
         void Deactivated(RPC::IRemoteConnection* connection);
 
     private:
