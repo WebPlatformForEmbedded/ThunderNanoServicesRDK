@@ -40,7 +40,7 @@
     }
   },
   "interface": [
-    { "$cppref": "{cppinterfacedir}/ITimeZone.h" },
-    { "$ref": "{interfacedir}/LocationSync.json#" }
+    { "$ref": "{cppinterfacedir}/ITimeZone.h" },
+    { "$ref": "{cppinterfacedir}/ILocationSync.h" }
   ]
 }
