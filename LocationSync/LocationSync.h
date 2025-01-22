@@ -284,8 +284,8 @@ POP_WARNING()
         void NotifyTimeZoneChanged(const string& timezone) const;
         void NotifyLocationChanged() const;
         void SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update);
-        Core::hresult Sync();
-        Core::hresult Location(Exchange::ILocationSync::locationinfo& info) const;
+        Core::hresult Sync() override;
+        Core::hresult Location(Exchange::ILocationSync::locationinfo& info) const override;
         Core::hresult Register(Exchange::ILocationSync::INotification* const notification) override;
         Core::hresult Unregister(const Exchange::ILocationSync::INotification* const notification) override;
 
