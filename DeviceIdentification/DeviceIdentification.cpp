@@ -74,6 +74,8 @@ namespace Plugin {
 
             _deviceId = GetDeviceId();
 
+            Exchange::JDeviceIdentification::Register(*this, this);
+
             if (_deviceId.empty() != true) {
 #ifndef DISABLE_DEVICEID_CONTROL
                 service->SubSystems()->Set(PluginHost::ISubSystem::IDENTIFIER, _identifier);
@@ -104,6 +106,8 @@ namespace Plugin {
                 _deviceId.clear();
             }
             if (_identifier != nullptr) {
+
+                Exchange::JDeviceIdentification::Unregister(*this);
 
                 // Stop processing:
                 RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
