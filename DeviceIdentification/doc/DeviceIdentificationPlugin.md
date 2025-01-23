@@ -1,18 +1,19 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.DeviceIdentification_Plugin"></a>
-# DeviceIdentification Plugin
+<a name="head.Device_Identification_Plugin"></a>
+# Device Identification Plugin
 
-**Version: 1.0**
+**Version: 1.0.0**
 
-**Status: :black_circle::black_circle::black_circle:**
+**Status: :black_circle::white_circle::white_circle:**
 
-DeviceIdentification plugin for Thunder framework.
+DeviceIdentification interface for Thunder framework.
+
+(Defined with IDeviceIdentification in [IDeviceIdentification.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IDeviceIdentification.h))
 
 ### Table of Contents
 
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
-- [Configuration](#head.Configuration)
 - [Properties](#head.Properties)
 
 <a name="head.Introduction"></a>
@@ -21,7 +22,7 @@ DeviceIdentification plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the DeviceIdentification plugin. It includes detailed specification about its configuration and properties provided.
+This document describes purpose and functionality of the DeviceIdentification interface (version 1.0.0). It includes detailed specification about its properties provided.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -59,46 +60,34 @@ The table below provides and overview of terms and abbreviations used in this do
 <a name="head.Description"></a>
 # Description
 
-The `DeviceIdentification` plugin allows you to retrieve various device-related information.
-
-The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
-
-<a name="head.Configuration"></a>
-# Configuration
-
-The table below lists configuration options of the plugin.
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| classname | string | Class name: *DeviceIdentification* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
+DeviceIdentification JSON-RPC interface.
 
 <a name="head.Properties"></a>
 # Properties
 
-The following properties are provided by the DeviceIdentification plugin:
+The following properties are provided by the DeviceIdentification interface:
 
 DeviceIdentification interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [deviceidentification](#property.deviceidentification) <sup>RO</sup> | Device platform specific information |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [deviceidentification](#property.deviceidentification) | read-only | Get device paltform specific information |
 
 <a name="property.deviceidentification"></a>
-## *deviceidentification <sup>property</sup>*
+## *deviceidentification [<sup>property</sup>](#head.Properties)*
 
-Provides access to the device platform specific information.
+Provides access to the get device paltform specific information.
 
 > This property is **read-only**.
 
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | object | Device platform specific information |
-| (property).firmwareversion | string | Version of the device firmware |
-| (property).chipset | string | Chipset used for this device |
-| (property)?.identifier | string | <sup>*(optional)*</sup> Device unique identifier |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| (property) | object | mandatory | Get device paltform specific information |
+| (property).firmwareversion | string | mandatory | Version of the device firmware |
+| (property).chipset | string | mandatory | Chipset used for this device |
+| (property).deviceid | string | mandatory | Device ID |
 
 ### Example
 
@@ -106,9 +95,9 @@ Provides access to the device platform specific information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "DeviceIdentification.1.deviceidentification"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceIdentification.1.deviceidentification"
 }
 ```
 
@@ -116,12 +105,13 @@ Provides access to the device platform specific information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": {
-        "firmwareversion": "1.0.0",
-        "chipset": "BCM2711",
-        "identifier": ""
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "firmwareversion": "1.0.0",
+    "chipset": "BCM2711",
+    "deviceid": "WPEuCfrLF45"
+  }
 }
 ```
+

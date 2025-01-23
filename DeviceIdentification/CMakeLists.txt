@@ -52,7 +52,6 @@ find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 add_library(${MODULE_NAME} SHARED
     DeviceIdentification.cpp
-    DeviceIdentificationJsonRpc.cpp
     Module.cpp)
 
 if (PLUGIN_DEVICEIDENTIFICATION_USE_MFR AND MFRFWLIBS_FOUND)

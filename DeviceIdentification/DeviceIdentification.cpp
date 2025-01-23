@@ -179,11 +179,11 @@ namespace Plugin {
     {
         ASSERT(_identifier != nullptr);
 
-        info.firmwareversion = _identifier->FirmwareVersion();
+        info.firmwareVersion = _identifier->FirmwareVersion();
         info.chipset = _identifier->Chipset();
 
         if (_deviceId.empty() != true) {
-            info.deviceid = _deviceId;
+            info.deviceID = _deviceId;
         }
 
         return (Core::ERROR_NONE);
