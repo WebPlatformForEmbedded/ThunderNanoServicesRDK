@@ -93,7 +93,7 @@ namespace Plugin {
         string Information() const override;
 
     private:
-        Core::hresult DeviceIdentification(Exchange::IDeviceIdentification::DeviceInfo& info) const override;
+        Core::hresult Identification(Exchange::IDeviceIdentification::DeviceInfo& info) const override;
         string GetDeviceId() const;
         void Deactivated(RPC::IRemoteConnection* connection);
 
