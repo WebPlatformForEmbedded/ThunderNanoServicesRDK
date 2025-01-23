@@ -175,7 +175,7 @@ namespace Plugin {
         return result;
     }
 
-    Core::hresult DeviceIdentification::DeviceIdentification(Exchange::IDeviceIdentification::DeviceInfo& info) const;
+    Core::hresult DeviceIdentification::DeviceIdentification(Exchange::IDeviceIdentification::DeviceInfo& info) const
     {
         ASSERT(_identifier != nullptr);
 
