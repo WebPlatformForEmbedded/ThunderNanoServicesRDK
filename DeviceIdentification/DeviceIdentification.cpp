@@ -185,8 +185,8 @@ namespace Plugin {
 
         ASSERT(_identifier != nullptr);
 
-        string firmwareVersion = _identifier->FirmwareVersion();
-        string chipset = _identifier->Chipset();
+        const string firmwareVersion = _identifier->FirmwareVersion();
+        const string chipset = _identifier->Chipset();
 
         if (firmwareVersion.empty() == false) {
             info.firmwareVersion = firmwareVersion;
