@@ -177,16 +177,29 @@ namespace Plugin {
 
     Core::hresult DeviceIdentification::Identification(Exchange::IDeviceIdentification::DeviceInfo& info) const
     {
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
+
         ASSERT(_identifier != nullptr);
 
-        info.firmwareVersion = _identifier->FirmwareVersion();
-        info.chipset = _identifier->Chipset();
+        string firmwareVersion = _identifier->FirmwareVersion();
+        string chipset = _identifier->Chipset();
 
-        if (_deviceId.empty() != true) {
-            info.deviceID = _deviceId;
+        if (firmwareVersion.empty() == false) {
+            info.firmwareVersion = firmwareVersion;
+            result = Core::ERROR_NONE;
         }
 
-        return (Core::ERROR_NONE);
+        if (chipset.empty() == false) {
+            info.chipset = chipset;
+            result = Core::ERROR_NONE;
+        }
+
+        if (_deviceId.empty() == false) {
+            info.deviceID = _deviceId;
+            result = Core::ERROR_NONE;
+        }
+
+        return (result);
     }
 
     void DeviceIdentification::Deactivated(RPC::IRemoteConnection* connection)

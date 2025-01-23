@@ -85,9 +85,15 @@ Provides access to the get device paltform specific information.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | object | mandatory | Get device paltform specific information |
-| (property).firmwareversion | string | mandatory | Version of the device firmware |
-| (property).chipset | string | mandatory | Chipset used for this device |
-| (property).deviceid | string | mandatory | Device ID |
+| (property)?.firmwareversion | string | optional | Version of the device firmware |
+| (property)?.chipset | string | optional | Chipset used for this device |
+| (property)?.deviceid | string | optional | Device ID |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_UNAVAILABLE``` | Identifykation not availbale |
 
 ### Example
 
