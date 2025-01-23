@@ -93,7 +93,7 @@ Provides access to the get device paltform specific information.
 
 | Message | Description |
 | :-------- | :-------- |
-| ```ERROR_UNAVAILABLE``` | Identifykation not availbale |
+| ```ERROR_UNAVAILABLE``` | Identification not availbale |
 
 ### Example
 
