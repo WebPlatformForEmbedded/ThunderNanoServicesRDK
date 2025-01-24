@@ -85,9 +85,9 @@ Provides access to the get device paltform specific information.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | object | mandatory | Get device paltform specific information |
+| (property).deviceid | string | mandatory | Device ID |
 | (property)?.firmwareversion | string | optional | Version of the device firmware |
 | (property)?.chipset | string | optional | Chipset used for this device |
-| (property)?.deviceid | string | optional | Device ID |
 
 ### Errors
 
@@ -114,9 +114,9 @@ Provides access to the get device paltform specific information.
   "jsonrpc": "2.0",
   "id": 42,
   "result": {
+    "deviceid": "WPEuCfrLF45",
     "firmwareversion": "1.0.0",
-    "chipset": "BCM2711",
-    "deviceid": "WPEuCfrLF45"
+    "chipset": "BCM2711"
   }
 }
 ```

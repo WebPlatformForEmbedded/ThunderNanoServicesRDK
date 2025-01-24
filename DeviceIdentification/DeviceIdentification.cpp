@@ -190,12 +190,10 @@ namespace Plugin {
 
         if (firmwareVersion.empty() == false) {
             info.firmwareVersion = firmwareVersion;
-            result = Core::ERROR_NONE;
         }
 
         if (chipset.empty() == false) {
             info.chipset = chipset;
-            result = Core::ERROR_NONE;
         }
 
         if (_deviceId.empty() == false) {
