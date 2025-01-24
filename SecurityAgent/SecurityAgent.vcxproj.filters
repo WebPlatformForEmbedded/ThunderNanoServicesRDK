@@ -10,9 +10,6 @@
     <ClCompile Include="SecurityContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SecurityAgentJsonRpc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AccessControlList.cpp" />
   </ItemGroup>
   <ItemGroup>
