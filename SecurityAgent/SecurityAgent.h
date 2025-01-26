@@ -223,7 +223,7 @@ namespace Plugin {
         Core::ProxyType<DirectoryCallback> _dacDirCallback;
 
 #ifdef SECURITY_TESTING_MODE
-        static constexpr const TCHAR* TestTokenContent = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
+        static constexpr TCHAR TestTokenContent[] = _T(R"--({ "url": "https://test.url.com", "user":"Test" })--");
 #endif // DEBUG
     };
 
