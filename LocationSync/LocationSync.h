@@ -285,7 +285,7 @@ POP_WARNING()
         void NotifyLocationChanged() const;
         void SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update);
         Core::hresult Sync() override;
-        Core::hresult Location(Exchange::ILocationSync::locationinfo& info) const override;
+        Core::hresult Location(Exchange::ILocationSync::LocationInfo& info) const override;
         Core::hresult Register(Exchange::ILocationSync::INotification* const notification) override;
         Core::hresult Unregister(const Exchange::ILocationSync::INotification* const notification) override;
 

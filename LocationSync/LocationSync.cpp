@@ -323,7 +323,7 @@ POP_WARNING()
         return (result);
     }
 
-    Core::hresult LocationSync::Location(Exchange::ILocationSync::locationinfo& info) const
+    Core::hresult LocationSync::Location(Exchange::ILocationSync::LocationInfo& info) const
     {
         Core::hresult status = Core::ERROR_UNAVAILABLE;
 
