@@ -288,11 +288,11 @@ POP_WARNING()
     void LocationSync::NotifyLocationChanged() const {
         _adminLock.Lock();
         for (auto observer : _locationSyncObservers) {
-            observer->LocationChange();
+            observer->Updated();
         }
         _adminLock.Unlock();
 
-        Exchange::JLocationSync::Event::LocationChange(*this);
+        Exchange::JLocationSync::Event::Updated(*this);
     }
 
     void LocationSync::SetLocationSubsystem(PluginHost::ISubSystem& subsystem, bool update) /* cannot be const due to subsystem Set*/ {
@@ -334,12 +334,12 @@ POP_WARNING()
             const PluginHost::ISubSystem::IInternet* internet(subSystem->Get<PluginHost::ISubSystem::IInternet>());
 
             if (internet != nullptr) {
-                info.publicip = internet->PublicIPAddress();
+                info.publicIP = internet->PublicIPAddress();
 
                 const PluginHost::ISubSystem::ILocation* location(subSystem->Get<PluginHost::ISubSystem::ILocation>());
 
                 if (location != nullptr) {
-                    info.timezone = location->TimeZone();
+                    info.timeZone = location->TimeZone();
                     info.region = location->Region();
                     info.country = location->Country();
                     info.city = location->City();

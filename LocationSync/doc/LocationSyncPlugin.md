@@ -89,7 +89,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - ITimeZone ([ITimeZone.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ITimeZone.h)) (version 1.0.0) (compliant format)
-- ILocationSync ([ILocationSync.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ILocationSync.h)) (version 1.0.0) (uncompliant-collapsed format)
+- ILocationSync ([ILocationSync.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ILocationSync.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -228,14 +228,16 @@ Provides access to the get information about the location.
 
 ### Value
 
+### Result
+
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| (property) | object | mandatory | Get information about the location |
-| (property).city | string | mandatory | City name |
-| (property).country | string | mandatory | Country name |
-| (property).region | string | mandatory | Region name |
-| (property).timezone | string | mandatory | Time zone information |
-| (property).publicip | string | mandatory | Public IP |
+| result | object | mandatory | Get information about the location |
+| result?.city | string | optional | City name |
+| result?.country | string | optional | Country name |
+| result?.region | string | optional | Region name |
+| result?.timezone | string | optional | Time zone information |
+| result?.publicip | string | optional | Public IP |
 
 ### Errors
 
@@ -288,7 +290,7 @@ LocationSync interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [locationchange](#notification.locationchange) | Signals a location change |
+| [updated](#notification.updated) / [locationchange](#notification.updated) | Signals a location change |
 
 <a name="notification.timeZoneChanged"></a>
 ## *timeZoneChanged [<sup>notification</sup>](#head.Notifications)*
@@ -327,10 +329,12 @@ TimeZone was set for the system.
 }
 ```
 
-<a name="notification.locationchange"></a>
-## *locationchange [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.updated"></a>
+## *updated [<sup>notification</sup>](#head.Notifications)*
 
 Signals a location change.
+
+> ``locationchange`` is an alternative name for this notification. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
 
 ### Parameters
 
@@ -346,7 +350,7 @@ This notification carries no parameters.
   "id": 42,
   "method": "LocationSync.1.register",
   "params": {
-    "event": "locationchange",
+    "event": "updated",
     "id": "client"
   }
 }
@@ -357,7 +361,7 @@ This notification carries no parameters.
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.locationchange"
+  "method": "client.updated"
 }
 ```
 
