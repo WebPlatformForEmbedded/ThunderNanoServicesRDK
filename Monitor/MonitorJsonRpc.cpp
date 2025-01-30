@@ -32,16 +32,16 @@ namespace Plugin {
 
     void Monitor::RegisterAll()
     {
-        Register<RestartlimitsParamsData,void>(_T("restartlimits"), &Monitor::endpoint_restartlimits, this);
-        Register<ResetstatsParamsData,InfoInfo>(_T("resetstats"), &Monitor::endpoint_resetstats, this);
-        Property<Core::JSON::ArrayType<InfoInfo>>(_T("status"), &Monitor::get_status, nullptr, this);
+        JSONRPC::Register<RestartlimitsParamsData,void>(_T("restartlimits"), &Monitor::endpoint_restartlimits, this);
+        JSONRPC::Register<ResetstatsParamsData,InfoInfo>(_T("resetstats"), &Monitor::endpoint_resetstats, this);
+        JSONRPC::Property<Core::JSON::ArrayType<InfoInfo>>(_T("status"), &Monitor::get_status, nullptr, this);
     }
 
     void Monitor::UnregisterAll()
     {
-        Unregister(_T("resetstats"));
-        Unregister(_T("restartlimits"));
-        Unregister(_T("status"));
+        JSONRPC::Unregister(_T("resetstats"));
+        JSONRPC::Unregister(_T("restartlimits"));
+        JSONRPC::Unregister(_T("status"));
     }
 
     // API implementation
