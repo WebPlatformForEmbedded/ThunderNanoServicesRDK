@@ -71,22 +71,22 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *Monitor*) |
-| classname | string | Class name: *Monitor* |
-| locator | string | Library name: *libThunderMonitor.so* |
-| startmode | string | Determines in which state the plugin should be moved to at startup of the framework |
-| configuration | object | <sup>*(optional)*</sup>  |
-| configuration?.observables | array | <sup>*(optional)*</sup> List of observable plugin details |
-| configuration?.observables[#] | object | <sup>*(optional)*</sup>  |
-| configuration?.observables[#]?.callsign | string | <sup>*(optional)*</sup> Callsign of the plugin to be monitored |
-| configuration?.observables[#]?.memory | integer | <sup>*(optional)*</sup> Interval(in seconds) for a memory measurement |
-| configuration?.observables[#]?.memorylimit | integer | <sup>*(optional)*</sup> Memory threshold in bytes |
-| configuration?.observables[#]?.operational | integer | <sup>*(optional)*</sup> Interval(in seconds) to check the monitored processes |
-| configuration?.observables[#]?.restart | object | <sup>*(optional)*</sup> Restart limits for failures applying to the plugin |
-| configuration?.observables[#]?.restart?.window | integer | <sup>*(optional)*</sup> Time period(in seconds) within which failures must happen for the limit to be considered crossed |
-| configuration?.observables[#]?.restart?.limit | integer | <sup>*(optional)*</sup> Maximum number or restarts to be attempted |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *Monitor*) |
+| classname | string | mandatory | Class name: *Monitor* |
+| locator | string | mandatory | Library name: *libThunderMonitor.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| configuration | object | optional | *...* |
+| configuration?.observables | array | optional | List of observable plugin details |
+| configuration?.observables[#] | object | optional | *...* |
+| configuration?.observables[#]?.callsign | string | optional | Callsign of the plugin to be monitored |
+| configuration?.observables[#]?.memory | integer | optional | Interval(in seconds) for a memory measurement |
+| configuration?.observables[#]?.memorylimit | integer | optional | Memory threshold in bytes |
+| configuration?.observables[#]?.operational | integer | optional | Interval(in seconds) to check the monitored processes |
+| configuration?.observables[#]?.restart | object | optional | Restart limits for failures applying to the plugin |
+| configuration?.observables[#]?.restart?.window | integer | optional | Time period(in seconds) within which failures must happen for the limit to be considered crossed |
+| configuration?.observables[#]?.restart?.limit | integer | optional | Maximum number or restarts to be attempted |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -94,6 +94,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - [Monitor.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/Monitor.json) (version 1.0.0) (compliant format)
+- IMemoryMonitor ([IMemoryMonitor.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMemoryMonitor.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -107,6 +108,12 @@ Monitor interface methods:
 | [restartlimits](#method.restartlimits) | Sets new restart limits for a service |
 | [resetstats](#method.resetstats) | Resets memory and process statistics for a single service watched by the Monitor |
 
+MemoryMonitor interface methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [resetstatistics](#method.resetstatistics) | Resets memory statistics for a given service |
+
 <a name="method.restartlimits"></a>
 ## *restartlimits [<sup>method</sup>](#head.Methods)*
 
@@ -114,19 +121,19 @@ Sets new restart limits for a service.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.callsign | string | The callsign of a service to reset measurements snapshot of |
-| params.restart | object | Restart limits for failures applying to the service |
-| params.restart.limit | integer | Maximum number or restarts to be attempted |
-| params.restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.callsign | string | mandatory | The callsign of a service to reset measurements snapshot of |
+| params.restart | object | mandatory | Restart limits for failures applying to the service |
+| params.restart.limit | integer | mandatory | Maximum number or restarts to be attempted |
+| params.restart.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null (default: *None*) |
 
 ### Example
 
@@ -164,43 +171,43 @@ Resets memory and process statistics for a single service watched by the Monitor
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.callsign | string | The callsign of a service to reset statistics of |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.callsign | string | mandatory | The callsign of a service to reset statistics of |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Measurements for the service before reset |
-| result.measurements | object | Measurements for the service |
-| result.measurements.resident | object | Resident memory measurement |
-| result.measurements.resident.min | integer | Minimal value measured |
-| result.measurements.resident.max | integer | Maximal value measured |
-| result.measurements.resident.average | integer | Average of all measurements |
-| result.measurements.resident.last | integer | Last measured value |
-| result.measurements.allocated | object | Allocated memory measurement |
-| result.measurements.allocated.min | integer | Minimal value measured |
-| result.measurements.allocated.max | integer | Maximal value measured |
-| result.measurements.allocated.average | integer | Average of all measurements |
-| result.measurements.allocated.last | integer | Last measured value |
-| result.measurements.shared | object | Shared memory measurement |
-| result.measurements.shared.min | integer | Minimal value measured |
-| result.measurements.shared.max | integer | Maximal value measured |
-| result.measurements.shared.average | integer | Average of all measurements |
-| result.measurements.shared.last | integer | Last measured value |
-| result.measurements.process | object | Processes measurement |
-| result.measurements.process.min | integer | Minimal value measured |
-| result.measurements.process.max | integer | Maximal value measured |
-| result.measurements.process.average | integer | Average of all measurements |
-| result.measurements.process.last | integer | Last measured value |
-| result.measurements.operational | boolean | Whether the service is up and running |
-| result.measurements.count | integer | Number of measurements |
-| result.observable | string | A callsign of the watched service |
-| result.restart | object | Restart limits for failures applying to the service |
-| result.restart.limit | integer | Maximum number or restarts to be attempted |
-| result.restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Measurements for the service before reset |
+| result.measurements | object | mandatory | Measurements for the service |
+| result.measurements.resident | object | mandatory | Resident memory measurement |
+| result.measurements.resident.min | integer | mandatory | Minimal value measured |
+| result.measurements.resident.max | integer | mandatory | Maximal value measured |
+| result.measurements.resident.average | integer | mandatory | Average of all measurements |
+| result.measurements.resident.last | integer | mandatory | Last measured value |
+| result.measurements.allocated | object | mandatory | Allocated memory measurement |
+| result.measurements.allocated.min | integer | mandatory | Minimal value measured |
+| result.measurements.allocated.max | integer | mandatory | Maximal value measured |
+| result.measurements.allocated.average | integer | mandatory | Average of all measurements |
+| result.measurements.allocated.last | integer | mandatory | Last measured value |
+| result.measurements.shared | object | mandatory | Shared memory measurement |
+| result.measurements.shared.min | integer | mandatory | Minimal value measured |
+| result.measurements.shared.max | integer | mandatory | Maximal value measured |
+| result.measurements.shared.average | integer | mandatory | Average of all measurements |
+| result.measurements.shared.last | integer | mandatory | Last measured value |
+| result.measurements.process | object | mandatory | Processes measurement |
+| result.measurements.process.min | integer | mandatory | Minimal value measured |
+| result.measurements.process.max | integer | mandatory | Maximal value measured |
+| result.measurements.process.average | integer | mandatory | Average of all measurements |
+| result.measurements.process.last | integer | mandatory | Last measured value |
+| result.measurements.operational | boolean | mandatory | Whether the service is up and running |
+| result.measurements.count | integer | mandatory | Number of measurements |
+| result.observable | string | mandatory | A callsign of the watched service |
+| result.restart | object | mandatory | Restart limits for failures applying to the service |
+| result.restart.limit | integer | mandatory | Maximum number or restarts to be attempted |
+| result.restart.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Example
 
@@ -261,6 +268,49 @@ Resets memory and process statistics for a single service watched by the Monitor
 }
 ```
 
+<a name="method.resetstatistics"></a>
+## *resetstatistics [<sup>method</sup>](#head.Methods)*
+
+Resets memory statistics for a given service.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.callsign | string | mandatory | *...* |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.resetstatistics",
+  "params": {
+    "callsign": "..."
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
+}
+```
+
 <a name="head.Properties"></a>
 # Properties
 
@@ -268,9 +318,17 @@ The following properties are provided by the Monitor plugin:
 
 Monitor interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [status](#property.status) (read-only) | Service statistics |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [status](#property.status) | read-only | Service statistics |
+
+MemoryMonitor interface properties:
+
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [restartinglimits](#property.restartinglimits) | read/write | Limits of restarting of a service |
+| [observables](#property.observables) | read-only | List of services watched by the Monitor |
+| [measurementdata](#property.measurementdata) | read-only | Memory statistics for a given service |
 
 <a name="property.status"></a>
 ## *status [<sup>property</sup>](#head.Properties)*
@@ -279,43 +337,49 @@ Provides access to the service statistics.
 
 > This property is **read-only**.
 
-### Value
+> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.status@<callsign>``.
 
-> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.status@WebServer``. If omitted then all observed objects will be returned on read.
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | If omitted then all observed objects will be returned on read |
+
+### Value
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | array | Service statistics |
-| result[#] | object |  |
-| result[#].measurements | object | Measurements for the service |
-| result[#].measurements.resident | object | Resident memory measurement |
-| result[#].measurements.resident.min | integer | Minimal value measured |
-| result[#].measurements.resident.max | integer | Maximal value measured |
-| result[#].measurements.resident.average | integer | Average of all measurements |
-| result[#].measurements.resident.last | integer | Last measured value |
-| result[#].measurements.allocated | object | Allocated memory measurement |
-| result[#].measurements.allocated.min | integer | Minimal value measured |
-| result[#].measurements.allocated.max | integer | Maximal value measured |
-| result[#].measurements.allocated.average | integer | Average of all measurements |
-| result[#].measurements.allocated.last | integer | Last measured value |
-| result[#].measurements.shared | object | Shared memory measurement |
-| result[#].measurements.shared.min | integer | Minimal value measured |
-| result[#].measurements.shared.max | integer | Maximal value measured |
-| result[#].measurements.shared.average | integer | Average of all measurements |
-| result[#].measurements.shared.last | integer | Last measured value |
-| result[#].measurements.process | object | Processes measurement |
-| result[#].measurements.process.min | integer | Minimal value measured |
-| result[#].measurements.process.max | integer | Maximal value measured |
-| result[#].measurements.process.average | integer | Average of all measurements |
-| result[#].measurements.process.last | integer | Last measured value |
-| result[#].measurements.operational | boolean | Whether the service is up and running |
-| result[#].measurements.count | integer | Number of measurements |
-| result[#].observable | string | A callsign of the watched service |
-| result[#].restart | object | Restart limits for failures applying to the service |
-| result[#].restart.limit | integer | Maximum number or restarts to be attempted |
-| result[#].restart.window | integer | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Service statistics |
+| result[#] | object | mandatory | *...* |
+| result[#].measurements | object | mandatory | Measurements for the service |
+| result[#].measurements.resident | object | mandatory | Resident memory measurement |
+| result[#].measurements.resident.min | integer | mandatory | Minimal value measured |
+| result[#].measurements.resident.max | integer | mandatory | Maximal value measured |
+| result[#].measurements.resident.average | integer | mandatory | Average of all measurements |
+| result[#].measurements.resident.last | integer | mandatory | Last measured value |
+| result[#].measurements.allocated | object | mandatory | Allocated memory measurement |
+| result[#].measurements.allocated.min | integer | mandatory | Minimal value measured |
+| result[#].measurements.allocated.max | integer | mandatory | Maximal value measured |
+| result[#].measurements.allocated.average | integer | mandatory | Average of all measurements |
+| result[#].measurements.allocated.last | integer | mandatory | Last measured value |
+| result[#].measurements.shared | object | mandatory | Shared memory measurement |
+| result[#].measurements.shared.min | integer | mandatory | Minimal value measured |
+| result[#].measurements.shared.max | integer | mandatory | Maximal value measured |
+| result[#].measurements.shared.average | integer | mandatory | Average of all measurements |
+| result[#].measurements.shared.last | integer | mandatory | Last measured value |
+| result[#].measurements.process | object | mandatory | Processes measurement |
+| result[#].measurements.process.min | integer | mandatory | Minimal value measured |
+| result[#].measurements.process.max | integer | mandatory | Maximal value measured |
+| result[#].measurements.process.average | integer | mandatory | Average of all measurements |
+| result[#].measurements.process.last | integer | mandatory | Last measured value |
+| result[#].measurements.operational | boolean | mandatory | Whether the service is up and running |
+| result[#].measurements.count | integer | mandatory | Number of measurements |
+| result[#].observable | string | mandatory | A callsign of the watched service |
+| result[#].restart | object | mandatory | Restart limits for failures applying to the service |
+| result[#].restart.limit | integer | mandatory | Maximum number or restarts to be attempted |
+| result[#].restart.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
 ### Example
 
@@ -375,6 +439,221 @@ Provides access to the service statistics.
 }
 ```
 
+<a name="property.restartinglimits"></a>
+## *restartinglimits [<sup>property</sup>](#head.Properties)*
+
+Provides access to the limits of restarting of a service.
+
+> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.restartinglimits@<callsign>``.
+
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | *...* |
+
+### Value
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| (property) | object | mandatory | Limits of restarting of a service |
+| (property).value | object | mandatory | *...* |
+| (property).value.limit | integer | mandatory | Maximum number or restarts to be attempted |
+| (property).value.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Limits of restarting of a service |
+| result.limit | integer | mandatory | Maximum number or restarts to be attempted |
+| result.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.restartinglimits@xyz"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "limit": 3,
+    "window": 60
+  }
+}
+```
+
+#### Set Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.restartinglimits@xyz",
+  "params": {
+    "value": {
+      "limit": 3,
+      "window": 60
+    }
+  }
+}
+```
+
+#### Set Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 42,
+    "result": "null"
+}
+```
+
+<a name="property.observables"></a>
+## *observables [<sup>property</sup>](#head.Properties)*
+
+Provides access to the list of services watched by the Monitor.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | List of services watched by the Monitor |
+| result[#] | string | mandatory | *...* |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.observables"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "..."
+  ]
+}
+```
+
+<a name="property.measurementdata"></a>
+## *measurementdata [<sup>property</sup>](#head.Properties)*
+
+Provides access to the memory statistics for a given service.
+
+> This property is **read-only**.
+
+> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.measurementdata@<callsign>``.
+
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | *...* |
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Memory statistics for a given service |
+| result.resident | object | mandatory | Resident memory measurement |
+| result.resident.min | integer | mandatory | Minimal value measured |
+| result.resident.max | integer | mandatory | Maximal value measured |
+| result.resident.average | integer | mandatory | Average of all measurements |
+| result.resident.last | integer | mandatory | Last measured value |
+| result.allocated | object | mandatory | Allocated memory measurement |
+| result.allocated.min | integer | mandatory | Minimal value measured |
+| result.allocated.max | integer | mandatory | Maximal value measured |
+| result.allocated.average | integer | mandatory | Average of all measurements |
+| result.allocated.last | integer | mandatory | Last measured value |
+| result.shared | object | mandatory | Shared memory measurement |
+| result.shared.min | integer | mandatory | Minimal value measured |
+| result.shared.max | integer | mandatory | Maximal value measured |
+| result.shared.average | integer | mandatory | Average of all measurements |
+| result.shared.last | integer | mandatory | Last measured value |
+| result.process | object | mandatory | Processes measurement |
+| result.process.min | integer | mandatory | Minimal value measured |
+| result.process.max | integer | mandatory | Maximal value measured |
+| result.process.average | integer | mandatory | Average of all measurements |
+| result.process.last | integer | mandatory | Last measured value |
+| result.operational | boolean | mandatory | Whether the service is up and running |
+| result.count | integer | mandatory | Number of measurements |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.measurementdata@xyz"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "resident": {
+      "min": 0,
+      "max": 100,
+      "average": 50,
+      "last": 100
+    },
+    "allocated": {
+      "min": 0,
+      "max": 100,
+      "average": 50,
+      "last": 100
+    },
+    "shared": {
+      "min": 0,
+      "max": 100,
+      "average": 50,
+      "last": 100
+    },
+    "process": {
+      "min": 0,
+      "max": 100,
+      "average": 50,
+      "last": 100
+    },
+    "operational": true,
+    "count": 100
+  }
+}
+```
+
 <a name="head.Notifications"></a>
 # Notifications
 
@@ -384,34 +663,100 @@ The following events are provided by the Monitor plugin:
 
 Monitor interface events:
 
-| Event | Description |
+| Notification | Description |
 | :-------- | :-------- |
-| [action](#event.action) | Signals an action taken by the Monitor |
+| [action](#notification.action) | Signals an action taken by the Monitor |
 
-<a name="event.action"></a>
-## *action [<sup>event</sup>](#head.Notifications)*
+MemoryMonitor interface events:
+
+| Notification | Description |
+| :-------- | :-------- |
+| [statuschanged](#notification.statuschanged) | Signals an action taken by the Monitor |
+
+<a name="notification.action"></a>
+## *action [<sup>notification</sup>](#head.Notifications)*
 
 Signals an action taken by the Monitor.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.callsign | string | Callsign of the service the Monitor acted upon |
-| params.action | string | The action executed by the Monitor on a service. One of: "Activate", "Deactivate", "StoppedRestarting" |
-| params.reason | string | A message describing the reason the action was taken |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.callsign | string | mandatory | Callsign of the service the Monitor acted upon |
+| params.action | string | mandatory | The action executed by the Monitor on a service. One of: "Activate", "Deactivate", "StoppedRestarting" |
+| params.reason | string | mandatory | A message describing the reason the action was taken |
 
 ### Example
+
+#### Registration
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.events.1.action",
+  "id": 42,
+  "method": "Monitor.1.register",
+  "params": {
+    "event": "action",
+    "id": "client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "client.action",
   "params": {
     "callsign": "WebServer",
     "action": "Deactivate",
     "reason": "EXCEEDED_MEMORY"
+  }
+}
+```
+
+<a name="notification.statuschanged"></a>
+## *statuschanged [<sup>notification</sup>](#head.Notifications)*
+
+Signals an action taken by the Monitor.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.callsign | string | mandatory | *...* |
+| params.action | string | mandatory | *...* (must be one of the following: *Activated, Deactivated, RestartingStopped*) |
+| params?.reason | string | optional | *...* (must be one of the following: *ExceededMemory, NotOperational*) |
+
+### Example
+
+#### Registration
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Monitor.1.register",
+  "params": {
+    "event": "statuschanged",
+    "id": "client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "client.statuschanged",
+  "params": {
+    "callsign": "...",
+    "action": "Deactivated",
+    "reason": "ExceededMemory"
   }
 }
 ```
