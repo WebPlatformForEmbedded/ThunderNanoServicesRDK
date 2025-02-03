@@ -56,13 +56,6 @@ namespace {
             result = _T("Couldn't create PACKAGER instance ");
 
         } else {
-            Register<Params, void>(kInstallMethodName, [this](const Params& params) -> uint32_t {
-                return this->_implementation->Install(params.Package.Value(), params.Version.Value(),
-                                                                 params.Architecture.Value());
-            });
-            Register<void, void>(kSynchronizeMethodName, [this]() -> uint32_t {
-                return this->_implementation->SynchronizeRepository();
-            });
             if (_implementation->Configure(_service) != Core::ERROR_NONE) {
                 result = _T("Couldn't initialize PACKAGER instance");
             }
@@ -79,8 +72,6 @@ namespace {
             _service->Unregister(&_notification);
 
             if (_implementation != nullptr) {
-                Unregister(kInstallMethodName);
-                Unregister(kSynchronizeMethodName);
 
                 RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 

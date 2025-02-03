@@ -128,9 +128,13 @@ namespace Plugin {
             , _isUpgrade(false)
             , _isSyncing(false)
         {
+            Exchange::JPackager::Register(*this, this);
         }
 
-        ~PackagerImplementation() override;
+        ~PackagerImplementation() override
+        {
+            Exchange::JPackager::Unregister(*this);
+        }
 
         BEGIN_INTERFACE_MAP(PackagerImplementation)
             INTERFACE_ENTRY(Exchange::IPackager)
@@ -140,8 +144,8 @@ namespace Plugin {
         void Register(Exchange::IPackager::INotification* observer) override;
         void Unregister(const Exchange::IPackager::INotification* observer) override;
         uint32_t Configure(PluginHost::IShell* service) override;
-        uint32_t Install(const string& name, const string& version, const string& arch) override;
-        uint32_t SynchronizeRepository() override;
+        Core::hresult Install(const string& name, const string& version, const string& arch) override;
+        Core::hresult SynchronizeRepository() override;
 
     private:
         class PackageInfo : public Exchange::IPackager::IPackageInfo {
