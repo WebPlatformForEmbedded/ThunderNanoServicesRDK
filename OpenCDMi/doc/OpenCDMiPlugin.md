@@ -86,7 +86,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - [OCDM.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/OCDM.json) (version 1.0.0) (uncompliant-extended format)
-- IOpenCDMi ([IOCDM.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IOCDM.h)) (version 1.0.0) (compliant format)
+- IOpenCDM ([IOCDM.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IOCDM.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Properties"></a>
 # Properties
@@ -101,7 +101,7 @@ OCDM interface properties:
 | [keysystems](#property.keysystems) | read-only | DRM key systems |
 | [sessions](#property.sessions) | read-only | Active sessions enumerator |
 
-OpenCDMi interface properties:
+OpenCDM interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
