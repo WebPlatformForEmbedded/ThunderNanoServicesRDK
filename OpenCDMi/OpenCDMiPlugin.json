@@ -61,7 +61,8 @@
       }
     }
   },
-  "interface": {
-    "$ref": "{interfacedir}/OCDM.json#"
-  }
+  "interface": [
+    { "$ref": "{interfacedir}/OCDM.json#" },
+    { "$ref": "{cppinterfacedir}/IOCDM.h" }
+  ]
 }

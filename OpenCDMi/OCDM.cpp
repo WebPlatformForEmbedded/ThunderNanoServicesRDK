@@ -124,6 +124,7 @@ namespace Plugin {
                 message = _T("OCDM could not be instantiated.");
             } else {
                 RegisterAll();
+                Exchange::JOpenCDMi::Register(*this, this);
                 _opencdmi->Initialize(_service);
 
                 ASSERT(_connectionId != 0);
@@ -161,6 +162,7 @@ namespace Plugin {
 
                 _opencdmi->Deinitialize(service);
 
+                Exchange::JOpenCDMi::Unregister(*this);
                 UnregisterAll();
 
                 RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
@@ -285,6 +287,24 @@ namespace Plugin {
                 PluginHost::IShell::DEACTIVATED,
                 PluginHost::IShell::FAILURE));
         }
+    }
+
+    Core::hresult OCDM::Systems(Exchange::IOpenCDMi::IStringIterator*& keySystems) const
+    {
+        ASSERT(_opencdmi != nullptr);
+
+        keySystems = _opencdmi->Systems();
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult OCDM::Designators(const string& keySystem, Exchange::IOpenCDMi::IStringIterator*& designators) const
+    {
+        ASSERT(_opencdmi != nullptr);
+
+        designators = _opencdmi->Designators(keySystem);
+
+        return (designators == nullptr ? Core::ERROR_BAD_REQUEST : Core::ERROR_NONE);
     }
 }
 } //namespace Thunder::Plugin

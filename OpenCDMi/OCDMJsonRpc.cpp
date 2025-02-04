@@ -32,14 +32,14 @@ namespace Plugin {
 
     void OCDM::RegisterAll()
     {
-        Property<Core::JSON::ArrayType<DrmData>>(_T("drms"), &OCDM::get_drms, nullptr, this);
-        Property<Core::JSON::ArrayType<Core::JSON::String>>(_T("keysystems"), &OCDM::get_keysystems, nullptr, this);
+        JSONRPC::Property<Core::JSON::ArrayType<DrmData>>(_T("drms"), &OCDM::get_drms, nullptr, this);
+        JSONRPC::Property<Core::JSON::ArrayType<Core::JSON::String>>(_T("keysystems"), &OCDM::get_keysystems, nullptr, this);
     }
 
     void OCDM::UnregisterAll()
     {
-        Unregister(_T("keysystems"));
-        Unregister(_T("drms"));
+        JSONRPC::Unregister(_T("keysystems"));
+        JSONRPC::Unregister(_T("drms"));
     }
 
     bool OCDM::KeySystems(const string& name, Core::JSON::ArrayType<Core::JSON::String>& response) const

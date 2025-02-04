@@ -12,7 +12,9 @@ OCDM plugin for Thunder framework.
 
 - [Introduction](#head.Introduction)
 - [Configuration](#head.Configuration)
+- [Interfaces](#head.Interfaces)
 - [Properties](#head.Properties)
+- [Notifications](#head.Notifications)
 
 <a name="head.Introduction"></a>
 # Introduction
@@ -20,7 +22,7 @@ OCDM plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the OCDM plugin. It includes detailed specification about its configuration and properties provided.
+This document describes purpose and functionality of the OCDM plugin. It includes detailed specification about its configuration, properties provided and notifications sent.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -60,23 +62,31 @@ The table below provides and overview of terms and abbreviations used in this do
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *OCDM*) |
-| classname | string | Class name: *OCDM* |
-| locator | string | Library name: *libThunderOCDM.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
-| configuration | object | <sup>*(optional)*</sup>  |
-| configuration?.location | string | <sup>*(optional)*</sup> Location |
-| configuration?.connector | string | <sup>*(optional)*</sup> Connector |
-| configuration?.sharepath | string | <sup>*(optional)*</sup> Sharepath |
-| configuration?.sharesize | string | <sup>*(optional)*</sup> Sharesize |
-| configuration?.systems | array | <sup>*(optional)*</sup> List of key systems |
-| configuration?.systems[#] | object | <sup>*(optional)*</sup> System properties |
-| configuration?.systems[#]?.name | string | <sup>*(optional)*</sup> Name |
-| configuration?.systems[#]?.designators | array | <sup>*(optional)*</sup>  |
-| configuration?.systems[#]?.designators[#] | object | <sup>*(optional)*</sup> designator |
-| configuration?.systems[#]?.designators[#].name | string |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *OCDM*) |
+| classname | string | mandatory | Class name: *OCDM* |
+| locator | string | mandatory | Library name: *libThunderOCDM.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| configuration | object | optional | *...* |
+| configuration?.location | string | optional | Location |
+| configuration?.connector | string | optional | Connector |
+| configuration?.sharepath | string | optional | Sharepath |
+| configuration?.sharesize | string | optional | Sharesize |
+| configuration?.systems | array | optional | List of key systems |
+| configuration?.systems[#] | object | optional | System properties |
+| configuration?.systems[#]?.name | string | optional | Name |
+| configuration?.systems[#]?.designators | array | optional | *...* |
+| configuration?.systems[#]?.designators[#] | object | optional | Designator |
+| configuration?.systems[#]?.designators[#].name | string | mandatory | *...* |
+
+<a name="head.Interfaces"></a>
+# Interfaces
+
+This plugin implements the following interfaces:
+
+- [OCDM.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/OCDM.json) (version 1.0.0) (uncompliant-extended format)
+- IOpenCDMi ([IOCDM.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IOCDM.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Properties"></a>
 # Properties
@@ -85,14 +95,21 @@ The following properties are provided by the OCDM plugin:
 
 OCDM interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [drms](#property.drms) <sup>RO</sup> | Supported DRM systems |
-| [keysystems](#property.keysystems) <sup>RO</sup> | DRM key systems |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [drms](#property.drms) | read-only | Supported DRM systems |
+| [keysystems](#property.keysystems) | read-only | DRM key systems |
+| [sessions](#property.sessions) | read-only | Active sessions enumerator |
 
+OpenCDMi interface properties:
+
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [systems](#property.systems) | read-only | Supported DRM systems |
+| [designators](#property.designators) | read-only | DRM key systems |
 
 <a name="property.drms"></a>
-## *drms <sup>property</sup>*
+## *drms [<sup>property</sup>](#head.Properties)*
 
 Provides access to the supported DRM systems.
 
@@ -100,13 +117,15 @@ Provides access to the supported DRM systems.
 
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | array | Supported DRM systems |
-| (property)[#] | object |  |
-| (property)[#].name | string | Name of the DRM |
-| (property)[#].keysystems | array |  |
-| (property)[#].keysystems[#] | string | Identifier of a key system |
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Supported DRM systems |
+| result[#] | object | mandatory | *...* |
+| result[#].name | string | mandatory | Name of the DRM |
+| result[#].keysystems | array | mandatory | Key system identifier list |
+| result[#].keysystems[#] | string | mandatory | Identifier of a key system |
 
 ### Example
 
@@ -114,9 +133,9 @@ Provides access to the supported DRM systems.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "OCDM.1.drms"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.drms"
 }
 ```
 
@@ -124,40 +143,48 @@ Provides access to the supported DRM systems.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": [
-        {
-            "name": "PlayReady",
-            "keysystems": [
-                "com.microsoft.playready"
-            ]
-        }
-    ]
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "name": "PlayReady",
+      "keysystems": [
+        "com.microsoft.playready"
+      ]
+    }
+  ]
 }
 ```
 
 <a name="property.keysystems"></a>
-## *keysystems <sup>property</sup>*
+## *keysystems [<sup>property</sup>](#head.Properties)*
 
 Provides access to the DRM key systems.
 
 > This property is **read-only**.
 
+> The *drm system* argument shall be passed as the index to the property, e.g. ``OCDM.1.keysystems@<drm-system>``.
+
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| drm-system | string | mandatory | *...* |
+
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | array | DRM key systems |
-| (property)[#] | string | Identifier of a key system |
+### Result
 
-> The *drm system* shall be passed as the index to the property, e.g. *OCDM.1.keysystems@PlayReady*.
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | DRM key systems |
+| result[#] | string | mandatory | Identifier of a key system |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 30 | ```ERROR_BAD_REQUEST``` | Invalid DRM name |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_BAD_REQUEST``` | Invalid DRM name |
 
 ### Example
 
@@ -165,9 +192,9 @@ Provides access to the DRM key systems.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "OCDM.1.keysystems@PlayReady"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.keysystems@PlayReady"
 }
 ```
 
@@ -175,11 +202,252 @@ Provides access to the DRM key systems.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": [
-        "com.microsoft.playready"
-    ]
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "com.microsoft.playready"
+  ]
+}
+```
+
+<a name="property.sessions"></a>
+## *sessions [<sup>property</sup>](#head.Properties)*
+
+Provides access to the active sessions enumerator.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Active sessions enumerator |
+| result[#] | object | mandatory | *...* |
+| result[#].drm | string | mandatory | Name of the DRM system |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.sessions"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "drm": "PlayReady"
+    }
+  ]
+}
+```
+
+<a name="property.systems"></a>
+## *systems [<sup>property</sup>](#head.Properties)*
+
+Provides access to the supported DRM systems.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Supported DRM systems |
+| result[#] | string | mandatory | *...* |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.systems"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "..."
+  ]
+}
+```
+
+<a name="property.designators"></a>
+## *designators [<sup>property</sup>](#head.Properties)*
+
+Provides access to the DRM key systems.
+
+> This property is **read-only**.
+
+> The *keysystem* argument shall be passed as the index to the property, e.g. ``OCDM.1.designators@<keysystem>``.
+
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| keysystem | string | mandatory | *...* |
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | DRM key systems |
+| result[#] | string | mandatory | *...* |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_BAD_REQUEST``` | Invalid DRM name |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.designators@xyz"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "..."
+  ]
+}
+```
+
+<a name="head.Notifications"></a>
+# Notifications
+
+Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
+
+The following events are provided by the OCDM plugin:
+
+OCDM interface events:
+
+| Notification | Description |
+| :-------- | :-------- |
+| [drmalreadyinitialized](#notification.drmalreadyinitialized) | Signals that the specified DRM system could not be initialized because it is already initialized by another process |
+| [drminitializationstatus](#notification.drminitializationstatus) | Notifies about DRM initialization status |
+
+<a name="notification.drmalreadyinitialized"></a>
+## *drmalreadyinitialized [<sup>notification</sup>](#head.Notifications)*
+
+Signals that the specified DRM system could not be initialized because it is already initialized by another process.
+
+### Description
+
+When this event is received, the application owning given DRM system should release it immediately.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.drm | string | mandatory | Name of the DRM system |
+
+### Example
+
+#### Registration
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.register",
+  "params": {
+    "event": "drmalreadyinitialized",
+    "id": "client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "client.drmalreadyinitialized",
+  "params": {
+    "drm": "PlayReady"
+  }
+}
+```
+
+<a name="notification.drminitializationstatus"></a>
+## *drminitializationstatus [<sup>notification</sup>](#head.Notifications)*
+
+Notifies about DRM initialization status.
+
+### Description
+
+Register to this event to be notified about DRM retrying status busy/failure/success
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.status | string | mandatory | BUSY - drm is used by another process, SUCCESS - recovered from BUSY state after retry, FAILED - not recovered after re-trying from BUSY (must be one of the following: *BUSY, FAILED, SUCCESS*) |
+| params.drm | string | mandatory | Name of the DRM system |
+
+### Example
+
+#### Registration
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.register",
+  "params": {
+    "event": "drminitializationstatus",
+    "id": "client"
+  }
+}
+```
+
+#### Message
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "client.drminitializationstatus",
+  "params": {
+    "status": "SUCCESS",
+    "drm": "PlayReady"
+  }
 }
 ```
 
