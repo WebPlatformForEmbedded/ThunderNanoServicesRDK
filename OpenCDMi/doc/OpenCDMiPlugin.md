@@ -321,7 +321,7 @@ Provides access to the DRM key systems.
 
 | Message | Description |
 | :-------- | :-------- |
-| ```ERROR_BAD_REQUEST``` | Invalid DRM name |
+| ```ERROR_UNKNOWN_KEY``` | Invalid DRM name |
 
 ### Example
 

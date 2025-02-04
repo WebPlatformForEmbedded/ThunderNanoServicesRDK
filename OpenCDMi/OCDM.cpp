@@ -304,7 +304,7 @@ namespace Plugin {
 
         designators = _opencdmi->Designators(keySystem);
 
-        return (designators == nullptr ? Core::ERROR_BAD_REQUEST : Core::ERROR_NONE);
+        return (designators == nullptr ? Core::ERROR_UNKNOWN_KEY : Core::ERROR_NONE);
     }
 }
 } //namespace Thunder::Plugin
