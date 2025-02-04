@@ -106,7 +106,7 @@ OpenCDM interface properties:
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
 | [systems](#property.systems) | read-only | Supported DRM systems |
-| [designators](#property.designators) | read-only | DRM key systems |
+| [designators](#property.designators) | read-only | Designators of a specified DRM system |
 
 <a name="property.drms"></a>
 ## *drms [<sup>property</sup>](#head.Properties)*
@@ -296,7 +296,7 @@ Provides access to the supported DRM systems.
 <a name="property.designators"></a>
 ## *designators [<sup>property</sup>](#head.Properties)*
 
-Provides access to the DRM key systems.
+Provides access to the designators of a specified DRM system.
 
 > This property is **read-only**.
 
@@ -314,7 +314,7 @@ Provides access to the DRM key systems.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | DRM key systems |
+| result | array | mandatory | Designators of a specified DRM system |
 | result[#] | string | mandatory | *...* |
 
 ### Errors
