@@ -124,7 +124,7 @@ namespace Plugin {
                 message = _T("OCDM could not be instantiated.");
             } else {
                 RegisterAll();
-                Exchange::JOpenCDMi::Register(*this, this);
+                Exchange::JOpenCDM::Register(*this, this);
                 _opencdmi->Initialize(_service);
 
                 ASSERT(_connectionId != 0);
@@ -162,7 +162,7 @@ namespace Plugin {
 
                 _opencdmi->Deinitialize(service);
 
-                Exchange::JOpenCDMi::Unregister(*this);
+                Exchange::JOpenCDM::Unregister(*this);
                 UnregisterAll();
 
                 RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
@@ -289,7 +289,7 @@ namespace Plugin {
         }
     }
 
-    Core::hresult OCDM::Systems(Exchange::IOpenCDMi::IStringIterator*& keySystems) const
+    Core::hresult OCDM::Systems(Exchange::IOpenCDM::IStringIterator*& keySystems) const
     {
         ASSERT(_opencdmi != nullptr);
 
@@ -298,7 +298,7 @@ namespace Plugin {
         return (Core::ERROR_NONE);
     }
 
-    Core::hresult OCDM::Designators(const string& keySystem, Exchange::IOpenCDMi::IStringIterator*& designators) const
+    Core::hresult OCDM::Designators(const string& keySystem, Exchange::IOpenCDM::IStringIterator*& designators) const
     {
         ASSERT(_opencdmi != nullptr);
 
