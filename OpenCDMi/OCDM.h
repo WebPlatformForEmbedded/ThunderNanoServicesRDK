@@ -25,7 +25,7 @@
 #include <interfaces/IMemory.h>
 #include <interfaces/json/JsonData_OCDM.h>
 #include <interfaces/IOCDM.h>
-#include <interfaces/json/JOpenCDMi.h>
+#include <interfaces/json/JOpenCDM.h>
 
 namespace Thunder {
 namespace Plugin {
