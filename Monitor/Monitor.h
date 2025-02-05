@@ -433,7 +433,7 @@ namespace Plugin {
             Core::JSON::ArrayType<Entry> Observables;
         };
 
-        class MonitorObjects : public PluginHost::IPlugin::INotification {
+        class MonitorObjects : public PluginHost::IPlugin::INotification, public PluginHost::IPlugin::ILifeTime{
         public:
             using Job = Core::ThreadPool::JobType<MonitorObjects>;
 
@@ -744,8 +744,15 @@ POP_WARNING()
             }
             void Activated (const string& callsign, PluginHost::IShell* service) override
             {
+            }
+            void Deactivated (const string& callsign, PluginHost::IShell* service) override
+            {
+            }
+            void Unavailable(const string&, PluginHost::IShell*) override
+            {
+            }
+            void Initialize(const string& callsign, PluginHost::IShell* service) override{
                 /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
-                
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -765,10 +772,8 @@ POP_WARNING()
                     }
                 }
             }
-            void Deactivated (const string& callsign, PluginHost::IShell* service) override
-            {
+            void Deinitialized(const string& callsign, PluginHost::IShell* service) override{
                 /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
-                
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -795,9 +800,6 @@ POP_WARNING()
                         }
                     }
                 }
-            }
-            void Unavailable(const string&, PluginHost::IShell*) override
-            {
             }
             void Snapshot(Core::JSON::ArrayType<Monitor::Data>& snapshot) const
             {
@@ -907,6 +909,7 @@ POP_WARNING()
 
             BEGIN_INTERFACE_MAP(MonitorObjects)
             INTERFACE_ENTRY(PluginHost::IPlugin::INotification)
+            INTERFACE_ENTRY(PluginHost::IPlugin::ILifeTime)
             END_INTERFACE_MAP
 
         private:
