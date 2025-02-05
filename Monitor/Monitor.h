@@ -744,15 +744,7 @@ POP_WARNING()
             }
             void Activated (const string& callsign, PluginHost::IShell* service) override
             {
-            }
-            void Deactivated (const string& callsign, PluginHost::IShell* service) override
-            {
-            }
-            void Unavailable(const string&, PluginHost::IShell*) override
-            {
-            }
-            void Initialize(const string& callsign, PluginHost::IShell* service) override{
-                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                 /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
@@ -771,6 +763,14 @@ POP_WARNING()
                         TRACE(Trace::Information, (_T("Starting to probe as active observee appeared.")));
                     }
                 }
+            }
+            void Deactivated (const string& callsign, PluginHost::IShell* service) override
+            {
+            }
+            void Unavailable(const string&, PluginHost::IShell*) override
+            {
+            }
+            void Initialize(const string& callsign, PluginHost::IShell* service) override{
             }
             void Deinitialized(const string& callsign, PluginHost::IShell* service) override{
                 /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
