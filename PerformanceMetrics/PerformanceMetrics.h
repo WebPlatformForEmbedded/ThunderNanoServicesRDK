@@ -392,7 +392,7 @@ namespace Plugin {
         };
 
         template<class LOGGERINTERFACE = IStateMetricsLogger>
-        class StateObservable : public BasicObservable<LOGGERINTERFACE>, public PluginHost::IStateControl::INotification {
+        class StateObservable : public BasicObservable<LOGGERINTERFACE>, public PluginHost::IStateController::INotification, public PluginHost::IStateControl::INotification {
         private:
             using Base = BasicObservable<LOGGERINTERFACE>;
 
@@ -404,27 +404,34 @@ namespace Plugin {
             StateObservable(const StateObservable&) = delete;
             StateObservable& operator=(const StateObservable&) = delete;
 
-            StateObservable(CallsignPerfMetricsHandler& parent, PluginHost::IShell& service, PluginHost::IStateControl* statecontrol) 
+            StateObservable(CallsignPerfMetricsHandler& parent, PluginHost::IShell& service, PluginHost::IStateController* statecontroller, PluginHost::IStateControl* statecontrol) 
             : Base(parent, service)
+            , PluginHost::IStateController::INotification()
             , PluginHost::IStateControl::INotification()
+            , _statecontroller(statecontroller)
             , _statecontrol(statecontrol)
             {
                 // not very likely but it could happen that we have a Browser without StatControl
-                if (_statecontrol != nullptr) {
+                if ((_statecontrol != nullptr) && (_statecontrol != nullptr)) {
                     TRACE(Trace::Information, (_T("Observable supports Statecontrol")));
+                    _statecontroller->AddRef();
                     _statecontrol->AddRef();
                 }
             }
 
             ~StateObservable() override
             {
-                ASSERT(_statecontrol == nullptr);
+                ASSERT((_statecontrol == nullptr) && (_statecontrol == nullptr));
             }
 
             void Enable() override
             {
                 Base::Enable();
 
+                if (_statecontroller != nullptr) {
+
+                    _statecontroller->Register(this);
+                }
                 if (_statecontrol != nullptr) {
                     
                     _statecontrol->Register(this);
@@ -437,6 +444,15 @@ namespace Plugin {
                 Base::Disable();
             }
 
+            void StateChanged(const PluginHost::IStateController::state state) override 
+            {
+                if (state == PluginHost::IStateController::state::RESUMED) {
+                    Logger().Resumed();
+                } else if (state == PluginHost::IStateController::state::SUSPENDED) {
+                    Logger().Suspended();
+                }
+            }
+
             void StateChange(const PluginHost::IStateControl::state state) override 
             {
                 if (state == PluginHost::IStateControl::state::RESUMED) {
@@ -447,12 +463,18 @@ namespace Plugin {
             }
 
             BEGIN_INTERFACE_MAP(StateObservable)
+                INTERFACE_ENTRY(PluginHost::IStateController::INotification)
                 INTERFACE_ENTRY(PluginHost::IStateControl::INotification)
             END_INTERFACE_MAP
 
         private:
             void Cleanup() 
             {
+                if (_statecontroller != nullptr) {
+                    _statecontroller->Unregister(this);
+                    _statecontroller->Release();
+                    _statecontroller = nullptr;
+                }
                 if (_statecontrol != nullptr) {
                     _statecontrol->Unregister(this);
                     _statecontrol->Release();
@@ -461,6 +483,7 @@ namespace Plugin {
             }
 
         private:
+            PluginHost::IStateController* _statecontroller;
             PluginHost::IStateControl* _statecontrol;
         };
 
@@ -480,8 +503,9 @@ namespace Plugin {
             BrowserObservable(CallsignPerfMetricsHandler& parent, 
                               PluginHost::IShell& service, 
                               Exchange::IBrowser& browser,
+                              PluginHost::IStateController* statecontroller,
                               PluginHost::IStateControl* statecontrol) 
-            : Base(parent, service, statecontrol)
+            : Base(parent, service, statecontroller, statecontrol)
             , Exchange::IBrowser::INotification()
             , _browser(&browser)
             , _nbrloaded(0)
@@ -514,6 +538,7 @@ namespace Plugin {
             }
 
             BEGIN_INTERFACE_MAP(BrowserObservable)
+                INTERFACE_ENTRY(PluginHost::IStateController::INotification)
                 INTERFACE_ENTRY(PluginHost::IStateControl::INotification)
                 INTERFACE_ENTRY(Exchange::IBrowser::INotification)
             END_INTERFACE_MAP
@@ -558,8 +583,9 @@ namespace Plugin {
             WebBrowserObservable(CallsignPerfMetricsHandler& parent, 
                                  PluginHost::IShell& service, 
                                  Exchange::IWebBrowser& browser, 
+                                 PluginHost::IStateController* statecontroller,
                                  PluginHost::IStateControl* statecontrol) 
-            : Base(parent, service, statecontrol)
+            : Base(parent, service, statecontroller, statecontrol)
             , Exchange::IWebBrowser::INotification()
             , _browser(&browser)
             , _nbrloadedsuccess(0)
@@ -595,6 +621,7 @@ namespace Plugin {
             }
 
             BEGIN_INTERFACE_MAP(BrowserObservable)
+                INTERFACE_ENTRY(PluginHost::IStateController::INotification)
                 INTERFACE_ENTRY(PluginHost::IStateControl::INotification)
                 INTERFACE_ENTRY(Exchange::IWebBrowser::INotification)
             END_INTERFACE_MAP

@@ -393,6 +393,7 @@ static GSourceFuncs _handlerIntervention =
                                  public Exchange::IBrowserCookieJar,
 #endif
                                  public PluginHost::IStateControl,
+                                 public PluginHost::IStateController,
                                  public PluginHost::ISubSystem::INotification {
     public:
         class BundleConfig : public Core::JSON::Container {
@@ -919,8 +920,9 @@ static GSourceFuncs _handlerIntervention =
             , _notificationClients()
             , _notificationBrowserClients()
             , _stateControlClients()
+            , _stateObservers()
             , _applicationClients()
-            , _state(PluginHost::IStateControl::UNINITIALIZED)
+            , _state(PluginHost::IStateController::UNINITIALIZED)
             , _hidden(false)
             , _time(0)
             , _compliant(false)
@@ -1810,30 +1812,56 @@ static GSourceFuncs _handlerIntervention =
 
         PluginHost::IStateControl::state State() const override
         {
-            return (_state);
+            PluginHost::IStateControl::state state = PluginHost::IStateControl::state::UNINITIALIZED;
+
+            if (_state == PluginHost::IStateController::state::SUSPENDED) {
+                state = PluginHost::IStateControl::state::SUSPENDED;
+            }
+            else if (_state == PluginHost::IStateController::state::RESUMED) {
+                state = PluginHost::IStateControl::state::RESUMED;
+            }
+            else if (_state == PluginHost::IStateController::state::EXITED) {
+                state = PluginHost::IStateControl::state::EXITED;
+            }
+
+            return (state);
+        }
+
+        Core::hresult State(PluginHost::IStateController::state& state) const override
+        {
+            state = _state;
+
+            return (Core::ERROR_NONE);
         }
 
         uint32_t Request(PluginHost::IStateControl::command command) override
+        {
+            const IStateController::command cmd = (command == IStateControl::command::SUSPEND ? IStateController::command::SUSPEND : IStateController::command::RESUME);
+
+            return (Request(cmd));
+        }
+
+        uint32_t Request(PluginHost::IStateController::command command) override
         {
             uint32_t result = Core::ERROR_ILLEGAL_STATE;
 
             _adminLock.Lock();
 
-            if (_state == PluginHost::IStateControl::UNINITIALIZED) {
+            if (_state == PluginHost::IStateController::UNINITIALIZED) {
                 // Seems we are passing state changes before we reached an operational browser.
                 // Just move the state to what we would like it to be :-)
-                _state = (command == PluginHost::IStateControl::SUSPEND ? PluginHost::IStateControl::SUSPENDED : PluginHost::IStateControl::RESUMED);
+                _state = (command == PluginHost::IStateController::SUSPEND ? PluginHost::IStateController::SUSPENDED : PluginHost::IStateController::RESUMED);
                 result = Core::ERROR_NONE;
             } else {
                 switch (command) {
-                case PluginHost::IStateControl::SUSPEND:
-                    if (_state == PluginHost::IStateControl::RESUMED) {
+                case PluginHost::IStateController::SUSPEND:
+                    if (_state == PluginHost::IStateController::RESUMED) {
                         Suspend();
                         result = Core::ERROR_NONE;
                     }
                     break;
-                case PluginHost::IStateControl::RESUME:
-                    if (_state == PluginHost::IStateControl::SUSPENDED) {
+                case PluginHost::IStateController::RESUME:
+                    if (_state == PluginHost::IStateController::SUSPENDED) {
                         Resume();
                         result = Core::ERROR_NONE;
                     }
@@ -1886,6 +1914,52 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+
+    Core::hresult Register(PluginHost::IStateController::INotification* const notification)
+    {
+        Core::hresult result = Core::ERROR_ALREADY_CONNECTED;
+
+        ASSERT(notification != nullptr);
+
+        _adminLock.Lock();
+
+        auto it = std::find(_stateObservers.begin(), _stateObservers.end(), notification);
+        ASSERT(it == _stateObservers.end());
+
+        if (it == _stateObservers.end()) {
+            notification->AddRef();
+
+            _stateObservers.push_back(notification);
+
+            result = Core::ERROR_NONE;
+        }
+        _adminLock.Unlock();
+
+        return (result);
+    }
+
+    Core::hresult Unregister(const PluginHost::IStateController::INotification* const notification)
+    {
+        Core::hresult result = Core::ERROR_ALREADY_RELEASED;
+
+        ASSERT(notification != nullptr);
+
+        _adminLock.Lock();
+
+        auto it = std::find(_stateObservers.cbegin(), _stateObservers.cend(), notification);
+        ASSERT(it != _stateObservers.cend());
+
+        if (it != _stateObservers.cend()) {
+            (*it)->Release();
+
+            _stateObservers.erase(it);
+
+            result = Core::ERROR_NONE;
+        }
+        _adminLock.Unlock();
+
+        return (result);
+    }
 
         void Hide(const bool hidden) override
         {
@@ -2243,17 +2317,50 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Unlock();
         }
+        PluginHost::IStateController::state TranslateState(const PluginHost::IStateControl::state oldState)
+        {
+            PluginHost::IStateController::state newState = PluginHost::IStateController::state::UNINITIALIZED;
+
+            if (oldState == PluginHost::IStateControl::state::SUSPENDED) {
+                newState = PluginHost::IStateController::state::SUSPENDED;
+            }
+            else if (oldState == PluginHost::IStateControl::state::RESUMED) {
+                newState = PluginHost::IStateController::state::RESUMED;
+            }
+            else if (oldState == PluginHost::IStateControl::state::EXITED) {
+                newState = PluginHost::IStateController::state::EXITED;
+            }
+
+            return (newState);
+        }
         void OnStateChange(const PluginHost::IStateControl::state newState)
+        {
+            _adminLock.Lock();
+
+            if (_state != TranslateState(newState)) {
+                _state = TranslateState(newState);
+
+                std::list<PluginHost::IStateControl::INotification*>::iterator index(_stateControlClients.begin());
+
+                while (index != _stateControlClients.end()) {
+                    (*index)->StateChange(newState);
+                    index++;
+                }
+            }
+
+            _adminLock.Unlock();
+        }
+        void OnStateChanged(const PluginHost::IStateController::state newState)
         {
             _adminLock.Lock();
 
             if (_state != newState) {
                 _state = newState;
 
-                std::list<PluginHost::IStateControl::INotification*>::iterator index(_stateControlClients.begin());
+                std::list<PluginHost::IStateController::INotification*>::iterator index(_stateObservers.begin());
 
-                while (index != _stateControlClients.end()) {
-                    (*index)->StateChange(newState);
+                while (index != _stateObservers.end()) {
+                    (*index)->StateChanged(newState);
                     index++;
                 }
             }
@@ -2644,6 +2751,7 @@ static GSourceFuncs _handlerIntervention =
         INTERFACE_ENTRY (Exchange::IBrowserCookieJar)
 #endif
         INTERFACE_ENTRY(PluginHost::IStateControl)
+        INTERFACE_ENTRY(PluginHost::IStateController)
         INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
         END_INTERFACE_MAP
 
@@ -2696,7 +2804,7 @@ static GSourceFuncs _handlerIntervention =
         void Suspend()
         {
             if (_context == nullptr) {
-                _state = PluginHost::IStateControl::SUSPENDED;
+                _state = PluginHost::IStateController::SUSPENDED;
             } else {
                 _time = Core::Time::Now().Ticks();
                 g_main_context_invoke(
@@ -2716,6 +2824,7 @@ static GSourceFuncs _handlerIntervention =
                         WKViewSetViewState(object->_view, (object->_hidden ? 0 : kWKViewStateIsVisible));
 #endif
                         object->OnStateChange(PluginHost::IStateControl::SUSPENDED);
+                        object->OnStateChanged(PluginHost::IStateController::SUSPENDED);
 
                         TRACE_GLOBAL(Trace::Information, (_T("Internal Suspend Notification took %d mS."), static_cast<uint32_t>(Core::Time::Now().Ticks() - object->_time)));
 
@@ -2729,7 +2838,7 @@ static GSourceFuncs _handlerIntervention =
         void Resume()
         {
             if (_context == nullptr) {
-                _state = PluginHost::IStateControl::RESUMED;
+                _state = PluginHost::IStateController::RESUMED;
             } else {
                 _time = Core::Time::Now().Ticks();
 
@@ -2744,6 +2853,7 @@ static GSourceFuncs _handlerIntervention =
                         WKViewSetViewState(object->_view, (object->_hidden ? 0 : kWKViewStateIsVisible) | kWKViewStateIsInWindow);
 #endif
                         object->OnStateChange(PluginHost::IStateControl::RESUMED);
+                        object->OnStateChanged(PluginHost::IStateController::RESUMED);
 
                         TRACE_GLOBAL(Trace::Information, (_T("Internal Resume Notification took %d mS."), static_cast<uint32_t>(Core::Time::Now().Ticks() - object->_time)));
 
@@ -3207,14 +3317,15 @@ static GSourceFuncs _handlerIntervention =
             // Move into the correct state, as requested
             auto* backend = webkit_web_view_backend_get_wpe_backend(webkit_web_view_get_backend(_view));
             _adminLock.Lock();
-            if ((_state == PluginHost::IStateControl::SUSPENDED) || (_state == PluginHost::IStateControl::UNINITIALIZED)) {
-                _state = PluginHost::IStateControl::UNINITIALIZED;
+            if ((_state == PluginHost::IStateController::SUSPENDED) || (_state == PluginHost::IStateController::UNINITIALIZED)) {
+                _state = PluginHost::IStateController::UNINITIALIZED;
                 wpe_view_backend_add_activity_state(backend, wpe_view_activity_state_visible | wpe_view_activity_state_focused);
                 OnStateChange(PluginHost::IStateControl::SUSPENDED);
+                OnStateChanged(PluginHost::IStateController::SUSPENDED);
             } else {
-                _state = PluginHost::IStateControl::UNINITIALIZED;
+                _state = PluginHost::IStateController::UNINITIALIZED;
                 wpe_view_backend_add_activity_state(backend, wpe_view_activity_state_visible | wpe_view_activity_state_focused | wpe_view_activity_state_in_window);
-                OnStateChange(PluginHost::IStateControl::RESUMED);
+                OnStateChanged(PluginHost::IStateController::RESUMED);
             }
             _adminLock.Unlock();
 
@@ -3459,6 +3570,7 @@ static GSourceFuncs _handlerIntervention =
             } else {
                 _state = PluginHost::IStateControl::UNINITIALIZED;
                 OnStateChange(PluginHost::IStateControl::RESUMED);
+                OnStateChanged(PluginHost::IStateController::RESUMED);
             }
             _adminLock.Unlock();
 
@@ -3643,7 +3755,7 @@ static GSourceFuncs _handlerIntervention =
                                             activeURL.c_str()));
             }
 
-            if (!isWebProcessResponsive && _state == PluginHost::IStateControl::SUSPENDED) {
+            if (!isWebProcessResponsive && _state == PluginHost::IStateController::SUSPENDED) {
                 SYSLOG(Logging::Notification, (_T("Killing unresponsive suspended WebProcess, pid=%u, reply num=%d(max=%d), url=%s\n"),
                                             webprocessPID, _unresponsiveReplyNum, kWebProcessUnresponsiveReplyDefaultLimit,
                                             activeURL.c_str()));
@@ -3743,8 +3855,9 @@ static GSourceFuncs _handlerIntervention =
         std::list<Exchange::IWebBrowser::INotification*> _notificationClients;
         std::list<Exchange::IBrowser::INotification*> _notificationBrowserClients;
         std::list<PluginHost::IStateControl::INotification*> _stateControlClients;
+        std::list<PluginHost::IStateController::INotification*> _stateObservers;
         std::list<Exchange::IApplication::INotification*> _applicationClients;
-        PluginHost::IStateControl::state _state;
+        PluginHost::IStateController::state _state;
         bool _hidden;
         uint64_t _time;
         bool _compliant;

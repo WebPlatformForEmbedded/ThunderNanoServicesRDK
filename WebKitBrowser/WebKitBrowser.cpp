@@ -42,6 +42,7 @@ namespace Plugin {
         string message;
         ASSERT(service != nullptr);
         ASSERT(_service == nullptr);
+        ASSERT(_stateController == nullptr);
         ASSERT(_browser == nullptr);
         ASSERT(_memory == nullptr);
         ASSERT(_application == nullptr);
@@ -71,6 +72,15 @@ namespace Plugin {
                 _application = _browser->QueryInterface<Exchange::IApplication>();
                 if (_application != nullptr) {
                     RegisterAll();
+
+                    _stateController = _browser->QueryInterface<PluginHost::IStateController>();
+
+                    if (_stateController != nullptr)
+                    {
+                        PluginHost::JStateController::Register(*this, _stateController);
+                        _stateController->Register(&_notification);
+                    }
+
                     Exchange::JWebBrowser::Register(*this, _browser);
 
                     _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
@@ -172,6 +182,13 @@ namespace Plugin {
                     }
 
                     Exchange::JWebBrowser::Unregister(*this);
+
+                    if (_stateController != nullptr) {
+                        PluginHost::JStateController::Unregister(*this);
+                        _stateController->Release();
+                        _stateController = nullptr;
+                    }
+
                     UnregisterAll();
                     _browser->Unregister(&_notification);
                     _application->Release();
@@ -365,6 +382,11 @@ namespace Plugin {
         string message(string("{ \"suspended\": ") + (state == PluginHost::IStateControl::SUSPENDED ? _T("true") : _T("false")) + string(" }"));
         _service->Notify(message);
         event_statechange(state == PluginHost::IStateControl::SUSPENDED);
+    }
+
+    void WebKitBrowser::StateChanged(const PluginHost::IStateController::state state)
+    {
+        PluginHost::JStateController::Event::StateChanged(*this, state);
     }
 
     void WebKitBrowser::Deactivated(RPC::IRemoteConnection* connection)
