@@ -31,6 +31,7 @@
 #include <interfaces/json/JWebBrowser.h>
 #include <interfaces/json/JBrowserScripting.h>
 #include <interfaces/json/JBrowserCookieJar.h>
+#include <plugins/json/json_IStateController.h>
 
 namespace Thunder {
 
