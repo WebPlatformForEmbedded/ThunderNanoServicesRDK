@@ -189,7 +189,7 @@ Removes contents of a directory from the persistent storage.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.path | string | mandatory | *...* |
+| params.path | string | mandatory | Path to directory (within the persistent storage) to delete contents of |
 
 ### Result
 
@@ -213,7 +213,7 @@ Removes contents of a directory from the persistent storage.
   "id": 42,
   "method": "WebKitBrowser.1.deletedir",
   "params": {
-    "path": "..."
+    "path": ".cache/wpe/disk-cache"
   }
 }
 ```
@@ -570,7 +570,7 @@ Provides access to the headers to send on all requests that the browser makes.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | opaque object | mandatory | Headers to send on all requests that the browser makes |
+| result | opaque object | mandatory | Single string containing a list of headers |
 
 ### Example
 
@@ -883,7 +883,7 @@ Provides access to the user preferred languages.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | User preferred languages |
+| result | array | mandatory | List of langauges preferred by the user |
 | result[#] | string | mandatory | *...* |
 
 ### Example
@@ -1491,7 +1491,7 @@ A Base64 encoded JSON message from legacy $badger bridge.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.message | string | mandatory | *...* |
+| params.message | string | mandatory | Requested action |
 
 ### Example
 
