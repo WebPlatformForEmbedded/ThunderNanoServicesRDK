@@ -75,6 +75,7 @@ std::string getPathFromMessaging(const std::string& jsonFilePath)
             std::cout << "Found the messaging MemoryMapped files path: " << result << std::endl;
         }
     }
+
     return (result);
 }
 
