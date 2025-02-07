@@ -48,7 +48,6 @@ add_library(${MODULE_NAME} SHARED
     AccessControlList.cpp
     SecurityAgent.cpp
     SecurityContext.cpp
-    SecurityAgentJsonRpc.cpp
     ${SECAPI_RELATED_SOURCES}
     Module.cpp)
 

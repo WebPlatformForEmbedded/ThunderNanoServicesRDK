@@ -21,13 +21,14 @@
 
 #include "Module.h"
 #include "AccessControlList.h"
-
-#include <interfaces/json/JsonData_SecurityAgent.h>
+#include <interfaces/ISecurityAgent.h>
+#include <interfaces/json/JSecurityAgent.h>
 
 namespace Thunder {
 namespace Plugin {
 
-    class SecurityAgent : public PluginHost::IAuthenticate,
+    class SecurityAgent :   public Exchange::ISecurityAgent,
+                            public PluginHost::IAuthenticate,
                             public PluginHost::IPlugin,
                             public PluginHost::JSONRPC,
                             public PluginHost::IWeb {
@@ -171,6 +172,7 @@ namespace Plugin {
         INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IAuthenticate)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(Exchange::ISecurityAgent)
         END_INTERFACE_MAP
 
     public:
@@ -204,12 +206,7 @@ namespace Plugin {
     private:
         //   JsonRPC methods
         // -------------------------------------------------------------------------------------------------------
-        void RegisterAll();
-        void UnregisterAll();
-#ifdef SECURITY_TESTING_MODE
-        uint32_t endpoint_createtoken(const JsonData::SecurityAgent::CreatetokenParamsData& params, JsonData::SecurityAgent::CreatetokenResultInfo& response);
-#endif // DEBUG
-        uint32_t endpoint_validate(const JsonData::SecurityAgent::CreatetokenResultInfo& params, JsonData::SecurityAgent::ValidateResultData& response);
+        Core::hresult Validate(const string& token, bool& valid) const override;
 
     private:
         AccessControlList _acl;
