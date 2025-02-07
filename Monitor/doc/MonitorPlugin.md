@@ -278,7 +278,7 @@ Resets memory statistics for a given service.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.callsign | string | mandatory | *...* |
+| params.callsign | string | mandatory | Callsign of the service |
 
 ### Result
 
@@ -296,7 +296,7 @@ Resets memory statistics for a given service.
   "id": 42,
   "method": "Monitor.1.resetstatistics",
   "params": {
-    "callsign": "..."
+    "callsign": "WebServer"
   }
 }
 ```
@@ -450,14 +450,14 @@ Provides access to the limits of restarting of a service.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| callsign | string | mandatory | *...* |
+| callsign | string | mandatory | Callsign of the service |
 
 ### Value
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | object | mandatory | Limits of restarting of a service |
-| (property).value | object | mandatory | *...* |
+| (property).value | object | mandatory | Limits of restarts applying to a given service |
 | (property).value.limit | integer | mandatory | Maximum number or restarts to be attempted |
 | (property).value.window | integer | mandatory | Time period (in seconds) within which failures must happen for the limit to be considered crossed |
 
@@ -533,7 +533,7 @@ Provides access to the list of services watched by the Monitor.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | List of services watched by the Monitor |
+| result | array | mandatory | List of monitored services |
 | result[#] | string | mandatory | *...* |
 
 ### Example
@@ -573,7 +573,7 @@ Provides access to the memory statistics for a given service.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| callsign | string | mandatory | *...* |
+| callsign | string | mandatory | Callsign of the service |
 
 ### Value
 
@@ -581,7 +581,7 @@ Provides access to the memory statistics for a given service.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Memory statistics for a given service |
+| result | object | mandatory | Statistics for the requested callsign |
 | result.resident | object | mandatory | Resident memory measurement |
 | result.resident.min | integer | mandatory | Minimal value measured |
 | result.resident.max | integer | mandatory | Maximal value measured |
@@ -727,9 +727,9 @@ Signals an action taken by the Monitor.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.callsign | string | mandatory | *...* |
-| params.action | string | mandatory | *...* (must be one of the following: *Activated, Deactivated, RestartingStopped*) |
-| params?.reason | string | optional | *...* (must be one of the following: *ExceededMemory, NotOperational*) |
+| params.callsign | string | mandatory | Callsign of the service the Monitor acted upon |
+| params.action | string | mandatory | Ation executed by the Monitor on a service (must be one of the following: *Activated, Deactivated, RestartingStopped*) |
+| params?.reason | string | optional | Mssage describing the reason the action was taken (must be one of the following: *ExceededMemory, NotOperational*) |
 
 ### Example
 
@@ -754,9 +754,9 @@ Signals an action taken by the Monitor.
   "jsonrpc": "2.0",
   "method": "client.statuschanged",
   "params": {
-    "callsign": "...",
-    "action": "Deactivated",
-    "reason": "ExceededMemory"
+    "callsign": "WebServer",
+    "action": "Deactivate",
+    "reason": "EXCEEDED_MEMORY"
   }
 }
 ```
