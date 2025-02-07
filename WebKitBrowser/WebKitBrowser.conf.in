@@ -1,6 +1,4 @@
-if boolean("@PLUGIN_WEBSERVER@"):
-    precondition = ["WebSource"]
-
+precondition = ["WebSource"]
 startmode = "@PLUGIN_WEBKITBROWSER_STARTMODE@"
 resumed =  "@PLUGIN_WEBKITBROWSER_RESUMED@"
 
@@ -18,9 +16,12 @@ else:
     configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 
 configuration.add("transparent", "@PLUGIN_WEBKITBROWSER_TRANSPARENT@")
+configuration.add("webaudio", "false")
+configuration.add("noncompositedwebgl", "true")
 configuration.add("compositor", "noaa")
 configuration.add("inspector", "@PLUGIN_WEBKITBROWSER_WEBINSPECTOR_ADDRESS@")
 configuration.add("fps", "true")
+configuration.add("maxfps", "60")
 configuration.add("cursor", "false")
 configuration.add("touch", "false")
 configuration.add("msebuffers", "@PLUGIN_WEBKITBROWSER_MSEBUFFERS@")

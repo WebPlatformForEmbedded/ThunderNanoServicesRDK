@@ -74,7 +74,7 @@ namespace Plugin {
 
             _deviceId = GetDeviceId();
 
-            RegisterAll();
+            Exchange::JDeviceIdentification::Register(*this, this);
 
             if (_deviceId.empty() != true) {
 #ifndef DISABLE_DEVICEID_CONTROL
@@ -107,7 +107,7 @@ namespace Plugin {
             }
             if (_identifier != nullptr) {
 
-                UnregisterAll();
+                Exchange::JDeviceIdentification::Unregister(*this);
 
                 // Stop processing:
                 RPC::IRemoteConnection* connection = service->RemoteConnection(_connectionId);
@@ -179,15 +179,29 @@ namespace Plugin {
         return result;
     }
 
-    void DeviceIdentification::Info(JsonData::DeviceIdentification::DeviceidentificationData& deviceInfo) const
+    Core::hresult DeviceIdentification::Identification(Exchange::IDeviceIdentification::DeviceInfo& info) const
     {
-        ASSERT(_identifier != nullptr);
-        deviceInfo.Firmwareversion = _identifier->FirmwareVersion();
-        deviceInfo.Chipset = _identifier->Chipset();
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
 
-        if (_deviceId.empty() != true) {
-            deviceInfo.Deviceid = _deviceId;
+        ASSERT(_identifier != nullptr);
+
+        const string firmwareVersion = _identifier->FirmwareVersion();
+        const string chipset = _identifier->Chipset();
+
+        if (firmwareVersion.empty() == false) {
+            info.firmwareVersion = firmwareVersion;
         }
+
+        if (chipset.empty() == false) {
+            info.chipset = chipset;
+        }
+
+        if (_deviceId.empty() == false) {
+            info.deviceID = _deviceId;
+            result = Core::ERROR_NONE;
+        }
+
+        return (result);
     }
 
     void DeviceIdentification::Deactivated(RPC::IRemoteConnection* connection)

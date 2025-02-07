@@ -80,12 +80,10 @@ namespace Plugin {
         , _engine()
         , _testtoken()
     {
-        RegisterAll();
     }
 
     /* virtual */ SecurityAgent::~SecurityAgent()
     {
-        UnregisterAll();
     }
 
     /* virtual */ const string SecurityAgent::Initialize(PluginHost::IShell* service)
@@ -166,10 +164,12 @@ namespace Plugin {
                     subSystem->Release();
                 }
             }
+
+            Exchange::JSecurityAgent::Register(*this, this);
         }
-  	else {
-            message = _T("SecurityAgent failed to create TokenDispatcher");
-	}
+        else {
+                message = _T("SecurityAgent failed to create TokenDispatcher");
+        }
 
         // On success return empty, to indicate there is no error text.
         return message;
@@ -177,6 +177,8 @@ namespace Plugin {
 
     /* virtual */ void SecurityAgent::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
     {
+        Exchange::JSecurityAgent::Unregister(*this);
+
         _acl.Clear();
         _dispatcher.reset(nullptr);
 
@@ -316,6 +318,31 @@ namespace Plugin {
             }
         }
         return (result);
+    }
+
+    Core::hresult SecurityAgent::Validate(const string& token, bool& valid) const
+    {
+        valid = false;
+
+        auto webToken = JWTFactory::Instance().Element();
+
+        ASSERT(webToken != nullptr);
+
+        uint16_t load = webToken->PayloadLength(token);
+
+        // Validate the token
+        if (load != static_cast<uint16_t>(~0)) {
+            // It is potentially a valid token, extract the payload.
+            uint8_t* payload = reinterpret_cast<uint8_t*>(ALLOCA(load));
+
+            load = webToken->Decode(token, load, payload);
+
+            if (load != static_cast<uint16_t>(~0)) {
+                valid = true;
+            }
+        }
+
+        return (Core::ERROR_NONE);
     }
 
 } // namespace Plugin
