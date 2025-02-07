@@ -105,9 +105,9 @@ Install a package given by a name, an URL or a file path.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.name | string | mandatory | *...* |
-| params.version | string | mandatory | *...* |
-| params.arch | string | mandatory | *...* |
+| params.name | string | mandatory | Name, URL or file path of the package to install |
+| params.version | string | mandatory | Version of the package to install |
+| params.arch | string | mandatory | Architecture of the package to install |
 
 ### Result
 
@@ -132,9 +132,9 @@ Install a package given by a name, an URL or a file path.
   "id": 42,
   "method": "Packager.1.install",
   "params": {
-    "name": "...",
-    "version": "...",
-    "arch": "..."
+    "name": "thunder-plugin-netflix",
+    "version": "1.0",
+    "arch": "arm"
   }
 }
 ```
