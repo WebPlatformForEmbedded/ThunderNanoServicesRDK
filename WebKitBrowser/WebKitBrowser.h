@@ -29,6 +29,7 @@
 #include <interfaces/json/JsonData_WebKitBrowser.h>
 #include <interfaces/json/JsonData_StateControl.h>
 #include <interfaces/json/JWebBrowser.h>
+#include <interfaces/json/JWebBrowserExt.h>
 #include <interfaces/json/JBrowserScripting.h>
 #include <interfaces/json/JBrowserCookieJar.h>
 
@@ -41,7 +42,7 @@ namespace WebKitBrowser {
 
 namespace Plugin {
 
-    class WebKitBrowser : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    class WebKitBrowser : public Exchange::IWebBrowserExt, public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
     private:
         class Notification : public RPC::IRemoteConnection::INotification,
                              public PluginHost::IStateControl::INotification,
@@ -179,6 +180,7 @@ namespace Plugin {
         INTERFACE_ENTRY(PluginHost::IPlugin)
         INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(Exchange::IWebBrowserExt)
         INTERFACE_AGGREGATE(PluginHost::IStateControl, _browser)
         INTERFACE_AGGREGATE(Exchange::IBrowser, _browser)
         INTERFACE_AGGREGATE(Exchange::IApplication, _application)
@@ -224,20 +226,16 @@ namespace Plugin {
         void PageClosure();
         void BridgeQuery(const string& message);
         void StateChange(const PluginHost::IStateControl::state state);
-        uint32_t DeleteDir(const string& path);
+        Core::hresult DeleteDir(const string& path) override;
         void CookieJarChanged();
+        Core::hresult Languages(Exchange::IWebBrowserExt::IStringIterator*& languages) const override;
+        Core::hresult Languages(Exchange::IWebBrowserExt::IStringIterator* const languages) override;
 
         // JsonRpc
         void RegisterAll();
         void UnregisterAll();
         uint32_t get_state(Core::JSON::EnumType<JsonData::StateControl::StateType>& response) const; // StateControl
         uint32_t set_state(const Core::JSON::EnumType<JsonData::StateControl::StateType>& param); // StateControl
-        uint32_t endpoint_delete(const JsonData::Browser::DeleteParamsData& params);
-        uint32_t get_languages(Core::JSON::ArrayType<Core::JSON::String>& response) const;
-        uint32_t set_languages(const Core::JSON::ArrayType<Core::JSON::String>& param);
-        uint32_t get_headers(Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& response) const;
-        uint32_t set_headers(const Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& param);
-        void event_bridgequery(const string& message);
         void event_statechange(const bool& suspended); // StateControl
 
     private:

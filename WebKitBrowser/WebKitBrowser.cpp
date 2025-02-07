@@ -72,6 +72,7 @@ namespace Plugin {
                 if (_application != nullptr) {
                     RegisterAll();
                     Exchange::JWebBrowser::Register(*this, _browser);
+                    Exchange::JWebBrowserExt::Register(*this, this);
 
                     _cookieJar = _browser->QueryInterface<Exchange::IBrowserCookieJar>();
                     if (_cookieJar != nullptr) {
@@ -171,6 +172,7 @@ namespace Plugin {
                         _browserScripting = nullptr;
                     }
 
+                    Exchange::JWebBrowserExt::Unregister(*this);
                     Exchange::JWebBrowser::Unregister(*this);
                     UnregisterAll();
                     _browser->Unregister(&_notification);
@@ -287,20 +289,58 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t WebKitBrowser::DeleteDir(const string& path)
+    Core::hresult WebKitBrowser::DeleteDir(const string& path)
     {
-        uint32_t result = Core::ERROR_NONE;
+        Core::hresult result = Core::ERROR_NONE;
 
         if (path.empty() == false) {
             string fullPath = _persistentStoragePath + path;
             Core::Directory dir(fullPath.c_str());
-            if (!dir.Destroy()) {
-                TRACE(Trace::Error, (_T("Failed to delete %s\n"), fullPath.c_str()));
-                result = Core::ERROR_GENERAL;
-            }
+            dir.Destroy();
+        }
+        else {
+            result = Core::ERROR_UNKNOWN_KEY;
         }
 
-        return result;
+        return (result);
+    }
+
+    Core::hresult WebKitBrowser::Languages(Exchange::IWebBrowserExt::IStringIterator*& languages) const
+    {
+        ASSERT(_application != nullptr);
+
+        string languagesList;
+        static_cast<const Exchange::IApplication*>(_application)->Language(languagesList);
+
+        Core::JSON::ArrayType<Core::JSON::String> array;
+        array.FromString(languagesList);
+
+        std::list<string> list;
+        auto iterator = array.Elements();
+
+        while (iterator.Next() == true) {
+            list.push_back(iterator.Current().Value());
+        }
+
+        languages = Core::ServiceType<RPC::IteratorType<RPC::IStringIterator>>::Create<RPC::IStringIterator>(list);
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult WebKitBrowser::Languages(Exchange::IWebBrowserExt::IStringIterator* const languages)
+    {
+        ASSERT(_application != nullptr);
+
+        Core::JSON::ArrayType<Core::JSON::String> array;
+        string entry;
+
+        while (languages->Next(entry) == true) {
+            array.Add() = entry;
+        }
+
+        _application->Language(static_cast<const string>(Core::ToString(array)));
+
+        return (Core::ERROR_NONE);
     }
 
     void WebKitBrowser::LoadFinished(const string& URL, int32_t code)
@@ -350,7 +390,7 @@ namespace Plugin {
 
     void WebKitBrowser::BridgeQuery(const string& message)
     {
-        event_bridgequery(message);
+        Exchange::JWebBrowser::Event::BridgeQuery(*this, message);
     }
 
     void WebKitBrowser::CookieJarChanged()
