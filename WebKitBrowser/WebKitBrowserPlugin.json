@@ -124,7 +124,6 @@
     ]
   },
   "interface": [ 
-   { "$cppref": "{cppinterfacedir}/IBrowser.h" },
-   { "$ref": "{interfacedir}/WebKitBrowser.json#" }
+   { "$ref": "{cppinterfacedir}/IBrowser.h" }
   ]
 }
