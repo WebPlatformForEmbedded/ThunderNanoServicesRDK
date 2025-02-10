@@ -13,6 +13,7 @@ SecurityAgent plugin for Thunder framework.
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
+- [Interfaces](#head.Interfaces)
 - [Methods](#head.Methods)
 
 <a name="head.Introduction"></a>
@@ -68,15 +69,22 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *SecurityAgent*) |
-| classname | string | Class name: *SecurityAgent* |
-| locator | string | Library name: *libThunderSecurityAgent.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
-| configuration | object | <sup>*(optional)*</sup>  |
-| configuration?.acl | string | <sup>*(optional)*</sup> ACL |
-| configuration?.connector | string | <sup>*(optional)*</sup> Connector |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *SecurityAgent*) |
+| classname | string | mandatory | Class name: *SecurityAgent* |
+| locator | string | mandatory | Library name: *libThunderSecurityAgent.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| configuration | object | optional | *...* |
+| configuration?.acl | string | optional | ACL |
+| configuration?.connector | string | optional | Connector |
+
+<a name="head.Interfaces"></a>
+# Interfaces
+
+This plugin implements the following interfaces:
+
+- ISecurityAgent ([ISecurityAgent.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ISecurityAgent.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -87,97 +95,25 @@ SecurityAgent interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [createtoken](#method.createtoken) | Creates Token |
-| [validate](#method.validate) | Validates Token |
-
-
-<a name="method.createtoken"></a>
-## *createtoken <sup>method</sup>*
-
-Creates Token.
-
-### Description
-
-Create a signed JsonWeb token from provided payload.
-
-### Parameters
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params?.url | string | <sup>*(optional)*</sup> Url of application origin |
-| params?.user | string | <sup>*(optional)*</sup> Username |
-| params?.hash | string | <sup>*(optional)*</sup> Random hash |
-
-### Result
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.token | string | Signed JsonWeb token |
-
-### Errors
-
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` | Token creation failed |
-
-### Example
-
-#### Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "SecurityAgent.1.createtoken",
-    "params": {
-        "url": "https://test.comcast.com",
-        "user": "Test",
-        "hash": "1CLYex47SY"
-    }
-}
-```
-
-#### Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICAgImpzb25ycGMiOiAiMi4wIiwgCiAgICAiaWQiOiAxMjM0NTY3ODkwLCAKICAgICJtZXRob2QiOiAiQ29udHJvbGxlci4xLmFjdGl2YXRlIiwgCiAgICAicGFyYW1zIjogewogICAgICAgICJjYWxsc2lnbiI6ICJTZWN1cml0eUFnZW50IgogICAgfQp9.lL40nTwRyBvMwiglZhl5_rB8ycY1uhAJRFx9pGATMRQ"
-    }
-}
-```
+| [validate](#method.validate) | Validates a token |
 
 <a name="method.validate"></a>
-## *validate <sup>method</sup>*
+## *validate [<sup>method</sup>](#head.Methods)*
 
-Validates Token.
-
-### Description
-
-Checks whether the token is valid and properly signed.
+Validates a token.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.token | string | Token that will be validated |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.token | string | mandatory | *...* |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.valid | boolean | Tells whether token is signature is correct |
-
-### Errors
-
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | *...* |
 
 ### Example
 
@@ -185,12 +121,12 @@ Checks whether the token is valid and properly signed.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "SecurityAgent.1.validate",
-    "params": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICAgImpzb25ycGMiOiAiMi4wIiwgCiAgICAiaWQiOiAxMjM0NTY3ODkwLCAKICAgICJtZXRob2QiOiAiQ29udHJvbGxlci4xLmFjdGl2YXRlIiwgCiAgICAicGFyYW1zIjogewogICAgICAgICJjYWxsc2lnbiI6ICJTZWN1cml0eUFnZW50IgogICAgfQp9.lL40nTwRyBvMwiglZhl5_rB8ycY1uhAJRFx9pGATMRQ"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "SecurityAgent.1.validate",
+  "params": {
+    "token": "..."
+  }
 }
 ```
 
@@ -198,11 +134,9 @@ Checks whether the token is valid and properly signed.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": {
-        "valid": false
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
 }
 ```
 
