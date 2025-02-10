@@ -294,7 +294,7 @@ namespace Plugin {
         Core::hresult result = Core::ERROR_NONE;
 
         if (path.empty() == false) {
-            string fullPath = _persistentStoragePath + path;
+            string fullPath = _persistentStoragePath + Core::Directory::Normalize(path, true);
             Core::Directory dir(fullPath.c_str());
             dir.Destroy();
         }
