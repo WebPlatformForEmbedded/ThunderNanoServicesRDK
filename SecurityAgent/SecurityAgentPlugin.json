@@ -27,7 +27,7 @@
       }
     }
   },
-  "interface": {
-    "$ref": "{interfacedir}/SecurityAgent.json#"
-  }
+  "interface": [
+    { "$ref": "{cppinterfacedir}/ISecurityAgent.h" }
+  ]
 }

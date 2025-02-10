@@ -74,12 +74,14 @@ namespace Thunder {
         , _loggingFactory()
         , _warningReportingFactory()
         , _operationalStreamFactory()
+        , _assertFactory()
     {
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::OPERATIONAL_STREAM, &_operationalStreamFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::ASSERT, &_assertFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
