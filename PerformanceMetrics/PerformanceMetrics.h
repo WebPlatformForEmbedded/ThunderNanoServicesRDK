@@ -449,7 +449,8 @@ namespace Plugin {
             {
                 if (state == PluginHost::IStateController::state::RESUMED) {
                     Logger().Resumed();
-                } else if (state == PluginHost::IStateController::state::SUSPENDED) {
+                }
+                else if (state == PluginHost::IStateController::state::SUSPENDED) {
                     Logger().Suspended();
                 }
             }
