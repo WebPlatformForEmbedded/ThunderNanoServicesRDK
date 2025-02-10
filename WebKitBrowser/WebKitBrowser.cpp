@@ -75,8 +75,7 @@ namespace Plugin {
 
                     _stateController = _browser->QueryInterface<PluginHost::IStateController>();
 
-                    if (_stateController != nullptr)
-                    {
+                    if (_stateController != nullptr) {
                         PluginHost::JStateController::Register(*this, _stateController);
                         _stateController->Register(&_notification);
                     }
