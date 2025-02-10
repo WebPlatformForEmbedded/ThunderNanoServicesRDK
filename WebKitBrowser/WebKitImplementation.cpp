@@ -922,7 +922,7 @@ static GSourceFuncs _handlerIntervention =
             , _stateControlClients()
             , _stateObservers()
             , _applicationClients()
-            , _state(PluginHost::IStateController::UNINITIALIZED)
+            , _state(PluginHost::IStateController::UNKNOWN)
             , _hidden(false)
             , _time(0)
             , _compliant(false)
@@ -1820,9 +1820,6 @@ static GSourceFuncs _handlerIntervention =
             else if (_state == PluginHost::IStateController::state::RESUMED) {
                 state = PluginHost::IStateControl::state::RESUMED;
             }
-            else if (_state == PluginHost::IStateController::state::EXITED) {
-                state = PluginHost::IStateControl::state::EXITED;
-            }
 
             return (state);
         }
@@ -1847,7 +1844,7 @@ static GSourceFuncs _handlerIntervention =
 
             _adminLock.Lock();
 
-            if (_state == PluginHost::IStateController::UNINITIALIZED) {
+            if (_state == PluginHost::IStateController::UNKNOWN) {
                 // Seems we are passing state changes before we reached an operational browser.
                 // Just move the state to what we would like it to be :-)
                 _state = (command == PluginHost::IStateController::SUSPEND ? PluginHost::IStateController::SUSPENDED : PluginHost::IStateController::RESUMED);
@@ -2319,7 +2316,7 @@ static GSourceFuncs _handlerIntervention =
         }
         PluginHost::IStateController::state TranslateState(const PluginHost::IStateControl::state oldState)
         {
-            PluginHost::IStateController::state newState = PluginHost::IStateController::state::UNINITIALIZED;
+            PluginHost::IStateController::state newState = PluginHost::IStateController::state::UNKNOWN;
 
             if (oldState == PluginHost::IStateControl::state::SUSPENDED) {
                 newState = PluginHost::IStateController::state::SUSPENDED;
@@ -2328,7 +2325,7 @@ static GSourceFuncs _handlerIntervention =
                 newState = PluginHost::IStateController::state::RESUMED;
             }
             else if (oldState == PluginHost::IStateControl::state::EXITED) {
-                newState = PluginHost::IStateController::state::EXITED;
+                newState = PluginHost::IStateController::state::UNKNOWN;
             }
 
             return (newState);
@@ -2768,7 +2765,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
                         webkit_web_view_hide(object->_view);
 #else
-                        WKViewSetViewState(object->_view, (object->_state == PluginHost::IStateControl::RESUMED ? kWKViewStateIsInWindow : 0));
+                        WKViewSetViewState(object->_view, (object->_state == PluginHost::IStateController::RESUMED ? kWKViewStateIsInWindow : 0));
 #endif
                         object->Hidden(true);
                         TRACE_GLOBAL(Trace::Information, (_T("Internal Hide Notification took %d mS."), static_cast<uint32_t>(Core::Time::Now().Ticks() - object->_time)));
@@ -2790,7 +2787,7 @@ static GSourceFuncs _handlerIntervention =
 #ifdef WEBKIT_GLIB_API
                         webkit_web_view_show(object->_view);
 #else
-                        WKViewSetViewState(object->_view, (object->_state == PluginHost::IStateControl::RESUMED ? kWKViewStateIsInWindow : 0) | kWKViewStateIsVisible);
+                        WKViewSetViewState(object->_view, (object->_state == PluginHost::IStateController::RESUMED ? kWKViewStateIsInWindow : 0) | kWKViewStateIsVisible);
 #endif
                         object->Hidden(false);
 
@@ -3317,13 +3314,13 @@ static GSourceFuncs _handlerIntervention =
             // Move into the correct state, as requested
             auto* backend = webkit_web_view_backend_get_wpe_backend(webkit_web_view_get_backend(_view));
             _adminLock.Lock();
-            if ((_state == PluginHost::IStateController::SUSPENDED) || (_state == PluginHost::IStateController::UNINITIALIZED)) {
-                _state = PluginHost::IStateController::UNINITIALIZED;
+            if ((_state == PluginHost::IStateController::SUSPENDED) || (_state == PluginHost::IStateController::UNKNOWN)) {
+                _state = PluginHost::IStateController::UNKNOWN;
                 wpe_view_backend_add_activity_state(backend, wpe_view_activity_state_visible | wpe_view_activity_state_focused);
                 OnStateChange(PluginHost::IStateControl::SUSPENDED);
                 OnStateChanged(PluginHost::IStateController::SUSPENDED);
             } else {
-                _state = PluginHost::IStateController::UNINITIALIZED;
+                _state = PluginHost::IStateController::UNKNOWN;
                 wpe_view_backend_add_activity_state(backend, wpe_view_activity_state_visible | wpe_view_activity_state_focused | wpe_view_activity_state_in_window);
                 OnStateChanged(PluginHost::IStateController::RESUMED);
             }
@@ -3564,11 +3561,11 @@ static GSourceFuncs _handlerIntervention =
 
             // Move into the correct state, as requested
             _adminLock.Lock();
-            if ((_state == PluginHost::IStateControl::SUSPENDED) || (_state == PluginHost::IStateControl::UNINITIALIZED)) {
-                _state = PluginHost::IStateControl::UNINITIALIZED;
+            if ((_state == PluginHost::IStateController::SUSPENDED) || (_state == PluginHost::IStateController::UNKNOWN)) {
+                _state = PluginHost::IStateController::UNKNOWN;
                 Suspend();
             } else {
-                _state = PluginHost::IStateControl::UNINITIALIZED;
+                _state = PluginHost::IStateController::UNKNOWN;
                 OnStateChange(PluginHost::IStateControl::RESUMED);
                 OnStateChanged(PluginHost::IStateController::RESUMED);
             }
@@ -3580,7 +3577,7 @@ static GSourceFuncs _handlerIntervention =
 
             // Seems if we stop the mainloop but are not in a suspended state, there is a crash.
             // Force suspended state first.
-            if (_state == PluginHost::IStateControl::RESUMED) {
+            if (_state == PluginHost::IStateController::RESUMED) {
                 WKViewSetViewState(_view, 0);
             }
 
