@@ -22,7 +22,6 @@
     <ClCompile Include="AccessControlList.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="SecurityAgent.cpp" />
-    <ClCompile Include="SecurityAgentJsonRpc.cpp" />
     <ClCompile Include="SecurityContext.cpp" />
   </ItemGroup>
   <ItemGroup>

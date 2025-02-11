@@ -24,10 +24,6 @@
 
 namespace Thunder {
 namespace Plugin {
-namespace {
-    constexpr auto* kInstallMethodName = _T("install");
-    constexpr auto* kSynchronizeMethodName = _T("synchronize");
-}
 
     class Packager : public PluginHost::IPlugin,
                      public PluginHost::IWeb,

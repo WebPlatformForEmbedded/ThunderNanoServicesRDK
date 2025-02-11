@@ -13,6 +13,7 @@ Packager plugin for Thunder framework.
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
+- [Interfaces](#head.Interfaces)
 - [Methods](#head.Methods)
 
 <a name="head.Introduction"></a>
@@ -21,12 +22,12 @@ Packager plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the Packager plugin. It includes detailed specification of its configuration and methods provided.
+This document describes purpose and functionality of the Packager plugin. It includes detailed specification about its configuration and methods provided.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
 
-All identifiers on the interface described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
+All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
 <a name="head.Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
@@ -68,12 +69,19 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *Packager*) |
-| classname | string | Class name: *Packager* |
-| locator | string | Library name: *libThunderPackager.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *Packager*) |
+| classname | string | mandatory | Class name: *Packager* |
+| locator | string | mandatory | Library name: *libThunderPackager.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+
+<a name="head.Interfaces"></a>
+# Interfaces
+
+This plugin implements the following interfaces:
+
+- IPackager ([IPackager.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IPackager.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -84,34 +92,35 @@ Packager interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [install](#method.install) | Installs a package given by a name, an URL or a file path |
-| [synchronize](#method.synchronize) | Synchronizes repository manifest with a repository |
+| [install](#method.install) | Install a package given by a name, an URL or a file path |
+| [synchronizerepository](#method.synchronizerepository) / [::](#method.synchronizerepository) | Synchronize repository manifest with a repository |
 
 <a name="method.install"></a>
-## *install <sup>method</sup>*
+## *install [<sup>method</sup>](#head.Methods)*
 
-Installs a package given by a name, an URL or a file path.
+Install a package given by a name, an URL or a file path.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.package | string | A name, an URL or a file path of the package to install |
-| params?.version | string | <sup>*(optional)*</sup> Version of the package to install |
-| params?.architecture | string | <sup>*(optional)*</sup> Architecture of the package to install |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.name | string | mandatory | Name, URL or file path of the package to install |
+| params.version | string | mandatory | Version of the package to install |
+| params.arch | string | mandatory | Architecture of the package to install |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 12 | ```ERROR_INPROGRESS``` | Returned when the function is called while other installation/synchronization is already in progress. |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_INPROGRESS``` | Other installation/synchronization is already in progress |
+| ```ERROR_GENERAL``` | Opkg package manager not initialized successfully |
 
 ### Example
 
@@ -119,29 +128,33 @@ Installs a package given by a name, an URL or a file path.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "Packager.1.install",
-    "params": {
-        "package": "thunder-plugin-netflix",
-        "version": "1.0",
-        "architecture": "arm"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Packager.1.install",
+  "params": {
+    "name": "thunder-plugin-netflix",
+    "version": "1.0",
+    "arch": "arm"
+  }
 }
 ```
+
 #### Response
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": null
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
 }
 ```
-<a name="method.synchronize"></a>
-## *synchronize <sup>method</sup>*
 
-Synchronizes repository manifest with a repository.
+<a name="method.synchronizerepository"></a>
+## *synchronizerepository [<sup>method</sup>](#head.Methods)*
+
+Synchronize repository manifest with a repository.
+
+> ``::`` is an alternative name for this method.
 
 ### Parameters
 
@@ -149,15 +162,16 @@ This method takes no parameters.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 12 | ```ERROR_INPROGRESS``` | Returned when the function is called while other installation/synchronization is already in progress. |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_INPROGRESS``` | Other installation/synchronization is already in progress |
+| ```ERROR_GENERAL``` | Opkg package manager not initialized successfully |
 
 ### Example
 
@@ -165,17 +179,19 @@ This method takes no parameters.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "method": "Packager.1.synchronize"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "Packager.1.synchronizerepository"
 }
 ```
+
 #### Response
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 1234567890,
-    "result": null
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
 }
 ```
+

@@ -20,7 +20,6 @@
 #pragma once
 
 #include "Module.h"
-#include <interfaces/json/JsonData_DisplayInfo.h>
 #include <interfaces/json/JGraphicsProperties.h>
 #include <interfaces/json/JConnectionProperties.h>
 #include <interfaces/json/JHDRProperties.h>
@@ -30,7 +29,7 @@
 namespace Thunder {
 namespace Plugin {
 
-    class DisplayInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    class DisplayInfo : public PluginHost::IPlugin, public PluginHost::JSONRPC {
     private:
         class Notification : public Exchange::IConnectionProperties::INotification, public RPC::IRemoteConnection::INotification {
         public:
@@ -88,7 +87,6 @@ namespace Plugin {
 
         BEGIN_INTERFACE_MAP(DisplayInfo)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_AGGREGATE(Exchange::IGraphicsProperties, _graphicsProperties)
         INTERFACE_AGGREGATE(Exchange::IConnectionProperties, _connectionProperties)
         INTERFACE_AGGREGATE(Exchange::IHDRProperties, _hdrProperties)
@@ -103,14 +101,7 @@ namespace Plugin {
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override;
 
-        //   IWeb methods
-        // -------------------------------------------------------------------------------------------------------
-        void Inbound(Web::Request& request) override;
-        Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
-
     private:
-
-        void Info(JsonData::DisplayInfo::DisplayinfoData&) const;
         void Deactivated(RPC::IRemoteConnection* connection);
 
     private:

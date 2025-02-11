@@ -58,6 +58,8 @@ namespace Plugin {
 
         RegisterAll();
 
+        Exchange::JMemoryMonitor::Register(*this, this);
+
         // On succes return a name as a Callsign to be used in the URL, after the "service"prefix
         return (_T(""));
     }
@@ -65,6 +67,8 @@ namespace Plugin {
     /* virtual */ void Monitor::Deinitialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
+
+        Exchange::JMemoryMonitor::Unregister(*this);
 
         UnregisterAll();
 
@@ -160,6 +164,103 @@ namespace Plugin {
         }
 
         return (result);
+    }
+
+    void Monitor::NotifyStatusChanged(const string& callsign, const Exchange::IMemoryMonitor::INotification::action action, const Core::OptionalType<Exchange::IMemoryMonitor::INotification::reason> reason) const
+    {
+        _adminLock.Lock();
+
+        for (auto observer : _monitorObservers) {
+            observer->StatusChanged(callsign, action, reason);
+        }
+
+        _adminLock.Unlock();
+
+        Exchange::JMemoryMonitor::Event::StatusChanged(*this, callsign, action, reason);
+    }
+
+    Core::hresult Monitor::Register(Exchange::IMemoryMonitor::INotification* const notification)
+    {
+        Core::hresult result = Core::ERROR_ALREADY_CONNECTED;
+
+        ASSERT(notification != nullptr);
+
+        _adminLock.Lock();
+
+        auto it = std::find(_monitorObservers.begin(), _monitorObservers.end(), notification);
+        ASSERT(it == _monitorObservers.end());
+
+        if (it == _monitorObservers.end()) {
+            notification->AddRef();
+
+            _monitorObservers.push_back(notification);
+
+            result = Core::ERROR_NONE;
+        }
+        _adminLock.Unlock();
+
+        return (result);
+    }
+
+    Core::hresult Monitor::Unregister(const Exchange::IMemoryMonitor::INotification* const notification)
+    {
+        Core::hresult result = Core::ERROR_ALREADY_RELEASED;
+
+        ASSERT(notification != nullptr);
+
+        _adminLock.Lock();
+
+        auto it = std::find(_monitorObservers.cbegin(), _monitorObservers.cend(), notification);
+        ASSERT(it != _monitorObservers.cend());
+
+        if (it != _monitorObservers.cend()) {
+            (*it)->Release();
+
+            _monitorObservers.erase(it);
+
+            result = Core::ERROR_NONE;
+        }
+        _adminLock.Unlock();
+
+        return (result);
+    }
+
+    Core::hresult Monitor::RestartingLimits(const string& callsign, const Exchange::IMemoryMonitor::Restart& restart)
+    {
+        _monitor.Update(callsign, restart.window, restart.limit);
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult Monitor::RestartingLimits(const string& callsign, Exchange::IMemoryMonitor::Restart& restart) const
+    {
+        _monitor.Snapshot(callsign, restart);
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult Monitor::Observables(Exchange::IMemoryMonitor::IStringIterator*& observables) const
+    {
+        std::vector<string> list;
+
+        _monitor.Observables(list);
+
+        using Implementation = RPC::IteratorType<RPC::IStringIterator>;
+        observables = Core::ServiceType<Implementation>::Create<RPC::IStringIterator>(list);
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult Monitor::MeasurementData(const string& callsign, Exchange::IMemoryMonitor::Statistics& statistics) const
+    {
+        _monitor.Snapshot(callsign, statistics);
+
+        return (Core::ERROR_NONE);
+    }
+
+    Core::hresult Monitor::ResetStatistics(const string& callsign)
+    {
+        return ((_monitor.Reset(callsign) == true) ? Core::ERROR_NONE : Core::ERROR_UNKNOWN_KEY);
     }
 }
 }

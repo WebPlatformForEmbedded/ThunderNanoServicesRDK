@@ -2,7 +2,7 @@
  * If not stated otherwise in this file or this component's LICENSE file the
  * following copyright and licenses apply:
  *
- * Copyright 2020 RDK Management
+ * Copyright 2021 Metrological
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,6 @@
  * limitations under the License.
  */
  
-#ifndef __MODULE_PLUGIN_WEBKITBROWSER_H
-#define __MODULE_PLUGIN_WEBKITBROWSER_H
+#include "Module.h"
 
-#ifndef MODULE_NAME
-#define MODULE_NAME Plugin_WebKitBrowser
-#endif
-
-#include <core/core.h>
-#include <plugins/plugins.h>
-#include <definitions/definitions.h>
-
-#undef EXTERNAL
-#define EXTERNAL
-
-#endif // __MODULE_PLUGIN_WEBKITBROWSER_H
+MODULE_NAME_DECLARATION(BUILD_REFERENCE)

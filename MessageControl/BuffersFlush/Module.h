@@ -16,19 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#ifndef __MODULE_PLUGIN_WEBKITBROWSER_H
-#define __MODULE_PLUGIN_WEBKITBROWSER_H
+
+#pragma once
 
 #ifndef MODULE_NAME
-#define MODULE_NAME Plugin_WebKitBrowser
+#define MODULE_NAME BuffersFlush
 #endif
 
 #include <core/core.h>
-#include <plugins/plugins.h>
-#include <definitions/definitions.h>
 
 #undef EXTERNAL
 #define EXTERNAL
-
-#endif // __MODULE_PLUGIN_WEBKITBROWSER_H

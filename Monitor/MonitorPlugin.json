@@ -58,7 +58,8 @@
       }
     }
   },
-  "interface": {
-    "$ref": "{interfacedir}/Monitor.json#"
-  }
+  "interface": [
+    { "$ref": "{interfacedir}/Monitor.json#" },
+    { "$ref": "{cppinterfacedir}/IMemoryMonitor.h" }
+  ]
 }
