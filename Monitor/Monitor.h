@@ -23,6 +23,8 @@
 #include "Module.h"
 #include <interfaces/IMemory.h>
 #include <interfaces/json/JsonData_Monitor.h>
+#include <interfaces/IMemoryMonitor.h>
+#include <interfaces/json/JMemoryMonitor.h>
 #include <limits>
 #include <string>
 
@@ -34,7 +36,7 @@ static uint32_t gcd(uint32_t a, uint32_t b)
 namespace Thunder {
 namespace Plugin {
 
-    class Monitor : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    class Monitor : public Exchange::IMemoryMonitor, public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
     private:
         class RestartInfo : public Core::JSON::Container {
         public:
@@ -779,17 +781,26 @@ POP_WARNING()
                     PluginHost::IShell::reason reason = service->Reason();
 
                     if ((index->second.HasRestartAllowed() == true) && ((reason == PluginHost::IShell::MEMORY_EXCEEDED) || (reason == PluginHost::IShell::FAILURE))) {
+
                         if (index->second.RegisterRestart(reason) == false) {
+
                             uint8_t restartlimit = index->second.RestartLimit();
                             uint16_t restartwindow = index->second.RestartWindow();
+
                             TRACE(Trace::Fatal, (_T("Giving up restarting of %s: Failed more than %d times within %d seconds."), callsign.c_str(), restartlimit, restartwindow));
                             const string message("{\"callsign\": \"" + callsign + "\", \"action\": \"Restart\", \"reason\":\"" + (std::to_string(restartlimit)).c_str() + " Attempts Failed within the restart window\"}");
                             _service->Notify(message);
+
                             _parent.event_action(callsign, "StoppedRestaring", std::to_string(index->second.RestartLimit()) + " attempts failed within the restart window");
-                        } else {
+                            _parent.NotifyStatusChanged(callsign, Exchange::IMemoryMonitor::INotification::action::RESTARTING_STOPPED);
+                        }
+                        else {
                             const string message("{\"callsign\": \"" + callsign + "\", \"action\": \"Activate\", \"reason\": \"Automatic\" }");
                             _service->Notify(message);
+
                             _parent.event_action(callsign, "Activate", "Automatic");
+                            _parent.NotifyStatusChanged(callsign, Exchange::IMemoryMonitor::INotification::action::ACTIVATED);
+
                             TRACE(Trace::Error, (_T("Restarting %s again because we detected it misbehaved."), callsign.c_str()));
                             Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::AUTOMATIC));
                         }
@@ -870,6 +881,75 @@ POP_WARNING()
                     for (auto& element : _monitor) {
                         AddElementToResponse(*response, element.first, element.second);
                     }
+                }
+            }
+
+            void Snapshot(const string& callsign, Exchange::IMemoryMonitor::Restart& restart) const
+            {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                ASSERT(callsign.empty() == false);
+
+                if (callsign.empty() == false) {
+
+                    auto element = _monitor.find(callsign);
+
+                    if ((element != _monitor.end()) && (element->second.HasRestartAllowed() == true)) {
+
+                        restart.limit = element->second.RestartLimit();
+                        restart.window = element->second.RestartWindow();
+                    }
+                }
+            }
+
+            void Snapshot(const string& callsign, Exchange::IMemoryMonitor::Statistics& statistics) const
+            {
+                /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
+                ASSERT(callsign.empty() == false);
+
+                if (callsign.empty() == false) {
+
+                    auto element = _monitor.find(callsign);
+
+                    if (element != _monitor.end()) {
+
+                        const MetaData& metaData = element->second.Measurement();
+
+                        if (metaData.HasMeasurements() == true) {
+                            statistics.resident.min = metaData.Resident().Min();
+                            statistics.resident.max = metaData.Resident().Max();
+                            statistics.resident.average = metaData.Resident().Average();
+                            statistics.resident.last = metaData.Resident().Last();
+
+                            statistics.allocated.min = metaData.Allocated().Min();
+                            statistics.allocated.max = metaData.Allocated().Max();
+                            statistics.allocated.average = metaData.Allocated().Average();
+                            statistics.allocated.last = metaData.Allocated().Last();
+
+                            statistics.shared.min = metaData.Shared().Min();
+                            statistics.shared.max = metaData.Shared().Max();
+                            statistics.shared.average = metaData.Shared().Average();
+                            statistics.shared.last = metaData.Shared().Last();
+
+                            statistics.process.min = metaData.Process().Min();
+                            statistics.process.max = metaData.Process().Max();
+                            statistics.process.average = metaData.Process().Average();
+                            statistics.process.last = metaData.Process().Last();
+
+                            statistics.operational = element->second.Operational();
+                            statistics.count = metaData.Allocated().Measurements();
+                        }
+                    }
+                }
+            }
+
+            void Observables(std::vector<string>& observables) const
+            {
+                observables.clear();
+                observables.reserve(_monitor.size());
+
+                for (const auto& entry : _monitor) {
+
+                    observables.push_back(entry.first);
                 }
             }
 
@@ -966,6 +1046,8 @@ POP_WARNING()
                                 _service->Notify(message);
 
                                 _parent.event_action(plugin->Callsign(), "Deactivate", why.Data());
+                                _parent.NotifyStatusChanged(plugin->Callsign(), Exchange::IMemoryMonitor::INotification::action::DEACTIVATED,
+                                                            (((value & MonitorObject::EXCEEDED_MEMORY) != 0) ? Exchange::IMemoryMonitor::INotification::reason::EXCEEDED_MEMORY : Exchange::IMemoryMonitor::INotification::reason::NOT_OPERATIONAL));
 
                                 Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(plugin, PluginHost::IShell::DEACTIVATED, why.Value()));
 
@@ -1020,6 +1102,8 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         Monitor()
             : _skipURL(0)
             , _monitor(this)
+            , _monitorObservers()
+            , _adminLock()
         {
         }
 POP_WARNING()
@@ -1029,6 +1113,7 @@ POP_WARNING()
         INTERFACE_ENTRY(PluginHost::IPlugin)
         INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(Exchange::IMemoryMonitor)
         END_INTERFACE_MAP
 
     public:
@@ -1066,9 +1151,13 @@ POP_WARNING()
         Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
 
     private:
+        using MonitorObservers = std::list<Exchange::IMemoryMonitor::INotification*>;
+
         uint8_t _skipURL;
         Config _config;
         Core::SinkType<MonitorObjects> _monitor;
+        MonitorObservers _monitorObservers;
+        mutable Core::CriticalSection _adminLock;
 
     private:
         void RegisterAll();
@@ -1077,6 +1166,16 @@ POP_WARNING()
         uint32_t endpoint_resetstats(const JsonData::Monitor::ResetstatsParamsData& params, JsonData::Monitor::InfoInfo& response);
         uint32_t get_status(const string& index, Core::JSON::ArrayType<JsonData::Monitor::InfoInfo>& response) const;
         void event_action(const string& callsign, const string& action, const string& reason);
+
+        void NotifyStatusChanged(const string& callsign, const Exchange::IMemoryMonitor::INotification::action action, const Core::OptionalType<Exchange::IMemoryMonitor::INotification::reason> reason = {}) const;
+        Core::hresult Register(Exchange::IMemoryMonitor::INotification* const notification) override;
+        Core::hresult Unregister(const Exchange::IMemoryMonitor::INotification* const notification) override;
+
+        Core::hresult RestartingLimits(const string& callsign, const Exchange::IMemoryMonitor::Restart& restart) override;
+        Core::hresult RestartingLimits(const string& callsign, Exchange::IMemoryMonitor::Restart& restart) const override;
+        Core::hresult Observables(Exchange::IMemoryMonitor::IStringIterator*& observables) const override;
+        Core::hresult MeasurementData(const string& callsign, Exchange::IMemoryMonitor::Statistics& statistics) const override;
+        Core::hresult ResetStatistics(const string& callsign) override;
     };
 }
 }
