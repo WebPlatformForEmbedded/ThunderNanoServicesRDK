@@ -260,9 +260,7 @@ namespace Plugin {
 
     Core::hresult Monitor::ResetStatistics(const string& callsign)
     {
-        _monitor.Reset(callsign);
-
-        return (Core::ERROR_NONE);
+        return ((_monitor.Reset(callsign) == true) ? Core::ERROR_NONE : Core::ERROR_UNKNOWN_KEY);
     }
 }
 }
