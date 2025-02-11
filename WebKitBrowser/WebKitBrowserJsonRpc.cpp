@@ -38,89 +38,15 @@ namespace Plugin {
     void WebKitBrowser::RegisterAll()
     {
         JSONRPC::Property<Core::JSON::EnumType<StateType>>(_T("state"), &WebKitBrowser::get_state, &WebKitBrowser::set_state, this); /* StateControl */
-        JSONRPC::Property<Core::JSON::ArrayType<Core::JSON::String>>(_T("languages"), &WebKitBrowser::get_languages, &WebKitBrowser::set_languages, this);
-        JSONRPC::Property<Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>>(_T("headers"), &WebKitBrowser::get_headers, &WebKitBrowser::set_headers, this);
-        JSONRPC::Register<DeleteParamsData,void>(_T("delete"), &WebKitBrowser::endpoint_delete, this);
     }
 
     void WebKitBrowser::UnregisterAll()
     {
         JSONRPC::Unregister(_T("state"));
-        JSONRPC::Unregister(_T("headers"));
-        JSONRPC::Unregister(_T("languages"));
-        JSONRPC::Unregister(_T("delete"));
     }
 
     // API implementation
     //
-
-    // Method: endpoint_delete - delete dir
-    // Return codes:
-    //  - ERROR_NONE: Success
-    uint32_t WebKitBrowser::endpoint_delete(const DeleteParamsData& params)
-    {
-        return DeleteDir(params.Path.Value());
-    }
-
-    // Property: languages - Browser prefered languages
-    // Return codes:
-    //  - ERROR_NONE: Success
-    uint32_t WebKitBrowser::get_languages(Core::JSON::ArrayType<Core::JSON::String>& response) const
-    {
-        ASSERT(_application != nullptr);
-
-        string langs;
-        static_cast<const IApplication*>(_application)->Language(langs);
-        response.FromString(langs);
-
-        return Core::ERROR_NONE;
-    }
-
-    // Property: languages - Browser prefered languages
-    // Return codes:
-    //  - ERROR_NONE: Success
-    uint32_t WebKitBrowser::set_languages(const Core::JSON::ArrayType<Core::JSON::String>& param)
-    {
-        ASSERT(_application != nullptr);
-
-        string langs;
-        if ( param.IsSet() ) {
-            param.ToString(langs);
-        }
-        _application->Language(static_cast<const string>(langs));
-
-        return Core::ERROR_NONE;
-    }
-
-    // Property: headers - Headers to send on all requests that the browser makes
-    // Return codes:
-    //  - ERROR_NONE: Success
-    uint32_t WebKitBrowser::get_headers(Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& response) const
-    {
-        ASSERT(_browser != nullptr);
-        string headers;
-        static_cast<const IWebBrowser*>(_browser)->HeaderList(headers);
-
-        response.FromString(headers);
-        return Core::ERROR_NONE;
-    }
-
-    // Property: headers - Headers to send on all requests that the browser makes
-    // Return codes:
-    //  - ERROR_NONE: Success
-    uint32_t WebKitBrowser::set_headers(const Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>& param)
-    {
-        ASSERT(_browser != nullptr);
-
-        string headers;
-
-        if ( param.IsSet() ) {
-            param.ToString(headers);
-        }
-
-        _browser->HeaderList(static_cast<const string>(headers));
-        return Core::ERROR_NONE;
-    }
 
     // Property: state - Running state of the service
     // Return codes:
@@ -176,14 +102,6 @@ namespace Plugin {
         params.Suspended = suspended;
 
         Notify(_T("statechange"), params);
-    }
-
-    // Event: bridgequery - A message from legacy $badger bridge
-    void WebKitBrowser::event_bridgequery(const string& message)
-    {
-        Core::JSON::String params;
-        params = message;
-        Notify(_T("bridgequery"), params);
     }
 
 } // namespace Plugin
