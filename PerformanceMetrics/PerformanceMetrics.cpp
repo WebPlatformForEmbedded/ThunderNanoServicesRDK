@@ -101,22 +101,23 @@ namespace Plugin {
     {
         Exchange::IWebBrowser* webbrowser = service.QueryInterface<Exchange::IWebBrowser>();
         PluginHost::IStateControl* statecontrol = service.QueryInterface<PluginHost::IStateControl>();
+        PluginHost::IStateController* statecontroller = service.QueryInterface<PluginHost::IStateController>();
 
         if (webbrowser != nullptr) {
             TRACE(Trace::Information, (_T("Start oberserving %s as webbrowser"), Callsign().c_str()));
-            _observable = Core::ProxyType<WebBrowserObservable<>>::Create(*this, service, *webbrowser, statecontrol);
+            _observable = Core::ProxyType<WebBrowserObservable<>>::Create(*this, service, *webbrowser, statecontroller, statecontrol);
             webbrowser->Release();
         } else {
             Exchange::IBrowser* browser = service.QueryInterface<Exchange::IBrowser>();
 
             if (browser != nullptr) {
                 TRACE(Trace::Information, (_T("Start oberserving %s as browser"), Callsign().c_str()));
-                _observable = Core::ProxyType<BrowserObservable<>>::Create(*this, service, *browser, statecontrol);
+                _observable = Core::ProxyType<BrowserObservable<>>::Create(*this, service, *browser, statecontroller, statecontrol);
                 browser->Release();
             }
-            else if (statecontrol != nullptr) {
+            else if ((statecontrol != nullptr) && (statecontroller != nullptr)) {
                 TRACE(Trace::Information, (_T("Start oberserving %s as statecontrol"), Callsign().c_str()));
-                _observable = Core::ProxyType<StateObservable<>>::Create(*this, service, statecontrol);
+                _observable = Core::ProxyType<StateObservable<>>::Create(*this, service, statecontroller, statecontrol);
             } else {
                 TRACE(Trace::Information, (_T("Start oberserving %s as basic"), Callsign().c_str()));
                 _observable = Core::ProxyType<BasicObservable<>>::Create(*this, service);

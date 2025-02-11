@@ -469,10 +469,11 @@ namespace Plugin {
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
         WorkerThread _worker;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Messaging::TextMessage> _tracingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Messaging::TextMessage> _loggingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Messaging::TextMessage> _warningReportingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Messaging::TextMessage> _operationalStreamFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Core::Messaging::TextMessage> _tracingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Core::Messaging::TextMessage> _loggingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Core::Messaging::TextMessage> _operationalStreamFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Assert, Core::Messaging::TextMessage> _assertFactory;
         Cleanups _cleaning;
     };
 

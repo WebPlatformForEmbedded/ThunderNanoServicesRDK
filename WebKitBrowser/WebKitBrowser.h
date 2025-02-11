@@ -30,6 +30,7 @@
 #include <interfaces/json/JWebBrowserExt.h>
 #include <interfaces/json/JBrowserScripting.h>
 #include <interfaces/json/JBrowserCookieJar.h>
+#include <plugins/json/json_IStateController.h>
 
 namespace Thunder {
 
@@ -44,6 +45,7 @@ namespace Plugin {
     private:
         class Notification : public RPC::IRemoteConnection::INotification,
                              public PluginHost::IStateControl::INotification,
+                             public PluginHost::IStateController::INotification,
                              public Exchange::IWebBrowser::INotification,
                              public Exchange::IBrowserCookieJar::INotification {
         private:
@@ -88,6 +90,10 @@ namespace Plugin {
             {
                 _parent.StateChange(state);
             }
+            void StateChanged(const PluginHost::IStateController::state state) override
+            {
+                _parent.StateChanged(state);
+            }
             void Activated(RPC::IRemoteConnection* /* connection */) override
             {
             }
@@ -103,6 +109,7 @@ namespace Plugin {
             BEGIN_INTERFACE_MAP(Notification)
             INTERFACE_ENTRY(Exchange::IWebBrowser::INotification)
             INTERFACE_ENTRY(PluginHost::IStateControl::INotification)
+            INTERFACE_ENTRY(PluginHost::IStateController::INotification)
             INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
             INTERFACE_ENTRY(Exchange::IBrowserCookieJar::INotification)
             END_INTERFACE_MAP
@@ -149,6 +156,7 @@ namespace Plugin {
             : _skipURL(0)
             , _connectionId(0)
             , _service(nullptr)
+            , _stateController(nullptr)
             , _browser(nullptr)
             , _memory(nullptr)
             , _application(nullptr)
@@ -180,6 +188,7 @@ namespace Plugin {
         INTERFACE_ENTRY(PluginHost::IDispatcher)
         INTERFACE_ENTRY(Exchange::IWebBrowserExt)
         INTERFACE_AGGREGATE(PluginHost::IStateControl, _browser)
+        INTERFACE_AGGREGATE(PluginHost::IStateController, _stateController)
         INTERFACE_AGGREGATE(Exchange::IBrowser, _browser)
         INTERFACE_AGGREGATE(Exchange::IApplication, _application)
         INTERFACE_AGGREGATE(Exchange::IWebBrowser, _browser)
@@ -225,6 +234,7 @@ namespace Plugin {
         void BridgeQuery(const string& message);
         void StateChange(const PluginHost::IStateControl::state state);
         Core::hresult DeleteDir(const string& path) override;
+        void StateChanged(const PluginHost::IStateController::state state);
         void CookieJarChanged();
         Core::hresult Languages(Exchange::IWebBrowserExt::IStringIterator*& languages) const override;
         Core::hresult Languages(Exchange::IWebBrowserExt::IStringIterator* const languages) override;
@@ -240,6 +250,7 @@ namespace Plugin {
         uint8_t _skipURL;
         uint32_t _connectionId;
         PluginHost::IShell* _service;
+        PluginHost::IStateController* _stateController;
         Exchange::IWebBrowser* _browser;
         Exchange::IMemory* _memory;
         Exchange::IApplication* _application;

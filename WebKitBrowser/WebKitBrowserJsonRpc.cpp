@@ -37,12 +37,12 @@ namespace Plugin {
 
     void WebKitBrowser::RegisterAll()
     {
-        Property<Core::JSON::EnumType<StateType>>(_T("state"), &WebKitBrowser::get_state, &WebKitBrowser::set_state, this); /* StateControl */
+        JSONRPC::Property<Core::JSON::EnumType<StateType>>(_T("state"), &WebKitBrowser::get_state, &WebKitBrowser::set_state, this); /* StateControl */
     }
 
     void WebKitBrowser::UnregisterAll()
     {
-        Unregister(_T("state"));
+        JSONRPC::Unregister(_T("state"));
     }
 
     // API implementation
