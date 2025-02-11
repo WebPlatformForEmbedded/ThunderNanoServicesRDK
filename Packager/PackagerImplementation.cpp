@@ -154,19 +154,19 @@ namespace Plugin {
         _adminLock.Unlock();
     }
 
-    uint32_t PackagerImplementation::Install(const string& name, const string& version, const string& arch)
+    Core::hresult PackagerImplementation::Install(const string& name, const string& version, const string& arch)
     {
         return DoWork(&name, &version, &arch);
     }
 
-    uint32_t PackagerImplementation::SynchronizeRepository()
+    Core::hresult PackagerImplementation::SynchronizeRepository()
     {
         return DoWork(nullptr, nullptr, nullptr);
     }
 
-    uint32_t PackagerImplementation::DoWork(const string* name, const string* version, const string* arch)
+    Core::hresult PackagerImplementation::DoWork(const string* name, const string* version, const string* arch)
     {
-        uint32_t result = Core::ERROR_INPROGRESS;
+        Core::hresult result = Core::ERROR_INPROGRESS;
 
         _adminLock.Lock();
         if (_inProgress.Install == nullptr && _isSyncing == false) {
