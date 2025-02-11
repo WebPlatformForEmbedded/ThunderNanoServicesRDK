@@ -24,11 +24,13 @@
 #include <interfaces/IContentDecryption.h>
 #include <interfaces/IMemory.h>
 #include <interfaces/json/JsonData_OCDM.h>
+#include <interfaces/IOCDM.h>
+#include <interfaces/json/JOpenCDM.h>
 
 namespace Thunder {
 namespace Plugin {
 
-    class OCDM : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    class OCDM : public Exchange::IOpenCDM, public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
     private:
 
         class Notification : public RPC::IRemoteConnection::INotification {
@@ -158,6 +160,7 @@ POP_WARNING()
         INTERFACE_ENTRY(PluginHost::IDispatcher)
         INTERFACE_AGGREGATE(Exchange::IContentDecryption, _opencdmi)
         INTERFACE_AGGREGATE(Exchange::IMemory, _memory)
+        INTERFACE_ENTRY(Exchange::IOpenCDM)
         END_INTERFACE_MAP
 
     public:
@@ -197,6 +200,9 @@ POP_WARNING()
         void UnregisterAll();
         uint32_t get_drms(Core::JSON::ArrayType<JsonData::OCDM::DrmData>& response) const;
         uint32_t get_keysystems(const string& index, Core::JSON::ArrayType<Core::JSON::String>& response) const;
+
+        Core::hresult Systems(Exchange::IOpenCDM::IStringIterator*& keySystems) const override;
+        Core::hresult Designators(const string& keySystem, Exchange::IOpenCDM::IStringIterator*& designators) const override;
 
     private:
         uint8_t _skipURL;
