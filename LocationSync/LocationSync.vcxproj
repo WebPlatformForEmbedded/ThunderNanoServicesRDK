@@ -177,7 +177,6 @@
   <ItemGroup>
     <ClCompile Include="LocationService.cpp" />
     <ClCompile Include="LocationSync.cpp" />
-    <ClCompile Include="LocationSyncJsonRpc.cpp" />
     <ClCompile Include="Module.cpp" />
   </ItemGroup>
   <ItemGroup>

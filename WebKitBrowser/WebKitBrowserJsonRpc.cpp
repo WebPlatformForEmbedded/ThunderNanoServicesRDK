@@ -37,18 +37,18 @@ namespace Plugin {
 
     void WebKitBrowser::RegisterAll()
     {
-        Property<Core::JSON::EnumType<StateType>>(_T("state"), &WebKitBrowser::get_state, &WebKitBrowser::set_state, this); /* StateControl */
-        Property<Core::JSON::ArrayType<Core::JSON::String>>(_T("languages"), &WebKitBrowser::get_languages, &WebKitBrowser::set_languages, this);
-        Property<Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>>(_T("headers"), &WebKitBrowser::get_headers, &WebKitBrowser::set_headers, this);
-        Register<DeleteParamsData,void>(_T("delete"), &WebKitBrowser::endpoint_delete, this);
+        JSONRPC::Property<Core::JSON::EnumType<StateType>>(_T("state"), &WebKitBrowser::get_state, &WebKitBrowser::set_state, this); /* StateControl */
+        JSONRPC::Property<Core::JSON::ArrayType<Core::JSON::String>>(_T("languages"), &WebKitBrowser::get_languages, &WebKitBrowser::set_languages, this);
+        JSONRPC::Property<Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData>>(_T("headers"), &WebKitBrowser::get_headers, &WebKitBrowser::set_headers, this);
+        JSONRPC::Register<DeleteParamsData,void>(_T("delete"), &WebKitBrowser::endpoint_delete, this);
     }
 
     void WebKitBrowser::UnregisterAll()
     {
-        Unregister(_T("state"));
-        Unregister(_T("headers"));
-        Unregister(_T("languages"));
-        Unregister(_T("delete"));
+        JSONRPC::Unregister(_T("state"));
+        JSONRPC::Unregister(_T("headers"));
+        JSONRPC::Unregister(_T("languages"));
+        JSONRPC::Unregister(_T("delete"));
     }
 
     // API implementation

@@ -71,17 +71,17 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *LocationSync*) |
-| classname | string | Class name: *LocationSync* |
-| locator | string | Library name: *libWPELocationSync.so* |
-| startmode | string | Determines in which state the plugin should be moved to at startup of the framework |
-| configuration | object | <sup>*(optional)*</sup> *...* |
-| configuration?.interval | integer | <sup>*(optional)*</sup> Maximum time duration between each request to the Location Server (default: 10) |
-| configuration?.retries | integer | <sup>*(optional)*</sup> Maximum number of request reties to the Location Server (default:20) |
-| configuration?.source | string | <sup>*(optional)*</sup> URI of the Location Server (default:"http://jsonip.metrological.com/?maf=true") |
-| configuration?.timezone | string | <sup>*(optional)*</sup> With this the timezone can be overridden, otherwise taken from location (note can als be overriden with JSONRPC call) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *LocationSync*) |
+| classname | string | mandatory | Class name: *LocationSync* |
+| locator | string | mandatory | Library name: *libWPELocationSync.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| configuration | object | optional | *...* |
+| configuration?.interval | integer | optional | Maximum time duration between each request to the Location Server (default: 10) |
+| configuration?.retries | integer | optional | Maximum number of request reties to the Location Server (default:20) |
+| configuration?.source | string | optional | URI of the Location Server (default:"http://jsonip.metrological.com/?maf=true") |
+| configuration?.timezone | string | optional | With this the timezone can be overridden, otherwise taken from location (note can als be overriden with JSONRPC call) |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -89,7 +89,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - ITimeZone ([ITimeZone.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ITimeZone.h)) (version 1.0.0) (compliant format)
-- [LocationSync.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/LocationSync.json) (version 1.0.0) (compliant format)
+- ILocationSync ([ILocationSync.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ILocationSync.h)) (version 1.0.0) (compliant format)
 
 <a name="head.Methods"></a>
 # Methods
@@ -100,12 +100,12 @@ LocationSync interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [sync](#method.sync) | Synchronizes the location |
+| [sync](#method.sync) | Synchronize the location |
 
 <a name="method.sync"></a>
 ## *sync [<sup>method</sup>](#head.Methods)*
 
-Synchronizes the location.
+Synchronize the location.
 
 ### Parameters
 
@@ -113,18 +113,18 @@ This method takes no parameters.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null (default: *None*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Errors
 
 | Message | Description |
 | :-------- | :-------- |
 | ```ERROR_GENERAL``` | Failed to synchdonize the location |
-| ```ERROR_UNAVAILABLE``` | Unavailable locator |
-| ```ERROR_INCORRECT_URL``` | Incorrect URL |
-| ```ERROR_INPROGRESS``` | Probing in progress |
+| ```ERROR_UNAVAILABLE``` | Locator is not available |
+| ```ERROR_INCORRECT_URL``` | The URL is incorrect |
+| ```ERROR_INPROGRESS``` | Probing is still in progress |
 
 ### Example
 
@@ -155,26 +155,26 @@ The following properties are provided by the LocationSync plugin:
 
 TimeZone interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [timezone](#property.timezone) | TimeZone for system |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [timeZone](#property.timeZone) | read/write | TimeZone for system |
 
 LocationSync interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [location](#property.location) (read-only) | Location information |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [location](#property.location) | read-only | Get information about the location |
 
-<a name="property.timezone"></a>
-## *timezone [<sup>property</sup>](#head.Properties)*
+<a name="property.timeZone"></a>
+## *timeZone [<sup>property</sup>](#head.Properties)*
 
 Provides access to the timeZone for system.
 
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| (property) | string | TimeZone for system |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| (property) | string | mandatory | TimeZone for system |
 
 ### Example
 
@@ -184,7 +184,7 @@ Provides access to the timeZone for system.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "LocationSync.1.timezone"
+  "method": "LocationSync.1.timeZone"
 }
 ```
 
@@ -204,7 +204,7 @@ Provides access to the timeZone for system.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "LocationSync.1.timezone",
+  "method": "LocationSync.1.timeZone",
   "params": "..."
 }
 ```
@@ -222,7 +222,7 @@ Provides access to the timeZone for system.
 <a name="property.location"></a>
 ## *location [<sup>property</sup>](#head.Properties)*
 
-Provides access to the location information.
+Provides access to the get information about the location.
 
 > This property is **read-only**.
 
@@ -230,14 +230,20 @@ Provides access to the location information.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Location information |
-| result.city | string | City name |
-| result.country | string | Country name |
-| result.region | string | Region name |
-| result.timezone | string | Time zone information |
-| result.publicip | string | Public IP |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Get information about the location |
+| result?.city | string | optional | City name |
+| result?.country | string | optional | Country name |
+| result?.region | string | optional | Region name |
+| result?.timezone | string | optional | Time zone information |
+| result?.publicip | string | optional | Public IP |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_UNAVAILABLE``` | Either the internet or the location information is not available |
 
 ### Example
 
@@ -260,7 +266,7 @@ Provides access to the location information.
   "result": {
     "city": "Wroclaw",
     "country": "Poland",
-    "region": "Wroclaw",
+    "region": "Silesia",
     "timezone": "CET-1CEST,M3.5.0,M10.5.0/3",
     "publicip": "78.11.117.118"
   }
@@ -278,24 +284,24 @@ TimeZone interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [timezonechanged](#notification.timezonechanged) | TimeZone was set for the system |
+| [timeZoneChanged](#notification.timeZoneChanged) | TimeZone was set for the system |
 
 LocationSync interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [locationchange](#notification.locationchange) | Signals a location change |
+| [updated](#notification.updated) / [locationchange](#notification.updated) | Signals a location change |
 
-<a name="notification.timezonechanged"></a>
-## *timezonechanged [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.timeZoneChanged"></a>
+## *timeZoneChanged [<sup>notification</sup>](#head.Notifications)*
 
 TimeZone was set for the system.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | string | New TimeZone |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | string | mandatory | New TimeZone |
 
 ### Example
 
@@ -307,7 +313,7 @@ TimeZone was set for the system.
   "id": 42,
   "method": "LocationSync.1.register",
   "params": {
-    "event": "timezonechanged",
+    "event": "timeZoneChanged",
     "id": "client"
   }
 }
@@ -318,15 +324,17 @@ TimeZone was set for the system.
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.timezonechanged",
+  "method": "client.timeZoneChanged",
   "params": "..."
 }
 ```
 
-<a name="notification.locationchange"></a>
-## *locationchange [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.updated"></a>
+## *updated [<sup>notification</sup>](#head.Notifications)*
 
 Signals a location change.
+
+> ``locationchange`` is an alternative name for this notification. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
 
 ### Parameters
 
@@ -342,7 +350,7 @@ This notification carries no parameters.
   "id": 42,
   "method": "LocationSync.1.register",
   "params": {
-    "event": "locationchange",
+    "event": "updated",
     "id": "client"
   }
 }
@@ -353,7 +361,7 @@ This notification carries no parameters.
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.locationchange"
+  "method": "client.updated"
 }
 ```
 

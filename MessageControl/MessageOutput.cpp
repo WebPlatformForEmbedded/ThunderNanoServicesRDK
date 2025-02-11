@@ -101,6 +101,25 @@ namespace Publishers {
                     data.Callsign = report.Callsign();
                 }
             }
+            else if (metadata.Type() == Core::Messaging::Metadata::type::ASSERT) {
+                ASSERT(dynamic_cast<const Core::Messaging::IStore::Assert*>(&metadata) != nullptr);
+                const Core::Messaging::IStore::Assert& assert = static_cast<const Core::Messaging::IStore::Assert&>(metadata);
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PROCESSID)) != 0) {
+                    data.ProcessId = assert.ProcessId();
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PROCESSNAME)) != 0) {
+                    data.ProcessName = assert.ProcessName();
+                }
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
+                    data.FileName = assert.FileName();
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
+                    data.LineNumber = assert.LineNumber();
+                }
+            }
             else {
                 ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
             }

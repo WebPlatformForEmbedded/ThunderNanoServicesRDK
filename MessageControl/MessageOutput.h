@@ -43,7 +43,7 @@ namespace Publishers {
         ~Text() = default;
 
     public:
-        string Convert (const Core::Messaging::MessageInfo& metadata, const string& text);
+        string Convert(const Core::Messaging::MessageInfo& metadata, const string& text);
 
     private:
         Core::Messaging::MessageInfo::abbreviate _abbreviated;
@@ -121,16 +121,18 @@ namespace Publishers {
     class JSON  {
     private:
         enum class ExtraOutputOptions {
-            ABREVIATED    = 0x00,
-            FILENAME      = 0x01,
-            LINENUMBER    = 0x03, // selecting LINENUMBER will automatically select FILENAME
-            CLASSNAME     = 0x04,
-            MODULE        = 0x08,
-            CATEGORY      = 0x10,
-            CALLSIGN      = 0x20,
-            INCLUDINGDATE = 0x40,
-            ALL           = 0x7F,
-            PAUSED        = 0x80
+            ABREVIATED    = 0x000,
+            FILENAME      = 0x001,
+            LINENUMBER    = 0x003, // selecting LINENUMBER will automatically select FILENAME
+            CLASSNAME     = 0x004,
+            MODULE        = 0x008,
+            CATEGORY      = 0x010,
+            CALLSIGN      = 0x020,
+            INCLUDINGDATE = 0x040,
+            PROCESSID     = 0x080,
+            PROCESSNAME   = 0x100,
+            ALL           = 0x7FF,
+            PAUSED        = 0x800
         };
 
     public:
@@ -148,6 +150,8 @@ namespace Publishers {
                 , Category()
                 , Module()
                 , Callsign()
+                , ProcessId()
+                , ProcessName()
                 , Message()
             {
                 Add(_T("time"), &Time);
@@ -157,6 +161,8 @@ namespace Publishers {
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
                 Add(_T("callsign"), &Callsign);
+                Add(_T("processid"), &ProcessId);
+                Add(_T("processname"), &ProcessName);
                 Add(_T("message"), &Message);
             }
             ~Data() override = default;
@@ -169,6 +175,8 @@ namespace Publishers {
             Core::JSON::String Category;
             Core::JSON::String Module;
             Core::JSON::String Callsign;
+            Core::JSON::DecUInt32 ProcessId;
+            Core::JSON::String ProcessName;
             Core::JSON::String Message;
         };
 
@@ -264,6 +272,34 @@ namespace Publishers {
             }
             else {
                 _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::CALLSIGN));
+            }
+        }
+
+        bool ProcessId() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PROCESSID)) != 0);
+        }
+
+        void ProcessId(const bool enabled)
+        {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::PROCESSID));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::PROCESSID));
+            }
+        }
+
+        bool ProcessName() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PROCESSNAME)) != 0);
+        }
+
+        void ProcessName(const bool enabled)
+        {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::PROCESSNAME));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::PROCESSNAME));
             }
         }
 
@@ -400,6 +436,8 @@ namespace Publishers {
                 , Category()
                 , Module()
                 , Callsign()
+                , ProcessId()
+                , ProcessName()
                 , IncludingDate()
                 , Paused()
             {
@@ -409,6 +447,8 @@ namespace Publishers {
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
                 Add(_T("callsign"), &Callsign);
+                Add(_T("processid"), &ProcessId);
+                Add(_T("processname"), &ProcessName);
                 Add(_T("includingdate"), &IncludingDate);
                 Add(_T("paused"), &Paused);
             }
@@ -421,6 +461,8 @@ namespace Publishers {
             Core::JSON::Boolean Category;
             Core::JSON::Boolean Module;
             Core::JSON::Boolean Callsign;
+            Core::JSON::Boolean ProcessId;
+            Core::JSON::Boolean ProcessName;
             Core::JSON::Boolean IncludingDate;
             Core::JSON::Boolean Paused;
         };
@@ -543,6 +585,12 @@ namespace Publishers {
                     if (info->Callsign.IsSet() == true) {
                         index->second.Callsign(info->Callsign == true);
                     }
+                    if (info->ProcessId.IsSet() == true) {
+                        index->second.ProcessId(info->ProcessId == true);
+                    }
+                    if (info->ProcessName.IsSet() == true) {
+                        index->second.ProcessName(info->ProcessName == true);
+                    }
                     if (info->IncludingDate.IsSet() == true) {
                         index->second.Date(info->IncludingDate == true);
                     }
@@ -557,6 +605,8 @@ namespace Publishers {
                     info->Category = index->second.Category();
                     info->Module = index->second.Module();
                     info->Callsign = index->second.Callsign();
+                    info->ProcessId = index->second.ProcessId();
+                    info->ProcessName = index->second.ProcessName();
                     info->IncludingDate = index->second.Date();
                     info->Paused = index->second.Paused();
                 }

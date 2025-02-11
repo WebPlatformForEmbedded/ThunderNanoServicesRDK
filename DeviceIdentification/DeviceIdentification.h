@@ -20,12 +20,15 @@
 #pragma once
 
 #include "Module.h"
-#include <interfaces/json/JsonData_DeviceIdentification.h>
+#include <interfaces/IDeviceIdentification.h>
+#include <interfaces/json/JDeviceIdentification.h>
 
 namespace Thunder {
 namespace Plugin {
 
-    class DeviceIdentification : public PluginHost::IPlugin, public PluginHost::JSONRPC {
+    class DeviceIdentification : public Exchange::IDeviceIdentification
+                               , public PluginHost::IPlugin
+                               , public PluginHost::JSONRPC {
     public:
         DeviceIdentification(const DeviceIdentification&) = delete;
         DeviceIdentification& operator=(const DeviceIdentification&) = delete;
@@ -79,6 +82,7 @@ namespace Plugin {
         BEGIN_INTERFACE_MAP(DeviceIdentification)
         INTERFACE_ENTRY(PluginHost::IPlugin)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(Exchange::IDeviceIdentification)
         END_INTERFACE_MAP
 
     public:
@@ -89,13 +93,8 @@ namespace Plugin {
         string Information() const override;
 
     private:
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t get_deviceidentification(JsonData::DeviceIdentification::DeviceidentificationData& response) const;
-
+        Core::hresult Identification(Exchange::IDeviceIdentification::DeviceInfo& info) const override;
         string GetDeviceId() const;
-        void Info(JsonData::DeviceIdentification::DeviceidentificationData&) const;
-
         void Deactivated(RPC::IRemoteConnection* connection);
 
     private:
