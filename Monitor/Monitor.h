@@ -766,15 +766,17 @@ POP_WARNING()
                     }
                 }
             }
-            void Deactivated (const string& callsign, PluginHost::IShell* service) override
+            void Deactivated (const string&, PluginHost::IShell*) override
             {
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
             }
-            void Initialize(const string& callsign, PluginHost::IShell* service) override{
+            void Initialize(const string&, PluginHost::IShell*) override
+            {
             }
-            void Deinitialized(const string& callsign, PluginHost::IShell* service) override{
+            void Deinitialized(const string& callsign, PluginHost::IShell* service) override
+            {
                 /* See comment in the Dispatch method on why no locking is here to protect the _monitor member */
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
