@@ -20,7 +20,6 @@
 #include "Module.h"
 #include "RequestHeaders.h"
 
-#include <interfaces/json/JsonData_WebKitBrowser.h>
 
 #include <core/JSON.h>
 
@@ -34,6 +33,48 @@ namespace WebKit {
 namespace
 {
 
+class HeadersData : public Core::JSON::Container {
+public:
+    HeadersData()
+        : Core::JSON::Container()
+    {
+        _Init();
+    }
+
+    HeadersData(const HeadersData& _other)
+        : Core::JSON::Container()
+        , Name(_other.Name)
+        , Value(_other.Value)
+    {
+        _Init();
+    }
+
+    HeadersData& operator=(const HeadersData& _rhs)
+    {
+        Name = _rhs.Name;
+        Value = _rhs.Value;
+        return (*this);
+    }
+
+    bool IsValid() const
+    {
+        return (true);
+    }
+
+private:
+    void _Init()
+    {
+        Add(_T("name"), &Name);
+        Add(_T("value"), &Value);
+    }
+
+public:
+    Core::JSON::String Name; // Header name
+    Core::JSON::String Value; // Header value
+}; // class HeadersData
+
+
+
 typedef std::vector<std::pair<std::string, std::string>> Headers;
 typedef std::unordered_map<WebKitWebPage*, Headers> PageHeaders;
 static PageHeaders s_pageHeaders;
@@ -41,7 +82,7 @@ static PageHeaders s_pageHeaders;
 bool ParseHeaders(const string& json, Headers& out)
 {
     Core::OptionalType<Core::JSON::Error> error;
-    Core::JSON::ArrayType<JsonData::WebKitBrowser::HeadersData> array;
+    Core::JSON::ArrayType<HeadersData> array;
     if (array.FromString(json, error)) {
         for (auto it = array.Elements(); it.Next();) {
             if (!it.IsValid()) {
