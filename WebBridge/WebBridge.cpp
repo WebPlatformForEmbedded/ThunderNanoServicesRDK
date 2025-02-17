@@ -246,7 +246,7 @@ namespace WPEFramework {
                     // Let's on behalf of the request forward it and update 
                     string messageToSend(parameters);
                     Core::ProxyType<Message> message(g_BridgeMessages.Element());
-                    uint32_t newId = Core::_InterlockedIncrement(_sequenceId);
+                    uint32_t newId = Core::InterlockedIncrement(_sequenceId);
                     Core::Time waitTill = Core::Time::Now() + _timeOut;
 
                     _pendingRequests.emplace(std::piecewise_construct,
@@ -295,7 +295,7 @@ namespace WPEFramework {
 
                 return (result);
             }
-            Core::hresult WebBridge::Revoke(ICallback* callback) /* override*/ {
+            Core::hresult WebBridge::Revoke(IDispatcher::ICallback* callback) /* override*/ {
                 // Remove the interface from the pendings..
                 _adminLock.Lock();
 
