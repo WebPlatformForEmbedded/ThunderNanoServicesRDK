@@ -1,20 +1,18 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.Security_Agent_Plugin"></a>
-# Security Agent Plugin
+<a name="head.PerformanceMetrics_Plugin"></a>
+# PerformanceMetrics Plugin
 
 **Version: 1.0**
 
-**Status: :black_circle::black_circle::black_circle:**
+**Status: :black_circle::white_circle::white_circle:**
 
-SecurityAgent plugin for Thunder framework.
+PerformanceMetrics plugin for Thunder framework.
 
 ### Table of Contents
 
 - [Introduction](#head.Introduction)
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
 
 <a name="head.Introduction"></a>
 # Introduction
@@ -22,7 +20,7 @@ SecurityAgent plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the SecurityAgent plugin. It includes detailed specification about its configuration and methods provided.
+This document describes purpose and functionality of the PerformanceMetrics plugin. It includes detailed specification about its configuration.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -60,7 +58,7 @@ The table below provides and overview of terms and abbreviations used in this do
 <a name="head.Description"></a>
 # Description
 
-Security Agent of thunder is responsible to allow or block access to the Thunder API.
+The Performance Metrics plugin can output metrics on a plugin (e.g. uptime, resource usage).
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
@@ -71,73 +69,8 @@ The table below lists configuration options of the plugin.
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| callsign | string | mandatory | Plugin instance name (default: *SecurityAgent*) |
-| classname | string | mandatory | Class name: *SecurityAgent* |
-| locator | string | mandatory | Library name: *libThunderSecurityAgent.so* |
+| callsign | string | mandatory | Plugin instance name (default: *PerformanceMetrics*) |
+| classname | string | mandatory | Class name: *PerformanceMetrics* |
+| locator | string | mandatory | Library name: *libThunderPerformanceMetrics.so* |
 | startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
-| configuration | object | optional | *...* |
-| configuration?.acl | string | optional | ACL |
-| configuration?.connector | string | optional | Connector |
-
-<a name="head.Interfaces"></a>
-# Interfaces
-
-This plugin implements the following interfaces:
-
-- ISecurityAgent ([ISecurityAgent.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ISecurityAgent.h)) (version 1.0.0) (compliant format)
-> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
-
-<a name="head.Methods"></a>
-# Methods
-
-The following methods are provided by the SecurityAgent plugin:
-
-SecurityAgent interface methods:
-
-| Method | Description |
-| :-------- | :-------- |
-| [validate](#method.validate) | Validates a token |
-
-<a name="method.validate"></a>
-## *validate [<sup>method</sup>](#head.Methods)*
-
-Validates a token.
-
-### Parameters
-
-| Name | Type | M/O | Description |
-| :-------- | :-------- | :-------- | :-------- |
-| params | object | mandatory | *...* |
-| params.token | string | mandatory | *...* |
-
-### Result
-
-| Name | Type | M/O | Description |
-| :-------- | :-------- | :-------- | :-------- |
-| result | boolean | mandatory | *...* |
-
-### Example
-
-#### Request
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 42,
-  "method": "SecurityAgent.1.validate",
-  "params": {
-    "token": "..."
-  }
-}
-```
-
-#### Response
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 42,
-  "result": false
-}
-```
 

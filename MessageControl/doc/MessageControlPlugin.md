@@ -70,27 +70,28 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *MessageControl*) |
-| classname | string | Class name: *MessageControl* |
-| locator | string | Library name: *libThunderMessageControl.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
-| console | boolean | <sup>*(optional)*</sup> Enables message output messages to the console |
-| syslog | boolean | <sup>*(optional)*</sup> Enables message ouutput to syslog |
-| filepath | string | <sup>*(optional)*</sup> Path to file (inside VolatilePath) where messages will be stored |
-| abbreviated | boolean | <sup>*(optional)*</sup> Denotes if the messages should be abbreviated |
-| maxexportconnections | number | <sup>*(optional)*</sup> Specifies to how many websockets can the messages be outputted |
-| remote | object | <sup>*(optional)*</sup>  |
-| remote.port | number | Port |
-| remote?.bindig | string | <sup>*(optional)*</sup> Binding address |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *MessageControl*) |
+| classname | string | mandatory | Class name: *MessageControl* |
+| locator | string | mandatory | Library name: *libThunderMessageControl.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| console | boolean | optional | Enables message output messages to the console |
+| syslog | boolean | optional | Enables message ouutput to syslog |
+| filepath | string | optional | Path to file (inside VolatilePath) where messages will be stored |
+| abbreviated | boolean | optional | Denotes if the messages should be abbreviated |
+| maxexportconnections | integer | optional | Specifies to how many websockets can the messages be outputted |
+| remote | object | optional | *...* |
+| remote.port | integer | mandatory | Port |
+| remote?.bindig | string | optional | Binding address |
 
 <a name="head.Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
-- Exchange::IMessageControl ([IMessageControl.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessageControl.h)) (version 1.0.0) (compliant format)
+- IMessageControl ([IMessageControl.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessageControl.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
@@ -103,7 +104,6 @@ MessageControl interface methods:
 | :-------- | :-------- |
 | [enable](#method.enable) | Enables/disables a message control |
 
-
 <a name="method.enable"></a>
 ## *enable [<sup>method</sup>](#head.Methods)*
 
@@ -111,19 +111,19 @@ Enables/disables a message control.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.type | string | Message type (must be one of the following: *Tracing*, *Logging*) |
-| params.category | string | Name of the message category |
-| params.module | string | Name of the module the message is originating from |
-| params.enabled | boolean | Denotes if control should be enabled (true) or disabled (false) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.type | string | mandatory | Message type (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Tracing*) |
+| params.category | string | mandatory | Name of the message category |
+| params.module | string | mandatory | Name of the module the message is originating from |
+| params.enabled | boolean | mandatory | Denotes if control should be enabled (true) or disabled (false) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Example
 
@@ -131,15 +131,15 @@ Enables/disables a message control.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "MessageControl.1.enable",
-    "params": {
-        "type": "Tracing",
-        "category": "Information",
-        "module": "Plugin_BluetoothControl",
-        "enabled": false
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "MessageControl.1.enable",
+  "params": {
+    "type": "Invalid",
+    "category": "Information",
+    "module": "Plugin_BluetoothControl",
+    "enabled": false
+  }
 }
 ```
 
@@ -147,9 +147,9 @@ Enables/disables a message control.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": null
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
 }
 ```
 
@@ -160,15 +160,15 @@ The following properties are provided by the MessageControl plugin:
 
 MessageControl interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [controls](#property.controls) <sup>RO</sup> | Retrieves a list of current message controls |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [modules](#property.modules) | read-only | Retrieves a list of current message modules |
+| [controls](#property.controls) | read-only | Retrieves a list of current message controls for a specific module |
 
+<a name="property.modules"></a>
+## *modules [<sup>property</sup>](#head.Properties)*
 
-<a name="property.controls"></a>
-## *controls [<sup>property</sup>](#head.Properties)*
-
-Provides access to the retrieves a list of current message controls.
+Provides access to the retrieves a list of current message modules.
 
 > This property is **read-only**.
 
@@ -176,14 +176,10 @@ Provides access to the retrieves a list of current message controls.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | array | Retrieves a list of current message controls |
-| result[#] | object |  |
-| result[#].type | string | Type of message (must be one of the following: *Tracing*, *Logging*) |
-| result[#].category | string | Name of the message category |
-| result[#].module | string | Name of the module the message is originating from |
-| result[#].enabled | boolean | Denotes if the control is enabled (true) or disabled (false) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Retrieves a list of current message modules |
+| result[#] | string | mandatory | *...* |
 
 ### Example
 
@@ -191,9 +187,9 @@ Provides access to the retrieves a list of current message controls.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "MessageControl.1.controls"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "MessageControl.1.modules"
 }
 ```
 
@@ -201,16 +197,68 @@ Provides access to the retrieves a list of current message controls.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": [
-        {
-            "type": "Tracing",
-            "category": "Information",
-            "module": "Plugin_BluetoothControl",
-            "enabled": false
-        }
-    ]
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "..."
+  ]
+}
+```
+
+<a name="property.controls"></a>
+## *controls [<sup>property</sup>](#head.Properties)*
+
+Provides access to the retrieves a list of current message controls for a specific module.
+
+> This property is **read-only**.
+
+> The *module* parameter shall be passed as the index to the property, e.g. ``MessageControl.1.controls@<module>``.
+
+### Index
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| module | string | mandatory | *...* |
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Retrieves a list of current message controls for a specific module |
+| result[#] | object | mandatory | *...* |
+| result[#].type | string | mandatory | Type of message (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Tracing*) |
+| result[#].category | string | mandatory | Name of the message category |
+| result[#].module | string | mandatory | Name of the module the message is originating from |
+| result[#].enabled | boolean | mandatory | Denotes if the control is enabled (true) or disabled (false) |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "MessageControl.1.controls@xyz"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "type": "Invalid",
+      "category": "Information",
+      "module": "Plugin_BluetoothControl",
+      "enabled": false
+    }
+  ]
 }
 ```
 

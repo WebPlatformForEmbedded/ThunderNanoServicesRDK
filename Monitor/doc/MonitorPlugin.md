@@ -95,6 +95,7 @@ This plugin implements the following interfaces:
 
 - [Monitor.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/Monitor.json) (version 1.0.0) (compliant format)
 - IMemoryMonitor ([IMemoryMonitor.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMemoryMonitor.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
@@ -337,7 +338,7 @@ Provides access to the service statistics.
 
 > This property is **read-only**.
 
-> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.status@<callsign>``.
+> The *callsign* parameter shall be passed as the index to the property, e.g. ``Monitor.1.status@<callsign>``.
 
 ### Index
 
@@ -444,7 +445,7 @@ Provides access to the service statistics.
 
 Provides access to the limits of restarting of a service.
 
-> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.restartinglimits@<callsign>``.
+> The *callsign* parameter shall be passed as the index to the property, e.g. ``Monitor.1.restartinglimits@<callsign>``.
 
 ### Index
 
@@ -567,7 +568,7 @@ Provides access to the memory statistics for a given service.
 
 > This property is **read-only**.
 
-> The *callsign* argument shall be passed as the index to the property, e.g. ``Monitor.1.measurementdata@<callsign>``.
+> The *callsign* parameter shall be passed as the index to the property, e.g. ``Monitor.1.measurementdata@<callsign>``.
 
 ### Index
 
@@ -678,7 +679,7 @@ MemoryMonitor interface events:
 
 Signals an action taken by the Monitor.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -698,17 +699,17 @@ Signals an action taken by the Monitor.
   "method": "Monitor.1.register",
   "params": {
     "event": "action",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.action",
+  "method": "myid.action",
   "params": {
     "callsign": "WebServer",
     "action": "Deactivate",
@@ -722,7 +723,7 @@ Signals an action taken by the Monitor.
 
 Signals an action taken by the Monitor.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -742,17 +743,17 @@ Signals an action taken by the Monitor.
   "method": "Monitor.1.register",
   "params": {
     "event": "statuschanged",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.statuschanged",
+  "method": "myid.statuschanged",
   "params": {
     "callsign": "WebServer",
     "action": "Deactivate",
