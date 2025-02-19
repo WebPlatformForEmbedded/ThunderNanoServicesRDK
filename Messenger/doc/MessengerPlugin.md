@@ -70,12 +70,12 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *Messenger*) |
-| classname | string | Class name: *Messenger* |
-| locator | string | Library name: *libThunderMessenger.so* |
-| startmode | string | Determines in which state the plugin should be moved to at startup of the framework |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *Messenger*) |
+| classname | string | mandatory | Class name: *Messenger* |
+| locator | string | mandatory | Library name: *libThunderMessenger.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -83,6 +83,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - IMessenger ([IMessenger.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessenger.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
@@ -108,20 +109,20 @@ If the specified room does not exist, then it will be created.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.room | string | Name of the room to join |
-| params.user | string | Name of ther user to join as |
-| params?.secure | string | <sup>*(optional)*</sup> Denotes if the room is secure (by default not secure) (must be one of the following: *insecure, secure*) |
-| params?.acl | array | <sup>*(optional)*</sup> List of URL origins with possible wildcards |
-| params?.acl[#] | string | <sup>*(optional)*</sup> *...* |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.room | string | mandatory | Name of the room to join |
+| params.user | string | mandatory | Name of ther user to join as |
+| params?.secure | string | optional | Denotes if the room is secure (by default not secure) (must be one of the following: *insecure, secure*) |
+| params?.acl | array | optional | List of URL origins with possible wildcards |
+| params?.acl[#] | string | optional | *...* |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| roomid | string | Token for accessing the room (unique for a user) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | string | mandatory | Token for accessing the room (unique for a user) |
 
 ### Errors
 
@@ -172,16 +173,16 @@ The room ID becomes invalid after this call. If there are no more users, the roo
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.roomid | string | Token of the room to leave |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.roomid | string | mandatory | Token of the room to leave |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Errors
 
@@ -221,17 +222,17 @@ Sends a message to a messaging room.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.roomid | string | Token of the room to send the message to |
-| params.message | string | Contents of the message to send |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.roomid | string | mandatory | Token of the room to send the message to |
+| params.message | string | mandatory | Contents of the message to send |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | null | Always null |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
 
 ### Errors
 
@@ -291,14 +292,14 @@ Immediately after registering to this notification the listener will sequentiall
 
 > If applicable, this notification may be sent out during registration, reflecting the current status.
 
-### Parameters
+### Notification Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.room | string | Name of the room that has changed its status |
-| params.action | string | New room status (must be one of the following: *created, destroyed*) |
-| params.secure | string | Denotes if the room is secure (must be one of the following: *insecure, secure*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.room | string | mandatory | Name of the room that has changed its status |
+| params.action | string | mandatory | New room status (must be one of the following: *created, destroyed*) |
+| params.secure | string | mandatory | Denotes if the room is secure (must be one of the following: *insecure, secure*) |
 
 ### Example
 
@@ -311,17 +312,17 @@ Immediately after registering to this notification the listener will sequentiall
   "method": "Messenger.1.register",
   "params": {
     "event": "roomupdate",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.roomupdate",
+  "method": "myid.roomupdate",
   "params": {
     "room": "Lounge",
     "action": "created",
@@ -343,13 +344,15 @@ Immediately after registering to this notification the listener will sequentiall
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.user | string | Name of the user that has changed its status |
-| params.action | string | New user status (must be one of the following: *joined, left*) |
+> The *roomId* parameter shall be passed within the client ID during registration, e.g. *1e217990dd1cd4f66124.myid*
 
-> The *roomId* argument will be passed within the designator, e.g. *1e217990dd1cd4f66124.client.userupdate*.
+### Notification Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.user | string | mandatory | Name of the user that has changed its status |
+| params.action | string | mandatory | New user status (must be one of the following: *joined, left*) |
 
 ### Example
 
@@ -362,23 +365,25 @@ Immediately after registering to this notification the listener will sequentiall
   "method": "Messenger.1.register",
   "params": {
     "event": "userupdate",
-    "id": "1e217990dd1cd4f66124.client"
+    "id": "1e217990dd1cd4f66124.myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "1e217990dd1cd4f66124.client.userupdate",
+  "method": "1e217990dd1cd4f66124.myid.userupdate",
   "params": {
     "user": "Bob",
     "action": "joined"
   }
 }
 ```
+
+> The *roomId* parameter is passed within the designator, e.g. *1e217990dd1cd4f66124.myid.userupdate*.
 
 <a name="notification.message"></a>
 ## *message [<sup>notification</sup>](#head.Notifications)*
@@ -387,13 +392,15 @@ Notifies of messages sent the the room.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object | *...* |
-| params.user | string | Name of the user that has sent the message |
-| params.message | string | Contents of the sent message |
+> The *roomId* parameter shall be passed within the client ID during registration, e.g. *1e217990dd1cd4f66124.myid*
 
-> The *roomId* argument will be passed within the designator, e.g. *1e217990dd1cd4f66124.client.message*.
+### Notification Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.user | string | mandatory | Name of the user that has sent the message |
+| params.message | string | mandatory | Contents of the sent message |
 
 ### Example
 
@@ -406,21 +413,23 @@ Notifies of messages sent the the room.
   "method": "Messenger.1.register",
   "params": {
     "event": "message",
-    "id": "1e217990dd1cd4f66124.client"
+    "id": "1e217990dd1cd4f66124.myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "1e217990dd1cd4f66124.client.message",
+  "method": "1e217990dd1cd4f66124.myid.message",
   "params": {
     "user": "Bob",
     "message": "Hello!"
   }
 }
 ```
+
+> The *roomId* parameter is passed within the designator, e.g. *1e217990dd1cd4f66124.myid.message*.
 

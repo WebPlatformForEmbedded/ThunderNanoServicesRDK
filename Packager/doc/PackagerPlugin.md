@@ -82,6 +82,7 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - IPackager ([IPackager.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IPackager.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
