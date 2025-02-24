@@ -28,7 +28,7 @@ jobs:
           echo "deb http://archive.ubuntu.com/ubuntu/ jammy-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib' || 'zlib1g-dev libssl-dev'}}
+          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev autoconf automake libtool libtool-bin pkg-config libarchive-dev libcurl4-openssl-dev libgpgme-dev ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib' || 'zlib1g-dev libssl-dev'}}
           python3 -m venv venv
           source venv/bin/activate
           pip install jsonref
@@ -60,7 +60,21 @@ jobs:
         regex_flags: 'gim'
         search_string: ${{github.event.pull_request.body}}
 
+    - name: Checkout OPKG
+      uses: actions/checkout@v4
+      with:
+        path: opkg
+        repository: oe-mirrors/opkg
+
 # ----- Build & upload artifacts -----
+    - name: Build libopkg
+      run: |
+        cd opkg
+        ./autogen.sh || true
+        ./configure --prefix=/usr/local/include/libopkg
+        make
+        sudo make install
+
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
@@ -77,6 +91,7 @@ jobs:
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
         -DPLUGIN_PERFORMANCEMETRICS=ON \
+        -DPLUGIN_PACKAGER=ON \
         ${{steps.plugins.outputs.first_match}}
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
 
