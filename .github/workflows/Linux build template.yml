@@ -71,7 +71,7 @@ jobs:
       run: |
         cd opkg
         ./autogen.sh || true
-        ./configure --prefix=/usr/local/include/libopkg
+        ./configure --prefix=/usr/local
         make
         sudo make install
 
