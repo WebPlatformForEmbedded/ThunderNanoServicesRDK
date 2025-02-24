@@ -7,6 +7,9 @@ jobs:
   ThunderNanoServicesRDK:
 
     runs-on: ubuntu-24.04
+    
+    env:
+      PKG_CONFIG_PATH: "/usr/local/include/libopkg:$PKG_CONFIG_PATH"
 
     strategy:
       matrix:
@@ -75,13 +78,13 @@ jobs:
         make
         sudo make install
 
-    - name: Check PKG_CONFIG_PATH
+    - name: Debug pkg-config Paths
       run: |
         echo "PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
-
-    - name: Check pkg-config Default Paths
-      run: |
+        echo "Default pkg-config path:"
         pkg-config --variable=pc_path pkg-config
+        echo "Attempting to locate libopkg:"
+        pkg-config --cflags libopkg || echo "libopkg not found"
 
     - name: Build ThunderNanoServicesRDK
       run: |
