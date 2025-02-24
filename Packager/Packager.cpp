@@ -19,6 +19,8 @@
  
 #include "Packager.h"
 
+#include <interfaces/json/JPackager.h>
+
 namespace Thunder {
 namespace Plugin {
 namespace {
@@ -56,7 +58,15 @@ namespace {
             result = _T("Couldn't create PACKAGER instance ");
 
         } else {
-            if (_implementation->Configure(_service) != Core::ERROR_NONE) {
+
+            PUSH_WARNING(DISABLE_WARNING_DEPRECATED_USE)
+
+            if (_implementation->Configure(_service) == Core::ERROR_NONE) {
+
+            POP_WARNING()
+
+                Exchange::JPackager::Register(*this, _implementation);
+            } else {
                 result = _T("Couldn't initialize PACKAGER instance");
             }
         }
@@ -72,6 +82,8 @@ namespace {
             _service->Unregister(&_notification);
 
             if (_implementation != nullptr) {
+
+                Exchange::JPackager::Unregister(*this);
 
                 RPC::IRemoteConnection* connection(_service->RemoteConnection(_connectionId));
 
