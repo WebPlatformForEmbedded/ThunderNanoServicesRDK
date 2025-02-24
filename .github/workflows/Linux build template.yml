@@ -82,10 +82,23 @@ jobs:
         pkg-config --variable=pc_path pkg-config
         echo "Attempting to locate libopkg:"
         pkg-config --cflags libopkg || echo "libopkg not found"
+        pkg-config --modversion libopkg
+        pkg-config --cflags libopkg
+        pkg-config --libs libopkg
+    
+    - name: Verify libopkg include directory
+      run: |
+        if [ -d /usr/local/include/libopkg ]; then
+          echo "Directory exists."
+        else
+          echo "Directory /usr/local/include/libopkg does NOT exist."
+          ls -la /usr/local/include || true
+        fi
 
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
         cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
         -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
         -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
