@@ -75,6 +75,14 @@ jobs:
         make
         sudo make install
 
+    - name: Check PKG_CONFIG_PATH
+      run: |
+        echo "PKG_CONFIG_PATH: ${{PKG_CONFIG_PATH}}"
+
+    - name: Check pkg-config Default Paths
+      run: |
+        pkg-config --variable=pc_path pkg-config
+
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
