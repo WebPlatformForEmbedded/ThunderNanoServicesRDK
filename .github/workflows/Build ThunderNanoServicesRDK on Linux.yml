@@ -17,4 +17,4 @@ jobs:
 
   ThunderNanoServicesRDK:
     needs: ThunderInterfaces
-    uses: WebPlatformForEmbedded/ThunderNanoServicesRDK/.github/workflows/Linux build template.yml@master
+    uses: WebPlatformForEmbedded/ThunderNanoServicesRDK/.github/workflows/Linux build template.yml@development/packager-opkg-actions
