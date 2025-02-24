@@ -77,7 +77,7 @@ jobs:
 
     - name: Check PKG_CONFIG_PATH
       run: |
-        echo "PKG_CONFIG_PATH: ${{PKG_CONFIG_PATH}}"
+        echo "PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
 
     - name: Check pkg-config Default Paths
       run: |
