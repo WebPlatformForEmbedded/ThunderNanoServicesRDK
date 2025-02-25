@@ -85,6 +85,8 @@ jobs:
         pkg-config --modversion libopkg
         pkg-config --cflags libopkg
         pkg-config --libs libopkg
+        echo "ls -la /usr/local/include/opkg*:"
+        ls -la /usr/local/include/opkg*
     
     - name: Verify libopkg include directory
       run: |
