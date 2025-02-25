@@ -60,7 +60,7 @@ jobs:
         regex_flags: 'gim'
         search_string: ${{github.event.pull_request.body}}
 
-    - name: Checkout OPKG
+    - name: Checkout libopkg
       uses: actions/checkout@v4
       with:
         path: opkg
@@ -75,30 +75,10 @@ jobs:
         make
         sudo make install
 
-    - name: Debug pkg-config Paths
-      run: |
-        echo "PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
-        echo "Default pkg-config path:"
-        pkg-config --variable=pc_path pkg-config
-        echo "Attempting to locate libopkg:"
-        pkg-config --cflags libopkg || echo "libopkg not found"
-        pkg-config --modversion libopkg
-        pkg-config --cflags libopkg
-        pkg-config --libs libopkg
-
-    - name: Ls all possible paths
-      run: |
-        echo "ls -la /usr/local/include:"
-        ls -la /usr/local/include
-        echo "ls -la /usr/local/lib:"
-        ls -la /usr/local/lib
-
-    - name: Copy the OPKG headers
+    - name: Copy libopkg headers
       run: |
         sudo mkdir -p /usr/local/include/libopkg
-        sudo cp /home/runner/work/ThunderNanoServicesRDK/ThunderNanoServicesRDK/opkg/libopkg/*.h /usr/local/include/libopkg
-        echo "ls -la /usr/local/include/libopkg:"
-        ls -la /usr/local/include/libopkg
+        sudo cp $GITHUB_WORKSPACE/opkg/libopkg/*.h /usr/local/include/libopkg
 
     - name: Build ThunderNanoServicesRDK
       run: |
