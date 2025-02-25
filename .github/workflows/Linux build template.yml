@@ -71,11 +71,11 @@ jobs:
       run: |
         cd opkg
         ./autogen.sh || true
-        ./configure --prefix=/usr/local
+        ./configure --prefix=/usr/local ${{matrix.architecture == '32' && 'CFLAGS="-m32" LDFLAGS="-m32"' || ''}}
         make
         sudo make install
 
-    - name: Copy libopkg headers
+    - name: Install libopkg headers
       run: |
         sudo mkdir -p /usr/local/include/libopkg
         sudo cp $GITHUB_WORKSPACE/opkg/libopkg/*.h /usr/local/include/libopkg
