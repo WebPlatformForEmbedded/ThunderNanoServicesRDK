@@ -128,13 +128,9 @@ namespace Plugin {
             , _isUpgrade(false)
             , _isSyncing(false)
         {
-            Exchange::JPackager::Register(*this, this);
         }
 
-        ~PackagerImplementation() override
-        {
-            Exchange::JPackager::Unregister(*this);
-        }
+        ~PackagerImplementation() override;
 
         BEGIN_INTERFACE_MAP(PackagerImplementation)
             INTERFACE_ENTRY(Exchange::IPackager)
