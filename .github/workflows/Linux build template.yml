@@ -93,6 +93,13 @@ jobs:
         echo "ls -la /usr/local/lib:"
         ls -la /usr/local/lib
 
+    - name: Copy the OPKG headers
+      run: |
+        sudo mkdir -p /usr/local/include/libopkg
+        sudo cp /home/runner/work/ThunderNanoServicesRDK/ThunderNanoServicesRDK/opkg/libopkg/*.h /usr/local/include/libopkg
+        echo "ls -la /usr/local/include/libopkg:"
+        ls -la /usr/local/include/libopkg
+
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
