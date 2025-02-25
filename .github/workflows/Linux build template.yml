@@ -71,7 +71,7 @@ jobs:
       run: |
         cd opkg
         ./autogen.sh || true
-        ./configure --prefix=/usr/local --includedir=/usr/local/include/libopkg
+        ./configure --prefix=/usr/local
         make
         sudo make install
 
@@ -92,17 +92,6 @@ jobs:
         ls -la /usr/local/include
         echo "ls -la /usr/local/lib:"
         ls -la /usr/local/lib
-        echo "ls -la /usr/local/include/libopkg:"
-        ls -la /usr/local/include/libopkg
-    
-    - name: Verify libopkg include directory
-      run: |
-        if [ -d /usr/local/include/libopkg ]; then
-          echo "Directory exists."
-        else
-          echo "Directory /usr/local/include/libopkg does NOT exist."
-          ls -la /usr/local/include || true
-        fi
 
     - name: Build ThunderNanoServicesRDK
       run: |
