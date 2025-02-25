@@ -69,6 +69,7 @@ jobs:
 # ----- Build & upload artifacts -----
     - name: Build libopkg
       run: |
+        ${{matrix.architecture == '32' && 'export PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig:$PKG_CONFIG_PATH' || 'PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH'}}
         cd opkg
         ./autogen.sh || true
         ./configure --prefix=/usr/local ${{matrix.architecture == '32' && 'CFLAGS="-m32" LDFLAGS="-m32"' || ''}}
