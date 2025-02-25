@@ -85,8 +85,15 @@ jobs:
         pkg-config --modversion libopkg
         pkg-config --cflags libopkg
         pkg-config --libs libopkg
-        echo "ls -la /usr/local/include/opkg*:"
-        ls -la /usr/local/include/opkg*
+
+    - name: Ls all possible paths
+      run: |
+        echo "ls -la /usr/local/include:"
+        ls -la /usr/local/include
+        echo "ls -la /usr/local/lib:"
+        ls -la /usr/local/lib
+        echo "ls -la /usr/local/include/libopkg:"
+        ls -la /usr/local/include/libopkg
     
     - name: Verify libopkg include directory
       run: |
