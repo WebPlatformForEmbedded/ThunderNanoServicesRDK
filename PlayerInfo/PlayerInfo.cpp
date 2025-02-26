@@ -37,9 +37,6 @@ namespace Plugin {
         );
     }
 
-    static Core::ProxyPoolType<Web::Response> responseFactory(4);
-    static Core::ProxyPoolType<Web::JSONBodyType<JsonData::PlayerInfo::CodecsData>> jsonResponseFactory(4);
-
     /* virtual */ const string PlayerInfo::Initialize(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
@@ -139,58 +136,6 @@ namespace Plugin {
     {
         // No additional info to report.
         return (string());
-    }
-
-    /* virtual */ void PlayerInfo::Inbound(Web::Request& /* request */)
-    {
-    }
-
-    /* virtual */ Core::ProxyType<Web::Response> PlayerInfo::Process(const Web::Request& request)
-    {
-        ASSERT(_skipURL <= request.Path.length());
-
-        Core::ProxyType<Web::Response> result(PluginHost::IFactories::Instance().Response());
-
-        // By default, we assume everything works..
-        result->ErrorCode = Web::STATUS_OK;
-        result->Message = "OK";
-
-        // <GET> - currently, only the GET command is supported, returning system info
-        if (request.Verb == Web::Request::HTTP_GET) {
-
-            Core::ProxyType<Web::JSONBodyType<JsonData::PlayerInfo::CodecsData>> response(jsonResponseFactory.Element());
-
-            Core::TextSegmentIterator index(Core::TextFragment(request.Path, _skipURL, static_cast<uint32_t>(request.Path.length()) - _skipURL), false, '/');
-
-            // Always skip the first one, it is an empty part because we start with a '/' if there are more parameters.
-            index.Next();
-
-            Info(*response);
-            result->ContentType = Web::MIMETypes::MIME_JSON;
-            result->Body(Core::ProxyType<Web::IBody>(response));
-        } else {
-            result->ErrorCode = Web::STATUS_BAD_REQUEST;
-            result->Message = _T("Unsupported request for the [PlayerInfo] service.");
-        }
-
-        return result;
-    }
-
-    void PlayerInfo::Info(JsonData::PlayerInfo::CodecsData& playerInfo) const
-    {
-        Core::JSON::EnumType<JsonData::PlayerInfo::CodecsData::AudiocodecsType> audioCodec;
-        _audioCodecs->Reset(0);
-        Exchange::IPlayerProperties::AudioCodec audio;
-        while (_audioCodecs->Next(audio) == true) {
-            playerInfo.Audio.Add(audioCodec = static_cast<JsonData::PlayerInfo::CodecsData::AudiocodecsType>(audio));
-        }
-
-        Core::JSON::EnumType<JsonData::PlayerInfo::CodecsData::VideocodecsType> videoCodec;
-        Exchange::IPlayerProperties::VideoCodec video;
-        _videoCodecs->Reset(0);
-        while (_videoCodecs->Next(video) == true) {
-            playerInfo.Video.Add(videoCodec = static_cast<JsonData::PlayerInfo::CodecsData::VideocodecsType>(video));
-        }
     }
 
     void PlayerInfo::Deactivated(RPC::IRemoteConnection* connection)

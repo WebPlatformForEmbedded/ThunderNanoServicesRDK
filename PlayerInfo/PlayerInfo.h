@@ -20,14 +20,13 @@
 #pragma once
 
 #include "Module.h"
-#include <interfaces/json/JsonData_PlayerInfo.h>
 #include <interfaces/json/JDolbyOutput.h>
 #include <interfaces/json/JPlayerProperties.h>
 
 namespace Thunder {
 namespace Plugin {
 
-    class PlayerInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
+    class PlayerInfo : public PluginHost::IPlugin, public PluginHost::JSONRPC {
     private:
         class Notification : public RPC::IRemoteConnection::INotification {
         public:
@@ -125,7 +124,6 @@ namespace Plugin {
 
         BEGIN_INTERFACE_MAP(PlayerInfo)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
         INTERFACE_AGGREGATE(Exchange::IPlayerProperties, _player)
         END_INTERFACE_MAP
@@ -137,14 +135,8 @@ namespace Plugin {
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override;
 
-        //   IWeb methods
-        // -------------------------------------------------------------------------------------------------------
-        void Inbound(Web::Request& request) override;
-        Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
-
     private:
         void Deactivated(RPC::IRemoteConnection* connection);
-        void Info(JsonData::PlayerInfo::CodecsData&) const;
 
     private:
         uint8_t _skipURL;
