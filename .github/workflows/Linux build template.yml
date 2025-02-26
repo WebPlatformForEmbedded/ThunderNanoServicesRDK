@@ -28,7 +28,7 @@ jobs:
           echo "deb http://archive.ubuntu.com/ubuntu/ jammy-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev libgstreamer1.0-dev autoconf automake libtool libtool-bin pkg-config ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib libarchive-dev:i386 libcurl4-openssl-dev:i386 libgpgme-dev:i386 libgpg-error-dev:i386' || 'zlib1g-dev libssl-dev libarchive-dev libcurl4-openssl-dev libgpgme-dev libgpg-error-dev'}}
+          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev autoconf automake libtool libtool-bin pkg-config ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib libarchive-dev:i386 libcurl4-openssl-dev:i386 libgpgme-dev:i386 libgpg-error-dev:i386 libgstreamer1.0-dev:i386' || 'zlib1g-dev libssl-dev libarchive-dev libcurl4-openssl-dev libgpgme-dev libgpg-error-dev libgstreamer1.0-dev'}}
           python3 -m venv venv
           source venv/bin/activate
           pip install jsonref
@@ -84,7 +84,7 @@ jobs:
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
-        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/${{matrix.architecture == '32' && 'i386' || 'x86_64'}}-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
         cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
         -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
         -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
