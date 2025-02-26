@@ -87,6 +87,7 @@ This plugin implements the following interfaces:
 
 - [OCDM.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/OCDM.json) (version 1.0.0) (uncompliant-extended format)
 - IOpenCDM ([IOCDM.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IOCDM.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Properties"></a>
 # Properties
@@ -163,7 +164,7 @@ Provides access to the DRM key systems.
 
 > This property is **read-only**.
 
-> The *drm system* argument shall be passed as the index to the property, e.g. ``OCDM.1.keysystems@<drm-system>``.
+> The *drm system* parameter shall be passed as the index to the property, e.g. ``OCDM.1.keysystems@<drm-system>``.
 
 ### Index
 
@@ -300,7 +301,7 @@ Provides access to the designators of a specified DRM system.
 
 > This property is **read-only**.
 
-> The *keysystem* argument shall be passed as the index to the property, e.g. ``OCDM.1.designators@<keysystem>``.
+> The *keysystem* parameter shall be passed as the index to the property, e.g. ``OCDM.1.designators@<keysystem>``.
 
 ### Index
 
@@ -370,7 +371,7 @@ Signals that the specified DRM system could not be initialized because it is alr
 
 When this event is received, the application owning given DRM system should release it immediately.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -388,17 +389,17 @@ When this event is received, the application owning given DRM system should rele
   "method": "OCDM.1.register",
   "params": {
     "event": "drmalreadyinitialized",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.drmalreadyinitialized",
+  "method": "myid.drmalreadyinitialized",
   "params": {
     "drm": "PlayReady"
   }
@@ -414,7 +415,7 @@ Notifies about DRM initialization status.
 
 Register to this event to be notified about DRM retrying status busy/failure/success
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -433,17 +434,17 @@ Register to this event to be notified about DRM retrying status busy/failure/suc
   "method": "OCDM.1.register",
   "params": {
     "event": "drminitializationstatus",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.drminitializationstatus",
+  "method": "myid.drminitializationstatus",
   "params": {
     "status": "SUCCESS",
     "drm": "PlayReady"

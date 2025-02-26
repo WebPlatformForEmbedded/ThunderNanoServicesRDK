@@ -109,11 +109,20 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - IWebBrowser ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
+
 - IWebBrowserExt ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
+
 - IBrowserResources ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
 - IBrowserSecurity ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
+
 - IBrowserScripting ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
+
 - IBrowserCookieJar ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
@@ -124,24 +133,24 @@ WebBrowser interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [collectGarbage](#method.collectGarbage) | Initiate garbage collection |
+| [collectgarbage](#method.collectgarbage) | Initiate garbage collection |
 
 WebBrowserExt interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [deletedir](#method.deletedir) / [delete](#method.deletedir) | Removes contents of a directory from the persistent storage |
+| [delete](#method.delete) / [deletedir](#method.delete) | Removes contents of a directory from the persistent storage |
 
 BrowserScripting interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [runJavaScript](#method.runJavaScript) | Run javascript in main frame |
-| [addUserScript](#method.addUserScript) | Add user script to be executed at document start |
-| [removeAllUserScripts](#method.removeAllUserScripts) | Remove all user scripts |
+| [runjavascript](#method.runjavascript) | Run javascript in main frame |
+| [adduserscript](#method.adduserscript) | Add user script to be executed at document start |
+| [removealluserscripts](#method.removealluserscripts) | Remove all user scripts |
 
-<a name="method.collectGarbage"></a>
-## *collectGarbage [<sup>method</sup>](#head.Methods)*
+<a name="method.collectgarbage"></a>
+## *collectgarbage [<sup>method</sup>](#head.Methods)*
 
 Initiate garbage collection.
 
@@ -163,7 +172,7 @@ This method takes no parameters.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.collectGarbage"
+  "method": "WebKitBrowser.1.collectgarbage"
 }
 ```
 
@@ -177,12 +186,12 @@ This method takes no parameters.
 }
 ```
 
-<a name="method.deletedir"></a>
-## *deletedir [<sup>method</sup>](#head.Methods)*
+<a name="method.delete"></a>
+## *delete [<sup>method</sup>](#head.Methods)*
 
 Removes contents of a directory from the persistent storage.
 
-> ``delete`` is an alternative name for this method. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
+> ``deletedir`` is an alternative name for this method. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
 
 ### Parameters
 
@@ -211,7 +220,7 @@ Removes contents of a directory from the persistent storage.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.deletedir",
+  "method": "WebKitBrowser.1.delete",
   "params": {
     "path": ".cache/wpe/disk-cache"
   }
@@ -228,8 +237,8 @@ Removes contents of a directory from the persistent storage.
 }
 ```
 
-<a name="method.runJavaScript"></a>
-## *runJavaScript [<sup>method</sup>](#head.Methods)*
+<a name="method.runjavascript"></a>
+## *runjavascript [<sup>method</sup>](#head.Methods)*
 
 Run javascript in main frame.
 
@@ -254,7 +263,7 @@ Run javascript in main frame.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.runJavaScript",
+  "method": "WebKitBrowser.1.runjavascript",
   "params": {
     "script": "..."
   }
@@ -271,8 +280,8 @@ Run javascript in main frame.
 }
 ```
 
-<a name="method.addUserScript"></a>
-## *addUserScript [<sup>method</sup>](#head.Methods)*
+<a name="method.adduserscript"></a>
+## *adduserscript [<sup>method</sup>](#head.Methods)*
 
 Add user script to be executed at document start.
 
@@ -282,7 +291,7 @@ Add user script to be executed at document start.
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
 | params.script | string | mandatory | Utf8 encoded JS code string |
-| params.topFrameOnly | boolean | mandatory | Enable only top frame |
+| params.topframeonly | boolean | mandatory | Enable only top frame |
 
 ### Result
 
@@ -298,10 +307,10 @@ Add user script to be executed at document start.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.addUserScript",
+  "method": "WebKitBrowser.1.adduserscript",
   "params": {
     "script": "...",
-    "topFrameOnly": false
+    "topframeonly": false
   }
 }
 ```
@@ -316,8 +325,8 @@ Add user script to be executed at document start.
 }
 ```
 
-<a name="method.removeAllUserScripts"></a>
-## *removeAllUserScripts [<sup>method</sup>](#head.Methods)*
+<a name="method.removealluserscripts"></a>
+## *removealluserscripts [<sup>method</sup>](#head.Methods)*
 
 Remove all user scripts.
 
@@ -339,7 +348,7 @@ This method takes no parameters.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.removeAllUserScripts"
+  "method": "WebKitBrowser.1.removealluserscripts"
 }
 ```
 
@@ -366,11 +375,11 @@ WebBrowser interface properties:
 | [visibility](#property.visibility) | read/write | Browser window visibility state |
 | [fps](#property.fps) | read-only | Current framerate the browser is rendering at |
 | [headers](#property.headers) | read/write | Headers to send on all requests that the browser makes |
-| [userAgent](#property.userAgent) | read/write | UserAgent string used by the browser |
-| [localStorageEnabled](#property.localStorageEnabled) | read/write | Controls the local storage availability |
-| [httpCookieAcceptPolicy](#property.httpCookieAcceptPolicy) | read/write | HTTP cookies accept policy |
-| [bridgeReply](#property.bridgeReply) | write-only | Response for legacy $badger |
-| [bridgeEvent](#property.bridgeEvent) | write-only | Send legacy $badger event |
+| [useragent](#property.useragent) | read/write | UserAgent string used by the browser |
+| [localstorageenabled](#property.localstorageenabled) | read/write | Controls the local storage availability |
+| [httpcookieacceptpolicy](#property.httpcookieacceptpolicy) | read/write | HTTP cookies accept policy |
+| [bridgereply](#property.bridgereply) | write-only | Response for legacy $badger |
+| [bridgeevent](#property.bridgeevent) | write-only | Send legacy $badger event |
 
 WebBrowserExt interface properties:
 
@@ -389,14 +398,14 @@ BrowserSecurity interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [securityProfile](#property.securityProfile) | read/write | Security profile for secure connections |
-| [mixedContentPolicy](#property.mixedContentPolicy) | read/write | Mixed content policy |
+| [securityprofile](#property.securityprofile) | read/write | Security profile for secure connections |
+| [mixedcontentpolicy](#property.mixedcontentpolicy) | read/write | Mixed content policy |
 
 BrowserCookieJar interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [cookieJar](#property.cookieJar) | read/write | Get/Set CookieJar config details |
+| [cookiejar](#property.cookiejar) | read/write | Get/Set CookieJar config details |
 
 <a name="property.url"></a>
 ## *url [<sup>property</sup>](#head.Properties)*
@@ -615,8 +624,8 @@ Provides access to the headers to send on all requests that the browser makes.
 }
 ```
 
-<a name="property.userAgent"></a>
-## *userAgent [<sup>property</sup>](#head.Properties)*
+<a name="property.useragent"></a>
+## *useragent [<sup>property</sup>](#head.Properties)*
 
 Provides access to the userAgent string used by the browser.
 
@@ -640,7 +649,7 @@ Provides access to the userAgent string used by the browser.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.userAgent"
+  "method": "WebKitBrowser.1.useragent"
 }
 ```
 
@@ -660,7 +669,7 @@ Provides access to the userAgent string used by the browser.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.userAgent",
+  "method": "WebKitBrowser.1.useragent",
   "params": "..."
 }
 ```
@@ -675,8 +684,8 @@ Provides access to the userAgent string used by the browser.
 }
 ```
 
-<a name="property.localStorageEnabled"></a>
-## *localStorageEnabled [<sup>property</sup>](#head.Properties)*
+<a name="property.localstorageenabled"></a>
+## *localstorageenabled [<sup>property</sup>](#head.Properties)*
 
 Provides access to the controls the local storage availability.
 
@@ -700,7 +709,7 @@ Provides access to the controls the local storage availability.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.localStorageEnabled"
+  "method": "WebKitBrowser.1.localstorageenabled"
 }
 ```
 
@@ -720,7 +729,7 @@ Provides access to the controls the local storage availability.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.localStorageEnabled",
+  "method": "WebKitBrowser.1.localstorageenabled",
   "params": false
 }
 ```
@@ -735,8 +744,8 @@ Provides access to the controls the local storage availability.
 }
 ```
 
-<a name="property.httpCookieAcceptPolicy"></a>
-## *httpCookieAcceptPolicy [<sup>property</sup>](#head.Properties)*
+<a name="property.httpcookieacceptpolicy"></a>
+## *httpcookieacceptpolicy [<sup>property</sup>](#head.Properties)*
 
 Provides access to the HTTP cookies accept policy.
 
@@ -760,7 +769,7 @@ Provides access to the HTTP cookies accept policy.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.httpCookieAcceptPolicy"
+  "method": "WebKitBrowser.1.httpcookieacceptpolicy"
 }
 ```
 
@@ -780,7 +789,7 @@ Provides access to the HTTP cookies accept policy.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.httpCookieAcceptPolicy",
+  "method": "WebKitBrowser.1.httpcookieacceptpolicy",
   "params": "always"
 }
 ```
@@ -795,8 +804,8 @@ Provides access to the HTTP cookies accept policy.
 }
 ```
 
-<a name="property.bridgeReply"></a>
-## *bridgeReply [<sup>property</sup>](#head.Properties)*
+<a name="property.bridgereply"></a>
+## *bridgereply [<sup>property</sup>](#head.Properties)*
 
 Provides access to the response for legacy $badger.
 
@@ -816,7 +825,7 @@ Provides access to the response for legacy $badger.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.bridgeReply",
+  "method": "WebKitBrowser.1.bridgereply",
   "params": "..."
 }
 ```
@@ -831,8 +840,8 @@ Provides access to the response for legacy $badger.
 }
 ```
 
-<a name="property.bridgeEvent"></a>
-## *bridgeEvent [<sup>property</sup>](#head.Properties)*
+<a name="property.bridgeevent"></a>
+## *bridgeevent [<sup>property</sup>](#head.Properties)*
 
 Provides access to the send legacy $badger event.
 
@@ -852,7 +861,7 @@ Provides access to the send legacy $badger event.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.bridgeEvent",
+  "method": "WebKitBrowser.1.bridgeevent",
   "params": "..."
 }
 ```
@@ -1065,8 +1074,8 @@ Provides access to the user style sheets used by the browser.
 }
 ```
 
-<a name="property.securityProfile"></a>
-## *securityProfile [<sup>property</sup>](#head.Properties)*
+<a name="property.securityprofile"></a>
+## *securityprofile [<sup>property</sup>](#head.Properties)*
 
 Provides access to the security profile for secure connections.
 
@@ -1090,7 +1099,7 @@ Provides access to the security profile for secure connections.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.securityProfile"
+  "method": "WebKitBrowser.1.securityprofile"
 }
 ```
 
@@ -1110,7 +1119,7 @@ Provides access to the security profile for secure connections.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.securityProfile",
+  "method": "WebKitBrowser.1.securityprofile",
   "params": "..."
 }
 ```
@@ -1125,8 +1134,8 @@ Provides access to the security profile for secure connections.
 }
 ```
 
-<a name="property.mixedContentPolicy"></a>
-## *mixedContentPolicy [<sup>property</sup>](#head.Properties)*
+<a name="property.mixedcontentpolicy"></a>
+## *mixedcontentpolicy [<sup>property</sup>](#head.Properties)*
 
 Provides access to the mixed content policy.
 
@@ -1150,7 +1159,7 @@ Provides access to the mixed content policy.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.mixedContentPolicy"
+  "method": "WebKitBrowser.1.mixedcontentpolicy"
 }
 ```
 
@@ -1170,7 +1179,7 @@ Provides access to the mixed content policy.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.mixedContentPolicy",
+  "method": "WebKitBrowser.1.mixedcontentpolicy",
   "params": "allowed"
 }
 ```
@@ -1185,8 +1194,8 @@ Provides access to the mixed content policy.
 }
 ```
 
-<a name="property.cookieJar"></a>
-## *cookieJar [<sup>property</sup>](#head.Properties)*
+<a name="property.cookiejar"></a>
+## *cookiejar [<sup>property</sup>](#head.Properties)*
 
 Provides access to the get/Set CookieJar config details.
 
@@ -1216,7 +1225,7 @@ Provides access to the get/Set CookieJar config details.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.cookieJar"
+  "method": "WebKitBrowser.1.cookiejar"
 }
 ```
 
@@ -1240,7 +1249,7 @@ Provides access to the get/Set CookieJar config details.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "WebKitBrowser.1.cookieJar",
+  "method": "WebKitBrowser.1.cookiejar",
   "params": {
     "version": 0,
     "checksum": 0,
@@ -1270,25 +1279,25 @@ WebBrowser interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [loadFinished](#notification.loadFinished) | Initial HTML document has been completely loaded and parsed |
-| [loadFailed](#notification.loadFailed) | Browser failed to load page |
-| [urlChange](#notification.urlChange) | Signals a URL change in the browser |
-| [visibilityChange](#notification.visibilityChange) | Signals a visibility change of the browser |
-| [pageClosure](#notification.pageClosure) | Notifies that the web page requests to close its window |
-| [bridgeQuery](#notification.bridgeQuery) | A Base64 encoded JSON message from legacy $badger bridge |
+| [loadfinished](#notification.loadfinished) | Initial HTML document has been completely loaded and parsed |
+| [loadfailed](#notification.loadfailed) | Browser failed to load page |
+| [urlchange](#notification.urlchange) | Signals a URL change in the browser |
+| [visibilitychange](#notification.visibilitychange) | Signals a visibility change of the browser |
+| [pageclosure](#notification.pageclosure) | Notifies that the web page requests to close its window |
+| [bridgequery](#notification.bridgequery) | A Base64 encoded JSON message from legacy $badger bridge |
 
 BrowserCookieJar interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [cookieJarChanged](#notification.cookieJarChanged) | Notifies that cookies were added, removed or modified |
+| [cookiejarchanged](#notification.cookiejarchanged) | Notifies that cookies were added, removed or modified |
 
-<a name="notification.loadFinished"></a>
-## *loadFinished [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.loadfinished"></a>
+## *loadfinished [<sup>notification</sup>](#head.Notifications)*
 
 Initial HTML document has been completely loaded and parsed.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -1306,18 +1315,18 @@ Initial HTML document has been completely loaded and parsed.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "loadFinished",
-    "id": "client"
+    "event": "loadfinished",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.loadFinished",
+  "method": "myid.loadfinished",
   "params": {
     "url": "https://example.com",
     "httpstatus": 200
@@ -1325,12 +1334,12 @@ Initial HTML document has been completely loaded and parsed.
 }
 ```
 
-<a name="notification.loadFailed"></a>
-## *loadFailed [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.loadfailed"></a>
+## *loadfailed [<sup>notification</sup>](#head.Notifications)*
 
 Browser failed to load page.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -1347,30 +1356,30 @@ Browser failed to load page.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "loadFailed",
-    "id": "client"
+    "event": "loadfailed",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.loadFailed",
+  "method": "myid.loadfailed",
   "params": {
     "url": "https://example.com"
   }
 }
 ```
 
-<a name="notification.urlChange"></a>
-## *urlChange [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.urlchange"></a>
+## *urlchange [<sup>notification</sup>](#head.Notifications)*
 
 Signals a URL change in the browser.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -1388,18 +1397,18 @@ Signals a URL change in the browser.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "urlChange",
-    "id": "client"
+    "event": "urlchange",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.urlChange",
+  "method": "myid.urlchange",
   "params": {
     "url": "https://example.com",
     "loaded": false
@@ -1407,12 +1416,12 @@ Signals a URL change in the browser.
 }
 ```
 
-<a name="notification.visibilityChange"></a>
-## *visibilityChange [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.visibilitychange"></a>
+## *visibilitychange [<sup>notification</sup>](#head.Notifications)*
 
 Signals a visibility change of the browser.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -1429,30 +1438,30 @@ Signals a visibility change of the browser.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "visibilityChange",
-    "id": "client"
+    "event": "visibilitychange",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.visibilityChange",
+  "method": "myid.visibilitychange",
   "params": {
     "hidden": false
   }
 }
 ```
 
-<a name="notification.pageClosure"></a>
-## *pageClosure [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.pageclosure"></a>
+## *pageclosure [<sup>notification</sup>](#head.Notifications)*
 
 Notifies that the web page requests to close its window.
 
-### Parameters
+### Notification Parameters
 
 This notification carries no parameters.
 
@@ -1466,27 +1475,27 @@ This notification carries no parameters.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "pageClosure",
-    "id": "client"
+    "event": "pageclosure",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.pageClosure"
+  "method": "myid.pageclosure"
 }
 ```
 
-<a name="notification.bridgeQuery"></a>
-## *bridgeQuery [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.bridgequery"></a>
+## *bridgequery [<sup>notification</sup>](#head.Notifications)*
 
 A Base64 encoded JSON message from legacy $badger bridge.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -1503,30 +1512,30 @@ A Base64 encoded JSON message from legacy $badger bridge.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "bridgeQuery",
-    "id": "client"
+    "event": "bridgequery",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.bridgeQuery",
+  "method": "myid.bridgequery",
   "params": {
     "message": "..."
   }
 }
 ```
 
-<a name="notification.cookieJarChanged"></a>
-## *cookieJarChanged [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.cookiejarchanged"></a>
+## *cookiejarchanged [<sup>notification</sup>](#head.Notifications)*
 
 Notifies that cookies were added, removed or modified.
 
-### Parameters
+### Notification Parameters
 
 This notification carries no parameters.
 
@@ -1540,18 +1549,18 @@ This notification carries no parameters.
   "id": 42,
   "method": "WebKitBrowser.1.register",
   "params": {
-    "event": "cookieJarChanged",
-    "id": "client"
+    "event": "cookiejarchanged",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.cookieJarChanged"
+  "method": "myid.cookiejarchanged"
 }
 ```
 

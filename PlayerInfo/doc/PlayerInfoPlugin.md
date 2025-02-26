@@ -6,7 +6,7 @@
 
 **Status: :black_circle::black_circle::white_circle:**
 
-A PlayerInfo plugin for Thunder framework.
+PlayerInfo plugin for Thunder framework.
 
 ### Table of Contents
 
@@ -14,7 +14,6 @@ A PlayerInfo plugin for Thunder framework.
 - [Description](#head.Description)
 - [Configuration](#head.Configuration)
 - [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
 - [Properties](#head.Properties)
 - [Notifications](#head.Notifications)
 
@@ -24,7 +23,7 @@ A PlayerInfo plugin for Thunder framework.
 <a name="head.Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the PlayerInfo plugin. It includes detailed specification about its configuration, methods and properties provided, as well as notifications sent.
+This document describes purpose and functionality of the PlayerInfo plugin. It includes detailed specification about its configuration, properties provided and notifications sent.
 
 <a name="head.Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -71,109 +70,23 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *PlayerInfo*) |
-| classname | string | Class name: *PlayerInfo* |
-| locator | string | Library name: *libWPEPlayerInfo.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *PlayerInfo*) |
+| classname | string | mandatory | Class name: *PlayerInfo* |
+| locator | string | mandatory | Library name: *libWPEPlayerInfo.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
 
 <a name="head.Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
-- Exchange::IPlayerProperties ([IPlayerInfo.h](https://github.com/rdkcentral/ThunderInterfaces/tree/master/interfaces/IPlayerInfo.h))
-- Exchange::Dolby::IOutput ([IDolby.h](https://github.com/rdkcentral/ThunderInterfaces/tree/master/interfaces/IDolby.h))
+- IPlayerProperties ([IPlayerInfo.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IPlayerInfo.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
-<a name="head.Methods"></a>
-# Methods
-
-The following methods are provided by the PlayerInfo plugin:
-
-PlayerProperties interface methods:
-
-| Method | Description |
-| :-------- | :-------- |
-| [audiocodecs](#method.audiocodecs) |  |
-| [videocodecs](#method.videocodecs) |  |
-
-
-<a name="method.audiocodecs"></a>
-## *audiocodecs [<sup>method</sup>](#head.Methods)*
-
-### Parameters
-
-This method takes no parameters.
-
-### Result
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| codec | array |  |
-| codec[#] | string |  (must be one of the following: *AudioUndefined*, *AudioAac*, *AudioAc3*, *AudioAc3Plus*, *AudioDts*, *AudioMpeg1*, *AudioMpeg2*, *AudioMpeg3*, *AudioMpeg4*, *AudioOpus*, *AudioVorbisOgg*, *AudioWav*) |
-
-### Example
-
-#### Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.audiocodecs"
-}
-```
-
-#### Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": [
-        "AudioUndefined"
-    ]
-}
-```
-
-<a name="method.videocodecs"></a>
-## *videocodecs [<sup>method</sup>](#head.Methods)*
-
-### Parameters
-
-This method takes no parameters.
-
-### Result
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| codec | array |  |
-| codec[#] | string |  (must be one of the following: *VideoUndefined*, *VideoH263*, *VideoH264*, *VideoH265*, *VideoH26510*, *VideoMpeg*, *VideoVp8*, *VideoVp9*, *VideoVp10*) |
-
-### Example
-
-#### Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.videocodecs"
-}
-```
-
-#### Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": [
-        "VideoUndefined"
-    ]
-}
-```
+- Dolby::IOutput ([IDolby.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IDolby.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Properties"></a>
 # Properties
@@ -182,20 +95,101 @@ The following properties are provided by the PlayerInfo plugin:
 
 PlayerProperties interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [resolution](#property.resolution) <sup>RO</sup> | Current Video playback resolution |
-| [isaudioequivalenceenabled](#property.isaudioequivalenceenabled) <sup>RO</sup> | Checks Loudness Equivalence in platform |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [audiocodecs](#property.audiocodecs) | read-only | Query Audio Codecs List |
+| [videocodecs](#property.videocodecs) | read-only | Query Video Codecs List |
+| [resolution](#property.resolution) | read-only | Current Video playback resolution |
+| [isaudioequivalenceenabled](#property.isaudioequivalenceenabled) | read-only | Checks Loudness Equivalence in platform |
 
 Dolby Output interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [dolby atmosmetadata](#property.dolby_atmosmetadata) <sup>RO</sup> | Atmos capabilities of Sink |
-| [dolby soundmode](#property.dolby_soundmode) <sup>RO</sup> | Sound Mode - Mono/Stereo/Surround |
-| [dolby enableatmosoutput](#property.dolby_enableatmosoutput) <sup>WO</sup> | Enable Atmos Audio Output |
-| [dolby mode](#property.dolby_mode) | Dolby Mode |
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [dolbyatmossupported](#property.dolbyatmossupported) / [dolby_atmosmetadata](#property.dolbyatmossupported) | read-only | Atmos capabilities of Sink |
+| [dolbysoundmode](#property.dolbysoundmode) / [dolby_soundmode](#property.dolbysoundmode) | read-only | Sound Mode - Mono/Stereo/Surround |
+| [dolbyatmosoutput](#property.dolbyatmosoutput) / [dolby_enableatmosoutput](#property.dolbyatmosoutput) | write-only | Enable Atmos Audio Output |
+| [dolbymode](#property.dolbymode) / [dolby_mode](#property.dolbymode) | read/write | Dolby Mode |
 
+<a name="property.audiocodecs"></a>
+## *audiocodecs [<sup>property</sup>](#head.Properties)*
+
+Provides access to the query Audio Codecs List.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Query Audio Codecs List |
+| result[#] | string | mandatory | *...* (must be one of the following: *AudioAac, AudioAc3, AudioAc3Plus, AudioDts, AudioMpeg1, AudioMpeg2, AudioMpeg3, AudioMpeg4, AudioOpus, AudioUndefined, AudioVorbisOgg, AudioWav*) |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.audiocodecs"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "AudioUndefined"
+  ]
+}
+```
+
+<a name="property.videocodecs"></a>
+## *videocodecs [<sup>property</sup>](#head.Properties)*
+
+Provides access to the query Video Codecs List.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Query Video Codecs List |
+| result[#] | string | mandatory | *...* (must be one of the following: *VideoH263, VideoH264, VideoH265, VideoH26510, VideoMpeg, VideoMpeg2, VideoMpeg4, VideoUndefined, VideoVp10, VideoVp8, VideoVp9*) |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.videocodecs"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    "VideoUndefined"
+  ]
+}
+```
 
 <a name="property.resolution"></a>
 ## *resolution [<sup>property</sup>](#head.Properties)*
@@ -206,9 +200,11 @@ Provides access to the current Video playback resolution.
 
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| res | string | resolution (must be one of the following: *ResolutionUnknown*, *Resolution480I24*, *Resolution480I25*, *Resolution480I30*, *Resolution480I50*, *Resolution480I*, *Resolution480P24*, *Resolution480P25*, *Resolution480P30*, *Resolution480P50*, *Resolution480P*, *Resolution576I24*, *Resolution576I25*, *Resolution576I30*, *Resolution576I50*, *Resolution576I*, *Resolution576P24*, *Resolution576P25*, *Resolution576P30*, *Resolution576P50*, *Resolution576P*, *Resolution720P24*, *Resolution720P25*, *Resolution720P30*, *Resolution720P50*, *Resolution720P*, *Resolution1080I24*, *Resolution1080I25*, *Resolution1080I30*, *Resolution1080I50*, *Resolution1080I*, *Resolution1080P24*, *Resolution1080P25*, *Resolution1080P30*, *Resolution1080P50*, *Resolution1080P*, *Resolution2160P24*, *Resolution2160P25*, *Resolution2160P30*, *Resolution2160P50*, *Resolution2160P60*, *Resolution2160P*) |
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | string | mandatory | Current Video playback resolution (must be one of the following: *Resolution1080i, Resolution1080i24, Resolution1080i25, Resolution1080i30, Resolution1080i50, Resolution1080p, Resolution1080p24, Resolution1080p25, Resolution1080p30, Resolution1080p50, Resolution2160p, Resolution2160p24, Resolution2160p25, Resolution2160p30, Resolution2160p50, Resolution2160p60, Resolution480i, Resolution480i24, Resolution480i25, Resolution480i30, Resolution480i50, Resolution480p, Resolution480p24, Resolution480p25, Resolution480p30, Resolution480p50, Resolution576i, Resolution576i24, Resolution576i25, Resolution576i30, Resolution576i50, Resolution576p, Resolution576p24, Resolution576p25, Resolution576p30, Resolution576p50, Resolution720p, Resolution720p24, Resolution720p25, Resolution720p30, Resolution720p50, ResolutionUnknown*) |
 
 ### Example
 
@@ -216,9 +212,9 @@ Provides access to the current Video playback resolution.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.resolution"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.resolution"
 }
 ```
 
@@ -226,9 +222,9 @@ Provides access to the current Video playback resolution.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": "ResolutionUnknown"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": "ResolutionUnknown"
 }
 ```
 
@@ -241,9 +237,11 @@ Provides access to the checks Loudness Equivalence in platform.
 
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| ae | boolean | enabled/disabled |
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Checks Loudness Equivalence in platform |
 
 ### Example
 
@@ -251,9 +249,9 @@ Provides access to the checks Loudness Equivalence in platform.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.isaudioequivalenceenabled"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.isaudioequivalenceenabled"
 }
 ```
 
@@ -261,24 +259,28 @@ Provides access to the checks Loudness Equivalence in platform.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": false
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
 }
 ```
 
-<a name="property.dolby_atmosmetadata"></a>
-## *dolby_atmosmetadata [<sup>property</sup>](#head.Properties)*
+<a name="property.dolbyatmossupported"></a>
+## *dolbyatmossupported [<sup>property</sup>](#head.Properties)*
 
 Provides access to the atmos capabilities of Sink.
 
 > This property is **read-only**.
 
+> ``dolby_atmosmetadata`` is an alternative name for this property. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
+
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| supported | boolean | Atmos capabilities of Sink |
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Atmos capabilities of Sink |
 
 ### Example
 
@@ -286,9 +288,9 @@ Provides access to the atmos capabilities of Sink.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.dolby_atmosmetadata"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.dolbyatmossupported"
 }
 ```
 
@@ -296,24 +298,28 @@ Provides access to the atmos capabilities of Sink.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": false
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
 }
 ```
 
-<a name="property.dolby_soundmode"></a>
-## *dolby_soundmode [<sup>property</sup>](#head.Properties)*
+<a name="property.dolbysoundmode"></a>
+## *dolbysoundmode [<sup>property</sup>](#head.Properties)*
 
 Provides access to the sound Mode - Mono/Stereo/Surround.
 
 > This property is **read-only**.
 
+> ``dolby_soundmode`` is an alternative name for this property. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
+
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| mode | string | Sound Mode - Mono/Stereo/Surround (must be one of the following: *Unknown*, *Mono*, *Stereo*, *Surround*, *Passthru*, *SoundmodeAuto*) |
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | string | mandatory | Sound Mode - Mono/Stereo/Surround (must be one of the following: *Dolbydigital, Dolbydigitalplus, Mono, Passthru, SoundmodeAuto, Stereo, Surround, Unknown*) |
 
 ### Example
 
@@ -321,9 +327,9 @@ Provides access to the sound Mode - Mono/Stereo/Surround.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.dolby_soundmode"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.dolbysoundmode"
 }
 ```
 
@@ -331,24 +337,26 @@ Provides access to the sound Mode - Mono/Stereo/Surround.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": "Unknown"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": "Unknown"
 }
 ```
 
-<a name="property.dolby_enableatmosoutput"></a>
-## *dolby_enableatmosoutput [<sup>property</sup>](#head.Properties)*
+<a name="property.dolbyatmosoutput"></a>
+## *dolbyatmosoutput [<sup>property</sup>](#head.Properties)*
 
 Provides access to the enable Atmos Audio Output.
 
 > This property is **write-only**.
 
+> ``dolby_enableatmosoutput`` is an alternative name for this property. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
+
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| enable | boolean | enable/disable |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| (property) | boolean | mandatory | Enable/Disable |
 
 ### Example
 
@@ -356,10 +364,10 @@ Provides access to the enable Atmos Audio Output.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.dolby_enableatmosoutput",
-    "params": false
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.dolbyatmosoutput",
+  "params": false
 }
 ```
 
@@ -373,16 +381,24 @@ Provides access to the enable Atmos Audio Output.
 }
 ```
 
-<a name="property.dolby_mode"></a>
-## *dolby_mode [<sup>property</sup>](#head.Properties)*
+<a name="property.dolbymode"></a>
+## *dolbymode [<sup>property</sup>](#head.Properties)*
 
 Provides access to the dolby Mode.
 
+> ``dolby_mode`` is an alternative name for this property. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
+
 ### Value
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| mode | string | dolby mode type (must be one of the following: *DigitalPcm*, *DigitalPlus*, *DigitalAc3*, *Auto*, *DigitalPassthrough*, *Ms12*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| (property) | string | mandatory | Dolby mode type (must be one of the following: *Auto, DigitalAc3, DigitalPassthrough, DigitalPcm, DigitalPlus, Ms12*) |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | string | mandatory | Dolby mode type (must be one of the following: *Auto, DigitalAc3, DigitalPassthrough, DigitalPcm, DigitalPlus, Ms12*) |
 
 ### Example
 
@@ -390,9 +406,9 @@ Provides access to the dolby Mode.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.dolby_mode"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.dolbymode"
 }
 ```
 
@@ -400,9 +416,9 @@ Provides access to the dolby Mode.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": "DigitalPcm"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": "DigitalPcm"
 }
 ```
 
@@ -410,10 +426,10 @@ Provides access to the dolby Mode.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "PlayerInfo.1.dolby_mode",
-    "params": "DigitalPcm"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.dolbymode",
+  "params": "DigitalPcm"
 }
 ```
 
@@ -430,38 +446,57 @@ Provides access to the dolby Mode.
 <a name="head.Notifications"></a>
 # Notifications
 
-Notifications are autonomous events, triggered by the internals of the implementation, and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
+Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
 
 The following events are provided by the PlayerInfo plugin:
 
 Dolby Output interface events:
 
-| Event | Description |
+| Notification | Description |
 | :-------- | :-------- |
-| [dolby audiomodechanged](#event.dolby_audiomodechanged) |  |
+| [soundmodechanged](#notification.soundmodechanged) / [dolby_audiomodechanged](#notification.soundmodechanged) | Signal audio mode change |
 
+<a name="notification.soundmodechanged"></a>
+## *soundmodechanged [<sup>notification</sup>](#head.Notifications)*
 
-<a name="event.dolby_audiomodechanged"></a>
-## *dolby_audiomodechanged [<sup>event</sup>](#head.Notifications)*
+Signal audio mode change.
 
-### Parameters
+> ``dolby_audiomodechanged`` is an alternative name for this notification. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.mode | string |  (must be one of the following: *Unknown*, *Mono*, *Stereo*, *Surround*, *Passthru*, *SoundmodeAuto*) |
-| params.enabled | boolean |  |
+### Notification Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.mode | string | mandatory | Changed Mode (must be one of the following: *Dolbydigital, Dolbydigitalplus, Mono, Passthru, SoundmodeAuto, Stereo, Surround, Unknown*) |
+| params.enabled | boolean | mandatory | Enabled/Disabled |
 
 ### Example
 
+#### Registration
+
 ```json
 {
-    "jsonrpc": "2.0",
-    "method": "client.events.1.dolby_audiomodechanged",
-    "params": {
-        "mode": "Unknown",
-        "enabled": false
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "PlayerInfo.1.register",
+  "params": {
+    "event": "soundmodechanged",
+    "id": "myid"
+  }
+}
+```
+
+#### Notification
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "myid.soundmodechanged",
+  "params": {
+    "mode": "Unknown",
+    "enabled": false
+  }
 }
 ```
 

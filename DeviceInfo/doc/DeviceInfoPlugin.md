@@ -70,27 +70,27 @@ The plugin is designed to be loaded and executed within the Thunder framework. F
 
 The table below lists configuration options of the plugin.
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| callsign | string | Plugin instance name (default: *DeviceInfo*) |
-| classname | string | Class name: *DeviceInfo* |
-| locator | string | Library name: *libThunderDeviceInfo.so* |
-| startmode | string | Determines if the plugin shall be started automatically along with the framework |
-| hdr | boolean | Does the device support HDR (true or false) |
-| atmos | boolean | Does the device support Dolby Atmos (true or false) |
-| cec | boolean | Does the device support HDMI CEC (true or false) |
-| hdcp | string | HDCP version supported by the device (UNAVAILABLE, 1.4, 2.0, 2.1, 2.2) |
-| audio | array | Supported audio outputs |
-| audio[#] | string | Audio output (OTHER, RF_MODULATOR, ANALOG, SPDIF0, HDMI0, HDMI1, DISPLAYPORT) |
-| video | array | Supported video outputs |
-| video[#] | string | Video output (OTHER, RF_MODULATOR, COMPOSITE, SVIDEO, COMPONENT, SCART_RGB, HDMI0, HDMI1, DISPLAYPORT) |
-| resolution | array | Supported output resolutions |
-| resolution[#] | string | Output resolution (unknown, 480i, 480p, 576i, 576p, 720p, 1080i, 1080p, 2160p30, 2160p60, 4320p30, 4320p60) |
-| modelName | string | Model Name |
-| modelYear | number | Model Year |
-| friendlyName | string | friendly Name |
-| systemIntegratorName | string | system Integrator Name |
-| platformName | string | platform Name |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| callsign | string | mandatory | Plugin instance name (default: *DeviceInfo*) |
+| classname | string | mandatory | Class name: *DeviceInfo* |
+| locator | string | mandatory | Library name: *libThunderDeviceInfo.so* |
+| startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
+| hdr | boolean | mandatory | Does the device support HDR (true or false) |
+| atmos | boolean | mandatory | Does the device support Dolby Atmos (true or false) |
+| cec | boolean | mandatory | Does the device support HDMI CEC (true or false) |
+| hdcp | string | mandatory | HDCP version supported by the device (unavailable, hdcp_14, hdcp_20, hdcp_21, hdcp_22) |
+| audio | array | mandatory | Supported audio outputs |
+| audio[#] | string | mandatory | Audio output (other, rf_modulator, analog, spdif, hdmi, displayport) |
+| video | array | mandatory | Supported video outputs |
+| video[#] | string | mandatory | Video output (other, rf_modulator, composite, svideo, component, scart_rgb, hdmi, displayport) |
+| resolution | array | mandatory | Supported output resolutions |
+| resolution[#] | string | mandatory | Output resolution (unknown, 480i, 480p, 576i, 576p, 720p, 1080i, 1080p, 2160p30, 2160p60, 4320p30, 4320p60) |
+| modelName | string | mandatory | Model Name |
+| modelYear | integer | mandatory | Model Year |
+| friendlyName | string | mandatory | Friendly Name |
+| systemIntegratorName | string | mandatory | System Integrator Name |
+| platformName | string | mandatory | Platform Name |
 
 <a name="head.Interfaces"></a>
 # Interfaces
@@ -115,7 +115,6 @@ DeviceInfo interface methods:
 | [ms12capabilities](#method.ms12capabilities) | Audio ms12 capabilities for the specified audio port |
 | [supportedms12audioprofiles](#method.supportedms12audioprofiles) | Supported ms12 audio profiles for the specified audio port |
 
-
 <a name="method.supportedresolutions"></a>
 ## *supportedresolutions [<sup>method</sup>](#head.Methods)*
 
@@ -123,24 +122,24 @@ Supported resolutions on the selected video display port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.videoDisplay | string | Video Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *COMPOSITE*, *SVIDEO*, *COMPONET*, *SCART_RGB*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.videoDisplay | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.supportedResolutions | array | Supported resolutions |
-| result.supportedResolutions[#] | string | Default resolution (must be one of the following: *unknown*, *480i*, *480p*, *576i*, *576p*, *576p50*, *720p*, *720p50*, *1080i*, *1080i25*, *1080i50*, *1080p*, *1080p24*, *1080p25*, *1080p30*, *1080p50*, *1080p60*, *2160p30*, *2160p50*, *2160p60*, *4320p30*, *4320p60*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.supportedResolutions | array | mandatory | An array of resolution supported by the device |
+| result.supportedResolutions[#] | string | mandatory | Resolution supported by the device (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | general error |
 
 ### Example
 
@@ -148,12 +147,12 @@ Supported resolutions on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.supportedresolutions",
-    "params": {
-        "videoDisplay": "DISPLAYPORT"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.supportedresolutions",
+  "params": {
+    "videoDisplay": "displayport"
+  }
 }
 ```
 
@@ -161,13 +160,13 @@ Supported resolutions on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "supportedResolutions": [
-            "1080p"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "supportedResolutions": [
+      "1080p"
+    ]
+  }
 }
 ```
 
@@ -178,23 +177,23 @@ Default resolution on the selected video display port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.videoDisplay | string | Video Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *COMPOSITE*, *SVIDEO*, *COMPONET*, *SCART_RGB*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.videoDisplay | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.defaultResolution | string | Default resolution (must be one of the following: *unknown*, *480i*, *480p*, *576i*, *576p*, *576p50*, *720p*, *720p50*, *1080i*, *1080i25*, *1080i50*, *1080p*, *1080p24*, *1080p25*, *1080p30*, *1080p50*, *1080p60*, *2160p30*, *2160p50*, *2160p60*, *4320p30*, *4320p60*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.defaultResolution | string | mandatory | Resolution supported by the device (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | general error |
 
 ### Example
 
@@ -202,12 +201,12 @@ Default resolution on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.defaultresolution",
-    "params": {
-        "videoDisplay": "DISPLAYPORT"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.defaultresolution",
+  "params": {
+    "videoDisplay": "displayport"
+  }
 }
 ```
 
@@ -215,11 +214,11 @@ Default resolution on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "defaultResolution": "1080p"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "defaultResolution": "1080p"
+  }
 }
 ```
 
@@ -230,23 +229,23 @@ Supported hdcp version on the selected video display port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.videoDisplay | string | Video Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *COMPOSITE*, *SVIDEO*, *COMPONET*, *SCART_RGB*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.videoDisplay | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.supportedHDCPVersion | string | HDCP support (must be one of the following: *unavailable*, *1.4*, *2.0*, *2.1*, *2.2*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.supportedHDCPVersion | string | mandatory | HDCP support (must be one of the following: *1.4, 2.0, 2.1, 2.2, unavailable*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | general error |
 
 ### Example
 
@@ -254,12 +253,12 @@ Supported hdcp version on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.supportedhdcp",
-    "params": {
-        "videoDisplay": "DISPLAYPORT"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.supportedhdcp",
+  "params": {
+    "videoDisplay": "displayport"
+  }
 }
 ```
 
@@ -267,11 +266,11 @@ Supported hdcp version on the selected video display port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "supportedHDCPVersion": "2.0"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "supportedHDCPVersion": "hdcp_20"
+  }
 }
 ```
 
@@ -282,24 +281,24 @@ Audio capabilities for the specified audio port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.audioPort | string | Audio Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *ANALOG*, *SPDIF0*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.audioPort | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.AudioCapabilities | array | Audio capabilities for the specified audio port |
-| result.AudioCapabilities[#] | string | Audio capability (must be one of the following: *none*, *ATMOS*, *DOLBY DIGITAL*, *DOLBY DIGITAL PLUS*, *Dual Audio Decode*, *DAPv2*, *MS12*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.AudioCapabilities | array | mandatory | An array of audio capabilities |
+| result.AudioCapabilities[#] | string | mandatory | Audio capability (must be one of the following: *ATMOS, DAPv2, DOLBY DIGITAL, DOLBY DIGITAL PLUS, Dual Audio Decode, MS12, none*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | general error |
 
 ### Example
 
@@ -307,12 +306,12 @@ Audio capabilities for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.audiocapabilities",
-    "params": {
-        "audioPort": "ANALOG"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.audiocapabilities",
+  "params": {
+    "audioPort": "analog"
+  }
 }
 ```
 
@@ -320,13 +319,13 @@ Audio capabilities for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "AudioCapabilities": [
-            "NONE"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "AudioCapabilities": [
+      "none"
+    ]
+  }
 }
 ```
 
@@ -337,24 +336,24 @@ Audio ms12 capabilities for the specified audio port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.audioPort | string | Audio Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *ANALOG*, *SPDIF0*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.audioPort | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.MS12Capabilities | array | Audio ms12 capabilities for the specified audio port |
-| result.MS12Capabilities[#] | string | MS12 audio capability (must be one of the following: *none*, *Dolby Volume*, *Inteligent Equalizer*, *Dialogue Enhancer*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.MS12Capabilities | array | mandatory | An array of MS12 audio capabilities |
+| result.MS12Capabilities[#] | string | mandatory | MS12 audio capability (must be one of the following: *Dialogue Enhancer, Dolby Volume, Inteligent Equalizer, none*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | general error |
 
 ### Example
 
@@ -362,12 +361,12 @@ Audio ms12 capabilities for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.ms12capabilities",
-    "params": {
-        "audioPort": "ANALOG"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.ms12capabilities",
+  "params": {
+    "audioPort": "analog"
+  }
 }
 ```
 
@@ -375,13 +374,13 @@ Audio ms12 capabilities for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "MS12Capabilities": [
-            "Dolby Volume"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "MS12Capabilities": [
+      "dolby_volume"
+    ]
+  }
 }
 ```
 
@@ -392,24 +391,24 @@ Supported ms12 audio profiles for the specified audio port.
 
 ### Parameters
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| params | object |  |
-| params.audioPort | string | Audio Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *ANALOG*, *SPDIF0*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.audioPort | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object |  |
-| result.supportedMS12AudioProfiles | array | An array of ms12 audio profiles |
-| result.supportedMS12AudioProfiles[#] | string | MS12 Profile (must be one of the following: *None*, *Music*, *Movie*, *Voice*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | *...* |
+| result.supportedMS12AudioProfiles | array | mandatory | An array of ms12 audio profiles |
+| result.supportedMS12AudioProfiles[#] | string | mandatory | MS12 Profile (must be one of the following: *Movie, Music, None, Voice*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -417,12 +416,12 @@ Supported ms12 audio profiles for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.supportedms12audioprofiles",
-    "params": {
-        "audioPort": "ANALOG"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.supportedms12audioprofiles",
+  "params": {
+    "audioPort": "analog"
+  }
 }
 ```
 
@@ -430,13 +429,13 @@ Supported ms12 audio profiles for the specified audio port.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "supportedMS12AudioProfiles": [
-            "music"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "supportedMS12AudioProfiles": [
+      "music"
+    ]
+  }
 }
 ```
 
@@ -447,28 +446,27 @@ The following properties are provided by the DeviceInfo plugin:
 
 DeviceInfo interface properties:
 
-| Property | Description |
-| :-------- | :-------- |
-| [deviceaudiocapabilities](#property.deviceaudiocapabilities) <sup>RO</sup> | Audio capabilities of the device |
-| [devicevideocapabilities](#property.devicevideocapabilities) <sup>RO</sup> | Video capabilities of the device |
-| [deviceinfo](#property.deviceinfo) <sup>RO</sup> | Device meta data |
-| [systeminfo](#property.systeminfo) <sup>RO</sup> | System general information |
-| [addresses](#property.addresses) <sup>RO</sup> | Network interface addresses |
-| [socketinfo](#property.socketinfo) <sup>RO</sup> | Socket information |
-| [supportedaudioports](#property.supportedaudioports) <sup>RO</sup> | Audio ports supported on the device (all ports that are physically present) |
-| [supportedvideodisplays](#property.supportedvideodisplays) <sup>RO</sup> | Video ports supported on the device (all ports that are physically present) |
-| [hostedid](#property.hostedid) <sup>RO</sup> | EDID of the host |
-| [firmwareversion](#property.firmwareversion) <sup>RO</sup> | Versions maintained in version |
-| [serialnumber](#property.serialnumber) <sup>RO</sup> | Serial number set by manufacturer |
-| [modelid](#property.modelid) <sup>RO</sup> | Device model number or SKU |
-| [make](#property.make) <sup>RO</sup> | Device manufacturer |
-| [modelname](#property.modelname) <sup>RO</sup> | Device model name |
-| [modelyear](#property.modelyear) <sup>RO</sup> | Device model year |
-| [friendlyname](#property.friendlyname) <sup>RO</sup> | Device friendly name |
-| [platformname](#property.platformname) <sup>RO</sup> | Device Platform name |
-| [devicetype](#property.devicetype) <sup>RO</sup> | Device type |
-| [distributorid](#property.distributorid) <sup>RO</sup> | Partner ID or distributor ID for device |
-
+| Property | R/W | Description |
+| :-------- | :-------- | :-------- |
+| [deviceaudiocapabilities](#property.deviceaudiocapabilities) | read-only | Audio capabilities of the device |
+| [devicevideocapabilities](#property.devicevideocapabilities) | read-only | Video capabilities of the device |
+| [deviceinfo](#property.deviceinfo) | read-only | Device meta data |
+| [systeminfo](#property.systeminfo) | read-only | System general information |
+| [addresses](#property.addresses) | read-only | Network interface addresses |
+| [socketinfo](#property.socketinfo) | read-only | Socket information |
+| [supportedaudioports](#property.supportedaudioports) | read-only | Audio ports supported on the device (all ports that are physically present) |
+| [supportedvideodisplays](#property.supportedvideodisplays) | read-only | Video ports supported on the device (all ports that are physically present) |
+| [hostedid](#property.hostedid) | read-only | EDID of the host |
+| [firmwareversion](#property.firmwareversion) | read-only | Versions maintained in version |
+| [serialnumber](#property.serialnumber) | read-only | Serial number set by manufacturer |
+| [make](#property.make) | read-only | Device manufacturer |
+| [modelid](#property.modelid) | read-only | Device model number or SKU |
+| [modelname](#property.modelname) | read-only | Device model name |
+| [modelyear](#property.modelyear) | read-only | Device model year |
+| [friendlyname](#property.friendlyname) | read-only | Device friendly name |
+| [platformname](#property.platformname) | read-only | Device Platform name |
+| [devicetype](#property.devicetype) | read-only | Device type |
+| [distributorid](#property.distributorid) | read-only | Partner ID or distributor ID for device |
 
 <a name="property.deviceaudiocapabilities"></a>
 ## *deviceaudiocapabilities [<sup>property</sup>](#head.Properties)*
@@ -481,18 +479,18 @@ Provides access to the audio capabilities of the device.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Audio capabilities of the device |
-| result.audiooutputcapabilities | array |  |
-| result.audiooutputcapabilities[#] | object | Audio capabilities of the output |
-| result.audiooutputcapabilities[#]?.audioPort | string | <sup>*(optional)*</sup> Audio Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *ANALOG*, *SPDIF0*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
-| result.audiooutputcapabilities[#].audiocapabilities | array | Audio capabilities for the specified audio port |
-| result.audiooutputcapabilities[#].audiocapabilities[#] | string | Audio capability (must be one of the following: *none*, *ATMOS*, *DOLBY DIGITAL*, *DOLBY DIGITAL PLUS*, *Dual Audio Decode*, *DAPv2*, *MS12*) |
-| result.audiooutputcapabilities[#].ms12capabilities | array | Audio ms12 capabilities for the specified audio port |
-| result.audiooutputcapabilities[#].ms12capabilities[#] | string | MS12 audio capability (must be one of the following: *none*, *Dolby Volume*, *Inteligent Equalizer*, *Dialogue Enhancer*) |
-| result.audiooutputcapabilities[#].ms12profiles | array | An array of ms12 audio profiles |
-| result.audiooutputcapabilities[#].ms12profiles[#] | string | MS12 Profile (must be one of the following: *None*, *Music*, *Movie*, *Voice*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Audio capabilities of the device |
+| result.audiooutputcapabilities | array | mandatory | An array of audiooutputcapabilities |
+| result.audiooutputcapabilities[#] | object | mandatory | Audio capabilities of the output |
+| result.audiooutputcapabilities[#]?.audioPort | string | optional | Audio Output support (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
+| result.audiooutputcapabilities[#].audiocapabilities | array | mandatory | Audio capabilities for the specified audio port |
+| result.audiooutputcapabilities[#].audiocapabilities[#] | string | mandatory | Audio capability (must be one of the following: *ATMOS, DAPv2, DOLBY DIGITAL, DOLBY DIGITAL PLUS, Dual Audio Decode, MS12, none*) |
+| result.audiooutputcapabilities[#].ms12capabilities | array | mandatory | Audio ms12 capabilities for the specified audio port |
+| result.audiooutputcapabilities[#].ms12capabilities[#] | string | mandatory | MS12 audio capability (must be one of the following: *Dialogue Enhancer, Dolby Volume, Inteligent Equalizer, none*) |
+| result.audiooutputcapabilities[#].ms12profiles | array | mandatory | Audio ms12 profiles for the specified audio port |
+| result.audiooutputcapabilities[#].ms12profiles[#] | string | mandatory | MS12 Profile (must be one of the following: *Movie, Music, None, Voice*) |
 
 ### Example
 
@@ -500,9 +498,9 @@ Provides access to the audio capabilities of the device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.deviceaudiocapabilities"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.deviceaudiocapabilities"
 }
 ```
 
@@ -510,24 +508,24 @@ Provides access to the audio capabilities of the device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "audiooutputcapabilities": [
-            {
-                "audioPort": "ANALOG",
-                "audiocapabilities": [
-                    "NONE"
-                ],
-                "ms12capabilities": [
-                    "Dolby Volume"
-                ],
-                "ms12profiles": [
-                    "Music"
-                ]
-            }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "audiooutputcapabilities": [
+      {
+        "audioPort": "analog",
+        "audiocapabilities": [
+          "none"
+        ],
+        "ms12capabilities": [
+          "dolby_volume"
+        ],
+        "ms12profiles": [
+          "music"
         ]
-    }
+      }
+    ]
+  }
 }
 ```
 
@@ -542,20 +540,20 @@ Provides access to the video capabilities of the device.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Video capabilities of the device |
-| result.hostedid | string | EDID of the host |
-| result.hdr | boolean | Is HDR supported by this device |
-| result.atmos | boolean | Is Atmos supported by this device |
-| result.cec | boolean | Is CEC supported by this device |
-| result.videooutputcapabilities | array |  |
-| result.videooutputcapabilities[#] | object | Video capabilities of the output |
-| result.videooutputcapabilities[#].hdcp | string | HDCP support (must be one of the following: *unavailable*, *1.4*, *2.0*, *2.1*, *2.2*) |
-| result.videooutputcapabilities[#]?.videoDisplay | string | <sup>*(optional)*</sup> Video Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *COMPOSITE*, *SVIDEO*, *COMPONET*, *SCART_RGB*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
-| result.videooutputcapabilities[#].output_resolutions | array | Supported resolutions |
-| result.videooutputcapabilities[#].output_resolutions[#] | string | Default resolution (must be one of the following: *unknown*, *480i*, *480p*, *576i*, *576p*, *576p50*, *720p*, *720p50*, *1080i*, *1080i25*, *1080i50*, *1080p*, *1080p24*, *1080p25*, *1080p30*, *1080p50*, *1080p60*, *2160p30*, *2160p50*, *2160p60*, *4320p30*, *4320p60*) |
-| result.videooutputcapabilities[#].defaultresolution | string | Default resolution (must be one of the following: *unknown*, *480i*, *480p*, *576i*, *576p*, *576p50*, *720p*, *720p50*, *1080i*, *1080i25*, *1080i50*, *1080p*, *1080p24*, *1080p25*, *1080p30*, *1080p50*, *1080p60*, *2160p30*, *2160p50*, *2160p60*, *4320p30*, *4320p60*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Video capabilities of the device |
+| result.hostedid | string | mandatory | EDID of the host |
+| result.hdr | boolean | mandatory | Is HDR supported by this device |
+| result.atmos | boolean | mandatory | Is Atmos supported by this device |
+| result.cec | boolean | mandatory | Is CEC supported by this device |
+| result.videooutputcapabilities | array | mandatory | An array of videooutputcapabilities |
+| result.videooutputcapabilities[#] | object | mandatory | Video capabilities of the output |
+| result.videooutputcapabilities[#].hdcp | string | mandatory | HDCP support (must be one of the following: *1.4, 2.0, 2.1, 2.2, unavailable*) |
+| result.videooutputcapabilities[#]?.videoDisplay | string | optional | Video Output support (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
+| result.videooutputcapabilities[#].output_resolutions | array | mandatory | Supported resolutions |
+| result.videooutputcapabilities[#].output_resolutions[#] | string | mandatory | Resolution supported by the device (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
+| result.videooutputcapabilities[#].defaultresolution | string | mandatory | Default resolution (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
 
 ### Example
 
@@ -563,9 +561,9 @@ Provides access to the video capabilities of the device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.devicevideocapabilities"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.devicevideocapabilities"
 }
 ```
 
@@ -573,24 +571,24 @@ Provides access to the video capabilities of the device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "hostedid": "...",
-        "hdr": false,
-        "atmos": false,
-        "cec": true,
-        "videooutputcapabilities": [
-            {
-                "hdcp": "2.0",
-                "videoDisplay": "DISPLAYPORT",
-                "output_resolutions": [
-                    "1080p"
-                ],
-                "defaultresolution": "1080p"
-            }
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "hostedid": "...",
+    "hdr": false,
+    "atmos": false,
+    "cec": true,
+    "videooutputcapabilities": [
+      {
+        "hdcp": "hdcp_20",
+        "videoDisplay": "displayport",
+        "output_resolutions": [
+          "1080p"
+        ],
+        "defaultresolution": "1080p"
+      }
+    ]
+  }
 }
 ```
 
@@ -605,18 +603,18 @@ Provides access to the device meta data.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device meta data |
-| result?.devicetype | string | <sup>*(optional)*</sup> Device type |
-| result?.friendlyname | string | <sup>*(optional)*</sup> Friendly name |
-| result?.distributorid | string | <sup>*(optional)*</sup> Partner ID or distributor ID for device |
-| result?.make | string | <sup>*(optional)*</sup> Device manufacturer |
-| result?.modelname | string | <sup>*(optional)*</sup> Model Name |
-| result?.modelyear | number | <sup>*(optional)*</sup> Model Year |
-| result?.platformname | string | <sup>*(optional)*</sup> Platform name |
-| result?.serialnumber | string | <sup>*(optional)*</sup> Device serial number |
-| result?.sku | string | <sup>*(optional)*</sup> Device model number or SKU |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device meta data |
+| result?.devicetype | string | optional | Device type |
+| result?.friendlyname | string | optional | Friendly name |
+| result?.distributorid | string | optional | Partner ID or distributor ID for device |
+| result?.make | string | optional | Device manufacturer |
+| result?.modelname | string | optional | Model Name |
+| result?.modelyear | integer | optional | Model Year |
+| result?.platformname | string | optional | Platform name |
+| result?.serialnumber | string | optional | Device serial number |
+| result?.sku | string | optional | Device model number or SKU |
 
 ### Example
 
@@ -624,9 +622,9 @@ Provides access to the device meta data.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.deviceinfo"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.deviceinfo"
 }
 ```
 
@@ -634,19 +632,19 @@ Provides access to the device meta data.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "devicetype": "IpStb",
-        "friendlyname": "my device",
-        "distributorid": "Comcast",
-        "make": "pace",
-        "modelname": "model A",
-        "modelyear": 2020,
-        "platformname": "linux",
-        "serialnumber": "WPEuCfrLF45",
-        "sku": "PX051AEI"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "devicetype": "IpStb",
+    "friendlyname": "my device",
+    "distributorid": "Comcast",
+    "make": "pace",
+    "modelname": "model A",
+    "modelyear": 2020,
+    "platformname": "linux",
+    "serialnumber": "WPEuCfrLF45",
+    "sku": "PX051AEI"
+  }
 }
 ```
 
@@ -661,23 +659,23 @@ Provides access to the system general information.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | System general information |
-| result.version | string | Software version (in form *version#hashtag*) |
-| result.uptime | number | System uptime (in seconds) |
-| result.totalram | number | Total installed system RAM memory (in bytes) |
-| result.freeram | number | Free system RAM memory (in bytes) |
-| result.totalswap | number | Total swap space (in bytes) |
-| result.freeswap | number | Swap space still available (in bytes) |
-| result.devicename | string | Host name |
-| result.cpuload | string | Current CPU load (percentage) |
-| result.cpuloadavg | object | CPU load average |
-| result.cpuloadavg.avg1min | number | 1min cpuload average |
-| result.cpuloadavg.avg5min | number | 5min cpuload average |
-| result.cpuloadavg.avg15min | number | 15min cpuload average |
-| result.serialnumber | string | Device serial number |
-| result.time | string | Current system date and time |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | System general information |
+| result.version | string | mandatory | Software version (in form *version#hashtag*) |
+| result.uptime | integer | mandatory | System uptime (in seconds) |
+| result.totalram | integer | mandatory | Total installed system RAM memory (in bytes) |
+| result.freeram | integer | mandatory | Free system RAM memory (in bytes) |
+| result.totalswap | integer | mandatory | Total swap space (in bytes) |
+| result.freeswap | integer | mandatory | Swap space still available (in bytes) |
+| result.devicename | string | mandatory | Host name |
+| result.cpuload | string | mandatory | Current CPU load (percentage) |
+| result.cpuloadavg | object | mandatory | CPU load average |
+| result.cpuloadavg.avg1min | integer | mandatory | 1min cpuload average |
+| result.cpuloadavg.avg5min | integer | mandatory | 5min cpuload average |
+| result.cpuloadavg.avg15min | integer | mandatory | 15min cpuload average |
+| result.serialnumber | string | mandatory | Device serial number |
+| result.time | string | mandatory | Current system date and time |
 
 ### Example
 
@@ -685,9 +683,9 @@ Provides access to the system general information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.systeminfo"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.systeminfo"
 }
 ```
 
@@ -695,25 +693,25 @@ Provides access to the system general information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "version": "1.0#14452f612c3747645d54974255d11b8f3b4faa54",
-        "uptime": 120,
-        "totalram": 655757312,
-        "freeram": 563015680,
-        "totalswap": 789132680,
-        "freeswap": 789132680,
-        "devicename": "buildroot",
-        "cpuload": "2",
-        "cpuloadavg": {
-            "avg1min": 789132680,
-            "avg5min": 789132680,
-            "avg15min": 789132680
-        },
-        "serialnumber": "WPEuCfrLF45",
-        "time": "Mon, 11 Mar 2019 14:38:18"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "version": "1.0#14452f612c3747645d54974255d11b8f3b4faa54",
+    "uptime": 120,
+    "totalram": 655757312,
+    "freeram": 563015680,
+    "totalswap": 789132680,
+    "freeswap": 789132680,
+    "devicename": "buildroot",
+    "cpuload": "2",
+    "cpuloadavg": {
+      "avg1min": 789132680,
+      "avg5min": 789132680,
+      "avg15min": 789132680
+    },
+    "serialnumber": "WPEuCfrLF45",
+    "time": "Mon, 11 Mar 2019 14:38:18"
+  }
 }
 ```
 
@@ -728,14 +726,14 @@ Provides access to the network interface addresses.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | array | Network interface addresses |
-| result[#] | object |  |
-| result[#].name | string | Interface name |
-| result[#].mac | string | Interface MAC address |
-| result[#]?.ip | array | <sup>*(optional)*</sup>  |
-| result[#]?.ip[#] | string | <sup>*(optional)*</sup> Interface IP address |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | Network interface addresses |
+| result[#] | object | mandatory | *...* |
+| result[#].name | string | mandatory | Interface name |
+| result[#].mac | string | mandatory | Interface MAC address |
+| result[#]?.ip | array | optional | An array of Interface IP address |
+| result[#]?.ip[#] | string | optional | Interface IP address |
 
 ### Example
 
@@ -743,9 +741,9 @@ Provides access to the network interface addresses.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.addresses"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.addresses"
 }
 ```
 
@@ -753,17 +751,17 @@ Provides access to the network interface addresses.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": [
-        {
-            "name": "lo",
-            "mac": "00:00:00:00:00",
-            "ip": [
-                "127.0.0.1"
-            ]
-        }
-    ]
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "name": "lo",
+      "mac": "00:00:00:00:00",
+      "ip": [
+        "127.0.0.1"
+      ]
+    }
+  ]
 }
 ```
 
@@ -778,15 +776,15 @@ Provides access to the socket information.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Socket information |
-| result?.total | number | <sup>*(optional)*</sup>  |
-| result?.open | number | <sup>*(optional)*</sup>  |
-| result?.link | number | <sup>*(optional)*</sup>  |
-| result?.exception | number | <sup>*(optional)*</sup>  |
-| result?.shutdown | number | <sup>*(optional)*</sup>  |
-| result.runs | number | Number of runs |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Socket information |
+| result?.total | integer | optional | Number of total |
+| result?.open | integer | optional | Number of open |
+| result?.link | integer | optional | Number of link |
+| result?.exception | integer | optional | Number of exception |
+| result?.shutdown | integer | optional | Number of shutdown |
+| result.runs | integer | mandatory | Number of runs |
 
 ### Example
 
@@ -794,9 +792,9 @@ Provides access to the socket information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.socketinfo"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.socketinfo"
 }
 ```
 
@@ -804,16 +802,16 @@ Provides access to the socket information.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "total": 0,
-        "open": 0,
-        "link": 0,
-        "exception": 0,
-        "shutdown": 0,
-        "runs": 1
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "total": 0,
+    "open": 0,
+    "link": 0,
+    "exception": 0,
+    "shutdown": 0,
+    "runs": 1
+  }
 }
 ```
 
@@ -828,17 +826,17 @@ Provides access to the audio ports supported on the device (all ports that are p
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Audio ports supported on the device (all ports that are physically present) |
-| result.supportedAudioPorts | array | Audio Output support |
-| result.supportedAudioPorts[#] | string | Audio Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *ANALOG*, *SPDIF0*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Audio ports supported on the device (all ports that are physically present) |
+| result.supportedAudioPorts | array | mandatory | Audio Output support |
+| result.supportedAudioPorts[#] | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -846,9 +844,9 @@ Provides access to the audio ports supported on the device (all ports that are p
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.supportedaudioports"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.supportedaudioports"
 }
 ```
 
@@ -856,13 +854,13 @@ Provides access to the audio ports supported on the device (all ports that are p
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "supportedAudioPorts": [
-            "ANALOG"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "supportedAudioPorts": [
+      "analog"
+    ]
+  }
 }
 ```
 
@@ -877,17 +875,17 @@ Provides access to the video ports supported on the device (all ports that are p
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Video ports supported on the device (all ports that are physically present) |
-| result.supportedVideoDisplays | array | Video Output support |
-| result.supportedVideoDisplays[#] | string | Video Output support (must be one of the following: *OTHER*, *RF_MODULATOR*, *COMPOSITE*, *SVIDEO*, *COMPONET*, *SCART_RGB*, *HDMI0*, *HDMI1*, *DISPLAYPORT*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Video ports supported on the device (all ports that are physically present) |
+| result.supportedVideoDisplays | array | mandatory | Video Output support |
+| result.supportedVideoDisplays[#] | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -895,9 +893,9 @@ Provides access to the video ports supported on the device (all ports that are p
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.supportedvideodisplays"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.supportedvideodisplays"
 }
 ```
 
@@ -905,13 +903,13 @@ Provides access to the video ports supported on the device (all ports that are p
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "supportedVideoDisplays": [
-            "DISPLAYPORT"
-        ]
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "supportedVideoDisplays": [
+      "displayport"
+    ]
+  }
 }
 ```
 
@@ -926,16 +924,16 @@ Provides access to the EDID of the host.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | EDID of the host |
-| result.EDID | string | A base64 encoded byte array string representing the EDID |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | EDID of the host |
+| result.EDID | string | mandatory | A base64 encoded byte array string representing the EDID |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -943,9 +941,9 @@ Provides access to the EDID of the host.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.hostedid"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.hostedid"
 }
 ```
 
@@ -953,11 +951,11 @@ Provides access to the EDID of the host.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "EDID": "AP///////wAQrMLQVEJTMQUdAQOANR546q11qVRNnSYPUFSlSwCBALMA0QBxT6lAgYDRwAEBVl4AoKCgKVAwIDUADighAAAaAAAA/wBNWTNORDkxVjFTQlQKAAAA/ABERUxMIFAyNDE4RAogAAAA/QAxVh1xHAAKICAgICAgARsCAxuxUJAFBAMCBxYBBhESFRMUHyBlAwwAEAACOoAYcTgtQFgsRQAOKCEAAB4BHYAYcRwWIFgsJQAOKCEAAJ6/FgCggDgTQDAgOgAOKCEAABp+OQCggDgfQDAgOgAOKCEAABoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2A"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "EDID": "AP///////wAQrMLQVEJTMQUdAQOANR546q11qVRNnSYPUFSlSwCBALMA0QBxT6lAgYDRwAEBVl4AoKCgKVAwIDUADighAAAaAAAA/wBNWTNORDkxVjFTQlQKAAAA/ABERUxMIFAyNDE4RAogAAAA/QAxVh1xHAAKICAgICAgARsCAxuxUJAFBAMCBxYBBhESFRMUHyBlAwwAEAACOoAYcTgtQFgsRQAOKCEAAB4BHYAYcRwWIFgsJQAOKCEAAJ6/FgCggDgTQDAgOgAOKCEAABp+OQCggDgfQDAgOgAOKCEAABoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2A"
+  }
 }
 ```
 
@@ -972,19 +970,19 @@ Provides access to the versions maintained in version.txt.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Versions maintained in version.txt |
-| result.imagename | string |  |
-| result?.sdk | string | <sup>*(optional)*</sup>  |
-| result?.mediarite | string | <sup>*(optional)*</sup>  |
-| result?.yocto | string | <sup>*(optional)*</sup> Yocto version (must be one of the following: *dunfell*, *morty*, *daisy*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Versions maintained in version.txt |
+| result.imagename | string | mandatory | Name of firmware image |
+| result?.sdk | string | optional | SDK version string |
+| result?.mediarite | string | optional | Mediarite value |
+| result?.yocto | string | optional | Yocto version (must be one of the following: *daisy, dunfell, kirkstone, morty*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -992,9 +990,9 @@ Provides access to the versions maintained in version.txt.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.firmwareversion"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.firmwareversion"
 }
 ```
 
@@ -1002,14 +1000,14 @@ Provides access to the versions maintained in version.txt.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "imagename": "PX051AEI_VBN_2203_sprint_20220331225312sdy_NG",
-        "sdk": "17.3",
-        "mediarite": "8.3.53",
-        "yocto": "dunfell"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "imagename": "PX051AEI_VBN_2203_sprint_20220331225312sdy_NG",
+    "sdk": "17.3",
+    "mediarite": "8.3.53",
+    "yocto": "dunfell"
+  }
 }
 ```
 
@@ -1024,16 +1022,16 @@ Provides access to the serial number set by manufacturer.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Serial number set by manufacturer |
-| result.serialnumber | string |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Serial number set by manufacturer |
+| result.serialnumber | string | mandatory | Device Serial Number |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1041,9 +1039,9 @@ Provides access to the serial number set by manufacturer.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.serialnumber"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.serialnumber"
 }
 ```
 
@@ -1051,57 +1049,11 @@ Provides access to the serial number set by manufacturer.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "serialnumber": "PAW400003744"
-    }
-}
-```
-
-<a name="property.modelid"></a>
-## *modelid [<sup>property</sup>](#head.Properties)*
-
-Provides access to the device model number or SKU.
-
-> This property is **read-only**.
-
-### Value
-
-### Result
-
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device model number or SKU |
-| result.sku | string | Device model number or SKU (must be one of the following: *PLTL11AEI*, *ZWCN11MWI*, *SKTL11AEI*, *LS301*, *HSTP11MWR*, *HSTP11MWRFX50*, *ELTE11MWR*, *SKXI11ADS*, *SKXI11AIS*, *SKXI11ANS*, *SCXI11AIC*, *SCXI11BEI*, *CMXI11BEI*, *AX013AN*, *AX014AN*, *AX061AEI*, *MX011AN*, *CS011AN*, *CXD01ANI*, *PX001AN*, *PX013AN*, *PX022AN*, *PX032ANI*, *PX051AEI*, *PXD01ANI*, *SX022AN*, *TX061AEI*) |
-
-### Errors
-
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
-
-### Example
-
-#### Get Request
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.modelid"
-}
-```
-
-#### Get Response
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "sku": "PX051AEI"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "serialnumber": "PAW400003744"
+  }
 }
 ```
 
@@ -1116,16 +1068,16 @@ Provides access to the device manufacturer.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device manufacturer |
-| result.make | string | Device manufacturer (must be one of the following: *platco*, *llama*, *hisense*, *element*, *sky*, *sercomm*, *commscope*, *arris*, *cisco*, *pace*, *samsung*, *technicolor*, *Amlogic_Inc*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device manufacturer |
+| result.make | string | mandatory | Device manufacturer (must be one of the following: *Amlogic_Inc, Pioneer, arris, cisco, commscope, element, hisense, llama, pace, platco, raspberrypi_org, samsung, sercomm, sky, technicolor*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1133,9 +1085,9 @@ Provides access to the device manufacturer.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.make"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.make"
 }
 ```
 
@@ -1143,11 +1095,57 @@ Provides access to the device manufacturer.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "make": "pace"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "make": "pace"
+  }
+}
+```
+
+<a name="property.modelid"></a>
+## *modelid [<sup>property</sup>](#head.Properties)*
+
+Provides access to the device model number or SKU.
+
+> This property is **read-only**.
+
+### Value
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device model number or SKU |
+| result.sku | string | mandatory | Device model number or SKU (must be one of the following: *AX013AN, AX014AN, AX061AEI, CMXI11BEI, CS011AN, CXD01ANI, ELTE11MWR, HSTP11MWR, HSTP11MWRFX50, LS301, MX011AN, PI, PITU11MWR, PLTL11AEI, PX001AN, PX013AN, PX022AN, PX032ANI, PX051AEI, PXD01ANI, SCXI11AIC, SCXI11BEI, SKTL11AEI, SKXI11ADS, SKXI11AIS, SKXI11ANS, SX022AN, TX061AEI, XUSHTB11MWR, XUSHTC11MWR, XUSPTC11MWR, ZWCN11MWI*) |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
+
+### Example
+
+#### Get Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.modelid"
+}
+```
+
+#### Get Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "sku": "PX051AEI"
+  }
 }
 ```
 
@@ -1162,16 +1160,16 @@ Provides access to the device model name.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device model name |
-| result.model | string |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device model name |
+| result.model | string | mandatory | Device model name |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1179,9 +1177,9 @@ Provides access to the device model name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.modelname"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.modelname"
 }
 ```
 
@@ -1189,11 +1187,11 @@ Provides access to the device model name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "model": "Pace Xi5"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "model": "Pace Xi5"
+  }
 }
 ```
 
@@ -1208,16 +1206,16 @@ Provides access to the device model year.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device model year |
-| result.year | number |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device model year |
+| result.year | integer | mandatory | Device model year |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1225,9 +1223,9 @@ Provides access to the device model year.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.modelyear"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.modelyear"
 }
 ```
 
@@ -1235,11 +1233,11 @@ Provides access to the device model year.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "year": 2020
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "year": 2020
+  }
 }
 ```
 
@@ -1254,16 +1252,16 @@ Provides access to the device friendly name.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device friendly name |
-| result.name | string |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device friendly name |
+| result.name | string | mandatory | Device friendly name |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1271,9 +1269,9 @@ Provides access to the device friendly name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.friendlyname"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.friendlyname"
 }
 ```
 
@@ -1281,11 +1279,11 @@ Provides access to the device friendly name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "name": "My device"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "name": "My device"
+  }
 }
 ```
 
@@ -1300,16 +1298,16 @@ Provides access to the device Platform name.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device Platform name |
-| result.name | string |  |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device Platform name |
+| result.name | string | mandatory | Device Platform name |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1317,9 +1315,9 @@ Provides access to the device Platform name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.platformname"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.platformname"
 }
 ```
 
@@ -1327,11 +1325,11 @@ Provides access to the device Platform name.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "name": "Linux"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "name": "Linux"
+  }
 }
 ```
 
@@ -1346,16 +1344,16 @@ Provides access to the device type.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Device type |
-| result.devicetype | string | Device type (must be one of the following: *tv*, *IpStb*, *QamIpStb*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Device type |
+| result.devicetype | string | mandatory | Device type (must be one of the following: *IpStb, QamIpStb, hybrid, mediaclient, tv*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1363,9 +1361,9 @@ Provides access to the device type.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.devicetype"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.devicetype"
 }
 ```
 
@@ -1373,11 +1371,11 @@ Provides access to the device type.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "devicetype": "IpStb"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "devicetype": "IpStb"
+  }
 }
 ```
 
@@ -1392,16 +1390,16 @@ Provides access to the partner ID or distributor ID for device.
 
 ### Result
 
-| Name | Type | Description |
-| :-------- | :-------- | :-------- |
-| result | object | Partner ID or distributor ID for device |
-| result.distributorid | string | Partner ID or distributor ID for device (must be one of the following: *comcast*, *xglobal*, *sky-de*, *sky-italia*, *sky-uk*, *sky-uk-dev*, *sky-deu*, *sky-deu-dev*, *sky-it*, *sky-it-dev*, *cox*, *cox-hospitality*, *cox-dev*, *cox-qa*, *MIT*, *shaw*, *shaw-dev*, *rogers*, *rogers-dev*, *videotron*, *charter*, *charter-dev*) |
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | object | mandatory | Partner ID or distributor ID for device |
+| result.distributorid | string | mandatory | Partner ID or distributor ID for device (must be one of the following: *MIT, charter, charter-dev, comcast, cox, cox-dev, cox-hospitality, cox-qa, rogers, rogers-dev, shaw, shaw-dev, sky-de, sky-deu, sky-deu-dev, sky-it, sky-it-dev, sky-italia, sky-uk, sky-uk-dev, videotron, xglobal*) |
 
 ### Errors
 
-| Code | Message | Description |
-| :-------- | :-------- | :-------- |
-| 1 | ```ERROR_GENERAL``` |  |
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_GENERAL``` | General error |
 
 ### Example
 
@@ -1409,9 +1407,9 @@ Provides access to the partner ID or distributor ID for device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "method": "DeviceInfo.1.distributorid"
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.distributorid"
 }
 ```
 
@@ -1419,11 +1417,11 @@ Provides access to the partner ID or distributor ID for device.
 
 ```json
 {
-    "jsonrpc": "2.0",
-    "id": 42,
-    "result": {
-        "distributorid": "comcast"
-    }
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": {
+    "distributorid": "comcast"
+  }
 }
 ```
 

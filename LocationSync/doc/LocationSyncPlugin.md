@@ -89,7 +89,10 @@ The table below lists configuration options of the plugin.
 This plugin implements the following interfaces:
 
 - ITimeZone ([ITimeZone.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ITimeZone.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
+
 - ILocationSync ([ILocationSync.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/ILocationSync.h)) (version 1.0.0) (compliant format)
+> This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a name="head.Methods"></a>
 # Methods
@@ -157,7 +160,7 @@ TimeZone interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [timeZone](#property.timeZone) | read/write | TimeZone for system |
+| [timezone](#property.timezone) | read/write | TimeZone for system |
 
 LocationSync interface properties:
 
@@ -165,8 +168,8 @@ LocationSync interface properties:
 | :-------- | :-------- | :-------- |
 | [location](#property.location) | read-only | Get information about the location |
 
-<a name="property.timeZone"></a>
-## *timeZone [<sup>property</sup>](#head.Properties)*
+<a name="property.timezone"></a>
+## *timezone [<sup>property</sup>](#head.Properties)*
 
 Provides access to the timeZone for system.
 
@@ -184,7 +187,7 @@ Provides access to the timeZone for system.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "LocationSync.1.timeZone"
+  "method": "LocationSync.1.timezone"
 }
 ```
 
@@ -204,7 +207,7 @@ Provides access to the timeZone for system.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "LocationSync.1.timeZone",
+  "method": "LocationSync.1.timezone",
   "params": "..."
 }
 ```
@@ -236,8 +239,8 @@ Provides access to the get information about the location.
 | result?.city | string | optional | City name |
 | result?.country | string | optional | Country name |
 | result?.region | string | optional | Region name |
-| result?.timezone | string | optional | Time zone information |
-| result?.publicip | string | optional | Public IP |
+| result?.timezone | string | optional | <sup>*(deprecated)*</sup> Time zone information |
+| result?.publicip | string | optional | <sup>*(deprecated)*</sup> Public IP |
 
 ### Errors
 
@@ -266,9 +269,7 @@ Provides access to the get information about the location.
   "result": {
     "city": "Wroclaw",
     "country": "Poland",
-    "region": "Silesia",
-    "timezone": "CET-1CEST,M3.5.0,M10.5.0/3",
-    "publicip": "78.11.117.118"
+    "region": "Silesia"
   }
 }
 ```
@@ -284,7 +285,7 @@ TimeZone interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [timeZoneChanged](#notification.timeZoneChanged) | TimeZone was set for the system |
+| [timezonechanged](#notification.timezonechanged) | TimeZone was set for the system |
 
 LocationSync interface events:
 
@@ -292,12 +293,12 @@ LocationSync interface events:
 | :-------- | :-------- |
 | [updated](#notification.updated) / [locationchange](#notification.updated) | Signals a location change |
 
-<a name="notification.timeZoneChanged"></a>
-## *timeZoneChanged [<sup>notification</sup>](#head.Notifications)*
+<a name="notification.timezonechanged"></a>
+## *timezonechanged [<sup>notification</sup>](#head.Notifications)*
 
 TimeZone was set for the system.
 
-### Parameters
+### Notification Parameters
 
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
@@ -313,18 +314,18 @@ TimeZone was set for the system.
   "id": 42,
   "method": "LocationSync.1.register",
   "params": {
-    "event": "timeZoneChanged",
-    "id": "client"
+    "event": "timezonechanged",
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.timeZoneChanged",
+  "method": "myid.timezonechanged",
   "params": "..."
 }
 ```
@@ -336,7 +337,7 @@ Signals a location change.
 
 > ``locationchange`` is an alternative name for this notification. This name is **deprecated** and may be removed in the future. It is not recommended for use in new implementations.
 
-### Parameters
+### Notification Parameters
 
 This notification carries no parameters.
 
@@ -351,17 +352,17 @@ This notification carries no parameters.
   "method": "LocationSync.1.register",
   "params": {
     "event": "updated",
-    "id": "client"
+    "id": "myid"
   }
 }
 ```
 
-#### Message
+#### Notification
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "client.updated"
+  "method": "myid.updated"
 }
 ```
 
