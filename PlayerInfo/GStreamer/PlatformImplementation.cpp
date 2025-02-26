@@ -58,10 +58,10 @@ private:
             for (auto index: caps) {
 
                 MediaTypes mediaType{gst_caps_from_string(index.first.c_str())};
-                if (elements = std::move(GstUtils::GstRegistryGetElementForMediaType(decoderFactories.get(), std::move(mediaType)))) {
+                if ((elements = std::move(GstUtils::GstRegistryGetElementForMediaType(decoderFactories.get(), std::move(mediaType))))) {
                     codecIteratorList.push_back(index.second);
 
-                } else if (elements = std::move(GstUtils::GstRegistryGetElementForMediaType(parserFactories.get(), std::move(mediaType)))) {
+                } else if ((elements = std::move(GstUtils::GstRegistryGetElementForMediaType(parserFactories.get(), std::move(mediaType))))) {
 
                     for (GList* iterator = elements.get(); iterator; iterator = iterator->next) {
 
