@@ -28,7 +28,7 @@ jobs:
           echo "deb http://archive.ubuntu.com/ubuntu/ jammy-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib' || 'zlib1g-dev libssl-dev'}}
+          sudo apt install python3-pip build-essential cmake ninja-build libusb-1.0-0-dev autoconf automake libtool libtool-bin pkg-config ${{matrix.architecture == '32' && 'zlib1g-dev:i386 libssl-dev:i386 gcc-13-multilib g++-13-multilib libarchive-dev:i386 libcurl4-openssl-dev:i386 libgpgme-dev:i386 libgpg-error-dev:i386' || 'zlib1g-dev libssl-dev libarchive-dev libcurl4-openssl-dev libgpgme-dev libgpg-error-dev'}}
           python3 -m venv venv
           source venv/bin/activate
           pip install jsonref
@@ -60,10 +60,31 @@ jobs:
         regex_flags: 'gim'
         search_string: ${{github.event.pull_request.body}}
 
+    - name: Checkout libopkg
+      uses: actions/checkout@v4
+      with:
+        path: opkg
+        repository: oe-mirrors/opkg
+
 # ----- Build & upload artifacts -----
+    - name: Build libopkg
+      run: |
+        export PKG_CONFIG_PATH=/usr/lib/${{matrix.architecture == '32' && 'i386' || 'x86_64'}}-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
+        cd opkg
+        ./autogen.sh || true
+        ./configure --prefix=/usr/local ${{matrix.architecture == '32' && 'CFLAGS="-m32" LDFLAGS="-m32"' || ''}}
+        make
+        sudo make install
+
+    - name: Install libopkg headers
+      run: |
+        sudo mkdir -p /usr/local/include/libopkg
+        sudo cp $GITHUB_WORKSPACE/opkg/libopkg/*.h /usr/local/include/libopkg
+
     - name: Build ThunderNanoServicesRDK
       run: |
         source venv/bin/activate
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
         cmake -G Ninja -S ThunderNanoServicesRDK -B ${{matrix.build_type}}/build/ThunderNanoServicesRDK \
         -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
         -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
@@ -77,6 +98,7 @@ jobs:
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
         -DPLUGIN_PERFORMANCEMETRICS=ON \
+        -DPLUGIN_PACKAGER=ON \
         ${{steps.plugins.outputs.first_match}}
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
 
