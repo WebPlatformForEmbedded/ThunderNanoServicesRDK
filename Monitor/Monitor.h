@@ -766,7 +766,7 @@ POP_WARNING()
                     }
                 }
             }
-            void Deactivated (const string&, PluginHost::IShell*) override
+            void Deactivated (const string& callsign, PluginHost::IShell*) override
             {
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
