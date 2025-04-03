@@ -451,7 +451,7 @@ namespace WebKitBrowser {
 
     class ProcessMemoryObserverImpl : public Exchange::IProcessMemory {
     public:
-        explicit ProcessMemoryObserverImpl(Core::process_t id)
+        explicit ProcessMemoryObserverImpl(pid_t id)
             : Exchange::IProcessMemory()
             , _info(id)
         { 
@@ -482,7 +482,6 @@ namespace WebKitBrowser {
         }
 
         uint32_t Identifier() const override {
-            static_assert(sizeof(Core::process_t) <= sizeof(uint32_t), "PId type size too big to fit in IProcessMemory::ID");
             return _info.Id();
         }
 
