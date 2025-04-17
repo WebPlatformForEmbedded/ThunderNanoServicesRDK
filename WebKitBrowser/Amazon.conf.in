@@ -6,12 +6,7 @@ configuration = JSON()
 
 configuration.add("url", "@PLUGIN_AMAZON_STARTURL@")
 configuration.add("useragent", "@PLUGIN_AMAZON_USERAGENT@")
-
-if not boolean("@WEBKIT_GLIB_API@"):
-    configuration.add("injectedbundle", "libWPEInjectedBundle@CMAKE_SHARED_LIBRARY_SUFFIX@")
-else:
-    configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
-
+configuration.add("extensiondir", "@PLUGIN_WEBKITBROWSER_EXTENSION_DIRECTORY@")
 configuration.add("transparent", "@PLUGIN_AMAZON_TRANSPARENT@")
 configuration.add("compositor", "noaa")
 configuration.add("inspector", "@PLUGIN_AMAZON_WEBINSPECTOR_ADDRESS@")
