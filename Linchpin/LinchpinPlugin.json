@@ -1,0 +1,17 @@
+{
+  "$schema": "plugin.schema.json",
+  "document": {
+    "$ref": "docs_common.json"
+  },
+  "info": {
+    "title": "Linchpin Plugin",
+    "version": "1.0",
+    "callsign": "Linchpin",
+    "locator": "libWPEFrameworkLinchpin.so",
+    "status": "alpha",
+    "description": "The Linchpin allows exchanging topics."
+  },
+  "interface": {
+    "$cppref": "{cppinterfacedir}/ITopicExchange.h"
+  }
+}

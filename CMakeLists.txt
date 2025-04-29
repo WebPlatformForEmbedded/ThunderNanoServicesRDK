@@ -99,3 +99,5 @@ endif()
 if(PLUGIN_WEBBRIDGE)
     add_subdirectory(WebBridge)
 endif()
+
+add_subdirectory(Linchpin)
