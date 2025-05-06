@@ -180,7 +180,7 @@ namespace Plugin {
                 if (_observable.IsValid() == true) {
                     _observable->Disable();
                     VARIABLE_IS_NOT_USED uint32_t result =_observable.Release(); 
-                    ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                    ASSERT( (result == Core::ERROR_CONNECTION_CLOSED) || (result == Core::ERROR_DESTRUCTION_SUCCEEDED));
                     ASSERT(_observable.IsValid() == false);
                 }
             }
@@ -203,7 +203,7 @@ namespace Plugin {
                     _observable->Deactivated(service);
                     _observable->Disable();
                     VARIABLE_IS_NOT_USED uint32_t result =_observable.Release(); 
-                    ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                    ASSERT( (result == Core::ERROR_CONNECTION_CLOSED) || (result == Core::ERROR_DESTRUCTION_SUCCEEDED));
                     ASSERT(_observable.IsValid() == false);            
                 }
             }
