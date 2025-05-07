@@ -21,34 +21,19 @@
 #define DEVICEINFO_DEVICEINFO_H
 
 #include "Module.h"
+#include <interfaces/IConfiguration.h>
 #include <interfaces/IDeviceInfo.h>
-#include <interfaces/json/JsonData_DeviceInfo.h>
+#include <interfaces/json/JDeviceInfo.h>
+#include <interfaces/json/JSystemInfo.h>
+#include <interfaces/json/JDeviceAudioCapabilities.h>
+#include <interfaces/json/JDeviceVideoCapabilities.h>
 
 namespace Thunder {
 namespace Plugin {
 
-    class DeviceInfo : public PluginHost::IPlugin, public PluginHost::IWeb, public PluginHost::JSONRPC {
-    public:
-        class Data : public Core::JSON::Container {
-        public:
-            Data()
-                : Core::JSON::Container()
-                , Addresses()
-                , SystemInfo()
-            {
-                Add(_T("addresses"), &Addresses);
-                Add(_T("systeminfo"), &SystemInfo);
-                Add(_T("sockets"), &Sockets);
-            }
-
-            ~Data() override = default;
-
-        public:
-            Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData> Addresses;
-            JsonData::DeviceInfo::SysteminfoData SystemInfo;
-            JsonData::DeviceInfo::SocketinfoData Sockets;
-        };
-
+    class DeviceInfo : public PluginHost::IPlugin
+                     , public PluginHost::JSONRPC
+                     , public Exchange::ISystemInfo {
     private:
         class Notification : public PluginHost::ISubSystem::INotification, public RPC::IRemoteConnection::INotification {
         private:
@@ -106,23 +91,6 @@ namespace Plugin {
             Core::WorkerPool::JobType<Job> _job;
         };
 
-    private:
-        uint32_t addresses(const Core::JSON::String&, Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response)
-        {
-            AddressInfo(response);
-            return (Core::ERROR_NONE);
-        }
-        uint32_t system(const Core::JSON::String&, JsonData::DeviceInfo::SysteminfoData& response)
-        {
-            SysInfo(response);
-            return (Core::ERROR_NONE);
-        }
-        uint32_t sockets(const Core::JSON::String&, JsonData::DeviceInfo::SocketinfoData& response)
-        {
-            SocketPortInfo(response);
-            return (Core::ERROR_NONE);
-        }
-
     public:
         DeviceInfo(const DeviceInfo&) = delete;
         DeviceInfo& operator=(const DeviceInfo&) = delete;
@@ -132,6 +100,7 @@ namespace Plugin {
             , _subSystem(nullptr)
             , _deviceId()
             , _deviceInfo(nullptr)
+            , _configuration(nullptr)
             , _deviceAudioCapabilityInterface(nullptr)
             , _deviceVideoCapabilityInterface(nullptr)
             , _connectionId(0)
@@ -144,9 +113,10 @@ namespace Plugin {
 
         BEGIN_INTERFACE_MAP(DeviceInfo)
         INTERFACE_ENTRY(PluginHost::IPlugin)
-        INTERFACE_ENTRY(PluginHost::IWeb)
         INTERFACE_ENTRY(PluginHost::IDispatcher)
+        INTERFACE_ENTRY(Exchange::ISystemInfo)
         INTERFACE_AGGREGATE(Exchange::IDeviceInfo, _deviceInfo)
+        INTERFACE_AGGREGATE(Exchange::IConfiguration, _configuration)
         INTERFACE_AGGREGATE(Exchange::IDeviceAudioCapabilities, _deviceAudioCapabilityInterface)
         INTERFACE_AGGREGATE(Exchange::IDeviceVideoCapabilities, _deviceVideoCapabilityInterface)
         END_INTERFACE_MAP
@@ -158,78 +128,32 @@ namespace Plugin {
         virtual void Deinitialize(PluginHost::IShell* service) override;
         virtual string Information() const override;
 
-        //   IWeb methods
-        // -------------------------------------------------------------------------------------------------------
-        virtual void Inbound(Web::Request& request) override;
-        virtual Core::ProxyType<Web::Response> Process(const Web::Request& request) override;
-
     private:
-        // JsonRpc
-        void RegisterAll();
-        void UnregisterAll();
-        uint32_t endpoint_supportedresolutions(const JsonData::DeviceInfo::SupportedresolutionsParamsInfo& params, JsonData::DeviceInfo::SupportedresolutionsResultData& response);
-        uint32_t endpoint_defaultresolution(const JsonData::DeviceInfo::SupportedresolutionsParamsInfo& params, JsonData::DeviceInfo::DefaultresolutionResultData& response);
-        uint32_t endpoint_supportedhdcp(const JsonData::DeviceInfo::SupportedresolutionsParamsInfo& params, JsonData::DeviceInfo::SupportedhdcpResultData& response);
-        uint32_t endpoint_audiocapabilities(const JsonData::DeviceInfo::AudiocapabilitiesParamsInfo& params, JsonData::DeviceInfo::AudiocapabilitiesResultData& response);
-        uint32_t endpoint_ms12capabilities(const JsonData::DeviceInfo::AudiocapabilitiesParamsInfo& params, JsonData::DeviceInfo::Ms12capabilitiesResultData& response);
-        uint32_t endpoint_supportedms12audioprofiles(const JsonData::DeviceInfo::AudiocapabilitiesParamsInfo& params, JsonData::DeviceInfo::Supportedms12audioprofilesResultData& response);
-        uint32_t endpoint_get_deviceaudiocapabilities(JsonData::DeviceInfo::DeviceaudiocapabilitiesData& response) const;
-        uint32_t endpoint_get_devicevideocapabilities(JsonData::DeviceInfo::DevicevideocapabilitiesData& response) const;
-        uint32_t endpoint_get_deviceinfo(JsonData::DeviceInfo::DeviceinfoData& response) const;
-        uint32_t endpoint_get_systeminfo(JsonData::DeviceInfo::SysteminfoData& response) const;
-        uint32_t endpoint_get_addresses(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& response) const;
-        uint32_t endpoint_get_socketinfo(JsonData::DeviceInfo::SocketinfoData& response) const;
-        uint32_t endpoint_get_supportedaudioports(JsonData::DeviceInfo::SupportedaudioportsData& response) const;
-        uint32_t endpoint_get_supportedvideodisplays(JsonData::DeviceInfo::SupportedvideodisplaysData& response) const;
-        uint32_t endpoint_get_hostedid(JsonData::DeviceInfo::HostedidData& response) const;
-        uint32_t endpoint_get_firmwareversion(JsonData::DeviceInfo::FirmwareversionData& response) const;
-        uint32_t endpoint_get_serialnumber(JsonData::DeviceInfo::SerialnumberData& response) const;
-        uint32_t endpoint_get_modelid(JsonData::DeviceInfo::ModelidData& response) const;
-        uint32_t endpoint_get_make(JsonData::DeviceInfo::MakeData& response) const;
-        uint32_t endpoint_get_modelname(JsonData::DeviceInfo::ModelnameData& response) const;
-        uint32_t endpoint_get_modelyear(JsonData::DeviceInfo::ModelyearData& response) const;
-        uint32_t endpoint_get_friendlyname(JsonData::DeviceInfo::FriendlynameInfo& response) const;
-        uint32_t endpoint_get_platformname(JsonData::DeviceInfo::FriendlynameInfo& response) const;
-        uint32_t endpoint_get_devicetype(JsonData::DeviceInfo::DevicetypeData& response) const;
-        uint32_t endpoint_get_distributorid(JsonData::DeviceInfo::DistributoridData& response) const;
+        Core::hresult AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const;
+        Core::hresult AudioCapabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator*& audioCapabilities) const;
+        Core::hresult MS12Capabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator*& ms12Capabilities) const;
+        Core::hresult MS12AudioProfiles(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator*& ms12Profiles) const;
 
-        void SysInfo(JsonData::DeviceInfo::SysteminfoData& systemInfo) const;
-        void AddressInfo(Core::JSON::ArrayType<JsonData::DeviceInfo::AddressesData>& addressInfo) const;
-        void SocketPortInfo(JsonData::DeviceInfo::SocketinfoData& socketPortInfo) const;
-        void AudioCapabilitiesInfo(JsonData::DeviceInfo::DeviceaudiocapabilitiesData& response) const;
-        void VideoCapabilitiesInfo(JsonData::DeviceInfo::DevicevideocapabilitiesData& response) const;
-        void DeviceMetaData(JsonData::DeviceInfo::DeviceinfoData& response) const;
+        Core::hresult VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const;
+        Core::hresult DefaultResolution(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::ScreenResolution& defaultResolution) const;
+        Core::hresult Resolutions(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator*& resolutions) const;
+        Core::hresult Hdcp(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::CopyProtection& hdcpVersion) const;
+        Core::hresult HostEDID(string& edid) const;
+
+        Core::hresult Version(string& value) const override;
+        Core::hresult Uptime(uint32_t& value) const override;
+        Core::hresult TotalRAM(uint64_t& value) const override;
+        Core::hresult FreeRAM(uint64_t& value) const override;
+        Core::hresult TotalSwap(uint64_t& value) const override;
+        Core::hresult FreeSwap(uint64_t& value) const override;
+        Core::hresult DeviceName(string& value) const override;
+        Core::hresult CPULoad(uint8_t& value) const override;
+        Core::hresult CPULoadAvgs(Exchange::ISystemInfo::CPULoads& value) const override;
+        Core::hresult Addresses(Exchange::ISystemInfo::INetworkInterfaceIterator*& networkInterfaces) const override;
+        Core::hresult SocketInfo(Exchange::ISystemInfo::Sockets& socketInfo) const override;
 
         void UpdateDeviceIdentifier();
         void Deactivated(RPC::IRemoteConnection* connection);
-
-        using VideoOutputTypes = Core::JSON::ArrayType<Core::JSON::EnumType<JsonData::DeviceInfo::VideodisplayType>>;
-        using ScreenResolutionType = Core::JSON::EnumType<JsonData::DeviceInfo::Output_resolutionType>;
-        using ScreenResolutionTypes = Core::JSON::ArrayType<ScreenResolutionType>;
-        using CopyProtectionType = Core::JSON::EnumType<JsonData::DeviceInfo::CopyprotectionType>;
-        uint32_t VideoOutputs(VideoOutputTypes& videoOutputs) const;
-        uint32_t DefaultResolution(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, ScreenResolutionType& screenResolutionType) const;
-        uint32_t Resolutions(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, ScreenResolutionTypes& screenResolutionTypes) const;
-        uint32_t Hdcp(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, CopyProtectionType& copyProtectionType) const;
-
-        using AudioOutputTypes = Core::JSON::ArrayType<Core::JSON::EnumType<JsonData::DeviceInfo::AudioportType>>;
-        using AudioCapabilityTypes = Core::JSON::ArrayType<Core::JSON::EnumType<JsonData::DeviceInfo::AudiocapabilityType>>;
-        using Ms12CapabilityTypes = Core::JSON::ArrayType<Core::JSON::EnumType<JsonData::DeviceInfo::Ms12capabilityType>>;
-        using Ms12ProfileTypes = Core::JSON::ArrayType<Core::JSON::EnumType<JsonData::DeviceInfo::Ms12profileType>>;
-        uint32_t AudioOutputs(AudioOutputTypes& audioOutputs) const;
-        uint32_t AudioCapabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, AudioCapabilityTypes& audioCapabilityTypes) const;
-        uint32_t Ms12Capabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Ms12CapabilityTypes& ms12CapabilityTypes) const;
-        uint32_t Ms12Profiles(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Ms12ProfileTypes& ms12ProfileTypes) const;
-
-        inline uint32_t HostEDID(Core::JSON::String& Hostedid) const
-        {
-            string edid;
-            uint32_t status = _deviceVideoCapabilityInterface->HostEDID(edid);
-            if (status == Core::ERROR_NONE) {
-                Hostedid = edid;
-            }
-            return status;
-        }
 
     private:
         uint8_t _skipURL;
@@ -237,6 +161,7 @@ namespace Plugin {
         PluginHost::ISubSystem* _subSystem;
         string _deviceId;
         Exchange::IDeviceInfo* _deviceInfo;
+        Exchange::IConfiguration* _configuration;
         Exchange::IDeviceAudioCapabilities* _deviceAudioCapabilityInterface;
         Exchange::IDeviceVideoCapabilities* _deviceVideoCapabilityInterface;
         uint32_t _connectionId;
