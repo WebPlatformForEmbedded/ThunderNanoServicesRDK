@@ -43,18 +43,22 @@ namespace Thunder {
         : Core::JSON::Container()
         , Port(2200)
         , Binding("0.0.0.0")
+        , Interface("eth0")
     {
         Add(_T("port"), &Port);
         Add(_T("binding"), &Binding);
+        Add(_T("interface"), &Interface);
     }
 
     MessageControl::Config::NetworkNode::NetworkNode(const NetworkNode& copy)
         : Core::JSON::Container()
         , Port(copy.Port)
         , Binding(copy.Binding)
+        , Interface(copy.Interface)
     {
         Add(_T("port"), &Port);
         Add(_T("binding"), &Binding);
+        Add(_T("interface"), &Interface);
     }
 
     MessageControl::MessageControl()
@@ -115,8 +119,8 @@ namespace Thunder {
             _config.FileName = service->VolatilePath() + _config.FileName.Value();
             Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value()));
         }
-        if ((_config.Remote.IsSet() == true) && (_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)) {
-            Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service));
+        if ((_config.Remote.IsSet() == true) && (_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)  && (_config.Remote.Interface.Value().empty() == false)) {
+            Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service, _config.Remote.Interface.Value()));
         }
 
         _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());

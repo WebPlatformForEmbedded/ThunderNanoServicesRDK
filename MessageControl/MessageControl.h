@@ -90,6 +90,7 @@ namespace Plugin {
             public:
                 Core::JSON::DecUInt16 Port;
                 Core::JSON::String Binding;
+                Core::JSON::String Interface;
             };
 
         public:

@@ -180,11 +180,12 @@ namespace Publishers {
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service)
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface)
         : _convertor(abbreviate)
         , _output(nodeId)
         , _notification(*this)
         , _subSystem(service->SubSystems())
+        , _interface(interface)
     {
         ASSERT(_subSystem != nullptr);
 
@@ -198,7 +199,12 @@ namespace Publishers {
     {
         if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
             if (_output.IsOpen() == false) {
-                _output.Open(0);
+                if (_interface.empty() == false) {
+                    _output.Open(0, _interface);
+                }
+                else {
+                    _output.Open(0);
+                }
             }
             ASSERT(_output.IsOpen() == true);
         }
