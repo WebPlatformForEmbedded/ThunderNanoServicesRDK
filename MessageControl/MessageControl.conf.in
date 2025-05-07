@@ -20,4 +20,5 @@ if boolean("@PLUGIN_MESSAGECONTROL_REMOTE@"):
   remote = JSON()
   remote.add("port", "@PLUGIN_MESSAGECONTROL_PORT@")
   remote.add("binding", "@PLUGIN_MESSAGECONTROL_BINDING@")
+  remote.add("interface", "@PLUGIN_MESSAGECONTROL_INTERFACE@")
   configuration.add("remote", remote)
