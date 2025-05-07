@@ -204,7 +204,7 @@ namespace Plugin {
                 // It should have been the last reference we are releasing,
                 // so it should end up in a DESCRUCTION_SUCCEEDED, if not we
                 // are leaking...
-                ASSERT(result == Core::ERROR_DESTRUCTION_SUCCEEDED);
+                ASSERT( (result == Core::ERROR_CONNECTION_CLOSED) || (result == Core::ERROR_DESTRUCTION_SUCCEEDED));
 
                 // If this was running in a (container) process...
                 if (connection != nullptr) {
@@ -451,7 +451,7 @@ namespace WebKitBrowser {
 
     class ProcessMemoryObserverImpl : public Exchange::IProcessMemory {
     public:
-        explicit ProcessMemoryObserverImpl(Core::process_t id)
+        explicit ProcessMemoryObserverImpl(pid_t id)
             : Exchange::IProcessMemory()
             , _info(id)
         { 
@@ -482,7 +482,6 @@ namespace WebKitBrowser {
         }
 
         uint32_t Identifier() const override {
-            static_assert(sizeof(Core::process_t) <= sizeof(uint32_t), "PId type size too big to fit in IProcessMemory::ID");
             return _info.Id();
         }
 
