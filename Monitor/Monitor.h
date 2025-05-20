@@ -766,8 +766,15 @@ POP_WARNING()
                     }
                 }
             }
-            void Deactivated (const string&, PluginHost::IShell*) override
+            void Deactivated (const string& callsign, PluginHost::IShell*) override
             {
+                MonitorObjectContainer::iterator index(_monitor.find(callsign));
+
+                if (index != _monitor.end()) {
+
+                    index->second.Set(nullptr);
+                    index->second.Active(false);
+                }
             }
             void Unavailable(const string&, PluginHost::IShell*) override
             {
@@ -781,9 +788,6 @@ POP_WARNING()
                 MonitorObjectContainer::iterator index(_monitor.find(callsign));
 
                 if (index != _monitor.end()) {
-
-                    index->second.Set(nullptr);
-                    index->second.Active(false);
 
                     PluginHost::IShell::reason reason = service->Reason();
 
