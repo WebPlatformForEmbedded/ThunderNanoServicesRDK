@@ -42,9 +42,13 @@
             "bindig" : {
               "type": "string",
               "description": "Binding address"
+            },
+            "interface" : {
+              "type": "string",
+              "description": "Interface"
             }
           },
-          "required": [ "port", "binding" ]
+          "required": [ "port", "binding", "interface" ]
         }
       },
       "required": [

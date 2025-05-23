@@ -401,7 +401,7 @@ namespace Publishers {
         UDPOutput(const UDPOutput&) = delete;
         UDPOutput& operator=(const UDPOutput&) = delete;
 
-        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service);
+        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface);
 
         ~UDPOutput() override
         {
@@ -420,6 +420,7 @@ namespace Publishers {
         Channel _output;
         Core::SinkType<Notification> _notification;
         PluginHost::ISubSystem* _subSystem;
+        string _interface;
     };
 
     class WebSocketOutput : public IPublish {
