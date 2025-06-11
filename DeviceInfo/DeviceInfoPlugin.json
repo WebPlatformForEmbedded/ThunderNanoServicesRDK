@@ -88,6 +88,6 @@
     ]
   },
   "interface": {
-    "$ref": "{interfacedir}/DeviceInfo.json#"
+    "$ref": "{cppinterfacedir}/IDeviceInfo.h"
   }
 }

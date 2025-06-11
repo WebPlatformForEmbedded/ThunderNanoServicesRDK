@@ -177,7 +177,6 @@
   <ItemGroup>
     <ClCompile Include="DeviceInfo.cpp" />
     <ClCompile Include="DeviceInfoImplementation.cpp" />
-    <ClCompile Include="DeviceInfoJsonRpc.cpp" />
     <ClCompile Include="Module.cpp" />
   </ItemGroup>
   <ItemGroup>
