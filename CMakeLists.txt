@@ -34,6 +34,7 @@ option(PLUGIN_PLAYERINFO "Include PlayerInfo plugin" OFF)
 option(PLUGIN_RUSTBRIDGE "Include RustBridge plugin" OFF)
 option(PLUGIN_SECURITYAGENT "Include SecurityAgent plugin" OFF)
 option(PLUGIN_WEBKITBROWSER "Include WebKitBrowser plugin" OFF)
+option(PLUGIN_PLUGININITIALIZERSERVICE "Include PluginInitializerService plugin" OFF)
 
 option(PLUGINS_CREATE_IPKG_TARGETS "Generate the CPack configuration for package generation" OFF)
 
@@ -114,4 +115,8 @@ endif()
 
 if(PLUGIN_RUSTBRIDGE)
     add_subdirectory(RustBridge)
+endif()
+
+if(PLUGIN_PLUGININITIALIZERSERVICE)
+    add_subdirectory(PluginInitializerService)
 endif()
