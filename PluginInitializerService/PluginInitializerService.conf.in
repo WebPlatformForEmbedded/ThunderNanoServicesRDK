@@ -1,0 +1,4 @@
+startmode = "@PLUGIN_PLUGININITIALIZERSERVICE_STARTMODE@"
+
+configuration = JSON()
+configuration.add("example", "@PLUGIN_PLUGININITIALIZERSERVICE_EXAMPLE@")
