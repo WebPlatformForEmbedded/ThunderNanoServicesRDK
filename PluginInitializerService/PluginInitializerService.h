@@ -66,10 +66,9 @@ namespace Plugin {
         string Information() const override;
         
         // IPluginAsyncStateControl methods
-        Core::hresult IPluginAsyncStateControlExample() override;
-        
-        // Plugin Methods
-        void PluginInitializerServiceMethod();
+        Core::hresult Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IActivationCallback* const cb) override;
+        Core::hresult AbortActivate(const string& callsign) override;
+       
         
         BEGIN_INTERFACE_MAP(PluginInitializerService)
             INTERFACE_ENTRY(PluginHost::IPlugin)

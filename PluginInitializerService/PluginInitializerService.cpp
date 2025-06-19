@@ -54,12 +54,17 @@ namespace Plugin {
     string PluginInitializerService::Information() const {
         return (string());
     }
-    
-    void PluginInitializerService::PluginInitializerServiceMethod() {
-    
+
+    Core::hresult PluginInitializerService::Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IActivationCallback* const cb)
+    {
+        ASSERT(cb != nullptr);
+        if (cb != nullptr) {
+            cb->Finished(callsign, Exchange::IPluginAsyncStateControl::IActivationCallback::state::FAILURE, 0);
+        }
+        return Core::ERROR_NONE;
     }
-    
-    Core::hresult PluginInitializerService::IPluginAsyncStateControlExample() {
+    Core::hresult PluginInitializerService::AbortActivate(const string& callsign)
+    {
         return Core::ERROR_NONE;
     }
     
