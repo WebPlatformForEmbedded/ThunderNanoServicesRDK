@@ -35,7 +35,11 @@ namespace Plugin {
         PluginInitializerService()
             : PluginHost::IPlugin()
             , Exchange::IPluginAsyncStateControl()
-            , _example(0)
+            , _maxparallel(2)
+            , _maxretries(5)
+            , _delay(500)
+            , _pluginInitList()
+            , _adminLock()
         {
         }
         
@@ -50,13 +54,19 @@ namespace Plugin {
             
             Config()
                 : Core::JSON::Container()
-                , Example()
+                , MaxParallel()
+                , MaxRetries(5)
+                , Delay(500)
             {
-                Add(_T("example"), &Example);
+                Add(_T("maxparallel"), &MaxParallel);
+                Add(_T("maxretries"), &MaxRetries);
+                Add(_T("delay"), &Delay);
             }
             ~Config() override = default;
         public:
-            Core::JSON::String Example;
+            Core::JSON::DecUInt8 MaxParallel;
+            Core::JSON::DecUInt8 MaxRetries;
+            Core::JSON::DecUInt16 Delay;
         };
         
     public:
@@ -66,7 +76,7 @@ namespace Plugin {
         string Information() const override;
         
         // IPluginAsyncStateControl methods
-        Core::hresult Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IActivationCallback* const cb) override;
+        Core::hresult Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IPluginAsyncStateControl::IActivationCallback* const cb) override;
         Core::hresult AbortActivate(const string& callsign) override;
        
         
@@ -76,11 +86,22 @@ namespace Plugin {
         END_INTERFACE_MAP
         
     private:
-        
-        // Include the correct member variables for your plugin:
-        // Note this is only an example, you are responsible for adding the correct members:
-        uint32_t _example;
-        
+
+        struct PluginInitData {
+            string callsign;
+            Core::OptionalType<uint8_t> maxnumberretries;
+            Core::OptionalType<uint16_t> delay;
+            IPluginAsyncStateControl::IActivationCallback* callback;
+        };
+
+    private:
+        using PluginInitDataContainer = std::list<PluginInitData>;
+
+        uint8_t                     _maxparallel;
+        uint8_t                     _maxretries;
+        uint16_t                    _delay;
+        PluginInitDataContainer     _pluginInitList;
+        Core::CriticalSection       _adminLock;
     };
 } // Plugin
 } // Thunder

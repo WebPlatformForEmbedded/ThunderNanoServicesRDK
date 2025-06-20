@@ -6,7 +6,7 @@
     "locator": "libThunderPluginInitializerService.so",
     "status": "development",
     "description": [
-    ""
+    "Service that can be used to activate plugin(s) asynchronously"
     ],
     "version": "1.0"
   },
@@ -17,10 +17,18 @@
         "type": "object",
         "required": [],
         "properties": {
-          "example": {
-            "type": "string",
-            "description": "Note: This is an example!"
-          }
+            "maxparallel": {
+                "type": "number",
+                "description": "Maximum number of plugins that can be started in parallel"
+            },
+            "maxretries": {
+                "type": "number",
+                "description": "Default maximum number of retries used starting a plugin"
+            },
+            "delay": {
+                "type": "number",
+                "description": "Default delay between retries starting a plugin (ms)"
+            }
         }
       }
     }

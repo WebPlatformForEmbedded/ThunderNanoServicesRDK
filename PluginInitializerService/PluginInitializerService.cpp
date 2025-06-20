@@ -44,7 +44,12 @@ namespace Plugin {
         ASSERT(service != nullptr);
         Config config;
         config.FromString(service->ConfigLine());
-        TRACE(Trace::Information, (_T("This is just an example: [%s])"), config.Example.Value().c_str()));
+        if (config.MaxParallel.IsSet() == true) {
+            _maxparallel = config.MaxParallel.Value();
+//            if ((_maxparallel == 0) || (_maxparallel > Core::WorkerPool::Instance()->))
+        }
+        _maxretries = config.MaxRetries.Value();
+        _delay = config.Delay.Value();
         return (message);
     }
     
