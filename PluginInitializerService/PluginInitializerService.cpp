@@ -90,10 +90,9 @@ namespace Plugin {
 
     Core::hresult PluginInitializerService::Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IPluginAsyncStateControl::IActivationCallback* const cb)
     {
-        TRACE(Trace::Information, (_T("Plugin Activate request received for plugin plugin [%s]"), callsign.c_str()));
+        TRACE(Trace::Information, (_T("Plugin Activate request received for plugin [%s]"), callsign.c_str()));
 
         Core::hresult result = Core::ERROR_NONE;
-        ASSERT(cb != nullptr);
 
         PluginHost::IShell* requestedpluginShell = _service->QueryInterfaceByCallsign<PluginHost::IShell>(callsign);
 
@@ -137,7 +136,19 @@ namespace Plugin {
     }
     Core::hresult PluginInitializerService::AbortActivate(const string& callsign)
     {
-        return Core::ERROR_NONE;
+        TRACE(Trace::Information, (_T("Plugin Abort Activate request received for plugin [%s]"), callsign.c_str()));
+
+        Core::hresult result = Core::ERROR_NONE;
+
+        if (CancelPluginStarter(callsign) == true) {
+            TRACE(Trace::Information, (_T("Plugin Activate request was canceled for plugin [%s]"), callsign.c_str()));
+        } else {
+            // note this is not necesarely an error, the abort reuquest could just have crossed the scuccesful activation (or failure to do so for that matter) so it was just removed from the list
+            TRACE(Trace::Warning, (_T("Plugin Abort Activate request plugin was not in activation list [%s]"), callsign.c_str()));
+            result = Core::ERROR_NOT_EXIST;
+        }
+
+        return result;
     }
     
 } // Plugin

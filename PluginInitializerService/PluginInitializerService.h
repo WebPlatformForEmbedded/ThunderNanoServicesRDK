@@ -91,10 +91,11 @@ POP_WARNING()
                 , _initializerservice(initservice)
             {
                 ASSERT(_requestedPluginShell != nullptr);
-                ASSERT(_callback != nullptr);
                 _callsign = _requestedPluginShell->Callsign();
                 _requestedPluginShell->AddRef();
-                _callback->AddRef();
+                if (_callback != nullptr) {
+                    _callback->AddRef();
+                }
             }
             ~PluginStarter()
             {
@@ -138,16 +139,39 @@ POP_WARNING()
             {
                 return lhs._callsign == rhs._callsign;
             }
+            friend bool operator!=(const PluginStarter& lhs, const PluginStarter& rhs)
+            {
+                return !(lhs == rhs);
+            }
+            friend bool operator==(const PluginStarter& lhs, const string& callsign)
+            {
+                return lhs._callsign == callsign;
+            }
+            friend bool operator!=(const PluginStarter& lhs, const string& callsign)
+            {
+                return !(lhs == callsign);
+            }
+            friend bool operator==(const string& callsign, const PluginStarter& lhs)
+            {
+                return lhs._callsign == callsign;
+            }
+            friend bool operator!=(const string& callsign, const PluginStarter& lhs)
+            {
+                return !(lhs == callsign);
+            }
 
             void Activate()
             {
                 TRACE(Trace::Information, (_T("Start activating plugin [%s]"), Callsign().c_str()));
                 ++_retries;
+                // we'll not keep the job, when activation is actualy started, aborting after that might not always abort the plugin activation (does not make sense, could always cross eachother anyway, and otherwisse we need to keep the job)
                 Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_initializerservice._service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
             }
             void Abort()
             {
-
+                if (_callback != nullptr) {
+                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::ABORTED, _retries);
+                }
             }
             const string& Callsign() const
             {
@@ -250,7 +274,7 @@ POP_WARNING()
             _adminLock.Lock();
 
             //see if this callsign is not yet in the list
-            if (std::find(_pluginInitList.cbegin(), _pluginInitList.cend(), starter) != _pluginInitList.cend()) {
+            if (std::find(_pluginInitList.cbegin(), _pluginInitList.cend(), starter) == _pluginInitList.cend()) {
                 _pluginInitList.emplace_back(std::move(starter));
             }
             else {
@@ -279,6 +303,27 @@ POP_WARNING()
 
             _adminLock.Unlock();
         }
+
+        bool CancelPluginStarter(const string& callsign)
+        {
+            bool result = false;
+
+            _adminLock.Lock();
+
+            PluginStarterContainer::iterator it = std::find(_pluginInitList.begin(), _pluginInitList.end(), callsign);
+            if (it != _pluginInitList.end()) {
+                PluginStarter toAbort(std::move(*it));
+                _pluginInitList.erase(it);
+                _adminLock.Unlock();
+                result = true;
+                toAbort.Abort();
+            } else {
+                _adminLock.Unlock();
+            }
+
+            return result;
+        }
+
     private:
         using PluginStarterContainer = std::list<PluginStarter>;
 
