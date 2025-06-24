@@ -88,8 +88,10 @@ namespace Plugin {
         return (string());
     }
 
-    Core::hresult PluginInitializerService::Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IActivationCallback* const cb)
+    Core::hresult PluginInitializerService::Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IPluginAsyncStateControl::IActivationCallback* const cb)
     {
+        TRACE(Trace::Information, (_T("Plugin Activate request received for plugin plugin [%s]"), callsign.c_str()));
+
         Core::hresult result = Core::ERROR_NONE;
         ASSERT(cb != nullptr);
 
@@ -98,24 +100,38 @@ namespace Plugin {
         if (requestedpluginShell != nullptr) {
             PluginHost::IShell::state state = requestedpluginShell->State();
             if ((state == PluginHost::IShell::DEACTIVATED) || (state == PluginHost::IShell::DEACTIVATION)) {
-
+                if (NewPluginStarter(requestedpluginShell
+                                    , (maxnumberretries.IsSet() == true ? maxnumberretries.Value() : _maxretries)
+                                    , (delay.IsSet() == true ? delay.Value() : _delay)
+                                    , cb) == true) {
+                    TRACE(Trace::Information, (_T("Plugin start entry created for plugin [%s]"), callsign.c_str()));
+                    ActivateAnotherPlugin();
+                } else {
+                    TRACE(Trace::Warning, (_T("Plugin start entry not created for plugin [%s], there was already a pending request for this plugin"), callsign.c_str()));
+                    result = Core::ERROR_INPROGRESS;
+                }
             } else if ((state == PluginHost::IShell::ACTIVATED) || 
                        (state == PluginHost::IShell::ACTIVATION) ||
                        (state == PluginHost::IShell::PRECONDITION) || 
                        (state == PluginHost::IShell::HIBERNATED)) {
-                requestedpluginShell->Release();
-                requestedpluginShell = nullptr;
-                if (cb != nullptr) {
+                TRACE(Trace::Warning, (_T("Plugin Activate received for plugin [%s] that was already active, state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
+
+                if (cb != nullptr)
+                {
+                    TRACE(Trace::Information, (_T("Result callback success called for plugin [%s]"), callsign.c_str()));
                     cb->Finished(callsign, Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, 0);
                 }
             } else {
+                TRACE(Trace::Error, (_T("Could not start activating plugin [%s] as it is in an illegal state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
                 result = Core::ERROR_ILLEGAL_STATE;
-                requestedpluginShell->Release();
-                requestedpluginShell = nullptr;
             }
         } else {
+            TRACE(Trace::Error, (_T("Could not start activating plugin [%s] as it is unknown"), callsign.c_str()));
             result = Core::ERROR_NOT_EXIST;        
         }
+
+        requestedpluginShell->Release();
+        requestedpluginShell = nullptr;
 
         return result;
     }

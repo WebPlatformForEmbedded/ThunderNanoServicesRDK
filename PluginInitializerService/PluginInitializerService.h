@@ -75,6 +75,108 @@ POP_WARNING()
 
     private:
 
+        class PluginStarter {
+        public:
+            PluginStarter(PluginHost::IShell* requestedPluginShell
+                         , uint8_t maxnumberretries
+                         , uint16_t delay
+                         , IPluginAsyncStateControl::IActivationCallback* callback
+                         , PluginInitializerService& initservice)
+                : _callsign()
+                , _requestedPluginShell(requestedPluginShell)
+                , _retries(0)
+                , _maxnumberretries(maxnumberretries)
+                , _delay(delay)
+                , _callback(callback)
+                , _initializerservice(initservice)
+            {
+                ASSERT(_requestedPluginShell != nullptr);
+                ASSERT(_callback != nullptr);
+                _callsign = _requestedPluginShell->Callsign();
+                _requestedPluginShell->AddRef();
+                _callback->AddRef();
+            }
+            ~PluginStarter()
+            {
+                if (_requestedPluginShell != nullptr) {
+                    _requestedPluginShell->Release();
+                    _requestedPluginShell = nullptr;
+                }
+                if (_callback != nullptr) {
+                    _callback->Release();
+                    _callback = nullptr;
+                }
+            }
+
+            PluginStarter(const PluginStarter&) = delete;
+            PluginStarter& operator=(const PluginStarter&) = delete;
+            PluginStarter(PluginStarter&& other)
+                : _callsign(std::move(other._callsign))
+                , _requestedPluginShell(other._requestedPluginShell)
+                , _retries(other._retries)
+                , _maxnumberretries(other._maxnumberretries)
+                , _delay(other._delay)
+                , _callback(other._callback)
+                , _initializerservice(other._initializerservice)
+            {
+                other._requestedPluginShell = nullptr;
+                other._callback = nullptr;
+            }
+            PluginStarter& operator=(PluginStarter&& other)
+            {
+                if (this != &other) {
+                    _requestedPluginShell = other._requestedPluginShell;
+                    other._requestedPluginShell = nullptr;
+                    _callback = other._callback;
+                    other._callback = nullptr;
+                    ASSERT(&_initializerservice == &other._initializerservice); // there should only be one...
+                }
+                return *this;
+            }
+
+            friend bool operator==(const PluginStarter& lhs, const PluginStarter& rhs)
+            {
+                return lhs._callsign == rhs._callsign;
+            }
+
+            void Activate()
+            {
+                TRACE(Trace::Information, (_T("Start activating plugin [%s]"), Callsign().c_str()));
+                ++_retries;
+                Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_initializerservice._service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
+            }
+            void Abort()
+            {
+
+            }
+            const string& Callsign() const
+            {
+                return _callsign;
+            }
+            bool Active() const
+            {
+                ASSERT(_requestedPluginShell != nullptr);
+                // if the plugin is waiting for preconditions it is not eating bread here, so we can add another in parallel
+                return( ( _retries > 0 ) && ( _requestedPluginShell->State() != PluginHost::IShell::PRECONDITION ) );
+            }
+            void Started()
+            {
+
+            }
+            void Failed()
+            {
+            }
+        private:
+            string _callsign; //as _requestedPluginShell->Callsign(); returns a temp and we need this lots of times let's keep a copy
+            PluginHost::IShell* _requestedPluginShell;
+            uint8_t _retries;
+            uint8_t _maxnumberretries;
+            uint16_t _delay;
+            IPluginAsyncStateControl::IActivationCallback* _callback;
+            PluginInitializerService& _initializerservice;
+        };
+
+
         class Notifications : public PluginHost::IPlugin::INotification, public PluginHost::IPlugin::ILifeTime {
         public:
             explicit Notifications(PluginInitializerService& initservice)
@@ -138,23 +240,52 @@ POP_WARNING()
             INTERFACE_ENTRY(PluginHost::IPlugin)
             INTERFACE_ENTRY(Exchange::IPluginAsyncStateControl)
         END_INTERFACE_MAP
-        
-    private:
-
-        struct PluginInitData {
-            PluginHost::IShell* requestedPluginShell;
-            Core::OptionalType<uint8_t> maxnumberretries;
-            Core::OptionalType<uint16_t> delay;
-            IPluginAsyncStateControl::IActivationCallback* callback;
-        };
 
     private:
-        using PluginInitDataContainer = std::list<PluginInitData>;
+        bool NewPluginStarter(PluginHost::IShell* requestedPluginShell, uint8_t maxnumberretries, uint16_t delay, IPluginAsyncStateControl::IActivationCallback* callback)
+        {
+            bool result = true;
+            PluginStarter starter(requestedPluginShell, maxnumberretries, delay, callback, *this);
+
+            _adminLock.Lock();
+
+            //see if this callsign is not yet in the list
+            if (std::find(_pluginInitList.cbegin(), _pluginInitList.cend(), starter) != _pluginInitList.cend()) {
+                _pluginInitList.emplace_back(std::move(starter));
+            }
+            else {
+                //oops this callsign was already requested...
+                result = false;
+            }
+
+            _adminLock.Unlock();
+            return result;
+        }
+
+        void ActivateAnotherPlugin() 
+        {
+            _adminLock.Lock();
+
+            PluginStarterContainer::iterator it = _pluginInitList.begin();
+            uint16_t currentlyActive = 0;
+            while (it != _pluginInitList.end() && currentlyActive < _maxparallel) {
+                if (it->Active() == false) {
+                    it->Activate();
+                    break; // we activated another we can stop looking...
+                }
+                ++currentlyActive;
+                ASSERT(currentlyActive < std::numeric_limits<uint16_t>::max()); // I'll bet this will fire at some point :)
+            };
+
+            _adminLock.Unlock();
+        }
+    private:
+        using PluginStarterContainer = std::list<PluginStarter>;
 
         uint8_t                         _maxparallel;
         uint8_t                         _maxretries;
         uint16_t                        _delay;
-        PluginInitDataContainer         _pluginInitList;
+        PluginStarterContainer          _pluginInitList;
         Core::SinkType<Notifications>   _sink;
         PluginHost::IShell*             _service;
         Core::CriticalSection           _adminLock;
