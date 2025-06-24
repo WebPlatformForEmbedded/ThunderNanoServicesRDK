@@ -42,18 +42,46 @@ namespace Plugin {
         string message;
         
         ASSERT(service != nullptr);
+        ASSERT(_service == nullptr);
+
         Config config;
         config.FromString(service->ConfigLine());
+        const Exchange::Controller::IMetadata* metadata = service->QueryInterfaceByCallsign<Exchange::Controller::IMetadata>(_T(""));
+        ASSERT(metadata != nullptr);
+
+        Exchange::Controller::IMetadata::Data::BuildInfo buildinfo{};
+        Core::hresult result = metadata->BuildInfo(buildinfo);
+        metadata->Release();
+        metadata = nullptr;
+        ASSERT(result == Core::ERROR_NONE);
+
         if (config.MaxParallel.IsSet() == true) {
             _maxparallel = config.MaxParallel.Value();
-//            if ((_maxparallel == 0) || (_maxparallel > Core::WorkerPool::Instance()->))
+            if ((_maxparallel == 0) || (_maxparallel > (buildinfo.ThreadPoolCount-1))) {
+                message = _T("maxparallel configured incorreclty");
+            }
+        } else {
+            _maxparallel = ((buildinfo.ThreadPoolCount / 2) > 0 ? (buildinfo.ThreadPoolCount / 2) : 1 );
         }
         _maxretries = config.MaxRetries.Value();
         _delay = config.Delay.Value();
+
+        if (message.empty() == true) {
+            service->Register(&_sink);
+            _service = service;
+            _service->AddRef();
+        }
+
         return (message);
     }
     
-    void PluginInitializerService::Deinitialize(VARIABLE_IS_NOT_USED PluginHost::IShell* service) {
+    void PluginInitializerService::Deinitialize(PluginHost::IShell* service) {
+
+        if (_service != nullptr) {
+            _service->Unregister(&_sink);
+            _service->Release();
+            _service = nullptr;
+        }
     }
     
     string PluginInitializerService::Information() const {
@@ -62,11 +90,34 @@ namespace Plugin {
 
     Core::hresult PluginInitializerService::Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IActivationCallback* const cb)
     {
+        Core::hresult result = Core::ERROR_NONE;
         ASSERT(cb != nullptr);
-        if (cb != nullptr) {
-            cb->Finished(callsign, Exchange::IPluginAsyncStateControl::IActivationCallback::state::FAILURE, 0);
+
+        PluginHost::IShell* requestedpluginShell = _service->QueryInterfaceByCallsign<PluginHost::IShell>(callsign);
+
+        if (requestedpluginShell != nullptr) {
+            PluginHost::IShell::state state = requestedpluginShell->State();
+            if ((state == PluginHost::IShell::DEACTIVATED) || (state == PluginHost::IShell::DEACTIVATION)) {
+
+            } else if ((state == PluginHost::IShell::ACTIVATED) || 
+                       (state == PluginHost::IShell::ACTIVATION) ||
+                       (state == PluginHost::IShell::PRECONDITION) || 
+                       (state == PluginHost::IShell::HIBERNATED)) {
+                requestedpluginShell->Release();
+                requestedpluginShell = nullptr;
+                if (cb != nullptr) {
+                    cb->Finished(callsign, Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, 0);
+                }
+            } else {
+                result = Core::ERROR_ILLEGAL_STATE;
+                requestedpluginShell->Release();
+                requestedpluginShell = nullptr;
+            }
+        } else {
+            result = Core::ERROR_NOT_EXIST;        
         }
-        return Core::ERROR_NONE;
+
+        return result;
     }
     Core::hresult PluginInitializerService::AbortActivate(const string& callsign)
     {

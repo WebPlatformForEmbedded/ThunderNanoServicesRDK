@@ -31,7 +31,8 @@ namespace Plugin {
         PluginInitializerService& operator=(const PluginInitializerService&) = delete;
         PluginInitializerService(PluginInitializerService&&) = delete;
         PluginInitializerService& operator=(PluginInitializerService&&) = delete;
-        
+
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
         PluginInitializerService()
             : PluginHost::IPlugin()
             , Exchange::IPluginAsyncStateControl()
@@ -39,10 +40,13 @@ namespace Plugin {
             , _maxretries(5)
             , _delay(500)
             , _pluginInitList()
+            , _sink(*this)
+            , _service(nullptr)
             , _adminLock()
         {
         }
-        
+POP_WARNING()
+
         ~PluginInitializerService() override = default;
     private:
         class Config : public Core::JSON::Container {
@@ -68,6 +72,56 @@ namespace Plugin {
             Core::JSON::DecUInt8 MaxRetries;
             Core::JSON::DecUInt16 Delay;
         };
+
+    private:
+
+        class Notifications : public PluginHost::IPlugin::INotification, public PluginHost::IPlugin::ILifeTime {
+        public:
+            explicit Notifications(PluginInitializerService& initservice)
+                : PluginHost::IPlugin::INotification()
+                , PluginHost::IPlugin::ILifeTime()
+                , _initservice(initservice)
+            {
+            }
+            ~Notifications() override = default;
+
+            Notifications(const Notifications&) = delete;
+            Notifications& operator=(const Notifications&) = delete;
+            Notifications(Notifications&&) = delete;
+            Notifications& operator=(Notifications&&) = delete;
+
+            // IPlugin::INotification overrides
+            void Activated(const string& callsign, PluginHost::IShell* plugin) override
+            {
+
+            }
+            void Deactivated(const string& callsign, PluginHost::IShell* plugin) override
+            {
+
+            }
+            void Unavailable(const string& callsign, PluginHost::IShell* plugin) override
+            {
+
+            }
+
+            // IPlugin::ILifeTime overrides
+            void Initialize(const string& callsign, PluginHost::IShell* plugin) override
+            {
+
+            }
+            void Deinitialized(const string& callsign, PluginHost::IShell* plugin) override
+            {
+
+            }
+
+            BEGIN_INTERFACE_MAP(Notifications)
+            INTERFACE_ENTRY(PluginHost::IPlugin::INotification)
+            INTERFACE_ENTRY(PluginHost::IPlugin::ILifeTime)
+            END_INTERFACE_MAP
+
+        private:
+            PluginInitializerService& _initservice;
+        };
         
     public:
         // IPlugin Methods
@@ -88,7 +142,7 @@ namespace Plugin {
     private:
 
         struct PluginInitData {
-            string callsign;
+            PluginHost::IShell* requestedPluginShell;
             Core::OptionalType<uint8_t> maxnumberretries;
             Core::OptionalType<uint16_t> delay;
             IPluginAsyncStateControl::IActivationCallback* callback;
@@ -97,11 +151,13 @@ namespace Plugin {
     private:
         using PluginInitDataContainer = std::list<PluginInitData>;
 
-        uint8_t                     _maxparallel;
-        uint8_t                     _maxretries;
-        uint16_t                    _delay;
-        PluginInitDataContainer     _pluginInitList;
-        Core::CriticalSection       _adminLock;
+        uint8_t                         _maxparallel;
+        uint8_t                         _maxretries;
+        uint16_t                        _delay;
+        PluginInitDataContainer         _pluginInitList;
+        Core::SinkType<Notifications>   _sink;
+        PluginHost::IShell*             _service;
+        Core::CriticalSection           _adminLock;
     };
 } // Plugin
 } // Thunder
