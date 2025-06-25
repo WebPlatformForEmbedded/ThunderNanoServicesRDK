@@ -183,9 +183,14 @@ POP_WARNING()
                 // if the plugin is waiting for preconditions it is not eating bread here, so we can add another in parallel
                 return( ( _retries > 0 ) && ( _requestedPluginShell->State() != PluginHost::IShell::PRECONDITION ) );
             }
-            void Started()
+            void Activated()
             {
-
+                TRACE(Trace::Information, (_T("Plugin [%s] was acivated"), Callsign().c_str()));
+                if (_callback != nullptr) {
+                    // huppel to do: do this from a new job to decouple from the notifications job?
+                    TRACE(Trace::Information, (_T("Result callback success called for plugin [%s]"), Callsign().c_str()));
+                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, _retries);
+                }
             }
             void Failed()
             {
@@ -217,9 +222,9 @@ POP_WARNING()
             Notifications& operator=(Notifications&&) = delete;
 
             // IPlugin::INotification overrides
-            void Activated(const string& callsign, PluginHost::IShell* plugin) override
+            void Activated(const string& callsign, PluginHost::IShell* plugin VARIABLE_IS_NOT_USED) override
             {
-
+                _initservice.ActivatedNotification(callsign);
             }
             void Deactivated(const string& callsign, PluginHost::IShell* plugin) override
             {
@@ -266,6 +271,19 @@ POP_WARNING()
         END_INTERFACE_MAP
 
     private:
+        void ActivateNotifications()
+        {
+            ASSERT(_service != nullptr);
+            _service->Register(&_sink);
+            TRACE(Trace::Information, (_T("Started listening for plugin state notifications")));
+        }
+        void DeactivateNotifications()
+        {
+            ASSERT(_service != nullptr);
+            _service->Unregister(&_sink);
+            TRACE(Trace::Information, (_T("Stopped listening for plugin state notifications")));
+        }
+
         bool NewPluginStarter(PluginHost::IShell* requestedPluginShell, uint8_t maxnumberretries, uint16_t delay, IPluginAsyncStateControl::IActivationCallback* callback)
         {
             bool result = true;
@@ -276,6 +294,9 @@ POP_WARNING()
             //see if this callsign is not yet in the list
             if (std::find(_pluginInitList.cbegin(), _pluginInitList.cend(), starter) == _pluginInitList.cend()) {
                 _pluginInitList.emplace_back(std::move(starter));
+                if (_pluginInitList.size() == 1) {
+                    ActivateNotifications();
+                }
             }
             else {
                 //oops this callsign was already requested...
@@ -314,6 +335,9 @@ POP_WARNING()
             if (it != _pluginInitList.end()) {
                 PluginStarter toAbort(std::move(*it));
                 _pluginInitList.erase(it);
+                if (_pluginInitList.size() == 0) {
+                    DeactivateNotifications();
+                }
                 _adminLock.Unlock();
                 result = true;
                 toAbort.Abort();
@@ -324,8 +348,24 @@ POP_WARNING()
             return result;
         }
 
+        void ActivatedNotification(const string& callsign)
+        {
+            _adminLock.Lock();
+
+            PluginStarterContainer::iterator it = std::find(_pluginInitList.begin(), _pluginInitList.end(), callsign);
+            if (it != _pluginInitList.end()) {
+                // okay this plugin is activated were done for this one!
+                PluginStarter activted(std::move(*it));
+                _pluginInitList.erase(it);
+                _adminLock.Unlock();
+                activted.Activated();
+            } else {
+                _adminLock.Unlock();
+            }
+        }
+
     private:
-        using PluginStarterContainer = std::list<PluginStarter>;
+        using PluginStarterContainer = std::list<PluginStarter>; // for now we keep them in a list as we want them to activate them in order receieved (if needed we can add a shadow unordered map for quick lookup but we do not expect that many parallel activation requests, at least I hope...)
 
         uint8_t                         _maxparallel;
         uint8_t                         _maxretries;

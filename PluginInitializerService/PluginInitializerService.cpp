@@ -67,7 +67,6 @@ namespace Plugin {
         _delay = config.Delay.Value();
 
         if (message.empty() == true) {
-            service->Register(&_sink);
             _service = service;
             _service->AddRef();
         }
@@ -78,10 +77,11 @@ namespace Plugin {
     void PluginInitializerService::Deinitialize(PluginHost::IShell* service) {
 
         if (_service != nullptr) {
-            _service->Unregister(&_sink);
             _service->Release();
             _service = nullptr;
         }
+
+        //huppel todo: cancel al pending activation requests
     }
     
     string PluginInitializerService::Information() const {
