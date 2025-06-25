@@ -120,7 +120,7 @@ namespace Plugin {
                     TRACE(Trace::Information, (_T("Result callback success called for plugin [%s]"), callsign.c_str()));
                     cb->Finished(callsign, Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, 0);
                 }
-            } else {
+            } else { // DESTROYED || UNAVAILABLE
                 TRACE(Trace::Error, (_T("Could not start activating plugin [%s] as it is in an illegal state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
                 result = Core::ERROR_ILLEGAL_STATE;
             }
@@ -143,7 +143,7 @@ namespace Plugin {
         if (CancelPluginStarter(callsign) == true) {
             TRACE(Trace::Information, (_T("Plugin Activate request was canceled for plugin [%s]"), callsign.c_str()));
         } else {
-            // note this is not necesarely an error, the abort reuquest could just have crossed the scuccesful activation (or failure to do so for that matter) so it was just removed from the list
+            // note this is not necesarely an error, the abort reuquest could just have crossed the succesful activation (or failure to do so for that matter) so it was just removed from the list
             TRACE(Trace::Warning, (_T("Plugin Abort Activate request plugin was not in activation list [%s]"), callsign.c_str()));
             result = Core::ERROR_NOT_EXIST;
         }
