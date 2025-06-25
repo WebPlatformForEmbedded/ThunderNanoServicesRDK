@@ -74,14 +74,14 @@ namespace Plugin {
         return (message);
     }
     
-    void PluginInitializerService::Deinitialize(PluginHost::IShell* service) {
+    void PluginInitializerService::Deinitialize(PluginHost::IShell* service) 
+    {
+        CancelAll();
 
         if (_service != nullptr) {
             _service->Release();
             _service = nullptr;
         }
-
-        //huppel todo: cancel al pending activation requests
     }
     
     string PluginInitializerService::Information() const {
