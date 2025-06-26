@@ -43,6 +43,7 @@ PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
             , _sink(*this)
             , _service(nullptr)
             , _adminLock()
+            , _deactivateNotificationsJob(*this)
         {
         }
 POP_WARNING()
@@ -84,12 +85,12 @@ POP_WARNING()
                          , PluginInitializerService& initservice)
                 : _callsign()
                 , _requestedPluginShell(requestedPluginShell)
-                , _retries(0)
+                , _attempt(0)
                 , _maxnumberretries(maxnumberretries)
                 , _delay(delay)
                 , _callback(callback)
                 , _initializerservice(initservice)
-                , _delayJob(Core::ProxyType<Core::WorkerPool::JobType<DelayJob>>::Create(requestedPluginShell))
+                , _delayJob()
             {
                 ASSERT(_requestedPluginShell != nullptr);
                 _callsign = _requestedPluginShell->Callsign();
@@ -109,7 +110,7 @@ POP_WARNING()
                     _callback = nullptr;
                 }
 
-                ASSERT(_delayJob->IsIdle() == true);
+                ASSERT((_delayJob.IsValid() == false) || (_delayJob->IsIdle() == true));
             }
 
             PluginStarter(const PluginStarter&) = delete;
@@ -117,7 +118,7 @@ POP_WARNING()
             PluginStarter(PluginStarter&& other)
                 : _callsign(std::move(other._callsign))
                 , _requestedPluginShell(other._requestedPluginShell)
-                , _retries(other._retries)
+                , _attempt(other._attempt)
                 , _maxnumberretries(other._maxnumberretries)
                 , _delay(other._delay)
                 , _callback(other._callback)
@@ -132,7 +133,7 @@ POP_WARNING()
                 if (this != &other) {
                     _callsign = std::move(other._callsign);
                     _requestedPluginShell = other._requestedPluginShell;
-                    _retries = other._retries;
+                    _attempt = other._attempt;
                     _maxnumberretries = other._maxnumberretries;
                     _delay = other._delay;
                     _callback = other._callback;
@@ -171,25 +172,31 @@ POP_WARNING()
 
             void Activate()
             {
-                ASSERT(_delayJob->IsIdle() == true);
+                ASSERT(_delayJob.IsValid() == false);
                 ASSERT(_requestedPluginShell != nullptr);
                 TRACE(Trace::Information, (_T("Start activating plugin [%s]"), Callsign().c_str()));
-                if (_requestedPluginShell->State() != PluginHost::IShell::DEACTIVATION) { // if the plugin is still deactivating we can only restart it ones it has fully deactivated
+                _delayJob = Core::ProxyType<Core::WorkerPool::JobType<DelayJob>>::Create(_requestedPluginShell); // indicate have activated this PluginStarter
+                if (_requestedPluginShell->State() != PluginHost::IShell::DEACTIVATION) { // if the plugin is still deactivating we can only restart it ones it has fully deactivated, we'll do that then when the Deinitialized notification is received
                     // we'll not keep the job, when activation is actualy started, aborting after that might not always abort the plugin activation (does not make sense, could always cross eachother anyway, and otherwisse we need to keep the job)
-                    Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_initializerservice._service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
-                    ++_retries;
+                    ++_attempt; // indicate we have attempted to start this plugin
+                    Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_requestedPluginShell, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
                 }
             }
             void Abort()
             {
+                ASSERT(_delayJob.IsValid() == true);
                 TRACE(Trace::Information, (_T("Aborting activating plugin [%s]"), Callsign().c_str()));
                 if (_delayJob->IsIdle() == false) {
                     _delayJob->Revoke();
                 }
                 if (_callback != nullptr) {
                     TRACE(Trace::Information, (_T("Result callback aborted called for plugin [%s]"), Callsign().c_str()));
-                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::ABORTED, _retries);
+                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::ABORTED, Retries());
                 }
+            }
+            uint8_t Retries() const
+            {
+                return (_attempt == 0 ? 0 : _attempt - 1); 
             }
             const string& Callsign() const
             {
@@ -198,44 +205,62 @@ POP_WARNING()
             bool Active() const
             {
                 ASSERT(_requestedPluginShell != nullptr);
-                // if the plugin is waiting for preconditions it is not eating bread here, so we can add another in parallel
-                return( ( _retries > 0 ) && ( _requestedPluginShell->State() != PluginHost::IShell::PRECONDITION ) );
+                // if the plugin is waiting for preconditions it is not eating bread here, so we can add another in parallel (risk is that if it fails to Initialize after the subsystems become avialable there might more parallel activations than max allowed, for now we just accept this small chance )
+                return ((_delayJob.IsValid() == true) && (_requestedPluginShell->State() != PluginHost::IShell::PRECONDITION));
             }
             void Activated()
             {
-                TRACE(Trace::Information, (_T("Plugin [%s] was activated"), Callsign().c_str()));
-                if (_callback != nullptr) {
-                    // huppel to do: do this from a new job to decouple from the notifications job?
-                    TRACE(Trace::Information, (_T("Result callback success called for plugin [%s]"), Callsign().c_str()));
-                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, _retries);
+                if (_delayJob.IsValid() == true) {
+                    TRACE(Trace::Information, (_T("Plugin [%s] was activated"), Callsign().c_str()));
+                } else {
+                    TRACE(Trace::Warning, (_T("Plugin [%s] was activated but this was initiated from the PluginInitializerService!!"), Callsign().c_str()));
                 }
+                if (_callback != nullptr) {
+                    // for now let's not decouple. In the future if users prove to be unreliable we might however to not block Thunder internally
+                    TRACE(Trace::Information, (_T("Result callback success called for plugin [%s]"), Callsign().c_str()));
+                    _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::SUCCESS, Retries());
+                }
+                // we will be removed and destroyed from the caller
             }
             void Deinitialized()
             {
                 // we can get here if:
-                // 1) state was DEACTIVATION and now plugin is fully deactivated -> let's try to startup now (still 1st attempt, therefore the _retries are still 0)
+                // 1) state was DEACTIVATION and now plugin is fully deactivated -> let's try to startup now if this one was actually Activated (this notification can of course also happen in this situation in case it was not yest Activated)
                 // 2) state was PRECONDITION and when preconditions were met startup failed -> let's try to restart, next attempt
                 // 3) at Activation the activation failed -> let's try to restart, next attempt
-                TRACE(Trace::Warning, (_T("Plugin [%s] was deinitialzed"), Callsign().c_str()));
-                if (_retries <= _maxnumberretries) {
-                    if ((_retries == 0) || (_delay == 0)) { // means we could not yet activate when Activate was called so we can start without delay (or of course delay is just 0)
-                        ++_retries;
-                        TRACE(Trace::Information, (_T("Retrying to re-activate Plugin [%s] now (retries %u)"), Callsign().c_str(), _retries));
-                        Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_initializerservice._service, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
+
+                if (_delayJob.IsValid() == true) { // we were already activated
+
+                    TRACE(Trace::Warning, (_T("Plugin [%s] was deinitialzed"), Callsign().c_str()));
+                    if (_attempt <= _maxnumberretries) { // first attempt not included, that is not a retry...
+                        if ((_attempt == 0) || (_delay == 0)) { // _attempt == 0 means we could not yet activate the plugin when Activate was called so we can start without delay (or of course delay is just 0)
+                            ++_attempt;
+                            TRACE(Trace::Information, (_T("Retrying to re-activate Plugin [%s] now (retries %u)"), Callsign().c_str(), Retries()));
+                            Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_requestedPluginShell, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
+                        } else {
+                            // okay we might need to delay now
+                            TRACE(Trace::Information, (_T("Delaying re-activating Plugin [%s] (retries %u)"), Callsign().c_str(), Retries()));
+                            ++_attempt;
+                            _delayJob->Reschedule(Core::Time::Now().Add(_delay));
+                        }
                     } else {
-                        // okay we might need to delay now
-                        TRACE(Trace::Information, (_T("Delaying re-activating Plugin [%s] (retries %u)"), Callsign().c_str(), _retries));
-                        ++_retries;
-                        _delayJob->Reschedule(Core::Time::Now().Add(_delay));
+                        TRACE(Trace::Error, (_T("Plugin [%s] could not be restarted within the allowed number of retries (retries %u)"), Callsign().c_str(), Retries()));
+                        if (_callback != nullptr) {
+                            // for now let's not decouple. In the future if users prove to be unreliable we might however to not block Thunder internally
+                            TRACE(Trace::Information, (_T("Result callback failed called for plugin [%s]"), Callsign().c_str()));
+                            _callback->Finished(Callsign(), Exchange::IPluginAsyncStateControl::IActivationCallback::state::FAILURE, Retries());
+                            _initializerservice.PluginStarterFinished(*this); // note after this we are dead...
+                        }
                     }
                 } else {
-                
+                    TRACE(Trace::Information, (_T("Plugin [%s] Deinitialzed notification received but not yet activated, will be ignored..."), Callsign().c_str()));
                 }
             }
+
         private:
             class DelayJob {
             public:
-                DelayJob(PluginHost::IShell* pluginShell)
+                explicit DelayJob(PluginHost::IShell* pluginShell)
                     : _pluginShell(pluginShell)
                 {
                     ASSERT(_pluginShell != nullptr);
@@ -267,7 +292,7 @@ POP_WARNING()
         private:
             string _callsign; //as _requestedPluginShell->Callsign(); returns a temp and we need this lots of times so let's keep a copy
             PluginHost::IShell* _requestedPluginShell;
-            uint8_t _retries;
+            uint8_t _attempt;
             uint8_t _maxnumberretries;
             uint16_t _delay;
             IPluginAsyncStateControl::IActivationCallback* _callback;
@@ -333,6 +358,12 @@ POP_WARNING()
         Core::hresult Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IPluginAsyncStateControl::IActivationCallback* const cb) override;
         Core::hresult AbortActivate(const string& callsign) override;
        
+        /*
+        void* QueryInterface(const uint32_t interfaceNumber) override
+        {
+            std::cout << "huppel was here : " << interfaceNumber << std::endl;
+            return nullptr;
+        }*/
         
         BEGIN_INTERFACE_MAP(PluginInitializerService)
             INTERFACE_ENTRY(PluginHost::IPlugin)
@@ -343,14 +374,20 @@ POP_WARNING()
         void ActivateNotifications()
         {
             ASSERT(_service != nullptr);
+            _deactivateNotificationsJob.Revoke(); // no need to check if it is actually posted
             _service->Register(&_sink);
             TRACE(Trace::Information, (_T("Started listening for plugin state notifications")));
         }
-        void DeactivateNotifications()
+        void DeactivateNotifications(bool synchronous = true)
         {
             ASSERT(_service != nullptr);
-            _service->Unregister(&_sink);
-            TRACE(Trace::Information, (_T("Stopped listening for plugin state notifications")));
+            if (synchronous == true) {
+                _deactivateNotificationsJob.Revoke(); // no need to check if it is actually posted
+                _service->Unregister(&_sink);
+                TRACE(Trace::Information, (_T("Stopped listening for plugin state notifications")));
+            } else {
+                _deactivateNotificationsJob.Submit();
+            }
         }
 
         bool NewPluginStarter(PluginHost::IShell* requestedPluginShell, uint8_t maxnumberretries, uint16_t delay, IPluginAsyncStateControl::IActivationCallback* callback)
@@ -366,6 +403,7 @@ POP_WARNING()
                 if (_pluginInitList.size() == 1) {
                     ActivateNotifications();
                 }
+                ActivateAnotherPlugin();
             }
             else {
                 //oops this callsign was already requested...
@@ -378,7 +416,6 @@ POP_WARNING()
 
         void ActivateAnotherPlugin() 
         {
-            _adminLock.Lock();
 
             PluginStarterContainer::iterator it = _pluginInitList.begin();
             uint16_t currentlyActive = 0;
@@ -391,7 +428,6 @@ POP_WARNING()
                 ASSERT(currentlyActive < std::numeric_limits<uint16_t>::max()); // I'll bet this will fire at some point :)
             };
 
-            _adminLock.Unlock();
         }
 
         bool CancelPluginStarter(const string& callsign)
@@ -406,7 +442,7 @@ POP_WARNING()
                 _pluginInitList.erase(it);
                 if (_pluginInitList.size() == 0) {
                     DeactivateNotifications();
-                }
+                } 
                 _adminLock.Unlock();
                 result = true;
                 toAbort.Abort();
@@ -424,10 +460,13 @@ POP_WARNING()
             PluginStarterContainer::iterator it = std::find(_pluginInitList.begin(), _pluginInitList.end(), callsign);
             if (it != _pluginInitList.end()) {
                 // okay this plugin is activated were done for this one!
-                PluginStarter activted(std::move(*it));
+                PluginStarter activated(std::move(*it));
                 _pluginInitList.erase(it);
+                if (_pluginInitList.size() == 0) {
+                    DeactivateNotifications(false);
+                }
                 _adminLock.Unlock();
-                activted.Activated();
+                activated.Activated();
             } else {
                 _adminLock.Unlock();
             }
@@ -439,7 +478,7 @@ POP_WARNING()
 
             PluginStarterContainer::iterator it = std::find(_pluginInitList.begin(), _pluginInitList.end(), callsign);
             if (it != _pluginInitList.end()) {
-                it->Deinitialized();
+                it->Deinitialized(); // note must be inside the lock as it could be in parallel with an abort request. Also note after this call the iterator might be invalid as the PluginStarter might remove itself from the list
             }
             _adminLock.Unlock();
         }
@@ -461,16 +500,57 @@ POP_WARNING()
              _adminLock.Unlock();
         }
 
+        void PluginStarterFinished(const PluginStarter& pluginstarter)
+        {
+            // note lock must already be taken
+
+            PluginStarterContainer::iterator it = std::find(_pluginInitList.begin(), _pluginInitList.end(), pluginstarter);
+            if (it != _pluginInitList.end()) {
+                _pluginInitList.erase(it);
+                if (_pluginInitList.size() == 0) {
+                    DeactivateNotifications(false);
+                }
+            } 
+        }
+
+    private:
+        class DeactivateNotificationsJob {
+        public:
+            DeactivateNotificationsJob(PluginInitializerService& parent)
+                : _parent(parent)
+            {
+            }
+            ~DeactivateNotificationsJob() = default;
+
+            DeactivateNotificationsJob(const DeactivateNotificationsJob&) = delete;
+            DeactivateNotificationsJob& operator=(const DeactivateNotificationsJob&) = delete;
+            DeactivateNotificationsJob(DeactivateNotificationsJob&&) = delete;
+            DeactivateNotificationsJob& operator=(DeactivateNotificationsJob&&) = delete;
+
+        private:
+            friend Core::ThreadPool::JobType<DeactivateNotificationsJob>;
+            void Dispatch()
+            {
+                TRACE(Trace::Information, (_T("Stopped listening for plugin state notifications (from job)")));
+                _parent._service->Unregister(&_parent._sink);
+            }
+
+        private:
+            PluginInitializerService& _parent;
+        };
+
     private:
         using PluginStarterContainer = std::list<PluginStarter>; // for now we keep them in a list as we more or less agreed to activate plugins in order of requests receieved (if needed we can add a shadow unordered map for quick lookup but we do not expect that many parallel activation requests, at least I hope...)
 
-        uint8_t                         _maxparallel;
-        uint8_t                         _maxretries;
-        uint16_t                        _delay;
-        PluginStarterContainer          _pluginInitList;
-        Core::SinkType<Notifications>   _sink;
-        PluginHost::IShell*             _service;
-        Core::CriticalSection           _adminLock;
+        uint8_t                                                 _maxparallel;
+        uint8_t                                                 _maxretries;
+        uint16_t                                                _delay;
+        PluginStarterContainer                                  _pluginInitList;
+        Core::SinkType<Notifications>                           _sink;
+        PluginHost::IShell*                                     _service;
+        Core::CriticalSection                                   _adminLock;
+        Core::WorkerPool::JobType<DeactivateNotificationsJob>   _deactivateNotificationsJob;
+
     };
 } // Plugin
 } // Thunder

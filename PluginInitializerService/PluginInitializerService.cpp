@@ -104,7 +104,6 @@ namespace Plugin {
                                     , (delay.IsSet() == true ? delay.Value() : _delay)
                                     , cb) == true) {
                     TRACE(Trace::Information, (_T("Plugin start entry created for plugin [%s]"), callsign.c_str()));
-                    ActivateAnotherPlugin();
                 } else {
                     TRACE(Trace::Warning, (_T("Plugin start entry not created for plugin [%s], there was already a pending request for this plugin"), callsign.c_str()));
                     result = Core::ERROR_INPROGRESS;
