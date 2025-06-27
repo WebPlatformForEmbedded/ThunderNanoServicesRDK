@@ -98,7 +98,12 @@ namespace Plugin {
 
         if (requestedpluginShell != nullptr) {
             PluginHost::IShell::state state = requestedpluginShell->State();
-            if ((state == PluginHost::IShell::DEACTIVATED) || (state == PluginHost::IShell::DEACTIVATION)) {
+            if ((state == PluginHost::IShell::DEACTIVATED) || 
+                (state == PluginHost::IShell::DEACTIVATION) || 
+                (state == PluginHost::IShell::ACTIVATION) ||  // this and the PRECONDITION are rather special cases, These plugin were already request to activate somewhere else, as we cannot just send a success notification (they might fail to initialize) we'll take them into account, if it was the result of a previous PluginInitializerService we'll find out anyway.
+                (state == PluginHost::IShell::PRECONDITION) ) // note PRECONDITION can be both reached during deactivation and activation, for the purpose here it does not matter, we only have to monitor if the activation succeeds and report back or monitor deinitialization failure and retry
+            {
+                TRACE(Trace::Information, (_T("Plugin Activate request received for plugin [%s] in state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
                 if (NewPluginStarter(requestedpluginShell
                                     , (maxnumberretries.IsSet() == true ? maxnumberretries.Value() : _maxretries)
                                     , (delay.IsSet() == true ? delay.Value() : _delay)
@@ -109,8 +114,6 @@ namespace Plugin {
                     result = Core::ERROR_INPROGRESS;
                 }
             } else if ((state == PluginHost::IShell::ACTIVATED) || 
-                       (state == PluginHost::IShell::ACTIVATION) ||
-                       (state == PluginHost::IShell::PRECONDITION) || 
                        (state == PluginHost::IShell::HIBERNATED)) {
                 TRACE(Trace::Warning, (_T("Plugin Activate received for plugin [%s] that was already active, state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
 
@@ -123,13 +126,14 @@ namespace Plugin {
                 TRACE(Trace::Error, (_T("Could not start activating plugin [%s] as it is in an illegal state [%s]"), callsign.c_str(), Core::EnumerateType<PluginHost::IShell::state>(state).Data()));
                 result = Core::ERROR_ILLEGAL_STATE;
             }
+
+            requestedpluginShell->Release();
+            requestedpluginShell = nullptr;
+
         } else {
             TRACE(Trace::Error, (_T("Could not start activating plugin [%s] as it is unknown"), callsign.c_str()));
             result = Core::ERROR_NOT_EXIST;        
         }
-
-        requestedpluginShell->Release();
-        requestedpluginShell = nullptr;
 
         return result;
     }

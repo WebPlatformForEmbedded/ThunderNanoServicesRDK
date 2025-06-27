@@ -176,7 +176,7 @@ POP_WARNING()
                 ASSERT(_requestedPluginShell != nullptr);
                 TRACE(Trace::Information, (_T("Start activating plugin [%s]"), Callsign().c_str()));
                 _delayJob = Core::ProxyType<Core::WorkerPool::JobType<DelayJob>>::Create(_requestedPluginShell); // indicate have activated this PluginStarter
-                if (_requestedPluginShell->State() != PluginHost::IShell::DEACTIVATION) { // if the plugin is still deactivating we can only restart it ones it has fully deactivated, we'll do that then when the Deinitialized notification is received
+                if (_requestedPluginShell->State() == PluginHost::IShell::DEACTIVATED) { // (other states here can be DEACTIVATION, ACTIVATION and PRECONDITION) if the plugin is still not yet fully deactivated or activated we can only restart it ones it has fully deactivated or activation failed, we'll do that then when the Deinitialized notification is received (either because it fully deactivated or the activation failed
                     // we'll not keep the job, when activation is actualy started, aborting after that might not always abort the plugin activation (does not make sense, could always cross eachother anyway, and otherwisse we need to keep the job)
                     ++_attempt; // indicate we have attempted to start this plugin
                     Core::IWorkerPool::Instance().Submit(PluginHost::IShell::Job::Create(_requestedPluginShell, PluginHost::IShell::ACTIVATED, PluginHost::IShell::REQUESTED));
@@ -226,7 +226,8 @@ POP_WARNING()
             {
                 // we can get here if:
                 // 1) state was DEACTIVATION and now plugin is fully deactivated -> let's try to startup now if this one was actually Activated (this notification can of course also happen in this situation in case it was not yest Activated)
-                // 2) state was PRECONDITION and when preconditions were met startup failed -> let's try to restart, next attempt
+                // 2) state was PRECONDITION (triggered by ourselves or in that state when request came in) and when preconditions were met startup failed -> let's try to restart, next attempt
+                // 3) initial state was ACTIVATION -> although activate was not triggered by this service let's try to restart anyway as that is now requested
                 // 3) at Activation the activation failed -> let's try to restart, next attempt
 
                 if (_delayJob.IsValid() == true) { // we were already activated
@@ -357,13 +358,7 @@ POP_WARNING()
         // IPluginAsyncStateControl methods
         Core::hresult Activate(const string& callsign, const Core::OptionalType<uint8_t>& maxnumberretries, const Core::OptionalType<uint16_t>& delay, IPluginAsyncStateControl::IActivationCallback* const cb) override;
         Core::hresult AbortActivate(const string& callsign) override;
-       
-        /*
-        void* QueryInterface(const uint32_t interfaceNumber) override
-        {
-            std::cout << "huppel was here : " << interfaceNumber << std::endl;
-            return nullptr;
-        }*/
+      
         
         BEGIN_INTERFACE_MAP(PluginInitializerService)
             INTERFACE_ENTRY(PluginHost::IPlugin)
