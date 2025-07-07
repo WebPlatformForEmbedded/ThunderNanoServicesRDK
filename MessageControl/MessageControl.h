@@ -464,6 +464,7 @@ namespace Plugin {
         OutputList _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
         MessageControl::ICollect::ICallback* _callback;
+        Cleanups _cleaning;
         Core::SinkType<Observer> _observer;
         PluginHost::IShell* _service;
         const string _dispatcherIdentifier;
@@ -475,7 +476,6 @@ namespace Plugin {
         Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Core::Messaging::TextMessage> _operationalStreamFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Assert, Core::Messaging::TextMessage> _assertFactory;
-        Cleanups _cleaning;
     };
 
 } // namespace Plugin

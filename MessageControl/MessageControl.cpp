@@ -68,6 +68,7 @@ namespace Thunder {
         , _outputDirector()
         , _webSocketExporter()
         , _callback(nullptr)
+        , _cleaning()
         , _observer(*this)
         , _service(nullptr)
         , _dispatcherIdentifier(Messaging::MessageUnit::Instance().Identifier())
