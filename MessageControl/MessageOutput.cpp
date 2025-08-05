@@ -131,9 +131,9 @@ namespace Publishers {
     //UDPOutput
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
         : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().DataSize(), 0)
-        , _loaded(0)
+        , _queue()
+        , _stringPool(ProxyPoolTypeSize)
     {
-        ::memset(_sendBuffer, 0, sizeof(_sendBuffer));
     }
     UDPOutput::Channel::~Channel()
     {
@@ -142,13 +142,21 @@ namespace Publishers {
 
     uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
     {
+        uint16_t actualByteCount = 0;
+
         _adminLock.Lock();
 
-        uint16_t actualByteCount = (_loaded > maxSendSize ? maxSendSize : _loaded);
-        memcpy(dataFrame, _sendBuffer, actualByteCount);
-        _loaded = 0;
+        if (_queue.empty() == true) {
+            _adminLock.Unlock();
+        }
+        else {
+            Core::ProxyType<string> msg = _queue.front();
+            _queue.pop();
+            _adminLock.Unlock();
 
-        _adminLock.Unlock();
+            actualByteCount = std::min<uint16_t>(msg->size(), maxSendSize);
+            memcpy(dataFrame, msg->c_str(), actualByteCount);
+        }
 
         return (actualByteCount);
     }
@@ -166,14 +174,9 @@ namespace Publishers {
     {
         _adminLock.Lock();
 
-        ASSERT((_loaded + text.length() + 1) < sizeof(_sendBuffer));
-
-        if ((_loaded + text.length() + 1) < sizeof(_sendBuffer)) {
-            Core::FrameType<0> frame(_sendBuffer + _loaded, sizeof(_sendBuffer) - _loaded, sizeof(_sendBuffer) - _loaded);
-            Core::FrameType<0>::Writer frameWriter(frame, 0);
-            frameWriter.NullTerminatedText(text);
-            _loaded += frameWriter.Offset();
-        }
+        Core::ProxyType<string> msg = _stringPool.Element();
+        *msg = text;
+        _queue.push(msg);
 
         _adminLock.Unlock();
 

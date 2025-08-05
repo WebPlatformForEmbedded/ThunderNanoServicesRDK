@@ -345,7 +345,7 @@ namespace Publishers {
 
     class UDPOutput : public IPublish {
     private:
-        static constexpr uint16_t UDPBufferSize = 4 * 1024;
+        static constexpr uint32_t ProxyPoolTypeSize = 10;
 
         class Channel : public Core::SocketDatagram {
         public:
@@ -364,8 +364,8 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            uint8_t _sendBuffer[UDPBufferSize];
-            uint16_t _loaded;
+            std::queue<Core::ProxyType<string>> _queue;
+            Core::ProxyPoolType<string> _stringPool;
             Core::CriticalSection _adminLock;
         };
 
