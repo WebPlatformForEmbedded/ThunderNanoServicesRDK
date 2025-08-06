@@ -149,7 +149,7 @@ namespace Publishers {
             _adminLock.Unlock();
         }
         else {
-            string msg = _queue.front();
+            const string msg = _queue.front();
             _queue.pop();
             _adminLock.Unlock();
 
