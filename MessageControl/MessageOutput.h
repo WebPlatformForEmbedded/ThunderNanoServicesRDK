@@ -345,8 +345,6 @@ namespace Publishers {
 
     class UDPOutput : public IPublish {
     private:
-        static constexpr uint32_t ProxyPoolTypeSize = 10;
-
         class Channel : public Core::SocketDatagram {
         public:
             Channel() = delete;
@@ -364,8 +362,7 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            std::queue<Core::ProxyType<string>> _queue;
-            Core::ProxyPoolType<string> _stringPool;
+            std::queue<string> _queue;
             Core::CriticalSection _adminLock;
         };
 

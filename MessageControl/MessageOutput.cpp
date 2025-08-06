@@ -132,7 +132,6 @@ namespace Publishers {
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
         : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().DataSize(), 0)
         , _queue()
-        , _stringPool(ProxyPoolTypeSize)
     {
     }
     UDPOutput::Channel::~Channel()
@@ -150,12 +149,12 @@ namespace Publishers {
             _adminLock.Unlock();
         }
         else {
-            Core::ProxyType<string> msg = _queue.front();
+            string msg = _queue.front();
             _queue.pop();
             _adminLock.Unlock();
 
-            actualByteCount = std::min<uint16_t>(msg->size(), maxSendSize);
-            memcpy(dataFrame, msg->c_str(), actualByteCount);
+            actualByteCount = std::min<uint16_t>(msg.size(), maxSendSize);
+            memcpy(dataFrame, msg.c_str(), actualByteCount);
         }
 
         return (actualByteCount);
@@ -174,9 +173,7 @@ namespace Publishers {
     {
         _adminLock.Lock();
 
-        Core::ProxyType<string> msg = _stringPool.Element();
-        *msg = text;
-        _queue.push(msg);
+        _queue.push(text);
 
         _adminLock.Unlock();
 
