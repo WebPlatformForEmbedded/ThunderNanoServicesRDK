@@ -173,7 +173,7 @@ namespace Publishers {
     {
         _adminLock.Lock();
 
-        _queue.push(std::move(text));
+        _queue.push(text);
 
         _adminLock.Unlock();
 
