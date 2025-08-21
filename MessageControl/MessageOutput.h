@@ -354,7 +354,7 @@ namespace Publishers {
             explicit Channel(const Core::NodeId& nodeId);
             ~Channel() override;
 
-            void Output(const string& text);
+            void Output(string&& text);
 
         private:
             uint16_t SendData(uint8_t* dataFrame, const uint16_t maxSendSize) override;

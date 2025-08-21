@@ -149,7 +149,7 @@ namespace Publishers {
             _adminLock.Unlock();
         }
         else {
-            const string msg = _queue.front();
+            string msg = std::move(_queue.front());
             _queue.pop();
             _adminLock.Unlock();
 
@@ -169,11 +169,11 @@ namespace Publishers {
     {
     }
 
-    void UDPOutput::Channel::Output(const string& text)
+    void UDPOutput::Channel::Output(string&& text)
     {
         _adminLock.Lock();
 
-        _queue.push(text);
+        _queue.emplace(std::move(text));
 
         _adminLock.Unlock();
 
