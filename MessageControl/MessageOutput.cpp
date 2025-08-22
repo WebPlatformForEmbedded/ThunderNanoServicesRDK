@@ -27,8 +27,12 @@ namespace Publishers {
     {
         ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
 
-        string output = metadata.ToString(_abbreviated).c_str() +
-                        Core::Format("%s\n", text.c_str());
+        string output = metadata.ToString(_abbreviated);
+
+        output.reserve(output.size() + text.size() + 1);
+
+        output.append(text);
+        output.push_back('\n');
 
         return (output);
     }
