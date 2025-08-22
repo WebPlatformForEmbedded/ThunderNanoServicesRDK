@@ -345,8 +345,6 @@ namespace Publishers {
 
     class UDPOutput : public IPublish {
     private:
-        static constexpr uint16_t UDPBufferSize = 4 * 1024;
-
         class Channel : public Core::SocketDatagram {
         public:
             Channel() = delete;
@@ -356,7 +354,7 @@ namespace Publishers {
             explicit Channel(const Core::NodeId& nodeId);
             ~Channel() override;
 
-            void Output(const string& text);
+            void Output(string&& text);
 
         private:
             uint16_t SendData(uint8_t* dataFrame, const uint16_t maxSendSize) override;
@@ -364,8 +362,7 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            uint8_t _sendBuffer[UDPBufferSize];
-            uint16_t _loaded;
+            std::queue<string> _queue;
             Core::CriticalSection _adminLock;
         };
 
