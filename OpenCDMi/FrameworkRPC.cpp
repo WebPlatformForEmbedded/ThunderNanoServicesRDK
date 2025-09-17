@@ -1402,7 +1402,11 @@ POP_WARNING()
                 if (_engine.IsValid()) {
                     _engine.Release();
                 }
-                _systemLibraries.clear();
+                while (_systemLibraries.empty() == false) {
+                    Core::Library library(_systemLibraries.back());
+                    _systemLibraries.pop_back();
+                    Core::ServiceAdministrator::Instance().ReleaseLibrary(std::move(library));
+                }
 
                 _shell->Release();
                 _shell = nullptr;
@@ -1569,8 +1573,8 @@ POP_WARNING()
         std::map<const std::string, SystemFactory> _systemToFactory;
         Blacklist _systemBlacklistedCodecRegexps;
         Blacklist _systemBlacklistedMediaTypeRegexps;
-        std::list<Core::Library> _systemLibraries;
-        std::list<string> _keySystems;
+        std::vector<Core::Library> _systemLibraries;
+        std::vector<string> _keySystems;
         AsyncInitThread _thread;
         Core::OptionalType<string> _group;
     };
