@@ -75,7 +75,7 @@ private:
 
 public:
     PluginHost()
-        : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4>>::Create())
+        : _engine(Core::ProxyType<RPC::InvokeServerType<2, 0, 4, 1, 1>>::Create())
         , _comClient(Core::ProxyType<RPC::CommunicatorClient>::Create(GetConnectionNode(), Core::ProxyType<Core::IIPCServer>(_engine)))
         , _extension(nullptr)
     {
@@ -256,7 +256,7 @@ POP_WARNING()
 #endif
 
 private:
-    Core::ProxyType<RPC::InvokeServerType<2, 0, 4> > _engine;
+    Core::ProxyType<RPC::InvokeServerType<2, 0, 4, 1, 1> > _engine;
     Core::ProxyType<RPC::CommunicatorClient> _comClient;
 
 #if defined(UPDATE_TZ_FROM_FILE)
