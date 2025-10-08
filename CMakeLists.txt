@@ -20,6 +20,7 @@ project(NanoServicesRDK)
 
 find_package(Thunder REQUIRED)
 
+option(PLUGIN_BRIDGELINK "Include BridgeLink plugin" OFF)
 option(PLUGIN_DEVICEIDENTIFICATION "Include DeviceIdentification plugin" OFF)
 option(PLUGIN_DEVICEINFO "Include DeviceInfo plugin" OFF)
 option(PLUGIN_DISPLAYINFO "Include DisplayInfo plugin" OFF)
@@ -54,6 +55,10 @@ if(ENABLE_STRICT_COMPILER_SETTINGS)
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_STRICT_CXX_COMPILER_SETTINGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_STRICT_COMPILER_SETTINGS}")
+endif()
+
+if(PLUGIN_BRIDGELINK)
+    add_subdirectory(BridgeLink)
 endif()
 
 if(PLUGIN_DEVICEIDENTIFICATION)
