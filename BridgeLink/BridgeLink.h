@@ -9,7 +9,7 @@ namespace Plugin {
 	private:
 		class Link {
    		private:
-			class Connector 
+			class Connector
                 : public PluginHost::IPlugin::INotification
                 , public Exchange::Controller::IShells::INotification {
 			private:
@@ -156,7 +156,7 @@ namespace Plugin {
 				void Closed() {
 					_parent.Disconnected();
 
-					// Dive into the retry loop again.. 
+					// Dive into the retry loop again..
 					_job.Reschedule(Core::Time::Now().Add(_interval * 1000));
 				}
                 void Created(const string& callsign, PluginHost::IShell* plugin) override {
@@ -650,7 +650,7 @@ namespace Plugin {
                     Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
                     return (_shell == nullptr ? IShell::state::DESTROYED : static_cast< IShell::state>(_state));
                 }
-                void* /* @interface:id */ QueryInterfaceByCallsign(const uint32_t id, const string& name) override {
+                void* QueryInterfaceByCallsign(const uint32_t id, const string& name) override {
                     void* result = nullptr;
                     PluginHost::IShell* source = Source();
                     if (source != nullptr) {
@@ -706,7 +706,7 @@ namespace Plugin {
                     }
                     return (result);
                 }
-                Core::hresult Metadata(string& info /* @out */) const {
+                Core::hresult Metadata(string& info) const override {
                     Core::hresult result = Core::ERROR_UNAVAILABLE;
                     const PluginHost::IShell* source = Source();
                     if (source != nullptr) {
@@ -715,11 +715,14 @@ namespace Plugin {
                     }
                     return (result);
                 }
+                uint32_t Submit(const uint32_t, const Core::ProxyType<Core::JSON::IElement>&) override {
+                    return (Core::ERROR_UNAVAILABLE);
+                }
 
                 //
                 // Implementation IDispatcher
                 // ------------------------------------------------------------------------------------------
-                uint32_t Invoke(const uint32_t channelid, const uint32_t id, const string& token, const string& method, const string& parameters, string& response /* @out */) override {
+                uint32_t Invoke(const uint32_t channelid, const uint32_t id, const string& token, const string& method, const string& parameters, string& response) override {
                     uint32_t result = Core::ERROR_UNAVAILABLE;
 
                     _adminLock.Lock();
@@ -770,13 +773,13 @@ namespace Plugin {
                     }
                     return (result);
                 }
-                Core::hresult Attach(IShell::IConnectionServer::INotification*& sink /* @out */, IShell* service) override {
+                Core::hresult Attach(IShell::IConnectionServer::INotification*&, IShell*) override {
                     return (Core::ERROR_UNAVAILABLE);
                 }
-                Core::hresult Detach(IShell::IConnectionServer::INotification*& sink /* @out */) override {
+                Core::hresult Detach(IShell::IConnectionServer::INotification*&) override {
                     return (Core::ERROR_UNAVAILABLE);
                 }
-                void Dropped(const ICallback* callback) override {
+                void Dropped(const ICallback*) override {
                 }
                 void* QueryInterface(const uint32_t interfaceNumber) override {
                     void* result = nullptr;
@@ -843,19 +846,19 @@ namespace Plugin {
             Link& operator=(Link&&) = delete;
             Link& operator=(const Link&) = delete;
 
-			PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST);
+			PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
 			Link(BridgeLink& parent)
-				: _parent(parent) 
+				: _parent(parent)
                 , _adminLock()
                 , _isEmpty(false, true)
                 , _callback(nullptr)
                 , _created()
                 , _destructed()
-                , _externalShells() 
+                , _externalShells()
 				, _connection(*this)
                 , _job(*this) {
 			}
-			POP_WARNING();
+			POP_WARNING()
 			~Link() = default;
 
 		public:
@@ -873,7 +876,7 @@ namespace Plugin {
                 _callback = sink;
                 if (_callback != nullptr) {
                     _callback->AddRef();
-                    for (const std::pair<string, ShellProxy*>& entry : _externalShells) {
+                    for (const std::pair<const string, ShellProxy*>& entry : _externalShells) {
                         _callback->Created(entry.first, entry.second);
                         if (entry.second->State() == PluginHost::IShell::ACTIVATED) {
                             _callback->Activated(entry.first, entry.second);
@@ -1022,7 +1025,7 @@ namespace Plugin {
                 }
             }
             void Dispatch() {
- 
+
                 // First report all Destroyed elements
                 _adminLock.Lock();
 
@@ -1032,7 +1035,7 @@ namespace Plugin {
                     _destructed.erase(_destructed.begin());
 
                     // Unsubscribing (resetting the _callback to a nullptr) requires the Job to be revoked.
-                    // If the Job is running the revoke will wait till it is completed before restting it 
+                    // If the Job is running the revoke will wait till it is completed before restting it
                     // to a nullptr!
                     if (_callback != nullptr) {
                         _adminLock.Unlock();
@@ -1057,7 +1060,7 @@ namespace Plugin {
                         std::forward_as_tuple(newEntry));
 
                     // Unsubscribing (resetting the _callback to a nullptr) requires the Job to be revoked.
-                    // If the Job is running the revoke will wait till it is completed before restting it 
+                    // If the Job is running the revoke will wait till it is completed before restting it
                     // to a nullptr!
                     if (_callback != nullptr) {
                         _adminLock.Unlock();
@@ -1079,7 +1082,7 @@ namespace Plugin {
                     }
                     else {
                         // Unsubscribing (resetting the _callback to a nullptr) requires the Job to be revoked.
-                        // If the Job is running the revoke will wait till it is completed before restting it 
+                        // If the Job is running the revoke will wait till it is completed before restting it
                         // to a nullptr!
                         if (_callback != nullptr) {
                             string callsign(entry->first);
@@ -1122,7 +1125,7 @@ namespace Plugin {
 
                 // Move all active elemnets to destructed so they are reported "Destroyed"
 
-                for (const std::pair<string, ShellProxy*>& entry : _externalShells) {
+                for (const std::pair<const string, ShellProxy*>& entry : _externalShells) {
                     entry.second->Unlink();
                     PluginHost::IShell* proxy = entry.second;
                     // No need to AddRef, in a moment we will kill the full list and those
@@ -1189,7 +1192,7 @@ namespace Plugin {
         BridgeLink& operator=(BridgeLink&&) = delete;
         BridgeLink& operator=(const BridgeLink&) = delete;
 
-		PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST);
+		PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
 		BridgeLink()
             : _adminLock()
 			, _skipURL(0)
@@ -1197,7 +1200,7 @@ namespace Plugin {
             , _callsign()
         {
         }
-		POP_WARNING();
+		POP_WARNING()
 		~BridgeLink() override = default;
 
     public:

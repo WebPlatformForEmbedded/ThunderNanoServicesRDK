@@ -36,7 +36,7 @@ namespace Thunder
 			return (EMPTY_STRING);
 		}
 
-        /* virtual */ void BridgeLink::Deinitialize(PluginHost::IShell* service)
+        /* virtual */ void BridgeLink::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED)
         {
             _link.Deinitialize(Core::infinite);
             _callsign.clear();
