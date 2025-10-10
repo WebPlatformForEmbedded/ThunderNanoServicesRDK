@@ -732,11 +732,12 @@ namespace Plugin {
                     }
                     _adminLock.Unlock();
 
-                    if ((link != nullptr) && (method.length() > _callsign.length())) {
-                        ASSERT(method.at(_callsign.length()) == PluginHost::ICompositPlugin::Delimiter);
+                    if (link != nullptr) {
                         // Do not forget to takeof "our" callsign
-                        string strippedMethod = method.substr(_callsign.length() + 1);
-                        result = link->Invoke(channelid, id, token, strippedMethod, parameters, response);
+                        const size_t pos = method.find(PluginHost::ICompositPlugin::Delimiter);
+                        ASSERT(pos != string::npos);
+                        ASSERT(_callsign == method.substr(0, pos));
+                        result = link->Invoke(channelid, id, token, method.substr(pos + 1), parameters, response);
                         link->Release();
                     }
                     return (result);
