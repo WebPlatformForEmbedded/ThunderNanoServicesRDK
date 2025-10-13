@@ -1,0 +1,8 @@
+startmode = "Deactivated"
+
+configuration = JSON()
+
+configuration.add("interval", 10)
+configuration.add("retries", 255)
+configuration.add("source", "@PLUGIN_BRIDGELINK_SOURCE@")
+
