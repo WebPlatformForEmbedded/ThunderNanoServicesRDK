@@ -413,16 +413,6 @@ namespace Plugin {
                     }
                     return (result);
                 }
-                //! Versions: Returns a JSON Array of versions (JSONRPC interfaces) supported by this plugin.
-                string Versions() const override {
-                    string result;
-                    const PluginHost::IShell* source = Source();
-                    if (source != nullptr) {
-                        result = source->Versions();
-                        source->Release();
-                    }
-                    return (result);
-                }
                 //! Callsign: Instantiation name of this specific plugin. It is the name given in the config for the classname.
                 string Callsign() const override {
                     string result;
@@ -598,16 +588,6 @@ namespace Plugin {
                     }
                     return (result);
                 }
-                //! Return whether the given version is supported by this IShell instance.
-                bool IsSupported(const uint8_t version) const override {
-                    bool result = true;
-                    const PluginHost::IShell* source = Source();
-                    if (source != nullptr) {
-                        result = source->IsSupported(version);
-                        source->Release();
-                    }
-                    return (result);
-                }
                 // Get access to the SubSystems and their corrresponding information. Information can be set or get to see what the
                 // status of the sub systems is.
                 PluginHost::ISubSystem* SubSystems() override {
@@ -736,7 +716,6 @@ namespace Plugin {
                         // Do not forget to takeof "our" callsign
                         const size_t pos = method.find(PluginHost::ICompositPlugin::Delimiter);
                         ASSERT(pos != string::npos);
-                        ASSERT(_callsign == method.substr(0, pos));
                         result = link->Invoke(channelid, id, token, method.substr(pos + 1), parameters, response);
                         link->Release();
                     }
