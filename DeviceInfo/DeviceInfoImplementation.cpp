@@ -14,7 +14,7 @@ namespace Plugin {
     using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;
     using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>;
 
-    uint32_t DeviceInfoImplementation::Configure(const PluginHost::IShell* service)
+    uint32_t DeviceInfoImplementation::Configure(PluginHost::IShell* service)
     {
         ASSERT(service != nullptr);
 
@@ -71,7 +71,7 @@ namespace Plugin {
         return (Core::ERROR_NONE);
     }
 
-    uint32_t DeviceInfoImplementation::AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const
+    Core::hresult DeviceInfoImplementation::AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const
     {
         AudioOutputList audioOutputList;
 
@@ -84,7 +84,7 @@ namespace Plugin {
         return (audioOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::AudioCapabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator*& audioCapabilities) const
+    Core::hresult DeviceInfoImplementation::AudioCapabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator*& audioCapabilities) const
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.AudioCapabilities.size() > 0)) {
@@ -93,7 +93,7 @@ namespace Plugin {
         return (audioCapabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::MS12Capabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator*& ms12Capabilities) const
+    Core::hresult DeviceInfoImplementation::MS12Capabilities(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator*& ms12Capabilities) const
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.MS12Capabilities.size() > 0)) {
@@ -102,7 +102,7 @@ namespace Plugin {
         return (ms12Capabilities != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::MS12AudioProfiles(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator*& ms12AudioProfiles) const
+    Core::hresult DeviceInfoImplementation::MS12AudioProfiles(const Exchange::IDeviceAudioCapabilities::AudioOutput audioOutput, Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator*& ms12AudioProfiles) const
     {
         AudioOutputMap::const_iterator index = _audioOutputMap.find(audioOutput);
         if ((index != _audioOutputMap.end()) && (index->second.MS12Profiles.size() > 0)) {
@@ -111,7 +111,7 @@ namespace Plugin {
         return (ms12AudioProfiles != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const
+    Core::hresult DeviceInfoImplementation::VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const
     {
         VideoOutputList videoOutputList;
 
@@ -125,64 +125,81 @@ namespace Plugin {
         return (videoOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
-    uint32_t DeviceInfoImplementation::DefaultResolution(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::ScreenResolution& defaultResolution) const
+    Core::hresult DeviceInfoImplementation::DefaultResolution(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::ScreenResolution& defaultResolution) const
     {
-        defaultResolution = Exchange::IDeviceVideoCapabilities::ScreenResolution_Unknown;
+        Core::hresult result = Core::ERROR_UNKNOWN_KEY;
+
         VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
-        if ((index != _videoOutputMap.end()) && (index->second.DefaultResolution != Exchange::IDeviceVideoCapabilities::ScreenResolution_Unknown)) {
+
+        if (index != _videoOutputMap.end()) {
             defaultResolution = index->second.DefaultResolution;
-        }
-        return (Core::ERROR_NONE);
-    }
-
-    uint32_t DeviceInfoImplementation::Resolutions(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator*& resolutions) const
-    {
-        VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
-        if ((index != _videoOutputMap.end()) && (index->second.Resolutions.size() > 0)) {
-            resolutions = Core::ServiceType<ResolutionIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>(index->second.Resolutions);
+            result = Core::ERROR_NONE;
         }
 
-        return (resolutions != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
+        return (result);
     }
 
-    uint32_t DeviceInfoImplementation::Hdcp(const VideoOutput videoOutput, CopyProtection& hdcpVersion) const
+    Core::hresult DeviceInfoImplementation::Resolutions(const Exchange::IDeviceVideoCapabilities::VideoOutput videoOutput, Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator*& resolutions) const
     {
-        hdcpVersion = Exchange::IDeviceVideoCapabilities::CopyProtection::HDCP_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNKNOWN_KEY;
+
         VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
-        if ((index != _videoOutputMap.end()) && (index->second.CopyProtection != HDCP_UNAVAILABLE)) {
+
+        if ((index != _videoOutputMap.end())) {
+
+            if (index->second.Resolutions.size() > 0) {
+                resolutions = Core::ServiceType<ResolutionIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>(index->second.Resolutions);
+                result = Core::ERROR_NONE;
+            }
+            else {
+                result = Core::ERROR_GENERAL;
+            }
+        }
+
+        return (result);
+    }
+
+    Core::hresult DeviceInfoImplementation::Hdcp(const VideoOutput videoOutput, CopyProtection& hdcpVersion) const
+    {
+        Core::hresult result = Core::ERROR_UNKNOWN_KEY;
+
+        VideoOutputMap::const_iterator index = _videoOutputMap.find(videoOutput);
+
+        if (index != _videoOutputMap.end()) {
             hdcpVersion = index->second.CopyProtection;
+            result = Core::ERROR_NONE;
         }
 
-        return (Core::ERROR_NONE);
+        return (result);
     }
 
-    uint32_t DeviceInfoImplementation::HDR(bool& supportsHDR) const
+    Core::hresult DeviceInfoImplementation::HDR(bool& supportsHDR) const
     {
         supportsHDR = _supportsHdr;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::Atmos(bool& supportsAtmos) const
+    Core::hresult DeviceInfoImplementation::Atmos(bool& supportsAtmos) const
     {
         supportsAtmos = _supportsAtmos;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::CEC(bool& supportsCEC) const
+    Core::hresult DeviceInfoImplementation::CEC(bool& supportsCEC) const
     {
         supportsCEC = _supportsCEC;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::HostEDID(string& edid) const
+    Core::hresult DeviceInfoImplementation::HostEDID(string& edid) const
     {
         edid = _hostEdid;
         return Core::ERROR_NONE;
     }
 
-    uint32_t DeviceInfoImplementation::Make(string& value) const
+    Core::hresult DeviceInfoImplementation::Make(string& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_make.empty() == false) {
             value = _make;
             result = Core::ERROR_NONE;
@@ -190,7 +207,7 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::SerialNumber(string& value) const
+    Core::hresult DeviceInfoImplementation::SerialNumber(string& value) const
     {
         uint32_t result = Core::ERROR_UNAVAILABLE;
         if (_serialNumber.empty() == false) {
@@ -200,7 +217,7 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::Sku(string& value) const
+    Core::hresult DeviceInfoImplementation::ModelID(string& value) const
     {
         uint32_t result = Core::ERROR_UNAVAILABLE;
         if (_sku.empty() == false) {
@@ -210,9 +227,9 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::ModelName(string& value) const
+    Core::hresult DeviceInfoImplementation::ModelName(string& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_modelName.empty() == false) {
             value = _modelName;
             result = Core::ERROR_NONE;
@@ -220,9 +237,9 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::ModelYear(uint16_t& value) const
+    Core::hresult DeviceInfoImplementation::ModelYear(uint16_t& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_modelYear != 0) {
             value = _modelYear;
             result = Core::ERROR_NONE;
@@ -230,9 +247,9 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::FriendlyName(string& value) const
+    Core::hresult DeviceInfoImplementation::FriendlyName(string& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_friendlyName.empty() == false) {
             value = _friendlyName;
             result = Core::ERROR_NONE;
@@ -240,19 +257,29 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::DeviceType(string& value) const
+    Core::hresult DeviceInfoImplementation::DeviceType(Exchange::IDeviceInfo::Type& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
+
         if (_deviceType.empty() == false) {
-            value = _deviceType;
-            result = Core::ERROR_NONE;
+
+            Core::EnumerateType<Exchange::IDeviceInfo::Type> deviceTypeEnum(_deviceType.c_str(), false);
+
+            if (deviceTypeEnum.IsSet()) {
+                value = deviceTypeEnum.Value();
+                result = Core::ERROR_NONE;
+            }
+            else {
+                TRACE(Trace::Fatal, (_T("Unknown value: %s"), _deviceType.c_str()));
+                result = Core::ERROR_UNKNOWN_KEY;
+            }
         }
-        return result;
+        return (result);
     }
 
-    uint32_t DeviceInfoImplementation::DistributorId(string& value) const
+    Core::hresult DeviceInfoImplementation::DistributorID(string& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_distributorId.empty() == false) {
             value = _distributorId;
             result = Core::ERROR_NONE;
@@ -260,14 +287,18 @@ namespace Plugin {
         return result;
     }
 
-    uint32_t DeviceInfoImplementation::PlatformName(string& value) const
+    Core::hresult DeviceInfoImplementation::PlatformName(string& value) const
     {
-        uint32_t result = Core::ERROR_UNAVAILABLE;
+        Core::hresult result = Core::ERROR_UNAVAILABLE;
         if (_platformName.empty() == false) {
             value = _platformName;
             result = Core::ERROR_NONE;
         }
         return result;
+    }
+
+    Core::hresult DeviceInfoImplementation::Firmware(Exchange::IDeviceInfo::FirmwareInfo& /* value */) const {
+        return (Core::ERROR_UNAVAILABLE);
     }
 }
 }
