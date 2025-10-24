@@ -14,6 +14,7 @@ DeviceIdentification interface for Thunder framework.
 
 - [Introduction](#head_Introduction)
 - [Description](#head_Description)
+- [Methods](#head_Methods)
 - [Properties](#head_Properties)
 
 <a id="head_Introduction"></a>
@@ -22,7 +23,7 @@ DeviceIdentification interface for Thunder framework.
 <a id="head_Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the DeviceIdentification interface (version 1.0.0). It includes detailed specification about its properties provided.
+This document describes purpose and functionality of the DeviceIdentification interface (version 1.0.0). It includes detailed specification about its methods and properties provided.
 
 <a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
@@ -61,6 +62,64 @@ The table below provides and overview of terms and abbreviations used in this do
 # Description
 
 DeviceIdentification JSON-RPC interface.
+
+<a id="head_Methods"></a>
+# Methods
+
+The following methods are provided by the DeviceIdentification interface:
+
+Built-in methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [exists](#method_exists) | Checks if a JSON-RPC method or property exists |
+
+<a id="method_exists"></a>
+## *exists [<sup>method</sup>](#head_Methods)*
+
+Checks if a JSON-RPC method or property exists.
+
+### Description
+
+This method will return *True* for the following methods/properties: *deviceidentification, exists*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.method | string | mandatory | Name of the method or property to look up |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Denotes if the method exists or not |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "<callsign>.1.exists",
+  "params": {
+    "method": "deviceidentification"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
+}
+```
 
 <a id="head_Properties"></a>
 # Properties
