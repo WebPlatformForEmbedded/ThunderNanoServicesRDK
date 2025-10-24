@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.OpenCDMi_Plugin"></a>
+<a id="head_OpenCDMi_Plugin"></a>
 # OpenCDMi Plugin
 
 **Version: 1.0**
@@ -10,26 +10,27 @@ OCDM plugin for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Properties](#head.Properties)
-- [Notifications](#head.Notifications)
+- [Introduction](#head_Introduction)
+- [Configuration](#head_Configuration)
+- [Interfaces](#head_Interfaces)
+- [Methods](#head_Methods)
+- [Properties](#head_Properties)
+- [Notifications](#head_Notifications)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the OCDM plugin. It includes detailed specification about its configuration, properties provided and notifications sent.
+This document describes purpose and functionality of the OCDM plugin. It includes detailed specification about its configuration, methods and properties as well as sent notifications.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -47,7 +48,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -57,7 +58,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Configuration"></a>
+<a id="head_Configuration"></a>
 # Configuration
 
 The table below lists configuration options of the plugin.
@@ -74,13 +75,13 @@ The table below lists configuration options of the plugin.
 | configuration?.sharepath | string | optional | Sharepath |
 | configuration?.sharesize | string | optional | Sharesize |
 | configuration?.systems | array | optional | List of key systems |
-| configuration?.systems[#] | object | optional | System properties |
+| configuration?.systems[#] | object | mandatory | System properties |
 | configuration?.systems[#]?.name | string | optional | Name |
 | configuration?.systems[#]?.designators | array | optional | *...* |
-| configuration?.systems[#]?.designators[#] | object | optional | Designator |
+| configuration?.systems[#]?.designators[#] | object | mandatory | Designator |
 | configuration?.systems[#]?.designators[#].name | string | mandatory | *...* |
 
-<a name="head.Interfaces"></a>
+<a id="head_Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
@@ -89,7 +90,227 @@ This plugin implements the following interfaces:
 - IOpenCDM ([IOCDM.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IOCDM.h)) (version 1.0.0) (compliant format)
 > This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
-<a name="head.Properties"></a>
+<a id="head_Methods"></a>
+# Methods
+
+The following methods are provided by the OCDM plugin:
+
+Built-in methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [versions](#method_versions) | Retrieves a list of JSON-RPC interfaces offered by this service |
+| [exists](#method_exists) | Checks if a JSON-RPC method or property exists |
+| [register](#method_register) | Registers for an asynchronous JSON-RPC notification |
+| [unregister](#method_unregister) | Unregisters from an asynchronous JSON-RPC notification |
+
+<a id="method_versions"></a>
+## *versions [<sup>method</sup>](#head_Methods)*
+
+Retrieves a list of JSON-RPC interfaces offered by this service.
+
+### Parameters
+
+This method takes no parameters.
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | A list ofsinterfaces with their version numbers<br>*Array length must be at most 255 elements.* |
+| result[#] | object | mandatory | *...* |
+| result[#].name | string | mandatory | Name of the interface |
+| result[#].major | integer | mandatory | Major part of version number |
+| result[#].minor | integer | mandatory | Minor part of version number |
+| result[#].patch | integer | mandatory | Patch part of version version number |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.versions"
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "name": "JMyInterface",
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  ]
+}
+```
+
+<a id="method_exists"></a>
+## *exists [<sup>method</sup>](#head_Methods)*
+
+Checks if a JSON-RPC method or property exists.
+
+### Description
+
+This method will return *True* for the following methods/properties: *drms, keysystems, sessions, systems, designators, versions, exists, register, unregister*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.method | string | mandatory | Name of the method or property to look up |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Denotes if the method exists or not |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.exists",
+  "params": {
+    "method": "drms"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
+}
+```
+
+<a id="method_register"></a>
+## *register [<sup>method</sup>](#head_Methods)*
+
+Registers for an asynchronous JSON-RPC notification.
+
+### Description
+
+This method supports the following event names: *[drmalreadyinitialized](#notification_drmalreadyinitialized), [drminitializationstatus](#notification_drminitializationstatus)*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.event | string | mandatory | Name of the notification to register for |
+| params.id | string | mandatory | Client identifier |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_FAILED_REGISTERED``` | Failed to register for the notification (e.g. already registered) |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.register",
+  "params": {
+    "event": "drmalreadyinitialized",
+    "id": "myapp"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
+}
+```
+
+<a id="method_unregister"></a>
+## *unregister [<sup>method</sup>](#head_Methods)*
+
+Unregisters from an asynchronous JSON-RPC notification.
+
+### Description
+
+This method supports the following event names: *[drmalreadyinitialized](#notification_drmalreadyinitialized), [drminitializationstatus](#notification_drminitializationstatus)*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.event | string | mandatory | Name of the notification to register for |
+| params.id | string | mandatory | Client identifier |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_FAILED_UNREGISTERED``` | Failed to unregister from the notification (e.g. not yet registered) |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "OCDM.1.unregister",
+  "params": {
+    "event": "drmalreadyinitialized",
+    "id": "myapp"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
+}
+```
+
+<a id="head_Properties"></a>
 # Properties
 
 The following properties are provided by the OCDM plugin:
@@ -98,19 +319,19 @@ OCDM interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [drms](#property.drms) | read-only | Supported DRM systems |
-| [keysystems](#property.keysystems) | read-only | DRM key systems |
-| [sessions](#property.sessions) | read-only | Active sessions enumerator |
+| [drms](#property_drms) | read-only | Supported DRM systems |
+| [keysystems](#property_keysystems) | read-only | DRM key systems |
+| [sessions](#property_sessions) | read-only | Active sessions enumerator |
 
 OpenCDM interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [systems](#property.systems) | read-only | Supported DRM systems |
-| [designators](#property.designators) | read-only | Designators of a specified DRM system |
+| [systems](#property_systems) | read-only | Supported DRM systems |
+| [designators](#property_designators) | read-only | Designators of a specified DRM system |
 
-<a name="property.drms"></a>
-## *drms [<sup>property</sup>](#head.Properties)*
+<a id="property_drms"></a>
+## *drms [<sup>property</sup>](#head_Properties)*
 
 Provides access to the supported DRM systems.
 
@@ -118,15 +339,13 @@ Provides access to the supported DRM systems.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Supported DRM systems |
-| result[#] | object | mandatory | *...* |
-| result[#].name | string | mandatory | Name of the DRM |
-| result[#].keysystems | array | mandatory | Key system identifier list |
-| result[#].keysystems[#] | string | mandatory | Identifier of a key system |
+| (property) | array | mandatory | Supported DRM systems |
+| (property)[#] | object | mandatory | *...* |
+| (property)[#].name | string | mandatory | Name of the DRM |
+| (property)[#].keysystems | array | mandatory | Key system identifier list |
+| (property)[#].keysystems[#] | string | mandatory | Identifier of a key system |
 
 ### Example
 
@@ -157,14 +376,14 @@ Provides access to the supported DRM systems.
 }
 ```
 
-<a name="property.keysystems"></a>
-## *keysystems [<sup>property</sup>](#head.Properties)*
+<a id="property_keysystems"></a>
+## *keysystems [<sup>property</sup>](#head_Properties)*
 
 Provides access to the DRM key systems.
 
 > This property is **read-only**.
 
-> The *drm system* parameter shall be passed as the index to the property, e.g. ``OCDM.1.keysystems@<drm-system>``.
+> The *drm system* parameter shall be passed as the index to the property, i.e. ``keysystems@<drm-system>``.
 
 ### Index
 
@@ -174,12 +393,10 @@ Provides access to the DRM key systems.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | DRM key systems |
-| result[#] | string | mandatory | Identifier of a key system |
+| (property) | array | mandatory | DRM key systems |
+| (property)[#] | string | mandatory | Identifier of a key system |
 
 ### Errors
 
@@ -211,8 +428,8 @@ Provides access to the DRM key systems.
 }
 ```
 
-<a name="property.sessions"></a>
-## *sessions [<sup>property</sup>](#head.Properties)*
+<a id="property_sessions"></a>
+## *sessions [<sup>property</sup>](#head_Properties)*
 
 Provides access to the active sessions enumerator.
 
@@ -220,13 +437,11 @@ Provides access to the active sessions enumerator.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Active sessions enumerator |
-| result[#] | object | mandatory | *...* |
-| result[#].drm | string | mandatory | Name of the DRM system |
+| (property) | array | mandatory | Active sessions enumerator |
+| (property)[#] | object | mandatory | *...* |
+| (property)[#].drm | string | mandatory | Name of the DRM system |
 
 ### Example
 
@@ -254,8 +469,8 @@ Provides access to the active sessions enumerator.
 }
 ```
 
-<a name="property.systems"></a>
-## *systems [<sup>property</sup>](#head.Properties)*
+<a id="property_systems"></a>
+## *systems [<sup>property</sup>](#head_Properties)*
 
 Provides access to the supported DRM systems.
 
@@ -263,12 +478,10 @@ Provides access to the supported DRM systems.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Supported DRM systems |
-| result[#] | string | mandatory | *...* |
+| (property) | array | mandatory | Supported DRM systems |
+| (property)[#] | string | mandatory | *...* |
 
 ### Example
 
@@ -294,14 +507,14 @@ Provides access to the supported DRM systems.
 }
 ```
 
-<a name="property.designators"></a>
-## *designators [<sup>property</sup>](#head.Properties)*
+<a id="property_designators"></a>
+## *designators [<sup>property</sup>](#head_Properties)*
 
 Provides access to the designators of a specified DRM system.
 
 > This property is **read-only**.
 
-> The *keysystem* parameter shall be passed as the index to the property, e.g. ``OCDM.1.designators@<keysystem>``.
+> The *keysystem* parameter shall be passed as the index to the property, i.e. ``designators@<keysystem>``.
 
 ### Index
 
@@ -311,12 +524,10 @@ Provides access to the designators of a specified DRM system.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Designators of a specified DRM system |
-| result[#] | string | mandatory | *...* |
+| (property) | array | mandatory | Designators of a specified DRM system |
+| (property)[#] | string | mandatory | *...* |
 
 ### Errors
 
@@ -348,7 +559,7 @@ Provides access to the designators of a specified DRM system.
 }
 ```
 
-<a name="head.Notifications"></a>
+<a id="head_Notifications"></a>
 # Notifications
 
 Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
@@ -359,11 +570,11 @@ OCDM interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [drmalreadyinitialized](#notification.drmalreadyinitialized) | Signals that the specified DRM system could not be initialized because it is already initialized by another process |
-| [drminitializationstatus](#notification.drminitializationstatus) | Notifies about DRM initialization status |
+| [drmalreadyinitialized](#notification_drmalreadyinitialized) | Signals that the specified DRM system could not be initialized because it is already initialized by another process |
+| [drminitializationstatus](#notification_drminitializationstatus) | Notifies about DRM initialization status |
 
-<a name="notification.drmalreadyinitialized"></a>
-## *drmalreadyinitialized [<sup>notification</sup>](#head.Notifications)*
+<a id="notification_drmalreadyinitialized"></a>
+## *drmalreadyinitialized [<sup>notification</sup>](#head_Notifications)*
 
 Signals that the specified DRM system could not be initialized because it is already initialized by another process.
 
@@ -406,8 +617,10 @@ When this event is received, the application owning given DRM system should rele
 }
 ```
 
-<a name="notification.drminitializationstatus"></a>
-## *drminitializationstatus [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.drmalreadyinitialized``.
+
+<a id="notification_drminitializationstatus"></a>
+## *drminitializationstatus [<sup>notification</sup>](#head_Notifications)*
 
 Notifies about DRM initialization status.
 
@@ -451,4 +664,6 @@ Register to this event to be notified about DRM retrying status busy/failure/suc
   }
 }
 ```
+
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.drminitializationstatus``.
 

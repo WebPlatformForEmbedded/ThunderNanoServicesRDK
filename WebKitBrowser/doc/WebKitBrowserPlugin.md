@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.WebKit_Browser_Plugin"></a>
+<a id="head_WebKit_Browser_Plugin"></a>
 # WebKit Browser Plugin
 
 **Version: 1.0**
@@ -10,28 +10,28 @@ WebKitBrowser plugin for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Description](#head.Description)
-- [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
-- [Properties](#head.Properties)
-- [Notifications](#head.Notifications)
+- [Introduction](#head_Introduction)
+- [Description](#head_Description)
+- [Configuration](#head_Configuration)
+- [Interfaces](#head_Interfaces)
+- [Methods](#head_Methods)
+- [Properties](#head_Properties)
+- [Notifications](#head_Notifications)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
 This document describes purpose and functionality of the WebKitBrowser plugin. It includes detailed specification about its configuration, methods and properties as well as sent notifications.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -49,7 +49,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -59,14 +59,14 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Description"></a>
+<a id="head_Description"></a>
 # Description
 
 The WebKitBrowser plugin provides web browsing functionality based on the WebKit engine.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
-<a name="head.Configuration"></a>
+<a id="head_Configuration"></a>
 # Configuration
 
 The table below lists configuration options of the plugin.
@@ -95,7 +95,7 @@ The table below lists configuration options of the plugin.
 | configuration?.whitelist | object | optional | *...* |
 | configuration?.whitelist?.origin | string | optional | Origin domain allowed to access domains in domain |
 | configuration?.whitelist?.domain | array | optional | *...* |
-| configuration?.whitelist?.domain[#] | string | optional | Domain allowed to access from origin |
+| configuration?.whitelist?.domain[#] | string | mandatory | Domain allowed to access from origin |
 | configuration?.whitelist?.subdomain | string | optional | Whether it is also OK to access subdomains of domains listed in domain |
 | configuration?.localstorageenabled | boolean | optional | Controls the local storage availability |
 | configuration?.logtosystemconsoleenabled | boolean | optional | Enable page logging to system console (stderr) |
@@ -103,7 +103,7 @@ The table below lists configuration options of the plugin.
 | configuration?.watchdoghangthresholdtinseconds | integer | optional | The amount of time to give a process to recover before declaring a hang state |
 | configuration?.loadblankpageonsuspendenabled | boolean | optional | Load 'about:blank' before suspending the page |
 
-<a name="head.Interfaces"></a>
+<a id="head_Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
@@ -124,33 +124,248 @@ This plugin implements the following interfaces:
 - IBrowserCookieJar ([IBrowser.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IBrowser.h)) (version 1.0.0) (uncompliant-extended format)
 > This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
-<a name="head.Methods"></a>
+<a id="head_Methods"></a>
 # Methods
 
 The following methods are provided by the WebKitBrowser plugin:
+
+Built-in methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [versions](#method_versions) | Retrieves a list of JSON-RPC interfaces offered by this service |
+| [exists](#method_exists) | Checks if a JSON-RPC method or property exists |
+| [register](#method_register) | Registers for an asynchronous JSON-RPC notification |
+| [unregister](#method_unregister) | Unregisters from an asynchronous JSON-RPC notification |
 
 WebBrowser interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [collectgarbage](#method.collectgarbage) | Initiate garbage collection |
+| [collectgarbage](#method_collectgarbage) | Initiate garbage collection |
 
 WebBrowserExt interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [delete](#method.delete) / [deletedir](#method.delete) | Removes contents of a directory from the persistent storage |
+| [delete](#method_delete) / [deletedir](#method_delete) | Removes contents of a directory from the persistent storage |
 
 BrowserScripting interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [runjavascript](#method.runjavascript) | Run javascript in main frame |
-| [adduserscript](#method.adduserscript) | Add user script to be executed at document start |
-| [removealluserscripts](#method.removealluserscripts) | Remove all user scripts |
+| [runjavascript](#method_runjavascript) | Run javascript in main frame |
+| [adduserscript](#method_adduserscript) | Add user script to be executed at document start |
+| [removealluserscripts](#method_removealluserscripts) | Remove all user scripts |
 
-<a name="method.collectgarbage"></a>
-## *collectgarbage [<sup>method</sup>](#head.Methods)*
+<a id="method_versions"></a>
+## *versions [<sup>method</sup>](#head_Methods)*
+
+Retrieves a list of JSON-RPC interfaces offered by this service.
+
+### Parameters
+
+This method takes no parameters.
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | A list ofsinterfaces with their version numbers<br>*Array length must be at most 255 elements.* |
+| result[#] | object | mandatory | *...* |
+| result[#].name | string | mandatory | Name of the interface |
+| result[#].major | integer | mandatory | Major part of version number |
+| result[#].minor | integer | mandatory | Minor part of version number |
+| result[#].patch | integer | mandatory | Patch part of version version number |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "WebKitBrowser.1.versions"
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "name": "JMyInterface",
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  ]
+}
+```
+
+<a id="method_exists"></a>
+## *exists [<sup>method</sup>](#head_Methods)*
+
+Checks if a JSON-RPC method or property exists.
+
+### Description
+
+This method will return *True* for the following methods/properties: *url, visibility, fps, headers, useragent, localstorageenabled, httpcookieacceptpolicy, bridgereply, bridgeevent, languages, userScripts, userStyleSheets, securityprofile, mixedcontentpolicy, cookiejar, versions, exists, register, unregister, collectgarbage, deletedir, runjavascript, adduserscript, removealluserscripts*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.method | string | mandatory | Name of the method or property to look up |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Denotes if the method exists or not |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "WebKitBrowser.1.exists",
+  "params": {
+    "method": "url"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
+}
+```
+
+<a id="method_register"></a>
+## *register [<sup>method</sup>](#head_Methods)*
+
+Registers for an asynchronous JSON-RPC notification.
+
+### Description
+
+This method supports the following event names: *[loadfinished](#notification_loadfinished), [loadfailed](#notification_loadfailed), [urlchange](#notification_urlchange), [visibilitychange](#notification_visibilitychange), [pageclosure](#notification_pageclosure), [bridgequery](#notification_bridgequery), [cookiejarchanged](#notification_cookiejarchanged)*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.event | string | mandatory | Name of the notification to register for |
+| params.id | string | mandatory | Client identifier |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_FAILED_REGISTERED``` | Failed to register for the notification (e.g. already registered) |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "WebKitBrowser.1.register",
+  "params": {
+    "event": "loadfinished",
+    "id": "myapp"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
+}
+```
+
+<a id="method_unregister"></a>
+## *unregister [<sup>method</sup>](#head_Methods)*
+
+Unregisters from an asynchronous JSON-RPC notification.
+
+### Description
+
+This method supports the following event names: *[loadfinished](#notification_loadfinished), [loadfailed](#notification_loadfailed), [urlchange](#notification_urlchange), [visibilitychange](#notification_visibilitychange), [pageclosure](#notification_pageclosure), [bridgequery](#notification_bridgequery), [cookiejarchanged](#notification_cookiejarchanged)*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.event | string | mandatory | Name of the notification to register for |
+| params.id | string | mandatory | Client identifier |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | null | mandatory | Always null |
+
+### Errors
+
+| Message | Description |
+| :-------- | :-------- |
+| ```ERROR_FAILED_UNREGISTERED``` | Failed to unregister from the notification (e.g. not yet registered) |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "WebKitBrowser.1.unregister",
+  "params": {
+    "event": "loadfinished",
+    "id": "myapp"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": null
+}
+```
+
+<a id="method_collectgarbage"></a>
+## *collectgarbage [<sup>method</sup>](#head_Methods)*
 
 Initiate garbage collection.
 
@@ -186,8 +401,8 @@ This method takes no parameters.
 }
 ```
 
-<a name="method.delete"></a>
-## *delete [<sup>method</sup>](#head.Methods)*
+<a id="method_delete"></a>
+## *delete [<sup>method</sup>](#head_Methods)*
 
 Removes contents of a directory from the persistent storage.
 
@@ -237,8 +452,8 @@ Removes contents of a directory from the persistent storage.
 }
 ```
 
-<a name="method.runjavascript"></a>
-## *runjavascript [<sup>method</sup>](#head.Methods)*
+<a id="method_runjavascript"></a>
+## *runjavascript [<sup>method</sup>](#head_Methods)*
 
 Run javascript in main frame.
 
@@ -280,8 +495,8 @@ Run javascript in main frame.
 }
 ```
 
-<a name="method.adduserscript"></a>
-## *adduserscript [<sup>method</sup>](#head.Methods)*
+<a id="method_adduserscript"></a>
+## *adduserscript [<sup>method</sup>](#head_Methods)*
 
 Add user script to be executed at document start.
 
@@ -325,8 +540,8 @@ Add user script to be executed at document start.
 }
 ```
 
-<a name="method.removealluserscripts"></a>
-## *removealluserscripts [<sup>method</sup>](#head.Methods)*
+<a id="method_removealluserscripts"></a>
+## *removealluserscripts [<sup>method</sup>](#head_Methods)*
 
 Remove all user scripts.
 
@@ -362,7 +577,7 @@ This method takes no parameters.
 }
 ```
 
-<a name="head.Properties"></a>
+<a id="head_Properties"></a>
 # Properties
 
 The following properties are provided by the WebKitBrowser plugin:
@@ -371,44 +586,44 @@ WebBrowser interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [url](#property.url) | read/write | Page loaded in the browser |
-| [visibility](#property.visibility) | read/write | Browser window visibility state |
-| [fps](#property.fps) | read-only | Current framerate the browser is rendering at |
-| [headers](#property.headers) | read/write | Headers to send on all requests that the browser makes |
-| [useragent](#property.useragent) | read/write | UserAgent string used by the browser |
-| [localstorageenabled](#property.localstorageenabled) | read/write | Controls the local storage availability |
-| [httpcookieacceptpolicy](#property.httpcookieacceptpolicy) | read/write | HTTP cookies accept policy |
-| [bridgereply](#property.bridgereply) | write-only | Response for legacy $badger |
-| [bridgeevent](#property.bridgeevent) | write-only | Send legacy $badger event |
+| [url](#property_url) | read/write | Page loaded in the browser |
+| [visibility](#property_visibility) | read/write | Browser window visibility state |
+| [fps](#property_fps) | read-only | Current framerate the browser is rendering at |
+| [headers](#property_headers) | read/write | Headers to send on all requests that the browser makes |
+| [useragent](#property_useragent) | read/write | UserAgent string used by the browser |
+| [localstorageenabled](#property_localstorageenabled) | read/write | Controls the local storage availability |
+| [httpcookieacceptpolicy](#property_httpcookieacceptpolicy) | read/write | HTTP cookies accept policy |
+| [bridgereply](#property_bridgereply) | write-only | Response for legacy $badger |
+| [bridgeevent](#property_bridgeevent) | write-only | Send legacy $badger event |
 
 WebBrowserExt interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [languages](#property.languages) | read/write | User preferred languages |
+| [languages](#property_languages) | read/write | User preferred languages |
 
 BrowserResources interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [userScripts](#property.userScripts) | read/write | User scripts used by the browser |
-| [userStyleSheets](#property.userStyleSheets) | read/write | User style sheets used by the browser |
+| [userScripts](#property_userScripts) | read/write | User scripts used by the browser |
+| [userStyleSheets](#property_userStyleSheets) | read/write | User style sheets used by the browser |
 
 BrowserSecurity interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [securityprofile](#property.securityprofile) | read/write | Security profile for secure connections |
-| [mixedcontentpolicy](#property.mixedcontentpolicy) | read/write | Mixed content policy |
+| [securityprofile](#property_securityprofile) | read/write | Security profile for secure connections |
+| [mixedcontentpolicy](#property_mixedcontentpolicy) | read/write | Mixed content policy |
 
 BrowserCookieJar interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [cookiejar](#property.cookiejar) | read/write | Get/Set CookieJar config details |
+| [cookiejar](#property_cookiejar) | read/write | Get/Set CookieJar config details |
 
-<a name="property.url"></a>
-## *url [<sup>property</sup>](#head.Properties)*
+<a id="property_url"></a>
+## *url [<sup>property</sup>](#head_Properties)*
 
 Provides access to the page loaded in the browser.
 
@@ -418,11 +633,9 @@ Provides access to the page loaded in the browser.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | Page loaded in the browser |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Loaded URL |
+| (property) | string | mandatory | Loaded URL |
 
 ### Example
 
@@ -467,8 +680,8 @@ Provides access to the page loaded in the browser.
 }
 ```
 
-<a name="property.visibility"></a>
-## *visibility [<sup>property</sup>](#head.Properties)*
+<a id="property_visibility"></a>
+## *visibility [<sup>property</sup>](#head_Properties)*
 
 Provides access to the browser window visibility state.
 
@@ -478,11 +691,9 @@ Provides access to the browser window visibility state.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | Browser window visibility state (must be one of the following: *hidden, visible*) |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Visiblity state (must be one of the following: *hidden, visible*) |
+| (property) | string | mandatory | Visiblity state (must be one of the following: *hidden, visible*) |
 
 ### Example
 
@@ -502,7 +713,7 @@ Provides access to the browser window visibility state.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "hidden"
+  "result": "visible"
 }
 ```
 
@@ -513,7 +724,7 @@ Provides access to the browser window visibility state.
   "jsonrpc": "2.0",
   "id": 42,
   "method": "WebKitBrowser.1.visibility",
-  "params": "hidden"
+  "params": "visible"
 }
 ```
 
@@ -527,8 +738,8 @@ Provides access to the browser window visibility state.
 }
 ```
 
-<a name="property.fps"></a>
-## *fps [<sup>property</sup>](#head.Properties)*
+<a id="property_fps"></a>
+## *fps [<sup>property</sup>](#head_Properties)*
 
 Provides access to the current framerate the browser is rendering at.
 
@@ -536,11 +747,9 @@ Provides access to the current framerate the browser is rendering at.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Current FPS |
+| (property) | integer | mandatory | Current FPS |
 
 ### Example
 
@@ -564,8 +773,8 @@ Provides access to the current framerate the browser is rendering at.
 }
 ```
 
-<a name="property.headers"></a>
-## *headers [<sup>property</sup>](#head.Properties)*
+<a id="property_headers"></a>
+## *headers [<sup>property</sup>](#head_Properties)*
 
 Provides access to the headers to send on all requests that the browser makes.
 
@@ -575,11 +784,9 @@ Provides access to the headers to send on all requests that the browser makes.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | opaque object | mandatory | Headers to send on all requests that the browser makes |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | opaque object | mandatory | Single string containing a list of headers |
+| (property) | opaque object | mandatory | Single string containing a list of headers |
 
 ### Example
 
@@ -624,8 +831,8 @@ Provides access to the headers to send on all requests that the browser makes.
 }
 ```
 
-<a name="property.useragent"></a>
-## *useragent [<sup>property</sup>](#head.Properties)*
+<a id="property_useragent"></a>
+## *useragent [<sup>property</sup>](#head_Properties)*
 
 Provides access to the userAgent string used by the browser.
 
@@ -635,11 +842,9 @@ Provides access to the userAgent string used by the browser.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | UserAgent string used by the browser |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | UserAgent value |
+| (property) | string | mandatory | UserAgent value |
 
 ### Example
 
@@ -684,8 +889,8 @@ Provides access to the userAgent string used by the browser.
 }
 ```
 
-<a name="property.localstorageenabled"></a>
-## *localstorageenabled [<sup>property</sup>](#head.Properties)*
+<a id="property_localstorageenabled"></a>
+## *localstorageenabled [<sup>property</sup>](#head_Properties)*
 
 Provides access to the controls the local storage availability.
 
@@ -695,11 +900,9 @@ Provides access to the controls the local storage availability.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | boolean | mandatory | Controls the local storage availability |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | boolean | mandatory | Controls the local storage availability |
+| (property) | boolean | mandatory | Controls the local storage availability |
 
 ### Example
 
@@ -744,8 +947,8 @@ Provides access to the controls the local storage availability.
 }
 ```
 
-<a name="property.httpcookieacceptpolicy"></a>
-## *httpcookieacceptpolicy [<sup>property</sup>](#head.Properties)*
+<a id="property_httpcookieacceptpolicy"></a>
+## *httpcookieacceptpolicy [<sup>property</sup>](#head_Properties)*
 
 Provides access to the HTTP cookies accept policy.
 
@@ -755,11 +958,9 @@ Provides access to the HTTP cookies accept policy.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | HTTP cookies accept policy (must be one of the following: *always, exclusivelyfrommaindocumentdomain, never, onlyfrommaindocumentdomain*) |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | HTTP Cookie Accept Policy Type (must be one of the following: *always, exclusivelyfrommaindocumentdomain, never, onlyfrommaindocumentdomain*) |
+| (property) | string | mandatory | HTTP Cookie Accept Policy Type (must be one of the following: *always, exclusivelyfrommaindocumentdomain, never, onlyfrommaindocumentdomain*) |
 
 ### Example
 
@@ -790,7 +991,7 @@ Provides access to the HTTP cookies accept policy.
   "jsonrpc": "2.0",
   "id": 42,
   "method": "WebKitBrowser.1.httpcookieacceptpolicy",
-  "params": "always"
+  "params": "never"
 }
 ```
 
@@ -804,8 +1005,8 @@ Provides access to the HTTP cookies accept policy.
 }
 ```
 
-<a name="property.bridgereply"></a>
-## *bridgereply [<sup>property</sup>](#head.Properties)*
+<a id="property_bridgereply"></a>
+## *bridgereply [<sup>property</sup>](#head_Properties)*
 
 Provides access to the response for legacy $badger.
 
@@ -840,8 +1041,8 @@ Provides access to the response for legacy $badger.
 }
 ```
 
-<a name="property.bridgeevent"></a>
-## *bridgeevent [<sup>property</sup>](#head.Properties)*
+<a id="property_bridgeevent"></a>
+## *bridgeevent [<sup>property</sup>](#head_Properties)*
 
 Provides access to the send legacy $badger event.
 
@@ -876,8 +1077,8 @@ Provides access to the send legacy $badger event.
 }
 ```
 
-<a name="property.languages"></a>
-## *languages [<sup>property</sup>](#head.Properties)*
+<a id="property_languages"></a>
+## *languages [<sup>property</sup>](#head_Properties)*
 
 Provides access to the user preferred languages.
 
@@ -888,12 +1089,10 @@ Provides access to the user preferred languages.
 | (property) | array | mandatory | User preferred languages |
 | (property)[#] | string | mandatory | *...* |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | List of langauges preferred by the user |
-| result[#] | string | mandatory | *...* |
+| (property) | array | mandatory | List of langauges preferred by the user |
+| (property)[#] | string | mandatory | *...* |
 
 ### Example
 
@@ -942,8 +1141,8 @@ Provides access to the user preferred languages.
 }
 ```
 
-<a name="property.userScripts"></a>
-## *userScripts [<sup>property</sup>](#head.Properties)*
+<a id="property_userScripts"></a>
+## *userScripts [<sup>property</sup>](#head_Properties)*
 
 Provides access to the user scripts used by the browser.
 
@@ -954,12 +1153,10 @@ Provides access to the user scripts used by the browser.
 | (property) | array | mandatory | User scripts used by the browser |
 | (property)[#] | string | mandatory | *...* |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | JSON array containing URIs pointing to user scripts, supported protocols: file:// |
-| result[#] | string | mandatory | *...* |
+| (property) | array | mandatory | JSON array containing URIs pointing to user scripts, supported protocols: file:// |
+| (property)[#] | string | mandatory | *...* |
 
 ### Example
 
@@ -1008,8 +1205,8 @@ Provides access to the user scripts used by the browser.
 }
 ```
 
-<a name="property.userStyleSheets"></a>
-## *userStyleSheets [<sup>property</sup>](#head.Properties)*
+<a id="property_userStyleSheets"></a>
+## *userStyleSheets [<sup>property</sup>](#head_Properties)*
 
 Provides access to the user style sheets used by the browser.
 
@@ -1020,12 +1217,10 @@ Provides access to the user style sheets used by the browser.
 | (property) | array | mandatory | User style sheets used by the browser |
 | (property)[#] | string | mandatory | *...* |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | JSON array containing URIs pointing to user style sheets, supported protocols: file:// |
-| result[#] | string | mandatory | *...* |
+| (property) | array | mandatory | JSON array containing URIs pointing to user style sheets, supported protocols: file:// |
+| (property)[#] | string | mandatory | *...* |
 
 ### Example
 
@@ -1074,8 +1269,8 @@ Provides access to the user style sheets used by the browser.
 }
 ```
 
-<a name="property.securityprofile"></a>
-## *securityprofile [<sup>property</sup>](#head.Properties)*
+<a id="property_securityprofile"></a>
+## *securityprofile [<sup>property</sup>](#head_Properties)*
 
 Provides access to the security profile for secure connections.
 
@@ -1085,11 +1280,9 @@ Provides access to the security profile for secure connections.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | Security profile for secure connections |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Security profile for secure connections |
+| (property) | string | mandatory | Security profile for secure connections |
 
 ### Example
 
@@ -1134,8 +1327,8 @@ Provides access to the security profile for secure connections.
 }
 ```
 
-<a name="property.mixedcontentpolicy"></a>
-## *mixedcontentpolicy [<sup>property</sup>](#head.Properties)*
+<a id="property_mixedcontentpolicy"></a>
+## *mixedcontentpolicy [<sup>property</sup>](#head_Properties)*
 
 Provides access to the mixed content policy.
 
@@ -1145,11 +1338,9 @@ Provides access to the mixed content policy.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | Mixed content policy (must be one of the following: *allowed, blocked*) |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Mixed content policy type (must be one of the following: *allowed, blocked*) |
+| (property) | string | mandatory | Mixed content policy type (must be one of the following: *allowed, blocked*) |
 
 ### Example
 
@@ -1169,7 +1360,7 @@ Provides access to the mixed content policy.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "allowed"
+  "result": "blocked"
 }
 ```
 
@@ -1180,7 +1371,7 @@ Provides access to the mixed content policy.
   "jsonrpc": "2.0",
   "id": 42,
   "method": "WebKitBrowser.1.mixedcontentpolicy",
-  "params": "allowed"
+  "params": "blocked"
 }
 ```
 
@@ -1194,8 +1385,8 @@ Provides access to the mixed content policy.
 }
 ```
 
-<a name="property.cookiejar"></a>
-## *cookiejar [<sup>property</sup>](#head.Properties)*
+<a id="property_cookiejar"></a>
+## *cookiejar [<sup>property</sup>](#head_Properties)*
 
 Provides access to the get/Set CookieJar config details.
 
@@ -1208,14 +1399,12 @@ Provides access to the get/Set CookieJar config details.
 | (property).checksum | integer | mandatory | The checksum of the string used for payload creation |
 | (property).payload | string | mandatory | Base64 string representation of compressed and encrypted cookies |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Config info CookieJar |
-| result.version | integer | mandatory | Version of payload format |
-| result.checksum | integer | mandatory | The checksum of the string used for payload creation |
-| result.payload | string | mandatory | Base64 string representation of compressed and encrypted cookies |
+| (property) | object | mandatory | Config info CookieJar |
+| (property).version | integer | mandatory | Version of payload format |
+| (property).checksum | integer | mandatory | The checksum of the string used for payload creation |
+| (property).payload | string | mandatory | Base64 string representation of compressed and encrypted cookies |
 
 ### Example
 
@@ -1268,7 +1457,7 @@ Provides access to the get/Set CookieJar config details.
 }
 ```
 
-<a name="head.Notifications"></a>
+<a id="head_Notifications"></a>
 # Notifications
 
 Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
@@ -1279,21 +1468,21 @@ WebBrowser interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [loadfinished](#notification.loadfinished) | Initial HTML document has been completely loaded and parsed |
-| [loadfailed](#notification.loadfailed) | Browser failed to load page |
-| [urlchange](#notification.urlchange) | Signals a URL change in the browser |
-| [visibilitychange](#notification.visibilitychange) | Signals a visibility change of the browser |
-| [pageclosure](#notification.pageclosure) | Notifies that the web page requests to close its window |
-| [bridgequery](#notification.bridgequery) | A Base64 encoded JSON message from legacy $badger bridge |
+| [loadfinished](#notification_loadfinished) | Initial HTML document has been completely loaded and parsed |
+| [loadfailed](#notification_loadfailed) | Browser failed to load page |
+| [urlchange](#notification_urlchange) | Signals a URL change in the browser |
+| [visibilitychange](#notification_visibilitychange) | Signals a visibility change of the browser |
+| [pageclosure](#notification_pageclosure) | Notifies that the web page requests to close its window |
+| [bridgequery](#notification_bridgequery) | A Base64 encoded JSON message from legacy $badger bridge |
 
 BrowserCookieJar interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [cookiejarchanged](#notification.cookiejarchanged) | Notifies that cookies were added, removed or modified |
+| [cookiejarchanged](#notification_cookiejarchanged) | Notifies that cookies were added, removed or modified |
 
-<a name="notification.loadfinished"></a>
-## *loadfinished [<sup>notification</sup>](#head.Notifications)*
+<a id="notification_loadfinished"></a>
+## *loadfinished [<sup>notification</sup>](#head_Notifications)*
 
 Initial HTML document has been completely loaded and parsed.
 
@@ -1334,8 +1523,10 @@ Initial HTML document has been completely loaded and parsed.
 }
 ```
 
-<a name="notification.loadfailed"></a>
-## *loadfailed [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.loadfinished``.
+
+<a id="notification_loadfailed"></a>
+## *loadfailed [<sup>notification</sup>](#head_Notifications)*
 
 Browser failed to load page.
 
@@ -1374,8 +1565,10 @@ Browser failed to load page.
 }
 ```
 
-<a name="notification.urlchange"></a>
-## *urlchange [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.loadfailed``.
+
+<a id="notification_urlchange"></a>
+## *urlchange [<sup>notification</sup>](#head_Notifications)*
 
 Signals a URL change in the browser.
 
@@ -1416,8 +1609,10 @@ Signals a URL change in the browser.
 }
 ```
 
-<a name="notification.visibilitychange"></a>
-## *visibilitychange [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.urlchange``.
+
+<a id="notification_visibilitychange"></a>
+## *visibilitychange [<sup>notification</sup>](#head_Notifications)*
 
 Signals a visibility change of the browser.
 
@@ -1456,8 +1651,10 @@ Signals a visibility change of the browser.
 }
 ```
 
-<a name="notification.pageclosure"></a>
-## *pageclosure [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.visibilitychange``.
+
+<a id="notification_pageclosure"></a>
+## *pageclosure [<sup>notification</sup>](#head_Notifications)*
 
 Notifies that the web page requests to close its window.
 
@@ -1490,8 +1687,10 @@ This notification carries no parameters.
 }
 ```
 
-<a name="notification.bridgequery"></a>
-## *bridgequery [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.pageclosure``.
+
+<a id="notification_bridgequery"></a>
+## *bridgequery [<sup>notification</sup>](#head_Notifications)*
 
 A Base64 encoded JSON message from legacy $badger bridge.
 
@@ -1530,8 +1729,10 @@ A Base64 encoded JSON message from legacy $badger bridge.
 }
 ```
 
-<a name="notification.cookiejarchanged"></a>
-## *cookiejarchanged [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.bridgequery``.
+
+<a id="notification_cookiejarchanged"></a>
+## *cookiejarchanged [<sup>notification</sup>](#head_Notifications)*
 
 Notifies that cookies were added, removed or modified.
 
@@ -1563,4 +1764,6 @@ This notification carries no parameters.
   "method": "myid.cookiejarchanged"
 }
 ```
+
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.cookiejarchanged``.
 

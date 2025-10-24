@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.Device_Identification_Plugin"></a>
+<a id="head_Device_Identification_Plugin"></a>
 # Device Identification Plugin
 
 **Version: 1.0.0**
@@ -12,24 +12,25 @@ DeviceIdentification interface for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Description](#head.Description)
-- [Properties](#head.Properties)
+- [Introduction](#head_Introduction)
+- [Description](#head_Description)
+- [Methods](#head_Methods)
+- [Properties](#head_Properties)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
-This document describes purpose and functionality of the DeviceIdentification interface (version 1.0.0). It includes detailed specification about its properties provided.
+This document describes purpose and functionality of the DeviceIdentification interface (version 1.0.0). It includes detailed specification about its methods and properties provided.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -47,7 +48,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -57,12 +58,70 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Description"></a>
+<a id="head_Description"></a>
 # Description
 
 DeviceIdentification JSON-RPC interface.
 
-<a name="head.Properties"></a>
+<a id="head_Methods"></a>
+# Methods
+
+The following methods are provided by the DeviceIdentification interface:
+
+Built-in methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [exists](#method_exists) | Checks if a JSON-RPC method or property exists |
+
+<a id="method_exists"></a>
+## *exists [<sup>method</sup>](#head_Methods)*
+
+Checks if a JSON-RPC method or property exists.
+
+### Description
+
+This method will return *True* for the following methods/properties: *deviceidentification, exists*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.method | string | mandatory | Name of the method or property to look up |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Denotes if the method exists or not |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "<callsign>.1.exists",
+  "params": {
+    "method": "deviceidentification"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
+}
+```
+
+<a id="head_Properties"></a>
 # Properties
 
 The following properties are provided by the DeviceIdentification interface:
@@ -71,10 +130,10 @@ DeviceIdentification interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [deviceidentification](#property.deviceidentification) | read-only | Get device paltform specific information |
+| [deviceidentification](#property_deviceidentification) | read-only | Get device paltform specific information |
 
-<a name="property.deviceidentification"></a>
-## *deviceidentification [<sup>property</sup>](#head.Properties)*
+<a id="property_deviceidentification"></a>
+## *deviceidentification [<sup>property</sup>](#head_Properties)*
 
 Provides access to the get device paltform specific information.
 
@@ -103,7 +162,7 @@ Provides access to the get device paltform specific information.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "DeviceIdentification.1.deviceidentification"
+  "method": "<callsign>.1.deviceidentification"
 }
 ```
 

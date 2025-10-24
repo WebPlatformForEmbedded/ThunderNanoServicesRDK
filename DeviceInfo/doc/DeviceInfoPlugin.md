@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.Device_Info_Plugin"></a>
+<a id="head_Device_Info_Plugin"></a>
 # Device Info Plugin
 
 **Version: 1.0**
@@ -10,27 +10,27 @@ DeviceInfo plugin for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Description](#head.Description)
-- [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
-- [Properties](#head.Properties)
+- [Introduction](#head_Introduction)
+- [Description](#head_Description)
+- [Configuration](#head_Configuration)
+- [Interfaces](#head_Interfaces)
+- [Methods](#head_Methods)
+- [Properties](#head_Properties)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
 This document describes purpose and functionality of the DeviceInfo plugin. It includes detailed specification about its configuration, methods and properties provided.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -48,7 +48,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -58,14 +58,14 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Description"></a>
+<a id="head_Description"></a>
 # Description
 
 The DeviceInfo plugin allows retrieving of various device-related information.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
-<a name="head.Configuration"></a>
+<a id="head_Configuration"></a>
 # Configuration
 
 The table below lists configuration options of the plugin.
@@ -92,31 +92,134 @@ The table below lists configuration options of the plugin.
 | systemIntegratorName | string | mandatory | System Integrator Name |
 | platformName | string | mandatory | Platform Name |
 
-<a name="head.Interfaces"></a>
+<a id="head_Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
 - [DeviceInfo.json](https://github.com/rdkcentral/ThunderInterfaces/blob/master/jsonrpc/DeviceInfo.json) (version 1.0.0) (uncompliant-extended format)
 
-<a name="head.Methods"></a>
+<a id="head_Methods"></a>
 # Methods
 
 The following methods are provided by the DeviceInfo plugin:
+
+Built-in methods:
+
+| Method | Description |
+| :-------- | :-------- |
+| [versions](#method_versions) | Retrieves a list of JSON-RPC interfaces offered by this service |
+| [exists](#method_exists) | Checks if a JSON-RPC method or property exists |
 
 DeviceInfo interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [supportedresolutions](#method.supportedresolutions) | Supported resolutions on the selected video display port |
-| [defaultresolution](#method.defaultresolution) | Default resolution on the selected video display port |
-| [supportedhdcp](#method.supportedhdcp) | Supported hdcp version on the selected video display port |
-| [audiocapabilities](#method.audiocapabilities) | Audio capabilities for the specified audio port |
-| [ms12capabilities](#method.ms12capabilities) | Audio ms12 capabilities for the specified audio port |
-| [supportedms12audioprofiles](#method.supportedms12audioprofiles) | Supported ms12 audio profiles for the specified audio port |
+| [supportedresolutions](#method_supportedresolutions) | Supported resolutions on the selected video display port |
+| [defaultresolution](#method_defaultresolution) | Default resolution on the selected video display port |
+| [supportedhdcp](#method_supportedhdcp) | Supported hdcp version on the selected video display port |
+| [audiocapabilities](#method_audiocapabilities) | Audio capabilities for the specified audio port |
+| [ms12capabilities](#method_ms12capabilities) | Audio ms12 capabilities for the specified audio port |
+| [supportedms12audioprofiles](#method_supportedms12audioprofiles) | Supported ms12 audio profiles for the specified audio port |
 
-<a name="method.supportedresolutions"></a>
-## *supportedresolutions [<sup>method</sup>](#head.Methods)*
+<a id="method_versions"></a>
+## *versions [<sup>method</sup>](#head_Methods)*
+
+Retrieves a list of JSON-RPC interfaces offered by this service.
+
+### Parameters
+
+This method takes no parameters.
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | array | mandatory | A list ofsinterfaces with their version numbers<br>*Array length must be at most 255 elements.* |
+| result[#] | object | mandatory | *...* |
+| result[#].name | string | mandatory | Name of the interface |
+| result[#].major | integer | mandatory | Major part of version number |
+| result[#].minor | integer | mandatory | Minor part of version number |
+| result[#].patch | integer | mandatory | Patch part of version version number |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.versions"
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": [
+    {
+      "name": "JMyInterface",
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  ]
+}
+```
+
+<a id="method_exists"></a>
+## *exists [<sup>method</sup>](#head_Methods)*
+
+Checks if a JSON-RPC method or property exists.
+
+### Description
+
+This method will return *True* for the following methods/properties: *deviceaudiocapabilities, devicevideocapabilities, deviceinfo, systeminfo, addresses, socketinfo, supportedaudioports, supportedvideodisplays, hostedid, firmwareversion, serialnumber, make, modelid, modelname, modelyear, friendlyname, platformname, devicetype, distributorid, versions, exists, supportedresolutions, defaultresolution, supportedhdcp, audiocapabilities, ms12capabilities, supportedms12audioprofiles*.
+
+### Parameters
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| params | object | mandatory | *...* |
+| params.method | string | mandatory | Name of the method or property to look up |
+
+### Result
+
+| Name | Type | M/O | Description |
+| :-------- | :-------- | :-------- | :-------- |
+| result | boolean | mandatory | Denotes if the method exists or not |
+
+### Example
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "DeviceInfo.1.exists",
+  "params": {
+    "method": "deviceaudiocapabilities"
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "result": false
+}
+```
+
+<a id="method_supportedresolutions"></a>
+## *supportedresolutions [<sup>method</sup>](#head_Methods)*
 
 Supported resolutions on the selected video display port.
 
@@ -170,8 +273,8 @@ Supported resolutions on the selected video display port.
 }
 ```
 
-<a name="method.defaultresolution"></a>
-## *defaultresolution [<sup>method</sup>](#head.Methods)*
+<a id="method_defaultresolution"></a>
+## *defaultresolution [<sup>method</sup>](#head_Methods)*
 
 Default resolution on the selected video display port.
 
@@ -222,8 +325,8 @@ Default resolution on the selected video display port.
 }
 ```
 
-<a name="method.supportedhdcp"></a>
-## *supportedhdcp [<sup>method</sup>](#head.Methods)*
+<a id="method_supportedhdcp"></a>
+## *supportedhdcp [<sup>method</sup>](#head_Methods)*
 
 Supported hdcp version on the selected video display port.
 
@@ -274,8 +377,8 @@ Supported hdcp version on the selected video display port.
 }
 ```
 
-<a name="method.audiocapabilities"></a>
-## *audiocapabilities [<sup>method</sup>](#head.Methods)*
+<a id="method_audiocapabilities"></a>
+## *audiocapabilities [<sup>method</sup>](#head_Methods)*
 
 Audio capabilities for the specified audio port.
 
@@ -329,8 +432,8 @@ Audio capabilities for the specified audio port.
 }
 ```
 
-<a name="method.ms12capabilities"></a>
-## *ms12capabilities [<sup>method</sup>](#head.Methods)*
+<a id="method_ms12capabilities"></a>
+## *ms12capabilities [<sup>method</sup>](#head_Methods)*
 
 Audio ms12 capabilities for the specified audio port.
 
@@ -384,8 +487,8 @@ Audio ms12 capabilities for the specified audio port.
 }
 ```
 
-<a name="method.supportedms12audioprofiles"></a>
-## *supportedms12audioprofiles [<sup>method</sup>](#head.Methods)*
+<a id="method_supportedms12audioprofiles"></a>
+## *supportedms12audioprofiles [<sup>method</sup>](#head_Methods)*
 
 Supported ms12 audio profiles for the specified audio port.
 
@@ -439,7 +542,7 @@ Supported ms12 audio profiles for the specified audio port.
 }
 ```
 
-<a name="head.Properties"></a>
+<a id="head_Properties"></a>
 # Properties
 
 The following properties are provided by the DeviceInfo plugin:
@@ -448,28 +551,28 @@ DeviceInfo interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [deviceaudiocapabilities](#property.deviceaudiocapabilities) | read-only | Audio capabilities of the device |
-| [devicevideocapabilities](#property.devicevideocapabilities) | read-only | Video capabilities of the device |
-| [deviceinfo](#property.deviceinfo) | read-only | Device meta data |
-| [systeminfo](#property.systeminfo) | read-only | System general information |
-| [addresses](#property.addresses) | read-only | Network interface addresses |
-| [socketinfo](#property.socketinfo) | read-only | Socket information |
-| [supportedaudioports](#property.supportedaudioports) | read-only | Audio ports supported on the device (all ports that are physically present) |
-| [supportedvideodisplays](#property.supportedvideodisplays) | read-only | Video ports supported on the device (all ports that are physically present) |
-| [hostedid](#property.hostedid) | read-only | EDID of the host |
-| [firmwareversion](#property.firmwareversion) | read-only | Versions maintained in version |
-| [serialnumber](#property.serialnumber) | read-only | Serial number set by manufacturer |
-| [make](#property.make) | read-only | Device manufacturer |
-| [modelid](#property.modelid) | read-only | Device model number or SKU |
-| [modelname](#property.modelname) | read-only | Device model name |
-| [modelyear](#property.modelyear) | read-only | Device model year |
-| [friendlyname](#property.friendlyname) | read-only | Device friendly name |
-| [platformname](#property.platformname) | read-only | Device Platform name |
-| [devicetype](#property.devicetype) | read-only | Device type |
-| [distributorid](#property.distributorid) | read-only | Partner ID or distributor ID for device |
+| [deviceaudiocapabilities](#property_deviceaudiocapabilities) | read-only | Audio capabilities of the device |
+| [devicevideocapabilities](#property_devicevideocapabilities) | read-only | Video capabilities of the device |
+| [deviceinfo](#property_deviceinfo) | read-only | Device meta data |
+| [systeminfo](#property_systeminfo) | read-only | System general information |
+| [addresses](#property_addresses) | read-only | Network interface addresses |
+| [socketinfo](#property_socketinfo) | read-only | Socket information |
+| [supportedaudioports](#property_supportedaudioports) | read-only | Audio ports supported on the device (all ports that are physically present) |
+| [supportedvideodisplays](#property_supportedvideodisplays) | read-only | Video ports supported on the device (all ports that are physically present) |
+| [hostedid](#property_hostedid) | read-only | EDID of the host |
+| [firmwareversion](#property_firmwareversion) | read-only | Versions maintained in version |
+| [serialnumber](#property_serialnumber) | read-only | Serial number set by manufacturer |
+| [make](#property_make) | read-only | Device manufacturer |
+| [modelid](#property_modelid) | read-only | Device model number or SKU |
+| [modelname](#property_modelname) | read-only | Device model name |
+| [modelyear](#property_modelyear) | read-only | Device model year |
+| [friendlyname](#property_friendlyname) | read-only | Device friendly name |
+| [platformname](#property_platformname) | read-only | Device Platform name |
+| [devicetype](#property_devicetype) | read-only | Device type |
+| [distributorid](#property_distributorid) | read-only | Partner ID or distributor ID for device |
 
-<a name="property.deviceaudiocapabilities"></a>
-## *deviceaudiocapabilities [<sup>property</sup>](#head.Properties)*
+<a id="property_deviceaudiocapabilities"></a>
+## *deviceaudiocapabilities [<sup>property</sup>](#head_Properties)*
 
 Provides access to the audio capabilities of the device.
 
@@ -477,20 +580,18 @@ Provides access to the audio capabilities of the device.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Audio capabilities of the device |
-| result.audiooutputcapabilities | array | mandatory | An array of audiooutputcapabilities |
-| result.audiooutputcapabilities[#] | object | mandatory | Audio capabilities of the output |
-| result.audiooutputcapabilities[#]?.audioPort | string | optional | Audio Output support (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
-| result.audiooutputcapabilities[#].audiocapabilities | array | mandatory | Audio capabilities for the specified audio port |
-| result.audiooutputcapabilities[#].audiocapabilities[#] | string | mandatory | Audio capability (must be one of the following: *ATMOS, DAPv2, DOLBY DIGITAL, DOLBY DIGITAL PLUS, Dual Audio Decode, MS12, none*) |
-| result.audiooutputcapabilities[#].ms12capabilities | array | mandatory | Audio ms12 capabilities for the specified audio port |
-| result.audiooutputcapabilities[#].ms12capabilities[#] | string | mandatory | MS12 audio capability (must be one of the following: *Dialogue Enhancer, Dolby Volume, Inteligent Equalizer, none*) |
-| result.audiooutputcapabilities[#].ms12profiles | array | mandatory | Audio ms12 profiles for the specified audio port |
-| result.audiooutputcapabilities[#].ms12profiles[#] | string | mandatory | MS12 Profile (must be one of the following: *Movie, Music, None, Voice*) |
+| (property) | object | mandatory | Audio capabilities of the device |
+| (property).audiooutputcapabilities | array | mandatory | An array of audiooutputcapabilities |
+| (property).audiooutputcapabilities[#] | object | mandatory | Audio capabilities of the output |
+| (property).audiooutputcapabilities[#]?.audioPort | string | optional | Audio Output support (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
+| (property).audiooutputcapabilities[#].audiocapabilities | array | mandatory | Audio capabilities for the specified audio port |
+| (property).audiooutputcapabilities[#].audiocapabilities[#] | string | mandatory | Audio capability (must be one of the following: *ATMOS, DAPv2, DOLBY DIGITAL, DOLBY DIGITAL PLUS, Dual Audio Decode, MS12, none*) |
+| (property).audiooutputcapabilities[#].ms12capabilities | array | mandatory | Audio ms12 capabilities for the specified audio port |
+| (property).audiooutputcapabilities[#].ms12capabilities[#] | string | mandatory | MS12 audio capability (must be one of the following: *Dialogue Enhancer, Dolby Volume, Inteligent Equalizer, none*) |
+| (property).audiooutputcapabilities[#].ms12profiles | array | mandatory | Audio ms12 profiles for the specified audio port |
+| (property).audiooutputcapabilities[#].ms12profiles[#] | string | mandatory | MS12 Profile (must be one of the following: *Movie, Music, None, Voice*) |
 
 ### Example
 
@@ -529,8 +630,8 @@ Provides access to the audio capabilities of the device.
 }
 ```
 
-<a name="property.devicevideocapabilities"></a>
-## *devicevideocapabilities [<sup>property</sup>](#head.Properties)*
+<a id="property_devicevideocapabilities"></a>
+## *devicevideocapabilities [<sup>property</sup>](#head_Properties)*
 
 Provides access to the video capabilities of the device.
 
@@ -538,22 +639,20 @@ Provides access to the video capabilities of the device.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Video capabilities of the device |
-| result.hostedid | string | mandatory | EDID of the host |
-| result.hdr | boolean | mandatory | Is HDR supported by this device |
-| result.atmos | boolean | mandatory | Is Atmos supported by this device |
-| result.cec | boolean | mandatory | Is CEC supported by this device |
-| result.videooutputcapabilities | array | mandatory | An array of videooutputcapabilities |
-| result.videooutputcapabilities[#] | object | mandatory | Video capabilities of the output |
-| result.videooutputcapabilities[#].hdcp | string | mandatory | HDCP support (must be one of the following: *1.4, 2.0, 2.1, 2.2, unavailable*) |
-| result.videooutputcapabilities[#]?.videoDisplay | string | optional | Video Output support (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
-| result.videooutputcapabilities[#].output_resolutions | array | mandatory | Supported resolutions |
-| result.videooutputcapabilities[#].output_resolutions[#] | string | mandatory | Resolution supported by the device (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
-| result.videooutputcapabilities[#].defaultresolution | string | mandatory | Default resolution (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
+| (property) | object | mandatory | Video capabilities of the device |
+| (property).hostedid | string | mandatory | EDID of the host |
+| (property).hdr | boolean | mandatory | Is HDR supported by this device |
+| (property).atmos | boolean | mandatory | Is Atmos supported by this device |
+| (property).cec | boolean | mandatory | Is CEC supported by this device |
+| (property).videooutputcapabilities | array | mandatory | An array of videooutputcapabilities |
+| (property).videooutputcapabilities[#] | object | mandatory | Video capabilities of the output |
+| (property).videooutputcapabilities[#].hdcp | string | mandatory | HDCP support (must be one of the following: *1.4, 2.0, 2.1, 2.2, unavailable*) |
+| (property).videooutputcapabilities[#]?.videoDisplay | string | optional | Video Output support (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
+| (property).videooutputcapabilities[#].output_resolutions | array | mandatory | Supported resolutions |
+| (property).videooutputcapabilities[#].output_resolutions[#] | string | mandatory | Resolution supported by the device (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
+| (property).videooutputcapabilities[#].defaultresolution | string | mandatory | Default resolution (must be one of the following: *1080i, 1080i25, 1080i50, 1080i60, 1080p, 1080p24, 1080p25, 1080p30, 1080p50, 1080p60, 2160p24, 2160p25, 2160p30, 2160p50, 2160p60, 4320p30, 4320p60, 480i, 480p, 576i, 576p, 576p50, 720p, 720p24, 720p25, 720p30, 720p50, 720p60, unknown*) |
 
 ### Example
 
@@ -592,8 +691,8 @@ Provides access to the video capabilities of the device.
 }
 ```
 
-<a name="property.deviceinfo"></a>
-## *deviceinfo [<sup>property</sup>](#head.Properties)*
+<a id="property_deviceinfo"></a>
+## *deviceinfo [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device meta data.
 
@@ -601,20 +700,18 @@ Provides access to the device meta data.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device meta data |
-| result?.devicetype | string | optional | Device type |
-| result?.friendlyname | string | optional | Friendly name |
-| result?.distributorid | string | optional | Partner ID or distributor ID for device |
-| result?.make | string | optional | Device manufacturer |
-| result?.modelname | string | optional | Model Name |
-| result?.modelyear | integer | optional | Model Year |
-| result?.platformname | string | optional | Platform name |
-| result?.serialnumber | string | optional | Device serial number |
-| result?.sku | string | optional | Device model number or SKU |
+| (property) | object | mandatory | Device meta data |
+| (property)?.devicetype | string | optional | Device type |
+| (property)?.friendlyname | string | optional | Friendly name |
+| (property)?.distributorid | string | optional | Partner ID or distributor ID for device |
+| (property)?.make | string | optional | Device manufacturer |
+| (property)?.modelname | string | optional | Model Name |
+| (property)?.modelyear | integer | optional | Model Year |
+| (property)?.platformname | string | optional | Platform name |
+| (property)?.serialnumber | string | optional | Device serial number |
+| (property)?.sku | string | optional | Device model number or SKU |
 
 ### Example
 
@@ -648,8 +745,8 @@ Provides access to the device meta data.
 }
 ```
 
-<a name="property.systeminfo"></a>
-## *systeminfo [<sup>property</sup>](#head.Properties)*
+<a id="property_systeminfo"></a>
+## *systeminfo [<sup>property</sup>](#head_Properties)*
 
 Provides access to the system general information.
 
@@ -657,25 +754,23 @@ Provides access to the system general information.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | System general information |
-| result.version | string | mandatory | Software version (in form *version#hashtag*) |
-| result.uptime | integer | mandatory | System uptime (in seconds) |
-| result.totalram | integer | mandatory | Total installed system RAM memory (in bytes) |
-| result.freeram | integer | mandatory | Free system RAM memory (in bytes) |
-| result.totalswap | integer | mandatory | Total swap space (in bytes) |
-| result.freeswap | integer | mandatory | Swap space still available (in bytes) |
-| result.devicename | string | mandatory | Host name |
-| result.cpuload | string | mandatory | Current CPU load (percentage) |
-| result.cpuloadavg | object | mandatory | CPU load average |
-| result.cpuloadavg.avg1min | integer | mandatory | 1min cpuload average |
-| result.cpuloadavg.avg5min | integer | mandatory | 5min cpuload average |
-| result.cpuloadavg.avg15min | integer | mandatory | 15min cpuload average |
-| result.serialnumber | string | mandatory | Device serial number |
-| result.time | string | mandatory | Current system date and time |
+| (property) | object | mandatory | System general information |
+| (property).version | string | mandatory | Software version (in form *version#hashtag*) |
+| (property).uptime | integer | mandatory | System uptime (in seconds) |
+| (property).totalram | integer | mandatory | Total installed system RAM memory (in bytes) |
+| (property).freeram | integer | mandatory | Free system RAM memory (in bytes) |
+| (property).totalswap | integer | mandatory | Total swap space (in bytes) |
+| (property).freeswap | integer | mandatory | Swap space still available (in bytes) |
+| (property).devicename | string | mandatory | Host name |
+| (property).cpuload | string | mandatory | Current CPU load (percentage) |
+| (property).cpuloadavg | object | mandatory | CPU load average |
+| (property).cpuloadavg.avg1min | integer | mandatory | 1min cpuload average |
+| (property).cpuloadavg.avg5min | integer | mandatory | 5min cpuload average |
+| (property).cpuloadavg.avg15min | integer | mandatory | 15min cpuload average |
+| (property).serialnumber | string | mandatory | Device serial number |
+| (property).time | string | mandatory | Current system date and time |
 
 ### Example
 
@@ -715,8 +810,8 @@ Provides access to the system general information.
 }
 ```
 
-<a name="property.addresses"></a>
-## *addresses [<sup>property</sup>](#head.Properties)*
+<a id="property_addresses"></a>
+## *addresses [<sup>property</sup>](#head_Properties)*
 
 Provides access to the network interface addresses.
 
@@ -724,16 +819,14 @@ Provides access to the network interface addresses.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Network interface addresses |
-| result[#] | object | mandatory | *...* |
-| result[#].name | string | mandatory | Interface name |
-| result[#].mac | string | mandatory | Interface MAC address |
-| result[#]?.ip | array | optional | An array of Interface IP address |
-| result[#]?.ip[#] | string | optional | Interface IP address |
+| (property) | array | mandatory | Network interface addresses |
+| (property)[#] | object | mandatory | *...* |
+| (property)[#].name | string | mandatory | Interface name |
+| (property)[#].mac | string | mandatory | Interface MAC address |
+| (property)[#]?.ip | array | optional | An array of Interface IP address |
+| (property)[#]?.ip[#] | string | mandatory | Interface IP address |
 
 ### Example
 
@@ -765,8 +858,8 @@ Provides access to the network interface addresses.
 }
 ```
 
-<a name="property.socketinfo"></a>
-## *socketinfo [<sup>property</sup>](#head.Properties)*
+<a id="property_socketinfo"></a>
+## *socketinfo [<sup>property</sup>](#head_Properties)*
 
 Provides access to the socket information.
 
@@ -774,17 +867,15 @@ Provides access to the socket information.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Socket information |
-| result?.total | integer | optional | Number of total |
-| result?.open | integer | optional | Number of open |
-| result?.link | integer | optional | Number of link |
-| result?.exception | integer | optional | Number of exception |
-| result?.shutdown | integer | optional | Number of shutdown |
-| result.runs | integer | mandatory | Number of runs |
+| (property) | object | mandatory | Socket information |
+| (property)?.total | integer | optional | Number of total |
+| (property)?.open | integer | optional | Number of open |
+| (property)?.link | integer | optional | Number of link |
+| (property)?.exception | integer | optional | Number of exception |
+| (property)?.shutdown | integer | optional | Number of shutdown |
+| (property).runs | integer | mandatory | Number of runs |
 
 ### Example
 
@@ -815,8 +906,8 @@ Provides access to the socket information.
 }
 ```
 
-<a name="property.supportedaudioports"></a>
-## *supportedaudioports [<sup>property</sup>](#head.Properties)*
+<a id="property_supportedaudioports"></a>
+## *supportedaudioports [<sup>property</sup>](#head_Properties)*
 
 Provides access to the audio ports supported on the device (all ports that are physically present).
 
@@ -824,13 +915,11 @@ Provides access to the audio ports supported on the device (all ports that are p
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Audio ports supported on the device (all ports that are physically present) |
-| result.supportedAudioPorts | array | mandatory | Audio Output support |
-| result.supportedAudioPorts[#] | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
+| (property) | object | mandatory | Audio ports supported on the device (all ports that are physically present) |
+| (property).supportedAudioPorts | array | mandatory | Audio Output support |
+| (property).supportedAudioPorts[#] | string | mandatory | Audio output supported by the device (must be one of the following: *ANALOG, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SPDIF0*) |
 
 ### Errors
 
@@ -864,8 +953,8 @@ Provides access to the audio ports supported on the device (all ports that are p
 }
 ```
 
-<a name="property.supportedvideodisplays"></a>
-## *supportedvideodisplays [<sup>property</sup>](#head.Properties)*
+<a id="property_supportedvideodisplays"></a>
+## *supportedvideodisplays [<sup>property</sup>](#head_Properties)*
 
 Provides access to the video ports supported on the device (all ports that are physically present).
 
@@ -873,13 +962,11 @@ Provides access to the video ports supported on the device (all ports that are p
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Video ports supported on the device (all ports that are physically present) |
-| result.supportedVideoDisplays | array | mandatory | Video Output support |
-| result.supportedVideoDisplays[#] | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
+| (property) | object | mandatory | Video ports supported on the device (all ports that are physically present) |
+| (property).supportedVideoDisplays | array | mandatory | Video Output support |
+| (property).supportedVideoDisplays[#] | string | mandatory | Video output supported by the device (must be one of the following: *COMPONET, COMPOSITE, DISPLAYPORT, HDMI0, HDMI1, OTHER, RF_MODULATOR, SCART_RGB, SVIDEO*) |
 
 ### Errors
 
@@ -913,8 +1000,8 @@ Provides access to the video ports supported on the device (all ports that are p
 }
 ```
 
-<a name="property.hostedid"></a>
-## *hostedid [<sup>property</sup>](#head.Properties)*
+<a id="property_hostedid"></a>
+## *hostedid [<sup>property</sup>](#head_Properties)*
 
 Provides access to the EDID of the host.
 
@@ -922,12 +1009,10 @@ Provides access to the EDID of the host.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | EDID of the host |
-| result.EDID | string | mandatory | A base64 encoded byte array string representing the EDID |
+| (property) | object | mandatory | EDID of the host |
+| (property).EDID | string | mandatory | A base64 encoded byte array string representing the EDID |
 
 ### Errors
 
@@ -959,8 +1044,8 @@ Provides access to the EDID of the host.
 }
 ```
 
-<a name="property.firmwareversion"></a>
-## *firmwareversion [<sup>property</sup>](#head.Properties)*
+<a id="property_firmwareversion"></a>
+## *firmwareversion [<sup>property</sup>](#head_Properties)*
 
 Provides access to the versions maintained in version.txt.
 
@@ -968,15 +1053,13 @@ Provides access to the versions maintained in version.txt.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Versions maintained in version.txt |
-| result.imagename | string | mandatory | Name of firmware image |
-| result?.sdk | string | optional | SDK version string |
-| result?.mediarite | string | optional | Mediarite value |
-| result?.yocto | string | optional | Yocto version (must be one of the following: *daisy, dunfell, kirkstone, morty*) |
+| (property) | object | mandatory | Versions maintained in version.txt |
+| (property).imagename | string | mandatory | Name of firmware image |
+| (property)?.sdk | string | optional | SDK version string |
+| (property)?.mediarite | string | optional | Mediarite value |
+| (property)?.yocto | string | optional | Yocto version (must be one of the following: *daisy, dunfell, kirkstone, morty*) |
 
 ### Errors
 
@@ -1011,8 +1094,8 @@ Provides access to the versions maintained in version.txt.
 }
 ```
 
-<a name="property.serialnumber"></a>
-## *serialnumber [<sup>property</sup>](#head.Properties)*
+<a id="property_serialnumber"></a>
+## *serialnumber [<sup>property</sup>](#head_Properties)*
 
 Provides access to the serial number set by manufacturer.
 
@@ -1020,12 +1103,10 @@ Provides access to the serial number set by manufacturer.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Serial number set by manufacturer |
-| result.serialnumber | string | mandatory | Device Serial Number |
+| (property) | object | mandatory | Serial number set by manufacturer |
+| (property).serialnumber | string | mandatory | Device Serial Number |
 
 ### Errors
 
@@ -1057,8 +1138,8 @@ Provides access to the serial number set by manufacturer.
 }
 ```
 
-<a name="property.make"></a>
-## *make [<sup>property</sup>](#head.Properties)*
+<a id="property_make"></a>
+## *make [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device manufacturer.
 
@@ -1066,12 +1147,10 @@ Provides access to the device manufacturer.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device manufacturer |
-| result.make | string | mandatory | Device manufacturer (must be one of the following: *Amlogic_Inc, Pioneer, arris, cisco, commscope, element, hisense, llama, pace, platco, raspberrypi_org, samsung, sercomm, sky, technicolor*) |
+| (property) | object | mandatory | Device manufacturer |
+| (property).make | string | mandatory | Device manufacturer (must be one of the following: *Amlogic_Inc, Pioneer, arris, cisco, commscope, element, hisense, llama, pace, platco, raspberrypi_org, samsung, sercomm, sky, technicolor*) |
 
 ### Errors
 
@@ -1103,8 +1182,8 @@ Provides access to the device manufacturer.
 }
 ```
 
-<a name="property.modelid"></a>
-## *modelid [<sup>property</sup>](#head.Properties)*
+<a id="property_modelid"></a>
+## *modelid [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device model number or SKU.
 
@@ -1112,12 +1191,10 @@ Provides access to the device model number or SKU.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device model number or SKU |
-| result.sku | string | mandatory | Device model number or SKU (must be one of the following: *AX013AN, AX014AN, AX061AEI, CMXI11BEI, CS011AN, CXD01ANI, ELTE11MWR, HSTP11MWR, HSTP11MWRFX50, LS301, MX011AN, PI, PITU11MWR, PLTL11AEI, PX001AN, PX013AN, PX022AN, PX032ANI, PX051AEI, PXD01ANI, SCXI11AIC, SCXI11BEI, SKTL11AEI, SKXI11ADS, SKXI11AIS, SKXI11ANS, SX022AN, TX061AEI, XUSHTB11MWR, XUSHTC11MWR, XUSPTC11MWR, ZWCN11MWI*) |
+| (property) | object | mandatory | Device model number or SKU |
+| (property).sku | string | mandatory | Device model number or SKU (must be one of the following: *AX013AN, AX014AN, AX061AEI, CMXI11BEI, CS011AN, CXD01ANI, ELTE11MWR, HSTP11MWR, HSTP11MWRFX50, LS301, MX011AN, PI, PITU11MWR, PLTL11AEI, PX001AN, PX013AN, PX022AN, PX032ANI, PX051AEI, PXD01ANI, SCXI11AIC, SCXI11BEI, SKTL11AEI, SKXI11ADS, SKXI11AIS, SKXI11ANS, SX022AN, TX061AEI, XUSHTB11MWR, XUSHTC11MWR, XUSPTC11MWR, ZWCN11MWI*) |
 
 ### Errors
 
@@ -1149,8 +1226,8 @@ Provides access to the device model number or SKU.
 }
 ```
 
-<a name="property.modelname"></a>
-## *modelname [<sup>property</sup>](#head.Properties)*
+<a id="property_modelname"></a>
+## *modelname [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device model name.
 
@@ -1158,12 +1235,10 @@ Provides access to the device model name.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device model name |
-| result.model | string | mandatory | Device model name |
+| (property) | object | mandatory | Device model name |
+| (property).model | string | mandatory | Device model name |
 
 ### Errors
 
@@ -1195,8 +1270,8 @@ Provides access to the device model name.
 }
 ```
 
-<a name="property.modelyear"></a>
-## *modelyear [<sup>property</sup>](#head.Properties)*
+<a id="property_modelyear"></a>
+## *modelyear [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device model year.
 
@@ -1204,12 +1279,10 @@ Provides access to the device model year.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device model year |
-| result.year | integer | mandatory | Device model year |
+| (property) | object | mandatory | Device model year |
+| (property).year | integer | mandatory | Device model year |
 
 ### Errors
 
@@ -1241,8 +1314,8 @@ Provides access to the device model year.
 }
 ```
 
-<a name="property.friendlyname"></a>
-## *friendlyname [<sup>property</sup>](#head.Properties)*
+<a id="property_friendlyname"></a>
+## *friendlyname [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device friendly name.
 
@@ -1250,12 +1323,10 @@ Provides access to the device friendly name.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device friendly name |
-| result.name | string | mandatory | Device friendly name |
+| (property) | object | mandatory | Device friendly name |
+| (property).name | string | mandatory | Device friendly name |
 
 ### Errors
 
@@ -1287,8 +1358,8 @@ Provides access to the device friendly name.
 }
 ```
 
-<a name="property.platformname"></a>
-## *platformname [<sup>property</sup>](#head.Properties)*
+<a id="property_platformname"></a>
+## *platformname [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device Platform name.
 
@@ -1296,12 +1367,10 @@ Provides access to the device Platform name.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device Platform name |
-| result.name | string | mandatory | Device Platform name |
+| (property) | object | mandatory | Device Platform name |
+| (property).name | string | mandatory | Device Platform name |
 
 ### Errors
 
@@ -1333,8 +1402,8 @@ Provides access to the device Platform name.
 }
 ```
 
-<a name="property.devicetype"></a>
-## *devicetype [<sup>property</sup>](#head.Properties)*
+<a id="property_devicetype"></a>
+## *devicetype [<sup>property</sup>](#head_Properties)*
 
 Provides access to the device type.
 
@@ -1342,12 +1411,10 @@ Provides access to the device type.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Device type |
-| result.devicetype | string | mandatory | Device type (must be one of the following: *IpStb, QamIpStb, hybrid, mediaclient, tv*) |
+| (property) | object | mandatory | Device type |
+| (property).devicetype | string | mandatory | Device type (must be one of the following: *IpStb, QamIpStb, hybrid, mediaclient, tv*) |
 
 ### Errors
 
@@ -1379,8 +1446,8 @@ Provides access to the device type.
 }
 ```
 
-<a name="property.distributorid"></a>
-## *distributorid [<sup>property</sup>](#head.Properties)*
+<a id="property_distributorid"></a>
+## *distributorid [<sup>property</sup>](#head_Properties)*
 
 Provides access to the partner ID or distributor ID for device.
 
@@ -1388,12 +1455,10 @@ Provides access to the partner ID or distributor ID for device.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | object | mandatory | Partner ID or distributor ID for device |
-| result.distributorid | string | mandatory | Partner ID or distributor ID for device (must be one of the following: *MIT, charter, charter-dev, comcast, cox, cox-dev, cox-hospitality, cox-qa, rogers, rogers-dev, shaw, shaw-dev, sky-de, sky-deu, sky-deu-dev, sky-it, sky-it-dev, sky-italia, sky-uk, sky-uk-dev, videotron, xglobal*) |
+| (property) | object | mandatory | Partner ID or distributor ID for device |
+| (property).distributorid | string | mandatory | Partner ID or distributor ID for device (must be one of the following: *MIT, charter, charter-dev, comcast, cox, cox-dev, cox-hospitality, cox-qa, rogers, rogers-dev, shaw, shaw-dev, sky-de, sky-deu, sky-deu-dev, sky-it, sky-it-dev, sky-italia, sky-uk, sky-uk-dev, videotron, xglobal*) |
 
 ### Errors
 
