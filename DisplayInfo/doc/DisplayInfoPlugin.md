@@ -157,7 +157,7 @@ This method takes no parameters.
   "id": 42,
   "result": [
     {
-      "name": "JController",
+      "name": "JMyInterface",
       "major": 1,
       "minor": 0,
       "patch": 0
