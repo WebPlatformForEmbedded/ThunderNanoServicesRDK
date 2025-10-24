@@ -1,5 +1,5 @@
 # ThunderNanoServicesRDK
-
+* BridgeLink
 * [DeviceIdentification](DeviceIdentification/doc/DeviceIdentificationPlugin.md)
 * [DeviceInfo](DeviceInfo/doc/DeviceInfoPlugin.md)
 * [DisplayInfo](DisplayInfo/doc/DisplayInfoPlugin.md)

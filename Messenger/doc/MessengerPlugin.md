@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.Messenger_Plugin"></a>
+<a id="head_Messenger_Plugin"></a>
 # Messenger Plugin
 
 **Version: 1.0**
@@ -10,27 +10,27 @@ Messenger plugin for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Description](#head.Description)
-- [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
-- [Notifications](#head.Notifications)
+- [Introduction](#head_Introduction)
+- [Description](#head_Description)
+- [Configuration](#head_Configuration)
+- [Interfaces](#head_Interfaces)
+- [Methods](#head_Methods)
+- [Notifications](#head_Notifications)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
 This document describes purpose and functionality of the Messenger plugin. It includes detailed specification about its configuration, methods provided and notifications sent.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -48,7 +48,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -58,14 +58,14 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Description"></a>
+<a id="head_Description"></a>
 # Description
 
 The Messenger allows exchanging text messages between users gathered in virtual rooms. The rooms are dynamically created and destroyed based on user attendance. Upon joining a room the client receives a unique token (room ID) to be used for sending and receiving the messages.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
-<a name="head.Configuration"></a>
+<a id="head_Configuration"></a>
 # Configuration
 
 The table below lists configuration options of the plugin.
@@ -77,29 +77,29 @@ The table below lists configuration options of the plugin.
 | locator | string | mandatory | Library name: *libThunderMessenger.so* |
 | startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
 
-<a name="head.Interfaces"></a>
+<a id="head_Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
 
-- IMessenger ([IMessenger.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessenger.h)) (version 1.0.0) (compliant format)
+- JSONRPC::IMessenger ([IMessenger.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessenger.h)) (version 1.0.0) (compliant format)
 > This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
-<a name="head.Methods"></a>
+<a id="head_Methods"></a>
 # Methods
 
 The following methods are provided by the Messenger plugin:
 
-Messenger interface methods:
+JSONRPC Messenger interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [join](#method.join) | Joins a messaging room |
-| [leave](#method.leave) | Leaves a messaging room |
-| [send](#method.send) | Sends a message to a messaging room |
+| [join](#method_join) | Joins a messaging room |
+| [leave](#method_leave) | Leaves a messaging room |
+| [send](#method_send) | Sends a message to a messaging room |
 
-<a name="method.join"></a>
-## *join [<sup>method</sup>](#head.Methods)*
+<a id="method_join"></a>
+## *join [<sup>method</sup>](#head_Methods)*
 
 Joins a messaging room.
 
@@ -116,7 +116,7 @@ If the specified room does not exist, then it will be created.
 | params.user | string | mandatory | Name of ther user to join as |
 | params?.secure | string | optional | Denotes if the room is secure (by default not secure) (must be one of the following: *insecure, secure*) |
 | params?.acl | array | optional | List of URL origins with possible wildcards |
-| params?.acl[#] | string | optional | *...* |
+| params?.acl[#] | string | mandatory | *...* |
 
 ### Result
 
@@ -144,7 +144,7 @@ If the specified room does not exist, then it will be created.
   "params": {
     "room": "Lounge",
     "user": "Bob",
-    "secure": "insecure",
+    "secure": "secure",
     "acl": [
       "..."
     ]
@@ -162,8 +162,8 @@ If the specified room does not exist, then it will be created.
 }
 ```
 
-<a name="method.leave"></a>
-## *leave [<sup>method</sup>](#head.Methods)*
+<a id="method_leave"></a>
+## *leave [<sup>method</sup>](#head_Methods)*
 
 Leaves a messaging room.
 
@@ -215,8 +215,8 @@ The room ID becomes invalid after this call. If there are no more users, the roo
 }
 ```
 
-<a name="method.send"></a>
-## *send [<sup>method</sup>](#head.Methods)*
+<a id="method_send"></a>
+## *send [<sup>method</sup>](#head_Methods)*
 
 Sends a message to a messaging room.
 
@@ -266,23 +266,23 @@ Sends a message to a messaging room.
 }
 ```
 
-<a name="head.Notifications"></a>
+<a id="head_Notifications"></a>
 # Notifications
 
 Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
 
 The following events are provided by the Messenger plugin:
 
-Messenger interface events:
+JSONRPC Messenger interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [roomupdate](#notification.roomupdate) | Notifies of room status changes |
-| [userupdate](#notification.userupdate) | Notifies of user status changes |
-| [message](#notification.message) | Notifies of messages sent the the room |
+| [roomupdate](#notification_roomupdate) | Notifies of room status changes |
+| [userupdate](#notification_userupdate) | Notifies of user status changes |
+| [message](#notification_message) | Notifies of messages sent the the room |
 
-<a name="notification.roomupdate"></a>
-## *roomupdate [<sup>notification</sup>](#head.Notifications)*
+<a id="notification_roomupdate"></a>
+## *roomupdate [<sup>notification</sup>](#head_Notifications)*
 
 Notifies of room status changes.
 
@@ -290,7 +290,7 @@ Notifies of room status changes.
 
 Immediately after registering to this notification the listener will sequentially receive updates of all rooms that have been created so far.
 
-> If applicable, this notification may be sent out during registration, reflecting the current status.
+> This notification may also be triggered by client registration.
 
 ### Notification Parameters
 
@@ -325,14 +325,16 @@ Immediately after registering to this notification the listener will sequentiall
   "method": "myid.roomupdate",
   "params": {
     "room": "Lounge",
-    "action": "created",
-    "secure": "insecure"
+    "action": "destroyed",
+    "secure": "secure"
   }
 }
 ```
 
-<a name="notification.userupdate"></a>
-## *userupdate [<sup>notification</sup>](#head.Notifications)*
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.roomupdate``.
+
+<a id="notification_userupdate"></a>
+## *userupdate [<sup>notification</sup>](#head_Notifications)*
 
 Notifies of user status changes.
 
@@ -340,11 +342,11 @@ Notifies of user status changes.
 
 Immediately after registering to this notification the listener will sequentially receive updates of all users that have joined the room so far.
 
-> If applicable, this notification may be sent out during registration, reflecting the current status.
+> This notification may also be triggered by client registration.
 
 ### Parameters
 
-> The *roomId* parameter shall be passed within the client ID during registration, e.g. *1e217990dd1cd4f66124.myid*
+> The *roomId* parameter shall be passed within the *id* parameter to the ``register`` call, i.e. ``<roomid>.<client-id>``.
 
 ### Notification Parameters
 
@@ -378,21 +380,23 @@ Immediately after registering to this notification the listener will sequentiall
   "method": "1e217990dd1cd4f66124.myid.userupdate",
   "params": {
     "user": "Bob",
-    "action": "joined"
+    "action": "left"
   }
 }
 ```
 
-> The *roomId* parameter is passed within the designator, e.g. *1e217990dd1cd4f66124.myid.userupdate*.
+> The *client ID* parameter is passed within the notification designator, i.e. ``<roomid>.<client-id>.userupdate``.
 
-<a name="notification.message"></a>
-## *message [<sup>notification</sup>](#head.Notifications)*
+> The *roomId* parameter is passed within the notification designator, i.e. ``<roomid>.<client-id>.userupdate``.
+
+<a id="notification_message"></a>
+## *message [<sup>notification</sup>](#head_Notifications)*
 
 Notifies of messages sent the the room.
 
 ### Parameters
 
-> The *roomId* parameter shall be passed within the client ID during registration, e.g. *1e217990dd1cd4f66124.myid*
+> The *roomId* parameter shall be passed within the *id* parameter to the ``register`` call, i.e. ``<roomid>.<client-id>``.
 
 ### Notification Parameters
 
@@ -431,5 +435,7 @@ Notifies of messages sent the the room.
 }
 ```
 
-> The *roomId* parameter is passed within the designator, e.g. *1e217990dd1cd4f66124.myid.message*.
+> The *client ID* parameter is passed within the notification designator, i.e. ``<roomid>.<client-id>.message``.
+
+> The *roomId* parameter is passed within the notification designator, i.e. ``<roomid>.<client-id>.message``.
 

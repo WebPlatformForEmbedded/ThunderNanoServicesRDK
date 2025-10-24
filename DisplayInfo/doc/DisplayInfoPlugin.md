@@ -1,5 +1,5 @@
 <!-- Generated automatically, DO NOT EDIT! -->
-<a name="head.Display_Info_Plugin"></a>
+<a id="head_Display_Info_Plugin"></a>
 # Display Info Plugin
 
 **Version: 1.0**
@@ -10,28 +10,28 @@ DisplayInfo plugin for Thunder framework.
 
 ### Table of Contents
 
-- [Introduction](#head.Introduction)
-- [Description](#head.Description)
-- [Configuration](#head.Configuration)
-- [Interfaces](#head.Interfaces)
-- [Methods](#head.Methods)
-- [Properties](#head.Properties)
-- [Notifications](#head.Notifications)
+- [Introduction](#head_Introduction)
+- [Description](#head_Description)
+- [Configuration](#head_Configuration)
+- [Interfaces](#head_Interfaces)
+- [Methods](#head_Methods)
+- [Properties](#head_Properties)
+- [Notifications](#head_Notifications)
 
-<a name="head.Introduction"></a>
+<a id="head_Introduction"></a>
 # Introduction
 
-<a name="head.Scope"></a>
+<a id="head_Scope"></a>
 ## Scope
 
 This document describes purpose and functionality of the DisplayInfo plugin. It includes detailed specification about its configuration, methods and properties as well as sent notifications.
 
-<a name="head.Case_Sensitivity"></a>
+<a id="head_Case_Sensitivity"></a>
 ## Case Sensitivity
 
 All identifiers of the interfaces described in this document are case-sensitive. Thus, unless stated otherwise, all keywords, entities, properties, relations and actions should be treated as such.
 
-<a name="head.Acronyms,_Abbreviations_and_Terms"></a>
+<a id="head_Acronyms,_Abbreviations_and_Terms"></a>
 ## Acronyms, Abbreviations and Terms
 
 The table below provides and overview of acronyms used in this document and their definitions.
@@ -49,7 +49,7 @@ The table below provides and overview of terms and abbreviations used in this do
 | :-------- | :-------- |
 | <a name="term.callsign">callsign</a> | The name given to an instance of a plugin. One plugin can be instantiated multiple times, but each instance the instance name, callsign, must be unique. |
 
-<a name="head.References"></a>
+<a id="head_References"></a>
 ## References
 
 | Ref ID | Description |
@@ -59,14 +59,14 @@ The table below provides and overview of terms and abbreviations used in this do
 | <a name="ref.JSON">[JSON](http://www.json.org/)</a> | JSON specification |
 | <a name="ref.Thunder">[Thunder](https://github.com/WebPlatformForEmbedded/Thunder/blob/master/doc/WPE%20-%20API%20-%20Thunder.docx)</a> | Thunder API Reference |
 
-<a name="head.Description"></a>
+<a id="head_Description"></a>
 # Description
 
 The DisplayInfo plugin allows retrieving of various display-related information.
 
 The plugin is designed to be loaded and executed within the Thunder framework. For more information about the framework refer to [[Thunder](#ref.Thunder)].
 
-<a name="head.Configuration"></a>
+<a id="head_Configuration"></a>
 # Configuration
 
 The table below lists configuration options of the plugin.
@@ -78,7 +78,7 @@ The table below lists configuration options of the plugin.
 | locator | string | mandatory | Library name: *libThunderDisplayInfo.so* |
 | startmode | string | mandatory | Determines in which state the plugin should be moved to at startup of the framework |
 
-<a name="head.Interfaces"></a>
+<a id="head_Interfaces"></a>
 # Interfaces
 
 This plugin implements the following interfaces:
@@ -95,7 +95,7 @@ This plugin implements the following interfaces:
 - IDisplayProperties ([IDisplayInfo.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IDisplayInfo.h)) (version 1.0.0) (compliant format)
 > This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
-<a name="head.Methods"></a>
+<a id="head_Methods"></a>
 # Methods
 
 The following methods are provided by the DisplayInfo plugin:
@@ -104,12 +104,12 @@ ConnectionProperties interface methods:
 
 | Method | Description |
 | :-------- | :-------- |
-| [edid](#method.edid) | TV's Extended Display Identification Data |
-| [widthincentimeters](#method.widthincentimeters) | Horizontal size in centimeters |
-| [heightincentimeters](#method.heightincentimeters) | Vertical size in centimeters |
+| [edid](#method_edid) | TV's Extended Display Identification Data |
+| [widthincentimeters](#method_widthincentimeters) | Horizontal size in centimeters |
+| [heightincentimeters](#method_heightincentimeters) | Vertical size in centimeters |
 
-<a name="method.edid"></a>
-## *edid [<sup>method</sup>](#head.Methods)*
+<a id="method_edid"></a>
+## *edid [<sup>method</sup>](#head_Methods)*
 
 TV's Extended Display Identification Data.
 
@@ -156,8 +156,8 @@ TV's Extended Display Identification Data.
 }
 ```
 
-<a name="method.widthincentimeters"></a>
-## *widthincentimeters [<sup>method</sup>](#head.Methods)*
+<a id="method_widthincentimeters"></a>
+## *widthincentimeters [<sup>method</sup>](#head_Methods)*
 
 Horizontal size in centimeters.
 
@@ -193,8 +193,8 @@ This method takes no parameters.
 }
 ```
 
-<a name="method.heightincentimeters"></a>
-## *heightincentimeters [<sup>method</sup>](#head.Methods)*
+<a id="method_heightincentimeters"></a>
+## *heightincentimeters [<sup>method</sup>](#head_Methods)*
 
 Vertical size in centimeters.
 
@@ -230,7 +230,7 @@ This method takes no parameters.
 }
 ```
 
-<a name="head.Properties"></a>
+<a id="head_Properties"></a>
 # Properties
 
 The following properties are provided by the DisplayInfo plugin:
@@ -239,42 +239,42 @@ GraphicsProperties interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [totalgpuram](#property.totalgpuram) | read-only | Total GPU DRAM memory (in bytes) |
-| [freegpuram](#property.freegpuram) | read-only | Free GPU DRAM memory (in bytes) |
+| [totalgpuram](#property_totalgpuram) | read-only | Total GPU DRAM memory (in bytes) |
+| [freegpuram](#property_freegpuram) | read-only | Free GPU DRAM memory (in bytes) |
 
 ConnectionProperties interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [isaudiopassthrough](#property.isaudiopassthrough) | read-only | Current audio passthrough status on HDMI |
-| [connected](#property.connected) | read-only | Current HDMI connection status |
-| [width](#property.width) | read-only | Horizontal resolution of TV |
-| [height](#property.height) | read-only | Vertical resolution of TV |
-| [verticalfreq](#property.verticalfreq) | read-only | Vertical Frequency |
-| [hdcpprotection](#property.hdcpprotection) | read/write | HDCP protocol used for transmission |
-| [portname](#property.portname) | read-only | Video output port on the STB used for connection to TV |
+| [isaudiopassthrough](#property_isaudiopassthrough) | read-only | Current audio passthrough status on HDMI |
+| [connected](#property_connected) | read-only | Current HDMI connection status |
+| [width](#property_width) | read-only | Horizontal resolution of TV |
+| [height](#property_height) | read-only | Vertical resolution of TV |
+| [verticalfreq](#property_verticalfreq) | read-only | Vertical Frequency |
+| [hdcpprotection](#property_hdcpprotection) | read/write | HDCP protocol used for transmission |
+| [portname](#property_portname) | read-only | Video output port on the STB used for connection to TV |
 
 HDRProperties interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [tvcapabilities](#property.tvcapabilities) | read-only | HDR formats supported by TV |
-| [stbcapabilities](#property.stbcapabilities) | read-only | HDR formats supported by STB |
-| [hdrsetting](#property.hdrsetting) | read-only | HDR format in use |
+| [tvcapabilities](#property_tvcapabilities) | read-only | HDR formats supported by TV |
+| [stbcapabilities](#property_stbcapabilities) | read-only | HDR formats supported by STB |
+| [hdrsetting](#property_hdrsetting) | read-only | HDR format in use |
 
 DisplayProperties interface properties:
 
 | Property | R/W | Description |
 | :-------- | :-------- | :-------- |
-| [colorspace](#property.colorspace) | read-only | Provides access to the display's Colour space (chroma subsampling format) |
-| [framerate](#property.framerate) | read-only | Provides access to Frame Rate |
-| [colourdepth](#property.colourdepth) | read-only | Provides access to display's colour Depth |
-| [colorimetry](#property.colorimetry) | read-only | Provides access to display's colorimetry |
-| [quantizationrange](#property.quantizationrange) | read-only | Provides access to display's Qauntization Range |
-| [eotf](#property.eotf) | read-only | Provides access to display's Electro optical transfer function |
+| [colorspace](#property_colorspace) | read-only | Provides access to the display's Colour space (chroma subsampling format) |
+| [framerate](#property_framerate) | read-only | Provides access to Frame Rate |
+| [colourdepth](#property_colourdepth) | read-only | Provides access to display's colour Depth |
+| [colorimetry](#property_colorimetry) | read-only | Provides access to display's colorimetry |
+| [quantizationrange](#property_quantizationrange) | read-only | Provides access to display's Qauntization Range |
+| [eotf](#property_eotf) | read-only | Provides access to display's Electro optical transfer function |
 
-<a name="property.totalgpuram"></a>
-## *totalgpuram [<sup>property</sup>](#head.Properties)*
+<a id="property_totalgpuram"></a>
+## *totalgpuram [<sup>property</sup>](#head_Properties)*
 
 Provides access to the total GPU DRAM memory (in bytes).
 
@@ -282,11 +282,9 @@ Provides access to the total GPU DRAM memory (in bytes).
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Total GPU DRAM memory (in bytes) |
+| (property) | integer | mandatory | Total GPU DRAM memory (in bytes) |
 
 ### Example
 
@@ -310,8 +308,8 @@ Provides access to the total GPU DRAM memory (in bytes).
 }
 ```
 
-<a name="property.freegpuram"></a>
-## *freegpuram [<sup>property</sup>](#head.Properties)*
+<a id="property_freegpuram"></a>
+## *freegpuram [<sup>property</sup>](#head_Properties)*
 
 Provides access to the free GPU DRAM memory (in bytes).
 
@@ -319,11 +317,9 @@ Provides access to the free GPU DRAM memory (in bytes).
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Free GPU DRAM memory (in bytes) |
+| (property) | integer | mandatory | Free GPU DRAM memory (in bytes) |
 
 ### Example
 
@@ -347,8 +343,8 @@ Provides access to the free GPU DRAM memory (in bytes).
 }
 ```
 
-<a name="property.isaudiopassthrough"></a>
-## *isaudiopassthrough [<sup>property</sup>](#head.Properties)*
+<a id="property_isaudiopassthrough"></a>
+## *isaudiopassthrough [<sup>property</sup>](#head_Properties)*
 
 Provides access to the current audio passthrough status on HDMI.
 
@@ -356,11 +352,9 @@ Provides access to the current audio passthrough status on HDMI.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | boolean | mandatory | Enabled/Disabled |
+| (property) | boolean | mandatory | Enabled/Disabled |
 
 ### Example
 
@@ -384,8 +378,8 @@ Provides access to the current audio passthrough status on HDMI.
 }
 ```
 
-<a name="property.connected"></a>
-## *connected [<sup>property</sup>](#head.Properties)*
+<a id="property_connected"></a>
+## *connected [<sup>property</sup>](#head_Properties)*
 
 Provides access to the current HDMI connection status.
 
@@ -393,11 +387,9 @@ Provides access to the current HDMI connection status.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | boolean | mandatory | Connected/Disconnected |
+| (property) | boolean | mandatory | Connected/Disconnected |
 
 ### Example
 
@@ -421,8 +413,8 @@ Provides access to the current HDMI connection status.
 }
 ```
 
-<a name="property.width"></a>
-## *width [<sup>property</sup>](#head.Properties)*
+<a id="property_width"></a>
+## *width [<sup>property</sup>](#head_Properties)*
 
 Provides access to the horizontal resolution of TV.
 
@@ -430,11 +422,9 @@ Provides access to the horizontal resolution of TV.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Width of TV in pixels |
+| (property) | integer | mandatory | Width of TV in pixels |
 
 ### Example
 
@@ -458,8 +448,8 @@ Provides access to the horizontal resolution of TV.
 }
 ```
 
-<a name="property.height"></a>
-## *height [<sup>property</sup>](#head.Properties)*
+<a id="property_height"></a>
+## *height [<sup>property</sup>](#head_Properties)*
 
 Provides access to the vertical resolution of TV.
 
@@ -467,11 +457,9 @@ Provides access to the vertical resolution of TV.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Height of TV in pixels |
+| (property) | integer | mandatory | Height of TV in pixels |
 
 ### Example
 
@@ -495,8 +483,8 @@ Provides access to the vertical resolution of TV.
 }
 ```
 
-<a name="property.verticalfreq"></a>
-## *verticalfreq [<sup>property</sup>](#head.Properties)*
+<a id="property_verticalfreq"></a>
+## *verticalfreq [<sup>property</sup>](#head_Properties)*
 
 Provides access to the vertical Frequency.
 
@@ -504,11 +492,9 @@ Provides access to the vertical Frequency.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | integer | mandatory | Vertical freq |
+| (property) | integer | mandatory | Vertical freq |
 
 ### Example
 
@@ -532,8 +518,8 @@ Provides access to the vertical Frequency.
 }
 ```
 
-<a name="property.hdcpprotection"></a>
-## *hdcpprotection [<sup>property</sup>](#head.Properties)*
+<a id="property_hdcpprotection"></a>
+## *hdcpprotection [<sup>property</sup>](#head_Properties)*
 
 Provides access to the HDCP protocol used for transmission.
 
@@ -543,11 +529,9 @@ Provides access to the HDCP protocol used for transmission.
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | string | mandatory | HDCP protocol used for transmission (must be one of the following: *Hdcp1x, Hdcp2x, HdcpAuto, HdcpUnencrypted*) |
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Protocol (must be one of the following: *Hdcp1x, Hdcp2x, HdcpAuto, HdcpUnencrypted*) |
+| (property) | string | mandatory | Protocol (must be one of the following: *Hdcp1x, Hdcp2x, HdcpAuto, HdcpUnencrypted*) |
 
 ### Example
 
@@ -567,7 +551,7 @@ Provides access to the HDCP protocol used for transmission.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "HdcpUnencrypted"
+  "result": "Hdcp1x"
 }
 ```
 
@@ -578,7 +562,7 @@ Provides access to the HDCP protocol used for transmission.
   "jsonrpc": "2.0",
   "id": 42,
   "method": "DisplayInfo.1.hdcpprotection",
-  "params": "HdcpUnencrypted"
+  "params": "Hdcp1x"
 }
 ```
 
@@ -592,8 +576,8 @@ Provides access to the HDCP protocol used for transmission.
 }
 ```
 
-<a name="property.portname"></a>
-## *portname [<sup>property</sup>](#head.Properties)*
+<a id="property_portname"></a>
+## *portname [<sup>property</sup>](#head_Properties)*
 
 Provides access to the video output port on the STB used for connection to TV.
 
@@ -601,11 +585,9 @@ Provides access to the video output port on the STB used for connection to TV.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Video output port name |
+| (property) | string | mandatory | Video output port name |
 
 ### Example
 
@@ -629,8 +611,8 @@ Provides access to the video output port on the STB used for connection to TV.
 }
 ```
 
-<a name="property.tvcapabilities"></a>
-## *tvcapabilities [<sup>property</sup>](#head.Properties)*
+<a id="property_tvcapabilities"></a>
+## *tvcapabilities [<sup>property</sup>](#head_Properties)*
 
 Provides access to the HDR formats supported by TV.
 
@@ -638,12 +620,10 @@ Provides access to the HDR formats supported by TV.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | HDR formats supported by TV |
-| result[#] | string | mandatory | *...* (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
+| (property) | array | mandatory | HDR formats supported by TV |
+| (property)[#] | string | mandatory | *...* (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
 
 ### Example
 
@@ -664,13 +644,13 @@ Provides access to the HDR formats supported by TV.
   "jsonrpc": "2.0",
   "id": 42,
   "result": [
-    "HdrOff"
+    "Hdr10"
   ]
 }
 ```
 
-<a name="property.stbcapabilities"></a>
-## *stbcapabilities [<sup>property</sup>](#head.Properties)*
+<a id="property_stbcapabilities"></a>
+## *stbcapabilities [<sup>property</sup>](#head_Properties)*
 
 Provides access to the HDR formats supported by STB.
 
@@ -678,12 +658,10 @@ Provides access to the HDR formats supported by STB.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | HDR formats supported by STB |
-| result[#] | string | mandatory | *...* (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
+| (property) | array | mandatory | HDR formats supported by STB |
+| (property)[#] | string | mandatory | *...* (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
 
 ### Example
 
@@ -704,13 +682,13 @@ Provides access to the HDR formats supported by STB.
   "jsonrpc": "2.0",
   "id": 42,
   "result": [
-    "HdrOff"
+    "Hdr10"
   ]
 }
 ```
 
-<a name="property.hdrsetting"></a>
-## *hdrsetting [<sup>property</sup>](#head.Properties)*
+<a id="property_hdrsetting"></a>
+## *hdrsetting [<sup>property</sup>](#head_Properties)*
 
 Provides access to the HDR format in use.
 
@@ -718,11 +696,9 @@ Provides access to the HDR format in use.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | HDR format (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
+| (property) | string | mandatory | HDR format (must be one of the following: *Hdr10, Hdr10plus, HdrDolbyvision, HdrHlg, HdrOff, HdrTechnicolor*) |
 
 ### Example
 
@@ -742,12 +718,12 @@ Provides access to the HDR format in use.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "HdrOff"
+  "result": "Hdr10"
 }
 ```
 
-<a name="property.colorspace"></a>
-## *colorspace [<sup>property</sup>](#head.Properties)*
+<a id="property_colorspace"></a>
+## *colorspace [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to the display's Colour space (chroma subsampling format).
 
@@ -755,11 +731,9 @@ Provides access to the provides access to the display's Colour space (chroma sub
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Colour space (must be one of the following: *FormatOther, FormatRgb444, FormatUnknown, FormatYcbcr420, FormatYcbcr422, FormatYcbcr444*) |
+| (property) | string | mandatory | Colour space (must be one of the following: *FormatOther, FormatRgb444, FormatUnknown, FormatYcbcr420, FormatYcbcr422, FormatYcbcr444*) |
 
 ### Example
 
@@ -779,12 +753,12 @@ Provides access to the provides access to the display's Colour space (chroma sub
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "FormatUnknown"
+  "result": "FormatOther"
 }
 ```
 
-<a name="property.framerate"></a>
-## *framerate [<sup>property</sup>](#head.Properties)*
+<a id="property_framerate"></a>
+## *framerate [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to Frame Rate.
 
@@ -792,11 +766,9 @@ Provides access to the provides access to Frame Rate.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Frame rate (must be one of the following: *Framerate11988, Framerate120, Framerate144, Framerate23976, Framerate24, Framerate25, Framerate2997, Framerate30, Framerate47952, Framerate48, Framerate50, Framerate5994, Framerate60, FramerateUnknown*) |
+| (property) | string | mandatory | Frame rate (must be one of the following: *Framerate11988, Framerate120, Framerate144, Framerate23976, Framerate24, Framerate25, Framerate2997, Framerate30, Framerate47952, Framerate48, Framerate50, Framerate5994, Framerate60, FramerateUnknown*) |
 
 ### Example
 
@@ -816,12 +788,12 @@ Provides access to the provides access to Frame Rate.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "FramerateUnknown"
+  "result": "Framerate23976"
 }
 ```
 
-<a name="property.colourdepth"></a>
-## *colourdepth [<sup>property</sup>](#head.Properties)*
+<a id="property_colourdepth"></a>
+## *colourdepth [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to display's colour Depth.
 
@@ -829,11 +801,9 @@ Provides access to the provides access to display's colour Depth.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Colour depth (must be one of the following: *Colordepth10Bit, Colordepth12Bit, Colordepth8Bit, ColordepthUnknown*) |
+| (property) | string | mandatory | Colour depth (must be one of the following: *Colordepth10Bit, Colordepth12Bit, Colordepth8Bit, ColordepthUnknown*) |
 
 ### Example
 
@@ -853,12 +823,12 @@ Provides access to the provides access to display's colour Depth.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "ColordepthUnknown"
+  "result": "Colordepth8Bit"
 }
 ```
 
-<a name="property.colorimetry"></a>
-## *colorimetry [<sup>property</sup>](#head.Properties)*
+<a id="property_colorimetry"></a>
+## *colorimetry [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to display's colorimetry.
 
@@ -866,12 +836,10 @@ Provides access to the provides access to display's colorimetry.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | array | mandatory | Display colorimetry |
-| result[#] | string | mandatory | *...* (must be one of the following: *ColorimetryBt2020rgbYcbcr, ColorimetryBt2020yccbcbrc, ColorimetryBt709, ColorimetryOprgb, ColorimetryOpycc601, ColorimetryOther, ColorimetrySmpte170m, ColorimetrySycc601, ColorimetryUnknown, ColorimetryXvycc601, ColorimetryXvycc709*) |
+| (property) | array | mandatory | Display colorimetry |
+| (property)[#] | string | mandatory | *...* (must be one of the following: *ColorimetryBt2020rgbYcbcr, ColorimetryBt2020yccbcbrc, ColorimetryBt709, ColorimetryOprgb, ColorimetryOpycc601, ColorimetryOther, ColorimetrySmpte170m, ColorimetrySycc601, ColorimetryUnknown, ColorimetryXvycc601, ColorimetryXvycc709*) |
 
 ### Example
 
@@ -892,13 +860,13 @@ Provides access to the provides access to display's colorimetry.
   "jsonrpc": "2.0",
   "id": 42,
   "result": [
-    "ColorimetryUnknown"
+    "ColorimetryOther"
   ]
 }
 ```
 
-<a name="property.quantizationrange"></a>
-## *quantizationrange [<sup>property</sup>](#head.Properties)*
+<a id="property_quantizationrange"></a>
+## *quantizationrange [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to display's Qauntization Range.
 
@@ -906,11 +874,9 @@ Provides access to the provides access to display's Qauntization Range.
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Quantization range (must be one of the following: *QuantizationrangeFull, QuantizationrangeLimited, QuantizationrangeUnknown*) |
+| (property) | string | mandatory | Quantization range (must be one of the following: *QuantizationrangeFull, QuantizationrangeLimited, QuantizationrangeUnknown*) |
 
 ### Example
 
@@ -930,12 +896,12 @@ Provides access to the provides access to display's Qauntization Range.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "QuantizationrangeUnknown"
+  "result": "QuantizationrangeLimited"
 }
 ```
 
-<a name="property.eotf"></a>
-## *eotf [<sup>property</sup>](#head.Properties)*
+<a id="property_eotf"></a>
+## *eotf [<sup>property</sup>](#head_Properties)*
 
 Provides access to the provides access to display's Electro optical transfer function.
 
@@ -943,11 +909,9 @@ Provides access to the provides access to display's Electro optical transfer fun
 
 ### Value
 
-### Result
-
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
-| result | string | mandatory | Display's EOTF (must be one of the following: *EotfBt1886, EotfBt2100, EotfOther, EotfSmpteSt2084, EotfUnknown*) |
+| (property) | string | mandatory | Display's EOTF (must be one of the following: *EotfBt1886, EotfBt2100, EotfOther, EotfSmpteSt2084, EotfUnknown*) |
 
 ### Example
 
@@ -967,11 +931,11 @@ Provides access to the provides access to display's Electro optical transfer fun
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "result": "EotfUnknown"
+  "result": "EotfOther"
 }
 ```
 
-<a name="head.Notifications"></a>
+<a id="head_Notifications"></a>
 # Notifications
 
 Notifications are autonomous events triggered by the internals of the implementation and broadcasted via JSON-RPC to all registered observers. Refer to [[Thunder](#ref.Thunder)] for information on how to register for a notification.
@@ -982,10 +946,10 @@ ConnectionProperties interface events:
 
 | Notification | Description |
 | :-------- | :-------- |
-| [updated](#notification.updated) | Signal changes on the display update |
+| [updated](#notification_updated) | Signal changes on the display update |
 
-<a name="notification.updated"></a>
-## *updated [<sup>notification</sup>](#head.Notifications)*
+<a id="notification_updated"></a>
+## *updated [<sup>notification</sup>](#head_Notifications)*
 
 Signal changes on the display update..
 
@@ -1019,8 +983,10 @@ Signal changes on the display update..
   "jsonrpc": "2.0",
   "method": "myid.updated",
   "params": {
-    "event": "PreResolutionChange"
+    "event": "PostResolutionChange"
   }
 }
 ```
+
+> The *client ID* parameter is passed within the notification designator, i.e. ``<client-id>.updated``.
 
