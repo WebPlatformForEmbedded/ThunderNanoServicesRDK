@@ -15,7 +15,7 @@ The Monitor plugin had several issues fixed as well as the MessageControl plugin
 
 ### Feature: BridgeLink plugin
 
-The BridgeLink plugin. It is a plugin that exposes Remote plugins (from a Remote Thunder instance) via a Composite plugin locally.
+The BridgeLink plugin was added, it is a plugin that exposes Remote plugins (from a Remote Thunder instance) via a Composite plugin locally.
 
 
 
