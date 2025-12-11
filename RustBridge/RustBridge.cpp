@@ -100,7 +100,7 @@ namespace Thunder {
             return (message);
         }
 
-        void RustBridge::Deinitialize(PluginHost::IShell* service) /* override */
+        void RustBridge::Deinitialize(PluginHost::IShell* service VARIABLE_IS_NOT_USED) /* override */
         {
             if (_service != nullptr) {
                 ASSERT(_service == _service);
@@ -156,7 +156,7 @@ namespace Thunder {
             return(assigned);
         }
 
-        void RustBridge::Detach(PluginHost::Channel& channel) /* override */ {
+        void RustBridge::Detach(PluginHost::Channel& /* channel */) /* override */ {
             // Hopefull this does not happen as than we are loosing the actual service :-) We could do proper error handling
             // if this happens :-)
             _javascriptService = 0;
@@ -279,7 +279,7 @@ namespace Thunder {
             }
         }
 
-        void RustBridge::RustInvoke(const string& context, const string& method, const string& parmeters, string& response, uint32_t& result) {
+        void RustBridge::RustInvoke(const string& /* context */, const string& /* method */, const string& /* parameters */, string& /* response */, uint32_t& /* result */) {
 
         }
 

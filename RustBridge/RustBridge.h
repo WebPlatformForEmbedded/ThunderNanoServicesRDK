@@ -167,7 +167,7 @@ namespace Thunder {
             RustBridge(const RustBridge&) = delete;
             RustBridge& operator=(const RustBridge&) = delete;
 
-            PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST);
+PUSH_WARNING(DISABLE_WARNING_THIS_IN_MEMBER_INITIALIZER_LIST)
                 RustBridge()
                 : _adminLock()
                 , _skipURL(0)
@@ -184,7 +184,7 @@ namespace Thunder {
                 , _cleaner(*this)
             {
             }
-            POP_WARNING();
+POP_WARNING()
             ~RustBridge() override = default;
 
             BEGIN_INTERFACE_MAP(RustBridge)
