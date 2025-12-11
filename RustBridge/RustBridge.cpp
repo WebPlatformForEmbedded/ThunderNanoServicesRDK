@@ -157,7 +157,7 @@ namespace Thunder {
         }
 
         void RustBridge::Detach(PluginHost::Channel& /* channel */) /* override */ {
-            // Hopefull this does not happen as than we are loosing the actual service :-) We could do proper error handling
+            // Hopefully this does not happen as then we are losing the actual service :-) We could do proper error handling
             // if this happens :-)
             _javascriptService = 0;
         }
