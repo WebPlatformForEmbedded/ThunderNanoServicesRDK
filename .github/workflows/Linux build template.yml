@@ -120,16 +120,20 @@ jobs:
         -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -m${{matrix.architecture}}" \
         -DCMAKE_INSTALL_PREFIX="${{matrix.build_type}}/install/usr" \
         -DCMAKE_MODULE_PATH="${PWD}/${{matrix.build_type}}/install/usr/include/WPEFramework/Modules" \
+        -DPLUGIN_BRIDGELINK=ON \
         -DPLUGIN_DEVICEIDENTIFICATION=ON \
         -DPLUGIN_DEVICEINFO=ON \
+        -DPLUGIN_DISPLAYINFO=ON \
         -DPLUGIN_LOCATIONSYNC=ON \
         -DPLUGIN_MESSAGECONTROL=ON \
         -DPLUGIN_MESSENGER=ON \
         -DPLUGIN_MONITOR=ON \
         -DPLUGIN_OPENCDMI=ON \
+        -DPLUGIN_PACKAGER=ON \
         -DPLUGIN_PERFORMANCEMETRICS=ON \
         -DPLUGIN_PLAYERINFO=ON \
-        -DPLUGIN_PACKAGER=ON \
+        -DPLUGIN_RUSTBRIDGE=ON \
+        -DPLUGIN_SECURITYAGENT=ON \
         ${{steps.plugins.outputs.first_match}}
         cmake --build ${{matrix.build_type}}/build/ThunderNanoServicesRDK --target install
 
