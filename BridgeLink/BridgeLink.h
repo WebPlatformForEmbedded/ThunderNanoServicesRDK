@@ -721,7 +721,7 @@ namespace Plugin {
                     }
                     return (result);
                 }
-                Core::hresult Subscribe(ICallback* callback, const string& event, const string& designator) override {
+                Core::hresult Subscribe(ICallback* callback, const string& event, const string& designator, const string& index) override {
                     uint32_t result = Core::ERROR_UNAVAILABLE;
 
                     _adminLock.Lock();
@@ -732,12 +732,12 @@ namespace Plugin {
                     _adminLock.Unlock();
 
                     if (link != nullptr) {
-                        result = link->Subscribe(callback, event, designator);
+                        result = link->Subscribe(callback, event, designator, index);
                         link->Release();
                     }
                     return (result);
                 }
-                Core::hresult Unsubscribe(ICallback* callback, const string& event, const string& designator) override {
+                Core::hresult Unsubscribe(ICallback* callback, const string& event, const string& designator, const string& index) override {
                     uint32_t result = Core::ERROR_UNAVAILABLE;
 
                     _adminLock.Lock();
@@ -748,7 +748,7 @@ namespace Plugin {
                     _adminLock.Unlock();
 
                     if (link != nullptr) {
-                        result = link->Unsubscribe(callback, event, designator);
+                        result = link->Unsubscribe(callback, event, designator, index);
                         link->Release();
                     }
                     return (result);
@@ -910,7 +910,7 @@ namespace Plugin {
 
                 _job.Submit();
             }
-			void Destroy(const string& callsign, PluginHost::IShell* plugin) {
+			void Destroy(const string& callsign, PluginHost::IShell* plugin VARIABLE_IS_NOT_USED) {
 
                 _adminLock.Lock();
 
@@ -947,7 +947,7 @@ namespace Plugin {
 
                 _job.Submit();
             }
-            void Activated(const string& callsign, PluginHost::IShell* plugin) {
+            void Activated(const string& callsign, PluginHost::IShell* plugin VARIABLE_IS_NOT_USED) {
                 bool change = false;
 
                 _adminLock.Lock();
@@ -966,7 +966,7 @@ namespace Plugin {
                     _job.Submit();
                 }
             }
-            void Deactivated(const string& callsign, PluginHost::IShell* plugin) {
+            void Deactivated(const string& callsign, PluginHost::IShell* plugin VARIABLE_IS_NOT_USED) {
                 bool change = false;
 
                 _adminLock.Lock();
@@ -985,7 +985,7 @@ namespace Plugin {
                     _job.Submit();
                 }
             }
-            void Unavailable(const string& callsign, PluginHost::IShell* plugin) {
+            void Unavailable(const string& callsign, PluginHost::IShell* plugin VARIABLE_IS_NOT_USED) {
                 bool change = false;
 
                 _adminLock.Lock();
