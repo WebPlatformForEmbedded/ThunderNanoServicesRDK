@@ -483,8 +483,8 @@ private:
     }
 
 private:
-    std::list<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
-    std::list<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
+    std::vector<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
+    std::vector<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
     std::map<string, Exchange::IPlayerProperties::PlaybackResolution> _resolutions =
     {
         {"480i24", RESOLUTION_480I24},

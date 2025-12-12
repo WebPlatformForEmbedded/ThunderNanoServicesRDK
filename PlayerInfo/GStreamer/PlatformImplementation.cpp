@@ -191,8 +191,8 @@ private:
     }
 
 private:
-    std::list<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
-    std::list<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
+    std::vector<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
+    std::vector<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
 #if DOLBY_SUPPORT
     Exchange::Dolby::IOutput* _dolbyOut;
 #endif

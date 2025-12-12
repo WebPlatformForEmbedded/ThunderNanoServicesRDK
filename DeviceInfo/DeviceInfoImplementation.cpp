@@ -75,7 +75,7 @@ namespace Plugin {
     {
         AudioOutputList audioOutputList;
 
-        std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::front_inserter(audioOutputList),
+        std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::back_inserter(audioOutputList),
         [](decltype(_audioOutputMap)::value_type const &pair) {
             return pair.first;
         });
