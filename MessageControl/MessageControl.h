@@ -432,7 +432,7 @@ namespace Plugin {
 
         Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
         {
-            std::list<Exchange::IMessageControl::Control> list;
+            std::vector<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
             _client.Controls(index, module);
 
