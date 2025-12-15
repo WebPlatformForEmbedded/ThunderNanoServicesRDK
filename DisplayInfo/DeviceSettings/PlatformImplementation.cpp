@@ -585,6 +585,8 @@ public:
     uint32_t Colorimetry(IColorimetryIterator*& colorimetry /* @out */) const override
     {
         std::vector<Exchange::IDisplayProperties::ColorimetryType> colorimetryCaps;
+        colorimetryCaps.reserve(8);
+
         vector<uint8_t> edidVec;
         uint32_t ret = GetEdidBytes(edidVec);
         if (ret == Core::ERROR_NONE)
@@ -666,6 +668,7 @@ public:
     uint32_t TVCapabilities(IHDRIterator*& type /* out */) const override
     {
         std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        hdrCapabilities.reserve(6);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try
@@ -700,6 +703,7 @@ public:
     uint32_t STBCapabilities(IHDRIterator*& type /* out */) const override
     {
         std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        hdrCapabilities.reserve(6);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try

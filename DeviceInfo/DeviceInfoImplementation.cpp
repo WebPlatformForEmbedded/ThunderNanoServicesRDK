@@ -74,6 +74,7 @@ namespace Plugin {
     uint32_t DeviceInfoImplementation::AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const
     {
         AudioOutputList audioOutputList;
+        audioOutputList.reserve(_audioOutputMap.size());
 
         std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::back_inserter(audioOutputList),
         [](decltype(_audioOutputMap)::value_type const &pair) {
@@ -114,6 +115,7 @@ namespace Plugin {
     uint32_t DeviceInfoImplementation::VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const
     {
         VideoOutputList videoOutputList;
+        videoOutputList.reserve(_videoOutputMap.size());
 
         std::transform(_videoOutputMap.begin(), _videoOutputMap.end(), std::back_inserter(videoOutputList),
         [](decltype(_videoOutputMap)::value_type const &pair) {

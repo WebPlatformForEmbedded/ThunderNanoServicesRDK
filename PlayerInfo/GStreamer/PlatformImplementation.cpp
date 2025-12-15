@@ -170,6 +170,8 @@ private:
             {"audio/x-vorbis", Exchange::IPlayerProperties::AudioCodec::AUDIO_VORBIS_OGG},
             {"audio/x-wav", Exchange::IPlayerProperties::AudioCodec::AUDIO_WAV},
         };
+        _audioCodecs.reserve(audioCaps.size());
+
         if (GstUtils::GstRegistryCheckElementsForMediaTypes(audioCaps, _audioCodecs) != true) {
             TRACE(Trace::Warning, (_T("There is no Audio Codec support available")));
         }
@@ -185,6 +187,8 @@ private:
             {"video/x-vp9", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP9},
             {"video/x-vp10", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP10}
         };
+        _videoCodecs.reserve(videoCaps.size());
+
         if (GstUtils::GstRegistryCheckElementsForMediaTypes(videoCaps, _videoCodecs) != true) {
             TRACE(Trace::Warning, (_T("There is no Video Codec support available")));
         }

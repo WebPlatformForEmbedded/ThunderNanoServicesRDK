@@ -332,6 +332,7 @@ namespace Plugin {
         array.FromString(languagesList);
 
         std::vector<string> list;
+        list.reserve(array.Length());
         auto iterator = array.Elements();
 
         while (iterator.Next() == true) {
