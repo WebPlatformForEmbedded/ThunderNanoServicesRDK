@@ -668,7 +668,7 @@ public:
     uint32_t TVCapabilities(IHDRIterator*& type /* out */) const override
     {
         std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
-        hdrCapabilities.reserve(6);
+        hdrCapabilities.reserve(4);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try
@@ -703,7 +703,7 @@ public:
     uint32_t STBCapabilities(IHDRIterator*& type /* out */) const override
     {
         std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
-        hdrCapabilities.reserve(6);
+        hdrCapabilities.reserve(4);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try
