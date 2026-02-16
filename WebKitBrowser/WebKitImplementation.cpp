@@ -1049,7 +1049,7 @@ namespace Plugin {
             _adminLock.Unlock();
         }
 
-        void Unregister(Exchange::IBrowserCookieJar::INotification* sink) override
+        void Unregister(const Exchange::IBrowserCookieJar::INotification* sink) override
         {
             ASSERT(sink != nullptr);
             _adminLock.Lock();
@@ -1414,7 +1414,7 @@ namespace Plugin {
 
         }
 
-        void Unregister(Exchange::IWebBrowser::INotification* sink) override
+        void Unregister(const Exchange::IWebBrowser::INotification* sink) override
         {
             ASSERT(sink != nullptr);
 
@@ -1455,7 +1455,7 @@ namespace Plugin {
             TRACE(Trace::Information, (_T("Registered a sink on the browser %p"), sink));
         }
 
-        void Unregister(Exchange::IBrowser::INotification* sink) override
+        void Unregister(const Exchange::IBrowser::INotification* sink) override
         {
             ASSERT(sink != nullptr);
 
@@ -1497,7 +1497,7 @@ namespace Plugin {
             _adminLock.Unlock();
         }
 
-        void Unregister(Exchange::IApplication::INotification* sink) override
+        void Unregister(const Exchange::IApplication::INotification* sink) override
         {
             ASSERT(sink != nullptr);
 

@@ -275,7 +275,7 @@ POP_WARNING()
         //   ITimeZone methods
         // -------------------------------------------------------------------------------------------------------
         uint32_t Register(ITimeZone::INotification* sink) override;
-        uint32_t Unregister(ITimeZone::INotification* sink) override;
+        uint32_t Unregister(const ITimeZone::INotification* sink) override;
         uint32_t TimeZone(string& timeZone ) const override;
         uint32_t TimeZone(const string& timeZone) override;
 

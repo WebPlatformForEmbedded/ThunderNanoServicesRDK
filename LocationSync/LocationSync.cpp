@@ -221,7 +221,7 @@ POP_WARNING()
         return Core::ERROR_NONE;
     }
 
-    uint32_t LocationSync::Unregister(Exchange::ITimeZone::INotification* sink) {
+    uint32_t LocationSync::Unregister(const Exchange::ITimeZone::INotification* sink) {
         _adminLock.Lock();
         TimeZoneObservers::iterator index = std::find(_timezoneoberservers.begin(), _timezoneoberservers.end(), sink);
         ASSERT (index != _timezoneoberservers.end());

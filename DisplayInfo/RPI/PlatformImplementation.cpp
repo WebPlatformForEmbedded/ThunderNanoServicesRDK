@@ -109,7 +109,7 @@ public:
 
         return (Core::ERROR_NONE);
     }
-    uint32_t Unregister(INotification* notification) override
+    uint32_t Unregister(const INotification* notification) override
     {
         ASSERT(notification != nullptr);
 
