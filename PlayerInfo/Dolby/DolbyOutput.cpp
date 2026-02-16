@@ -48,7 +48,7 @@ namespace Thunder
 
                 return (Core::ERROR_NONE);
             }
-            uint32_t Unregister(Exchange::Dolby::IOutput::INotification* notification) override
+            uint32_t Unregister(const Exchange::Dolby::IOutput::INotification* notification) override
             {
                 ASSERT(notification != nullptr);
 

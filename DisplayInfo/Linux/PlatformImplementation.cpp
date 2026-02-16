@@ -511,7 +511,7 @@ namespace Plugin {
             return (Core::ERROR_NONE);
         }
 
-        uint32_t Unregister(IConnectionProperties::INotification* notification) override
+        uint32_t Unregister(const IConnectionProperties::INotification* notification) override
         {
             std::lock_guard<std::mutex> lock(_observersLock);
 
