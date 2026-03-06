@@ -84,7 +84,7 @@ if (PLUGIN_WEBKITBROWSER_TESTING)
 endif()
 
 set_target_properties(${MODULE_NAME} PROPERTIES
-        CXX_STANDARD 11
+        CXX_STANDARD ${CXX_STD}
         CXX_STANDARD_REQUIRED YES)
 
 target_compile_options (${MODULE_NAME} PRIVATE -Wno-psabi)
