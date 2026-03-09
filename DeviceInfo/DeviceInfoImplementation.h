@@ -151,7 +151,7 @@ namespace Plugin {
             std::list<IDeviceAudioCapabilities::MS12Profile> MS12Profiles;
         };
         using AudioOutputMap = std::map<Exchange::IDeviceAudioCapabilities::AudioOutput, AudioOutputCapability>;
-        using AudioOutputList = std::list<Exchange::IDeviceAudioCapabilities::AudioOutput>;
+        using AudioOutputList = std::vector<Exchange::IDeviceAudioCapabilities::AudioOutput>;
         using AudioOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>;
 
         struct VideoOutputCapability {
@@ -160,7 +160,7 @@ namespace Plugin {
             IDeviceVideoCapabilities::CopyProtection CopyProtection;
         };
         using VideoOutputMap = std::map<Exchange::IDeviceVideoCapabilities::VideoOutput, VideoOutputCapability>;
-        using VideoOutputList = std::list<Exchange::IDeviceVideoCapabilities::VideoOutput>;
+        using VideoOutputList = std::vector<Exchange::IDeviceVideoCapabilities::VideoOutput>;
         using VideoOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>;
 
     public:
