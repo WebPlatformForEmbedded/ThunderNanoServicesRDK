@@ -20,4 +20,4 @@ jobs:
 
   ThunderNanoServicesRDK_MacOS:
     needs: ThunderInterfaces_MacOS
-    uses: WebPlatformForEmbedded/ThunderNanoServicesRDK/.github/workflows/MacOS build template.yml@master
+    uses: ./.github/workflows/MacOS build template.yml
