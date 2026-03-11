@@ -53,7 +53,7 @@ add_library(${MODULE_NAME} SHARED
 
 # Following compilation flag is added as SecurityAgent plugin uses regex that 
 # prevents the plugin from unloading from memory after deactivation.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
+target_compile_options(${MODULE_NAME} PRIVATE -fno-gnu-unique)
 
 set_target_properties(${MODULE_NAME} PROPERTIES
         CXX_STANDARD ${CXX_STD}

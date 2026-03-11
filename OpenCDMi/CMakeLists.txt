@@ -54,7 +54,7 @@ add_library(${MODULE_NAME} SHARED
         Module.cpp)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-gnu-unique")
+    target_compile_options(${MODULE_NAME} PRIVATE -fno-gnu-unique)
 endif()
 
 set_target_properties(${MODULE_NAME} PROPERTIES
