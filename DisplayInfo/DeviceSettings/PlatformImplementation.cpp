@@ -51,7 +51,7 @@ class DisplayInfoImplementation :
     public Exchange::IHDRProperties,
     public Exchange::IDisplayProperties  {
 private:
-    using HdrteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator, std::vector<Exchange::IHDRProperties::HDRType>>;
+    using HdrIteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator, std::vector<Exchange::IHDRProperties::HDRType>>;
     using ColorimetryIteratorImplementation = RPC::IteratorType<Exchange::IDisplayProperties::IColorimetryIterator, std::vector<Exchange::IDisplayProperties::ColorimetryType>>;
 public:
     DisplayInfoImplementation()
@@ -694,7 +694,7 @@ public:
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
+        type = Core::ServiceType<HdrIteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
@@ -722,7 +722,7 @@ public:
         if (capabilities & dsHDRSTANDARD_TechnicolorPrime) hdrCapabilities.push_back(HDR_TECHNICOLOR);
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
+        type = Core::ServiceType<HdrIteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
