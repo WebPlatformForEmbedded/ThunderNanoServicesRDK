@@ -152,7 +152,7 @@ namespace Plugin {
         };
         using AudioOutputMap = std::map<Exchange::IDeviceAudioCapabilities::AudioOutput, AudioOutputCapability>;
         using AudioOutputList = std::vector<Exchange::IDeviceAudioCapabilities::AudioOutput>;
-        using AudioOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>;
+        using AudioOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator, std::vector<Exchange::IDeviceAudioCapabilities::AudioOutput>>;
 
         struct VideoOutputCapability {
             std::list<IDeviceVideoCapabilities::ScreenResolution> Resolutions;
@@ -161,7 +161,7 @@ namespace Plugin {
         };
         using VideoOutputMap = std::map<Exchange::IDeviceVideoCapabilities::VideoOutput, VideoOutputCapability>;
         using VideoOutputList = std::vector<Exchange::IDeviceVideoCapabilities::VideoOutput>;
-        using VideoOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>;
+        using VideoOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator, std::vector<Exchange::IDeviceVideoCapabilities::VideoOutput>>;
 
     public:
         DeviceInfoImplementation(const DeviceInfoImplementation&) = delete;

@@ -51,8 +51,8 @@ class DisplayInfoImplementation :
     public Exchange::IHDRProperties,
     public Exchange::IDisplayProperties  {
 private:
-    using HdrteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator>;
-    using ColorimetryIteratorImplementation = RPC::IteratorType<Exchange::IDisplayProperties::IColorimetryIterator>;
+    using HdrteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator, std::vector<Exchange::IHDRProperties::HDRType>>;
+    using ColorimetryIteratorImplementation = RPC::IteratorType<Exchange::IDisplayProperties::IColorimetryIterator, std::vector<Exchange::IDisplayProperties::ColorimetryType>>;
 public:
     DisplayInfoImplementation()
     {
@@ -622,7 +622,7 @@ public:
             TRACE(Trace::Error, (_T("HDMI not connected!")));
             ret = Core::ERROR_GENERAL;
         }
-        colorimetry = Core::ServiceType<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(colorimetryCaps);
+        colorimetry = Core::ServiceType<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(std::move(colorimetryCaps));
         return (colorimetry != nullptr && ret == Core::ERROR_NONE ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
@@ -694,7 +694,7 @@ public:
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
@@ -722,7 +722,7 @@ public:
         if (capabilities & dsHDRSTANDARD_TechnicolorPrime) hdrCapabilities.push_back(HDR_TECHNICOLOR);
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property

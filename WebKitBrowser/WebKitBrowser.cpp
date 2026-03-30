@@ -339,7 +339,8 @@ namespace Plugin {
             list.push_back(iterator.Current().Value());
         }
 
-        languages = Core::ServiceType<RPC::IteratorType<RPC::IStringIterator>>::Create<RPC::IStringIterator>(list);
+        using LangIterImpl = RPC::IteratorType<RPC::IStringIterator, std::vector<string>>;
+        languages = Core::ServiceType<LangIterImpl>::Create<RPC::IStringIterator>(std::move(list));
 
         return (Core::ERROR_NONE);
     }
