@@ -95,8 +95,8 @@ private:
     };
 
 private:
-    using AudioIteratorImplementation = RPC::IteratorType<Exchange::IPlayerProperties::IAudioCodecIterator>;
-    using VideoIteratorImplementation = RPC::IteratorType<Exchange::IPlayerProperties::IVideoCodecIterator>;
+    using AudioIteratorImplementation = RPC::IteratorType<Exchange::IPlayerProperties::IAudioCodecIterator, std::vector<Exchange::IPlayerProperties::AudioCodec>>;
+    using VideoIteratorImplementation = RPC::IteratorType<Exchange::IPlayerProperties::IVideoCodecIterator, std::vector<Exchange::IPlayerProperties::VideoCodec>>;
 
     typedef std::map<const string, const Exchange::IPlayerProperties::AudioCodec> AudioCaps;
     typedef std::map<const string, const Exchange::IPlayerProperties::VideoCodec> VideoCaps;
@@ -170,6 +170,8 @@ private:
             {"audio/x-vorbis", Exchange::IPlayerProperties::AudioCodec::AUDIO_VORBIS_OGG},
             {"audio/x-wav", Exchange::IPlayerProperties::AudioCodec::AUDIO_WAV},
         };
+        _audioCodecs.reserve(audioCaps.size());
+
         if (GstUtils::GstRegistryCheckElementsForMediaTypes(audioCaps, _audioCodecs) != true) {
             TRACE(Trace::Warning, (_T("There is no Audio Codec support available")));
         }
@@ -185,14 +187,16 @@ private:
             {"video/x-vp9", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP9},
             {"video/x-vp10", Exchange::IPlayerProperties::VideoCodec::VIDEO_VP10}
         };
+        _videoCodecs.reserve(videoCaps.size());
+
         if (GstUtils::GstRegistryCheckElementsForMediaTypes(videoCaps, _videoCodecs) != true) {
             TRACE(Trace::Warning, (_T("There is no Video Codec support available")));
         }
     }
 
 private:
-    std::list<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
-    std::list<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
+    std::vector<Exchange::IPlayerProperties::AudioCodec> _audioCodecs;
+    std::vector<Exchange::IPlayerProperties::VideoCodec> _videoCodecs;
 #if DOLBY_SUPPORT
     Exchange::Dolby::IOutput* _dolbyOut;
 #endif

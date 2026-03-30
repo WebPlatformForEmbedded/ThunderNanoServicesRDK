@@ -424,15 +424,15 @@ namespace Plugin {
 
             _client.Modules(list);
 
-            using Implementation = RPC::IteratorType<RPC::IStringIterator>;
-            modules = Core::ServiceType<Implementation>::Create<RPC::IStringIterator>(list);
+            using Implementation = RPC::IteratorType<RPC::IStringIterator, std::vector<string>>;
+            modules = Core::ServiceType<Implementation>::Create<RPC::IStringIterator>(std::move(list));
 
             return (Core::ERROR_NONE);
         }
 
         Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
         {
-            std::list<Exchange::IMessageControl::Control> list;
+            std::vector<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
             _client.Controls(index, module);
 
@@ -440,8 +440,8 @@ namespace Plugin {
                 list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
-            using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator>;
-            controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(list);
+            using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator, std::vector<Exchange::IMessageControl::Control>>;
+            controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(std::move(list));
 
             return (Core::ERROR_NONE);
         }

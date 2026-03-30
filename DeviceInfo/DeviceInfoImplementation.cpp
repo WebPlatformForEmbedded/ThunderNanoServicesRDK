@@ -7,12 +7,12 @@ namespace Plugin {
     using AudioCapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::AudioCapability>>;
     using MS12CapabilitiesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::MS12Capability>>;
     using MS12ProfilesJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceAudioCapabilities::MS12Profile>>;
-    using AudioCapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator>;
-    using MS12CapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator>;
-    using MS12ProfileIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator>;
+    using AudioCapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioCapabilityIterator, std::vector<Exchange::IDeviceAudioCapabilities::AudioCapability>>;
+    using MS12CapabilityIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12CapabilityIterator, std::vector<Exchange::IDeviceAudioCapabilities::MS12Capability>>;
+    using MS12ProfileIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IMS12ProfileIterator, std::vector<Exchange::IDeviceAudioCapabilities::MS12Profile>>;
 
     using ResolutionJsonArray = Core::JSON::ArrayType<Core::JSON::EnumType<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;
-    using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator>;
+    using ResolutionIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IScreenResolutionIterator, std::vector<Exchange::IDeviceVideoCapabilities::ScreenResolution>>;
 
     uint32_t DeviceInfoImplementation::Configure(const PluginHost::IShell* service)
     {
@@ -74,13 +74,14 @@ namespace Plugin {
     uint32_t DeviceInfoImplementation::AudioOutputs(Exchange::IDeviceAudioCapabilities::IAudioOutputIterator*& audioOutputs) const
     {
         AudioOutputList audioOutputList;
+        audioOutputList.reserve(_audioOutputMap.size());
 
-        std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::front_inserter(audioOutputList),
+        std::transform(_audioOutputMap.begin(), _audioOutputMap.end(), std::back_inserter(audioOutputList),
         [](decltype(_audioOutputMap)::value_type const &pair) {
             return pair.first;
         });
 
-        audioOutputs = Core::ServiceType<AudioOutputIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>(audioOutputList);
+        audioOutputs = Core::ServiceType<AudioOutputIteratorImplementation>::Create<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>(std::move(audioOutputList));
         return (audioOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
@@ -114,13 +115,14 @@ namespace Plugin {
     uint32_t DeviceInfoImplementation::VideoOutputs(Exchange::IDeviceVideoCapabilities::IVideoOutputIterator*& videoOutputs) const
     {
         VideoOutputList videoOutputList;
+        videoOutputList.reserve(_videoOutputMap.size());
 
         std::transform(_videoOutputMap.begin(), _videoOutputMap.end(), std::back_inserter(videoOutputList),
         [](decltype(_videoOutputMap)::value_type const &pair) {
             return pair.first;
         });
 
-        videoOutputs = Core::ServiceType<VideoOutputIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>(videoOutputList);
+        videoOutputs = Core::ServiceType<VideoOutputIteratorImplementation>::Create<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>(std::move(videoOutputList));
 
         return (videoOutputs != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }

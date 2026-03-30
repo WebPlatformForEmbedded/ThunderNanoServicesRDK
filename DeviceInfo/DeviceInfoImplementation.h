@@ -146,22 +146,22 @@ namespace Plugin {
         }; // CONFIG
 
         struct AudioOutputCapability {
-            std::list<IDeviceAudioCapabilities::AudioCapability> AudioCapabilities;
-            std::list<IDeviceAudioCapabilities::MS12Capability> MS12Capabilities;
-            std::list<IDeviceAudioCapabilities::MS12Profile> MS12Profiles;
+            std::vector<IDeviceAudioCapabilities::AudioCapability> AudioCapabilities;
+            std::vector<IDeviceAudioCapabilities::MS12Capability> MS12Capabilities;
+            std::vector<IDeviceAudioCapabilities::MS12Profile> MS12Profiles;
         };
         using AudioOutputMap = std::map<Exchange::IDeviceAudioCapabilities::AudioOutput, AudioOutputCapability>;
-        using AudioOutputList = std::list<Exchange::IDeviceAudioCapabilities::AudioOutput>;
-        using AudioOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator>;
+        using AudioOutputList = std::vector<Exchange::IDeviceAudioCapabilities::AudioOutput>;
+        using AudioOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceAudioCapabilities::IAudioOutputIterator, std::vector<Exchange::IDeviceAudioCapabilities::AudioOutput>>;
 
         struct VideoOutputCapability {
-            std::list<IDeviceVideoCapabilities::ScreenResolution> Resolutions;
+            std::vector<IDeviceVideoCapabilities::ScreenResolution> Resolutions;
             IDeviceVideoCapabilities::ScreenResolution DefaultResolution;
             IDeviceVideoCapabilities::CopyProtection CopyProtection;
         };
         using VideoOutputMap = std::map<Exchange::IDeviceVideoCapabilities::VideoOutput, VideoOutputCapability>;
-        using VideoOutputList = std::list<Exchange::IDeviceVideoCapabilities::VideoOutput>;
-        using VideoOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator>;
+        using VideoOutputList = std::vector<Exchange::IDeviceVideoCapabilities::VideoOutput>;
+        using VideoOutputIteratorImplementation = RPC::IteratorType<Exchange::IDeviceVideoCapabilities::IVideoOutputIterator, std::vector<Exchange::IDeviceVideoCapabilities::VideoOutput>>;
 
     public:
         DeviceInfoImplementation(const DeviceInfoImplementation&) = delete;

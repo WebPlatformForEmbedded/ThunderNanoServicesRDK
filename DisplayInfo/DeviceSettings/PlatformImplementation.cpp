@@ -51,8 +51,8 @@ class DisplayInfoImplementation :
     public Exchange::IHDRProperties,
     public Exchange::IDisplayProperties  {
 private:
-    using HdrteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator>;
-    using ColorimetryIteratorImplementation = RPC::IteratorType<Exchange::IDisplayProperties::IColorimetryIterator>;
+    using HdrIteratorImplementation = RPC::IteratorType<Exchange::IHDRProperties::IHDRIterator, std::vector<Exchange::IHDRProperties::HDRType>>;
+    using ColorimetryIteratorImplementation = RPC::IteratorType<Exchange::IDisplayProperties::IColorimetryIterator, std::vector<Exchange::IDisplayProperties::ColorimetryType>>;
 public:
     DisplayInfoImplementation()
     {
@@ -584,7 +584,9 @@ public:
 
     uint32_t Colorimetry(IColorimetryIterator*& colorimetry /* @out */) const override
     {
-        std::list<Exchange::IDisplayProperties::ColorimetryType> colorimetryCaps;
+        std::vector<Exchange::IDisplayProperties::ColorimetryType> colorimetryCaps;
+        colorimetryCaps.reserve(8);
+
         vector<uint8_t> edidVec;
         uint32_t ret = GetEdidBytes(edidVec);
         if (ret == Core::ERROR_NONE)
@@ -620,7 +622,7 @@ public:
             TRACE(Trace::Error, (_T("HDMI not connected!")));
             ret = Core::ERROR_GENERAL;
         }
-        colorimetry = Core::ServiceType<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(colorimetryCaps);
+        colorimetry = Core::ServiceType<ColorimetryIteratorImplementation>::Create<Exchange::IDisplayProperties::IColorimetryIterator>(std::move(colorimetryCaps));
         return (colorimetry != nullptr && ret == Core::ERROR_NONE ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
 
@@ -665,7 +667,8 @@ public:
     // @return HDRType: array of HDR formats
     uint32_t TVCapabilities(IHDRIterator*& type /* out */) const override
     {
-        std::list<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        hdrCapabilities.reserve(4);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try
@@ -691,7 +694,7 @@ public:
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrIteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property
@@ -699,7 +702,8 @@ public:
     // @return HDRType: array of HDR formats
     uint32_t STBCapabilities(IHDRIterator*& type /* out */) const override
     {
-        std::list<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        std::vector<Exchange::IHDRProperties::HDRType> hdrCapabilities;
+        hdrCapabilities.reserve(4);
 
         int capabilities = static_cast<int>(dsHDRSTANDARD_NONE);
         try
@@ -718,7 +722,7 @@ public:
         if (capabilities & dsHDRSTANDARD_TechnicolorPrime) hdrCapabilities.push_back(HDR_TECHNICOLOR);
         if (capabilities & dsHDRSTANDARD_Invalid)hdrCapabilities.push_back(HDR_OFF);
 
-        type = Core::ServiceType<HdrteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(hdrCapabilities);
+        type = Core::ServiceType<HdrIteratorImplementation>::Create<Exchange::IHDRProperties::IHDRIterator>(std::move(hdrCapabilities));
         return (type != nullptr ? Core::ERROR_NONE : Core::ERROR_GENERAL);
     }
     // @property

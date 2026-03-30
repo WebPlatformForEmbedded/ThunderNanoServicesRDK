@@ -331,14 +331,16 @@ namespace Plugin {
         Core::JSON::ArrayType<Core::JSON::String> array;
         array.FromString(languagesList);
 
-        std::list<string> list;
+        std::vector<string> list;
+        list.reserve(array.Length());
         auto iterator = array.Elements();
 
         while (iterator.Next() == true) {
             list.push_back(iterator.Current().Value());
         }
 
-        languages = Core::ServiceType<RPC::IteratorType<RPC::IStringIterator>>::Create<RPC::IStringIterator>(list);
+        using LangIterImpl = RPC::IteratorType<RPC::IStringIterator, std::vector<string>>;
+        languages = Core::ServiceType<LangIterImpl>::Create<RPC::IStringIterator>(std::move(list));
 
         return (Core::ERROR_NONE);
     }
