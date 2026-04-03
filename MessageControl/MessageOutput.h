@@ -20,6 +20,10 @@
 #pragma once
 #include "Module.h"
 
+#if defined(HAS_TELEMETRY_BACKEND)
+#include "TelemetryOutput.h"
+#endif
+
 namespace Thunder {
 
 namespace Publishers {
@@ -27,7 +31,7 @@ namespace Publishers {
     struct IPublish {
         virtual ~IPublish() = default;
 
-        virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
+        virtual void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) = 0;
     };
 
     class Text {
@@ -43,7 +47,7 @@ namespace Publishers {
         ~Text() = default;
 
     public:
-        string Convert(const Core::Messaging::MessageInfo& metadata, const string& text);
+        string Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event);
 
     private:
         Core::Messaging::MessageInfo::abbreviate _abbreviated;
@@ -62,7 +66,7 @@ namespace Publishers {
         ~ConsoleOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -81,7 +85,7 @@ namespace Publishers {
         ~SyslogOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -111,7 +115,7 @@ namespace Publishers {
         }
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -331,7 +335,7 @@ namespace Publishers {
             }
         }
 
-        void Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& info);
+        void Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event, Data& info);
 
     private:
         template <typename E>
@@ -410,7 +414,7 @@ namespace Publishers {
         }
 
         void UpdateChannel();
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override;
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -615,7 +619,7 @@ namespace Publishers {
             return (element);
         }
 
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override
         {
             std::list<std::pair<uint32_t, Core::ProxyType<Core::JSON::IElement>>> cachedList;
             PluginHost::IShell* server = nullptr;
@@ -626,7 +630,7 @@ namespace Publishers {
                 for (auto& item : _channels) {
                     if (item.second.Paused() == false) {
                         Core::ProxyType<JSON::Data> data = _jsonExportDataFactory.Element();
-                        item.second.Convert(metadata, text, *data);
+                        item.second.Convert(metadata, event, *data);
                         cachedList.emplace_back(item.first, Core::ProxyType<Core::JSON::IElement>(data));
                     }
                 }
@@ -659,6 +663,45 @@ namespace Publishers {
         Core::ProxyPoolType<JSON::Data> _jsonExportDataFactory;
         Core::ProxyPoolType<ExportCommand> _jsonExportCommandFactory;
     };
+
+#if defined(HAS_TELEMETRY_BACKEND)
+    /**
+     * @brief Publisher that filters for TELEMETRY-type messages and forwards
+     *        them to the statically linked telemetry backend via C functions.
+     */
+    class TelemetryOutput : public IPublish {
+    public:
+        TelemetryOutput(const TelemetryOutput&) = delete;
+        TelemetryOutput& operator=(const TelemetryOutput&) = delete;
+
+        TelemetryOutput() = default;
+        ~TelemetryOutput() override = default;
+
+    public:
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override
+        {
+            if (metadata.Type() == Core::Messaging::Metadata::type::TELEMETRY) {
+                const Core::Messaging::TelemetryMessage* telemetry = static_cast<const Core::Messaging::TelemetryMessage*>(&event);
+
+                if (telemetry->IsSigned()) {
+                    TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), telemetry->SignedValue());
+                }
+                else if (telemetry->IsUnsigned()) {
+                    TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), static_cast<int64_t>(telemetry->UnsignedValue()));
+                }
+                else if (telemetry->IsFloatingPoint()) {
+                    double value = (telemetry->Type() == Core::Messaging::TelemetryMessage::ValueType::FLOAT32)
+                                 ? static_cast<double>(telemetry->Float32Value())
+                                 : telemetry->Float64Value();
+                    TelemetryBackend_SendFloat(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), value);
+                }
+                else {
+                    TelemetryBackend_SendString(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), event.Data().c_str());
+                }
+            }
+        }
+    };
+#endif
 
 } // namespace Publishers
 }

@@ -34,6 +34,8 @@ set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details en
 set(PLUGIN_MESSAGECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_MESSAGECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
 set(PLUGIN_MESSAGECONTROL_INTERFACE "eth0" CACHE STRING "Interface to bind to")
+option(PLUGIN_MESSAGECONTROL_TELEMETRY_T2 "Enable T2 telemetry backend (statically linked)" ON)
+set(PLUGIN_MESSAGECONTROL_TELEMETRY_CONFIG "" CACHE STRING "JSON configuration string for the telemetry backend")
 
 add_subdirectory(BuffersFlush)
 
@@ -61,6 +63,19 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${NAMESPACE}Messaging::${NAMESPACE}Messaging)
+
+if(PLUGIN_MESSAGECONTROL_TELEMETRY_T2)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../TelemetryBackendT2
+                     ${CMAKE_CURRENT_BINARY_DIR}/TelemetryBackendT2)
+
+    target_link_libraries(${MODULE_NAME}
+        PRIVATE
+            ${NAMESPACE}TelemetryBackendT2)
+
+    target_compile_definitions(${MODULE_NAME}
+        PRIVATE
+            HAS_TELEMETRY_BACKEND=1)
+endif()
 
 install(TARGETS ${MODULE_NAME} 
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/${STORAGE_DIRECTORY}/plugins COMPONENT ${NAMESPACE}_Runtime)

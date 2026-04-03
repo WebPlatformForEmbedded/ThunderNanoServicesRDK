@@ -21,6 +21,9 @@
 
 #include "Module.h"
 #include "MessageOutput.h"
+#if defined(HAS_TELEMETRY_BACKEND)
+#include "TelemetryOutput.h"
+#endif
 #include <functional>
 
 namespace Thunder {
@@ -61,7 +64,7 @@ namespace Plugin {
 
             struct ICallback {
 
-                virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
+                virtual void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) = 0;
 
                 virtual ~ICallback() = default;
             };
@@ -102,6 +105,7 @@ namespace Plugin {
                 , Abbreviated(true)
                 , MaxExportConnections(Publishers::WebSocketOutput::DefaultMaxConnections)
                 , Remote()
+                , TelemetryConfig()
             {
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
@@ -109,6 +113,7 @@ namespace Plugin {
                 Add(_T("abbreviated"), &Abbreviated);
                 Add(_T("maxexportconnections"), &MaxExportConnections);
                 Add(_T("remote"), &Remote);
+                Add(_T("telemetryconfig"), &TelemetryConfig);
             }
             ~Config() = default;
 
@@ -121,6 +126,7 @@ namespace Plugin {
             Core::JSON::Boolean Abbreviated;
             Core::JSON::DecUInt16 MaxExportConnections;
             NetworkNode Remote;
+            Core::JSON::String TelemetryConfig;
         };
 
         class Observer
@@ -154,8 +160,8 @@ namespace Plugin {
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Core::Messaging::MessageInfo& metadata, const string& message) override {
-                _parent.Message(metadata, message);
+            void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override {
+                _parent.Message(metadata, event);
             }
 
             //
@@ -325,16 +331,16 @@ namespace Plugin {
             _outputLock.Unlock();
         }
 
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& message)
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event)
         {
             // Time to start sending it to all interested parties...
             _outputLock.Lock();
 
             for (auto& entry : _outputDirector) {
-                entry->Message(metadata, message);
+                entry->Message(metadata, event);
             }
 
-            _webSocketExporter.Message(metadata, message);
+            _webSocketExporter.Message(metadata, event);
 
             _outputLock.Unlock();
         }
@@ -452,8 +458,8 @@ namespace Plugin {
             _client.WaitForUpdates(Core::infinite);
 
             _client.PopMessagesAndCall([this](const Core::ProxyType<Core::Messaging::MessageInfo>& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
-                // Turn data into piecies to trasfer over the wire
-                Message(*metadata, message->Data());
+                // Forward the IEvent directly so typed telemetry data is preserved
+                Message(*metadata, *message);
             });
         }
 
@@ -476,6 +482,7 @@ namespace Plugin {
         Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Core::Messaging::TextMessage> _operationalStreamFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Assert, Core::Messaging::TextMessage> _assertFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Telemetry, Core::Messaging::TelemetryMessage> _telemetryFactory;
     };
 
 } // namespace Plugin
