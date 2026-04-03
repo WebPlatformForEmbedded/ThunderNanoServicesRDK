@@ -34,7 +34,7 @@ set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details en
 set(PLUGIN_MESSAGECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_MESSAGECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
 set(PLUGIN_MESSAGECONTROL_INTERFACE "eth0" CACHE STRING "Interface to bind to")
-option(PLUGIN_MESSAGECONTROL_TELEMETRY_T2 "Enable T2 telemetry backend (statically linked)" ON)
+option(PLUGIN_MESSAGECONTROL_TELEMETRY_T2 "Enable T2 telemetry backend (statically linked)" OFF)
 set(PLUGIN_MESSAGECONTROL_TELEMETRY_CONFIG "" CACHE STRING "JSON configuration string for the telemetry backend")
 
 add_subdirectory(BuffersFlush)
