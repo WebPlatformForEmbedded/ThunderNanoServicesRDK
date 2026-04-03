@@ -24,7 +24,7 @@
 #endif
 
 #include <core/core.h>
-#include <cstring>
+#include <climits>
 #include <string>
 #include <vector>
 
@@ -99,7 +99,9 @@ uint32_t TelemetryBackend_SendInteger(const char* category, const char* /* modul
     uint32_t result = 1;
 
     if (g_initialized == true) {
-        result = (t2_event_d(category, static_cast<int>(value)) == 0) ? 0 : 1;
+        if ((value >= INT_MIN) && (value <= INT_MAX)) {
+            result = (t2_event_d(category, static_cast<int>(value)) == 0) ? 0 : 1;
+        }
     }
 
     return (result);

@@ -686,7 +686,7 @@ namespace Publishers {
                 if (telemetry->IsSigned()) {
                     TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), telemetry->SignedValue());
                 }
-                else if (telemetry->IsUnsigned()) {
+                else if (telemetry->IsUnsigned() && (telemetry->UnsignedValue() <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))) {
                     TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), static_cast<int64_t>(telemetry->UnsignedValue()));
                 }
                 else if (telemetry->IsFloatingPoint()) {
