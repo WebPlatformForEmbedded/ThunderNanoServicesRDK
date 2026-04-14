@@ -626,6 +626,20 @@ namespace Plugin {
                         source->Release();
                     }
                 }
+                void Register(IPlugin::INotification* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Register(sink, interface_id);
+                        source->Release();
+                    }
+                }
+                void Unregister(IPlugin::INotification* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Unregister(sink, interface_id);
+                        source->Release();
+                    }
+                }
                 IShell::state State() const override {
                     Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
                     return (_shell == nullptr ? IShell::state::DESTROYED : static_cast< IShell::state>(_state));
