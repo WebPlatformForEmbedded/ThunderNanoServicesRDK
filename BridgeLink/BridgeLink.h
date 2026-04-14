@@ -761,7 +761,7 @@ namespace Plugin {
                 }
                 void Dropped(const ICallback*) override {
                 }
-                void* QueryInterface(const uint32_t interfaceNumber) override {
+                void* QueryInterface(const uint32_t interfaceNumber, const bool asIUnknown = false) override {
                     void* result = nullptr;
                     if (interfaceNumber == Core::IUnknown::ID) {
                         AddRef();
@@ -769,20 +769,26 @@ namespace Plugin {
                     }
                     else if (interfaceNumber == PluginHost::IShell::ID) {
                         AddRef();
-                        result = static_cast<void*>(static_cast<PluginHost::IShell*>(this));
+                        if(asIUnknown == false)
+                            result = static_cast<void*>(static_cast<PluginHost::IShell*>(this));
+                        else 
+                            result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
                     }
                     else if (interfaceNumber == PluginHost::IDispatcher::ID) {
                         _adminLock.Lock();
                         if (_dispatcher != nullptr) {
                             AddRef();
-                            result = static_cast<void*>(static_cast<PluginHost::IDispatcher*>(this));
+                            if(asIUnknown == false)
+                                result = static_cast<void*>(static_cast<PluginHost::IDispatcher*>(this));
+                            else 
+                                result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
                         }
                         _adminLock.Unlock();
                     }
                     else {
                         PluginHost::IShell* source = Source();
                         if (source != nullptr) {
-                            result = source->QueryInterface(interfaceNumber);
+                            result = source->QueryInterface(interfaceNumber, asIUnknown);
                             source->Release();
                         }
                     }
