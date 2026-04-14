@@ -763,25 +763,27 @@ namespace Plugin {
                 }
                 void* QueryInterface(const uint32_t interfaceNumber, const bool asIUnknown = false) override {
                     void* result = nullptr;
-                    if (interfaceNumber == Core::IUnknown::ID) {
+                    if (interfaceNumber == Thunder::Core::IUnknown::ID) {
                         AddRef();
                         result = static_cast<void*>(static_cast<Core::IUnknown*>(this));
                     }
                     else if (interfaceNumber == PluginHost::IShell::ID) {
                         AddRef();
-                        if(asIUnknown == false)
+                        if (asIUnknown == false) {
                             result = static_cast<void*>(static_cast<PluginHost::IShell*>(this));
-                        else 
+                        } else {
                             result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
+                        }
                     }
                     else if (interfaceNumber == PluginHost::IDispatcher::ID) {
                         _adminLock.Lock();
                         if (_dispatcher != nullptr) {
                             AddRef();
-                            if(asIUnknown == false)
+                            if (asIUnknown == false) {
                                 result = static_cast<void*>(static_cast<PluginHost::IDispatcher*>(this));
-                            else 
+                            } else {
                                 result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
+                            }
                         }
                         _adminLock.Unlock();
                     }
