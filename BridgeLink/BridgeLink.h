@@ -626,6 +626,20 @@ namespace Plugin {
                         source->Release();
                     }
                 }
+                void Register(IPlugin::INotification* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Register(sink, interface_id);
+                        source->Release();
+                    }
+                }
+                void Unregister(IPlugin::INotification* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Unregister(sink, interface_id);
+                        source->Release();
+                    }
+                }
                 IShell::state State() const override {
                     Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
                     return (_shell == nullptr ? IShell::state::DESTROYED : static_cast< IShell::state>(_state));
@@ -761,28 +775,36 @@ namespace Plugin {
                 }
                 void Dropped(const ICallback*) override {
                 }
-                void* QueryInterface(const uint32_t interfaceNumber) override {
+                void* QueryInterface(const uint32_t interfaceNumber, const bool asIUnknown = false) override {
                     void* result = nullptr;
-                    if (interfaceNumber == Core::IUnknown::ID) {
+                    if (interfaceNumber == Thunder::Core::IUnknown::ID) {
                         AddRef();
                         result = static_cast<void*>(static_cast<Core::IUnknown*>(this));
                     }
                     else if (interfaceNumber == PluginHost::IShell::ID) {
                         AddRef();
-                        result = static_cast<void*>(static_cast<PluginHost::IShell*>(this));
+                        if (asIUnknown == false) {
+                            result = static_cast<void*>(static_cast<PluginHost::IShell*>(this));
+                        } else {
+                            result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
+                        }
                     }
                     else if (interfaceNumber == PluginHost::IDispatcher::ID) {
                         _adminLock.Lock();
                         if (_dispatcher != nullptr) {
                             AddRef();
-                            result = static_cast<void*>(static_cast<PluginHost::IDispatcher*>(this));
+                            if (asIUnknown == false) {
+                                result = static_cast<void*>(static_cast<PluginHost::IDispatcher*>(this));
+                            } else {
+                                result = static_cast<void*>(static_cast<Thunder::Core::IUnknown*>(this));
+                            }
                         }
                         _adminLock.Unlock();
                     }
                     else {
                         PluginHost::IShell* source = Source();
                         if (source != nullptr) {
-                            result = source->QueryInterface(interfaceNumber);
+                            result = source->QueryInterface(interfaceNumber, asIUnknown);
                             source->Release();
                         }
                     }
