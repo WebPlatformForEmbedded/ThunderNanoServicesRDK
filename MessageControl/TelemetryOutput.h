@@ -23,12 +23,12 @@
  * @brief C interface for a telemetry backend.
  *
  *        The backend is selected at build time (static linking) and must
- *        implement all five functions below. MessageControl calls them
+ *        implement all three functions below. MessageControl calls them
  *        directly.
  *
  *        Lifecycle:
  *          1. TelemetryBackend_Configure()   — once, at plugin Initialize
- *          2. TelemetryBackend_Send*()       — for every telemetry event
+ *          2. TelemetryBackend_Send()        — for every telemetry event
  *          3. TelemetryBackend_Teardown()    — once, at plugin Deinitialize
  */
 
@@ -38,6 +38,20 @@
 extern "C" {
 #endif
 
+typedef enum {
+    TELEMETRY_VALUE_TEXT    = 0,
+    TELEMETRY_VALUE_INT8    = 1,
+    TELEMETRY_VALUE_UINT8   = 2,
+    TELEMETRY_VALUE_INT16   = 3,
+    TELEMETRY_VALUE_UINT16  = 4,
+    TELEMETRY_VALUE_INT32   = 5,
+    TELEMETRY_VALUE_UINT32  = 6,
+    TELEMETRY_VALUE_INT64   = 7,
+    TELEMETRY_VALUE_UINT64  = 8,
+    TELEMETRY_VALUE_FLOAT32 = 9,
+    TELEMETRY_VALUE_FLOAT64 = 10
+} TelemetryBackend_ValueType;
+
 /**
  * @brief One-time initialization with backend-specific settings.
  * @param configuration Null-terminated JSON string (opaque to the caller)
@@ -46,24 +60,22 @@ extern "C" {
 uint32_t TelemetryBackend_Configure(const char* configuration);
 
 /**
- * @brief Send a string telemetry event.
+ * @brief Send a telemetry event.
  * @param category   Telemetry category name (marker)
  * @param module     Source module name
  * @param timestamp  Message timestamp (ticks)
- * @param message    Null-terminated message text
+ * @param type       Value type tag
+ * @param value      For TEXT: a const char* (null-terminated string).
+ *                   For signed integers: pointer to int64_t.
+ *                   For unsigned integers: pointer to uint64_t.
+ *                   For FLOAT32: pointer to float.
+ *                   For FLOAT64: pointer to double.
  * @return 0 on success
  */
-uint32_t TelemetryBackend_SendString(const char* category, const char* module, uint64_t timestamp, const char* message);
-
-/**
- * @brief Send an integer telemetry event.
- */
-uint32_t TelemetryBackend_SendInteger(const char* category, const char* module, uint64_t timestamp, int64_t value);
-
-/**
- * @brief Send a floating-point telemetry event.
- */
-uint32_t TelemetryBackend_SendFloat(const char* category, const char* module, uint64_t timestamp, double value);
+uint32_t TelemetryBackend_Send(const char* category, const char* module,
+                               uint64_t timestamp,
+                               TelemetryBackend_ValueType type,
+                               const void* value);
 
 /**
  * @brief Graceful shutdown — flush pending data, release resources.

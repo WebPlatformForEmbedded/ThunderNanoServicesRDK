@@ -17,15 +17,21 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(t2mock C)
+project(telemetry_msgsender_mock C)
 
-add_library(t2 SHARED t2_mock.c)
+add_library(telemetry_msgsender SHARED t2_mock.c)
 
-# Alias so that target_link_libraries(... t2::t2) works when
-# the mock is pulled in via add_subdirectory().
-add_library(t2::t2 ALIAS t2)
+# Expose the mock header so that #include <telemetry_busmessage_sender.h>
+# resolves when building against the mock library.
+target_include_directories(telemetry_msgsender
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
+# Alias so that target_link_libraries(... telemetry_msgsender::telemetry_msgsender)
+# works when the mock is pulled in via add_subdirectory().
+add_library(telemetry_msgsender::telemetry_msgsender ALIAS telemetry_msgsender)
 
 # Install the library so it ends up on the target filesystem
 include(GNUInstallDirs)
-install(TARGETS t2
+install(TARGETS telemetry_msgsender
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${NAMESPACE}${PROJECT_NAME})

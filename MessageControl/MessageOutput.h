@@ -683,21 +683,13 @@ namespace Publishers {
             if (metadata.Type() == Core::Messaging::Metadata::type::TELEMETRY) {
                 const Core::Messaging::TelemetryMessage* telemetry = static_cast<const Core::Messaging::TelemetryMessage*>(&event);
 
-                if (telemetry->IsSigned()) {
-                    TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), telemetry->SignedValue());
-                }
-                else if (telemetry->IsUnsigned() && (telemetry->UnsignedValue() <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))) {
-                    TelemetryBackend_SendInteger(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), static_cast<int64_t>(telemetry->UnsignedValue()));
-                }
-                else if (telemetry->IsFloatingPoint()) {
-                    double value = (telemetry->Type() == Core::Messaging::TelemetryMessage::ValueType::FLOAT32)
-                                 ? static_cast<double>(telemetry->Float32Value())
-                                 : telemetry->Float64Value();
-                    TelemetryBackend_SendFloat(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), value);
-                }
-                else {
-                    TelemetryBackend_SendString(metadata.Category().c_str(), metadata.Module().c_str(), metadata.TimeStamp(), event.Data().c_str());
-                }
+                TelemetryBackend_Send(
+                    metadata.Category().c_str(),
+                    metadata.Module().c_str(),
+                    metadata.TimeStamp(),
+                    static_cast<TelemetryBackend_ValueType>(telemetry->Type()),
+                    telemetry->RawValue()
+                );
             }
         }
     };

@@ -28,23 +28,7 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for the t2 API
-#if !defined(T2_STUB)
-extern "C" {
-    void t2_init(char* component);
-    int t2_event_s(const char* marker, const char* value);
-    int t2_event_d(const char* marker, int value);
-    int t2_event_f(const char* marker, double value);
-    void t2_uninit(void);
-}
-#else
-// Stub implementations when the t2 library is not available
-static inline void t2_init(char*) {}
-static inline int t2_event_s(const char*, const char*) { return 0; }
-static inline int t2_event_d(const char*, int) { return 0; }
-static inline int t2_event_f(const char*, double) { return 0; }
-static inline void t2_uninit() {}
-#endif
+#include <telemetry_busmessage_sender.h>
 
 static bool g_initialized = false;
 
@@ -83,36 +67,59 @@ uint32_t TelemetryBackend_Configure(const char* configuration)
     return (0);
 }
 
-uint32_t TelemetryBackend_SendString(const char* category, const char* /* module */, uint64_t /* timestamp */, const char* message)
+uint32_t TelemetryBackend_Send(const char* category, const char* /* module */,
+                               uint64_t /* timestamp */,
+                               TelemetryBackend_ValueType type,
+                               const void* value)
 {
     uint32_t result = 1;
 
     if (g_initialized == true) {
-        result = (t2_event_s(category, message) == 0) ? 0 : 1;
-    }
-
-    return (result);
-}
-
-uint32_t TelemetryBackend_SendInteger(const char* category, const char* /* module */, uint64_t /* timestamp */, int64_t value)
-{
-    uint32_t result = 1;
-
-    if (g_initialized == true) {
-        if ((value >= INT_MIN) && (value <= INT_MAX)) {
-            result = (t2_event_d(category, static_cast<int>(value)) == 0) ? 0 : 1;
+        switch (type) {
+        case TELEMETRY_VALUE_TEXT:
+            result = (t2_event_s(category, static_cast<const char*>(value)) == 0) ? 0 : 1;
+            break;
+        case TELEMETRY_VALUE_INT8:
+        case TELEMETRY_VALUE_INT16:
+        case TELEMETRY_VALUE_INT32: {
+            int64_t v = *static_cast<const int64_t*>(value);
+            result = (t2_event_d(category, static_cast<int>(v)) == 0) ? 0 : 1;
+            break;
         }
-    }
-
-    return (result);
-}
-
-uint32_t TelemetryBackend_SendFloat(const char* category, const char* /* module */, uint64_t /* timestamp */, double value)
-{
-    uint32_t result = 1;
-
-    if (g_initialized == true) {
-        result = (t2_event_f(category, value) == 0) ? 0 : 1;
+        case TELEMETRY_VALUE_INT64: {
+            int64_t v = *static_cast<const int64_t*>(value);
+            if ((v >= INT_MIN) && (v <= INT_MAX)) {
+                result = (t2_event_d(category, static_cast<int>(v)) == 0) ? 0 : 1;
+            }
+            break;
+        }
+        case TELEMETRY_VALUE_UINT8:
+        case TELEMETRY_VALUE_UINT16: {
+            uint64_t v = *static_cast<const uint64_t*>(value);
+            result = (t2_event_d(category, static_cast<int>(v)) == 0) ? 0 : 1;
+            break;
+        }
+        case TELEMETRY_VALUE_UINT32:
+        case TELEMETRY_VALUE_UINT64: {
+            uint64_t v = *static_cast<const uint64_t*>(value);
+            if (v <= static_cast<uint64_t>(INT_MAX)) {
+                result = (t2_event_d(category, static_cast<int>(v)) == 0) ? 0 : 1;
+            }
+            break;
+        }
+        case TELEMETRY_VALUE_FLOAT32: {
+            float v = *static_cast<const float*>(value);
+            result = (t2_event_f(category, static_cast<double>(v)) == 0) ? 0 : 1;
+            break;
+        }
+        case TELEMETRY_VALUE_FLOAT64: {
+            double v = *static_cast<const double*>(value);
+            result = (t2_event_f(category, v) == 0) ? 0 : 1;
+            break;
+        }
+        default:
+            break;
+        }
     }
 
     return (result);
