@@ -138,7 +138,6 @@ namespace Thunder {
             }
         }
 #endif
-
         _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
 
         Exchange::JMessageControl::Register(*this, this);
