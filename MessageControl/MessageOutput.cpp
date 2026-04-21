@@ -23,10 +23,11 @@ namespace Thunder {
 
 namespace Publishers {
 
-    string Text::Convert(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    string Text::Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
         ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
 
+        const string& text = event.Data();
         string output = metadata.ToString(_abbreviated);
 
         output.reserve(output.size() + text.size() + 1);
@@ -37,29 +38,29 @@ namespace Publishers {
         return (output);
     }
 
-    void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
-        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, text).c_str());
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, event).c_str());
     }
 
-    void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
 #ifndef __WINDOWS__
-        syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, text).c_str());
+        syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, event).c_str());
 #else
-        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, text).c_str());
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, event).c_str());
 #endif
     }
 
-    void FileOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void FileOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
         if (_file.IsOpen()) {
-            const string line = _convertor.Convert(metadata, text);
+            const string line = _convertor.Convert(metadata, event);
             _file.Write(reinterpret_cast<const uint8_t*>(line.c_str()), static_cast<uint32_t>(line.length()));
         }
     }
 
-    void JSON::Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& data)
+    void JSON::Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event, Data& data)
     {
         ExtraOutputOptions options = _outputOptions;
 
@@ -128,7 +129,7 @@ namespace Publishers {
                 ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
             }
 
-            data.Message = text;
+            data.Message = event.Data();
         }
     }
 
@@ -217,10 +218,10 @@ namespace Publishers {
         }
     }
 
-    void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
         if (_output.IsOpen() == true) {
-            _output.Output(_convertor.Convert(metadata, text));
+            _output.Output(_convertor.Convert(metadata, event));
         }
     }
 

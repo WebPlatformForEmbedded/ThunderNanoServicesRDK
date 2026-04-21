@@ -80,6 +80,7 @@ namespace Thunder {
         , _warningReportingFactory()
         , _operationalStreamFactory()
         , _assertFactory()
+        , _telemetryFactory()
     {
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
@@ -87,6 +88,7 @@ namespace Thunder {
         _client.AddFactory(Core::Messaging::Metadata::type::REPORTING, &_warningReportingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::OPERATIONAL_STREAM, &_operationalStreamFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::ASSERT, &_assertFactory);
+        _client.AddFactory(Core::Messaging::Metadata::type::TELEMETRY, &_telemetryFactory);
     }
 
     const string MessageControl::Initialize(PluginHost::IShell* service)
@@ -124,6 +126,18 @@ namespace Thunder {
             Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service, _config.Remote.Interface.Value()));
         }
 
+#if defined(HAS_TELEMETRY_BACKEND)
+        {
+            uint32_t telResult = TelemetryBackend_Configure(_config.TelemetryConfig.Value().c_str());
+
+            if (telResult == 0) {
+                Announce(new Publishers::TelemetryOutput());
+            }
+            else {
+                TRACE(Trace::Error, (_T("Telemetry backend Configure() failed: %u"), telResult));
+            }
+        }
+#endif
         _webSocketExporter.Initialize(service, _config.MaxExportConnections.Value());
 
         Exchange::JMessageControl::Register(*this, this);
@@ -158,6 +172,10 @@ namespace Thunder {
                 delete _outputDirector.back();
                 _outputDirector.pop_back();
             }
+
+#if defined(HAS_TELEMETRY_BACKEND)
+            TelemetryBackend_Teardown();
+#endif
 
             _service->Release();
             _service = nullptr;
