@@ -53,7 +53,7 @@ set_target_properties(${MODULE_NAME} PROPERTIES
 
 target_include_directories(${MODULE_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../MessageControl>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
 
 target_link_libraries(${MODULE_NAME}
     PRIVATE

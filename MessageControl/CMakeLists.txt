@@ -65,8 +65,7 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Messaging::${NAMESPACE}Messaging)
 
 if(PLUGIN_MESSAGECONTROL_TELEMETRY_T2)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../TelemetryBackendT2
-                     ${CMAKE_CURRENT_BINARY_DIR}/TelemetryBackendT2)
+    add_subdirectory(TelemetryBackendT2)
 
     target_link_libraries(${MODULE_NAME}
         PRIVATE
