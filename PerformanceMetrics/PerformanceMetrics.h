@@ -22,7 +22,7 @@
 #include "Module.h"
 #include <interfaces/IMemory.h>
 #include <interfaces/IBrowser.h>
-#include <plugins/json/json_IStateController.h>
+#include <interfaces/json/json_IStateController.h>
 
 #include <memory>
 
