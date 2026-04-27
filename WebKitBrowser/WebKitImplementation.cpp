@@ -28,6 +28,7 @@
 
 #include <interfaces/IBrowser.h>
 #include <interfaces/IApplication.h>
+#include <interfaces/IStateController.h>
 
 
 #include <wpe/webkit.h>
