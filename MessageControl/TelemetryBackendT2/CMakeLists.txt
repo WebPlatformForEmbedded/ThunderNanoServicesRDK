@@ -30,7 +30,7 @@ message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 find_package(${NAMESPACE}Core REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
-option(TELEMETRY_BACKEND_T2_USE_MOCK "Build and link the mock telemetry_msgsender library for testing" ON)
+option(TELEMETRY_BACKEND_T2_USE_MOCK "Build and link the mock telemetry_msgsender library for testing" OFF)
 
 if(TELEMETRY_BACKEND_T2_USE_MOCK)
     add_subdirectory(mock)
