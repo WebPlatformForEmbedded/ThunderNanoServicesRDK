@@ -23,44 +23,49 @@ namespace WPEFramework {
 
 namespace Publishers {
 
-    string Text::Convert(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    string Text::Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
         ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
 
-        string output = metadata.ToString(_abbreviated).c_str() +
-                        Core::Format("%s\n", text.c_str());
+        const string& text = event.Data();
+        string output = metadata.ToString(_abbreviated);
+
+        output.reserve(output.size() + text.size() + 1);
+
+        output.append(text);
+        output.push_back('\n');
 
         return (output);
     }
 
-    void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void ConsoleOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
-        std::cout << _convertor.Convert(metadata, text);
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, event).c_str());
     }
 
-    void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void SyslogOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
 #ifndef __WINDOWS__
-        syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, text).c_str());
+        syslog(LOG_NOTICE, _T("%s"), _convertor.Convert(metadata, event).c_str());
 #else
-        printf(_T("%s"), _convertor.Convert(metadata, text).c_str());
+        Messaging::ConsoleStandardOut::Instance().Format(_convertor.Convert(metadata, event).c_str());
 #endif
     }
 
-    void FileOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void FileOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
     {
         if (_file.IsOpen()) {
-            const string line = _convertor.Convert(metadata, text);
+            const string line = _convertor.Convert(metadata, event);
             _file.Write(reinterpret_cast<const uint8_t*>(line.c_str()), static_cast<uint32_t>(line.length()));
         }
     }
 
-    void JSON::Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& data)
+    void JSON::Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event, Data& data)
     {
         ExtraOutputOptions options = _outputOptions;
 
         if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PAUSED)) == 0) {
-            
+
             if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CATEGORY)) != 0) {
                 data.Category = metadata.Category();
             }
@@ -69,17 +74,17 @@ namespace Publishers {
                 data.Module = metadata.Module();
             }
 
+            const Core::Time now(metadata.TimeStamp());
+            if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
+                data.Time = now.ToRFC1123(true);
+            }
+            else {
+                data.Time = now.ToTimeOnly(true);
+            }
+
             if (metadata.Type() == Core::Messaging::Metadata::type::TRACING) {
                 ASSERT(dynamic_cast<const Core::Messaging::IStore::Tracing*>(&metadata) != nullptr);
                 const Core::Messaging::IStore::Tracing& trace = static_cast<const Core::Messaging::IStore::Tracing&>(metadata);
-                const Core::Time now(trace.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
 
                 if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
                     data.FileName = trace.FileName();
@@ -93,61 +98,69 @@ namespace Publishers {
                     data.ClassName = trace.ClassName();
                 }
             }
-            else if (metadata.Type() == Core::Messaging::Metadata::type::LOGGING) {
-                ASSERT(dynamic_cast<const Core::Messaging::IStore::Logging*>(&metadata) != nullptr);
-                const Core::Messaging::IStore::Logging& log = static_cast<const Core::Messaging::IStore::Logging&>(metadata);
-                const Core::Time now(log.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
-            }
             else if (metadata.Type() == Core::Messaging::Metadata::type::REPORTING) {
                 ASSERT(dynamic_cast<const Core::Messaging::IStore::WarningReporting*>(&metadata) != nullptr);
                 const Core::Messaging::IStore::WarningReporting& report = static_cast<const Core::Messaging::IStore::WarningReporting&>(metadata);
-                const Core::Time now(report.TimeStamp());
-
-                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0) {
-                    data.Time = now.ToRFC1123(true);
-                }
-                else {
-                    data.Time = now.ToTimeOnly(true);
-                }
 
                 if ((AsNumber(options) & AsNumber(ExtraOutputOptions::CALLSIGN)) != 0) {
                     data.Callsign = report.Callsign();
+                }
+            }
+            else if (metadata.Type() == Core::Messaging::Metadata::type::ASSERT) {
+                ASSERT(dynamic_cast<const Core::Messaging::IStore::Assert*>(&metadata) != nullptr);
+                const Core::Messaging::IStore::Assert& assert = static_cast<const Core::Messaging::IStore::Assert&>(metadata);
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PROCESSID)) != 0) {
+                    data.ProcessId = assert.ProcessId();
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::PROCESSNAME)) != 0) {
+                    data.ProcessName = assert.ProcessName();
+                }
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::FILENAME)) != 0) {
+                    data.FileName = assert.FileName();
+                }
+
+                if ((AsNumber(options) & AsNumber(ExtraOutputOptions::LINENUMBER)) != 0) {
+                    data.LineNumber = assert.LineNumber();
                 }
             }
             else {
                 ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
             }
 
-            data.Message = text;
+            data.Message = event.Data();
         }
     }
 
     //UDPOutput
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
-        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::DataSize, 0)
-        , _loaded(0)
+        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().DataSize(), 0)
+        , _queue()
     {
     }
-    UDPOutput::Channel::~Channel() {
+    UDPOutput::Channel::~Channel()
+    {
         Close(Core::infinite);
     }
 
     uint16_t UDPOutput::Channel::SendData(uint8_t* dataFrame, const uint16_t maxSendSize)
     {
+        uint16_t actualByteCount = 0;
+
         _adminLock.Lock();
 
-        uint16_t actualByteCount = (_loaded > maxSendSize ? maxSendSize : _loaded);
-        memcpy(dataFrame, _sendBuffer, actualByteCount);
-        _loaded = 0;
+        if (_queue.empty() == true) {
+            _adminLock.Unlock();
+        }
+        else {
+            string msg = std::move(_queue.front());
+            _queue.pop();
+            _adminLock.Unlock();
 
-        _adminLock.Unlock();
+            actualByteCount = std::min<uint16_t>(msg.size(), maxSendSize);
+            memcpy(dataFrame, msg.c_str(), actualByteCount);
+        }
 
         return (actualByteCount);
     }
@@ -161,32 +174,55 @@ namespace Publishers {
     {
     }
 
-    void UDPOutput::Channel::Output(const Core::Messaging::Metadata& metadata, const Core::Messaging::IEvent* message)
+    void UDPOutput::Channel::Output(string&& text)
     {
         _adminLock.Lock();
 
-        uint16_t length = 0;
-        ASSERT(metadata.Type() != Core::Messaging::Metadata::INVALID);
-
-        length += metadata.Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        length += message->Serialize(_sendBuffer + length, sizeof(_sendBuffer) - length);
-        _loaded = length;
+        _queue.emplace(std::move(text));
 
         _adminLock.Unlock();
 
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::NodeId& nodeId)
-        : _output(nodeId) {
-        _output.Open(0);
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface)
+        : _convertor(abbreviate)
+        , _output(nodeId)
+        , _notification(*this)
+        , _subSystem(service->SubSystems())
+        , _interface(interface)
+    {
+        ASSERT(_subSystem != nullptr);
+
+        if (_subSystem != nullptr) {
+            _subSystem->AddRef();
+            _subSystem->Register(&_notification);
+        }
     }
 
-    void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const string& text) /* override */
+    void UDPOutput::UpdateChannel()
     {
-        //yikes, recreating stuff from received pieces
-        Messaging::TextMessage textMessage(text);
-        _output.Output(metadata, &textMessage);
+        if (_subSystem->IsActive(PluginHost::ISubSystem::NETWORK)) {
+            if (_output.IsOpen() == false) {
+                if (_interface.empty() == false) {
+                    _output.Open(0, _interface);
+                }
+                else {
+                    _output.Open(0);
+                }
+            }
+            ASSERT(_output.IsOpen() == true);
+        }
+        else {
+            _output.Close(Core::infinite);
+        }
+    }
+
+    void UDPOutput::Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) /* override */
+    {
+        if (_output.IsOpen() == true) {
+            _output.Output(_convertor.Convert(metadata, event));
+        }
     }
 
 } // namespace Publishers

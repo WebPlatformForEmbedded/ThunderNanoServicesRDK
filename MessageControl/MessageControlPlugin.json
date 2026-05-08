@@ -5,7 +5,7 @@
       "callsign": "MessageControl",
       "locator": "libWPEFrameworkMessageControl.so",
       "status": "alpha",
-      "description": "The MessageControl plugin allows reading of the traces from WPEFramework, and controlling them tracing and logging. Allows for outputting logging messages to the websocket",
+      "description": "The MessageControl plugin allows reading of the traces from Thunder, and controlling them tracing and logging. Allows for outputting logging messages to the websocket",
       "version": "1.0"
     },
     "configuration": {
@@ -42,9 +42,13 @@
             "bindig" : {
               "type": "string",
               "description": "Binding address"
+            },
+            "interface" : {
+              "type": "string",
+              "description": "Interface"
             }
           },
-          "required": [ "port", "binding" ]
+          "required": [ "port", "binding", "interface" ]
         }
       },
       "required": [

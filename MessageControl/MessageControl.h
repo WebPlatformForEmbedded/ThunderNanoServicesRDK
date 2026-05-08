@@ -21,6 +21,9 @@
 
 #include "Module.h"
 #include "MessageOutput.h"
+#if defined(HAS_TELEMETRY_BACKEND)
+#include "TelemetryOutput.h"
+#endif
 #include <functional>
 
 namespace WPEFramework {
@@ -61,7 +64,7 @@ namespace Plugin {
 
             struct ICallback {
 
-                virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
+                virtual void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) = 0;
 
                 virtual ~ICallback() = default;
             };
@@ -90,6 +93,7 @@ namespace Plugin {
             public:
                 Core::JSON::DecUInt16 Port;
                 Core::JSON::String Binding;
+                Core::JSON::String Interface;
             };
 
         public:
@@ -101,6 +105,7 @@ namespace Plugin {
                 , Abbreviated(true)
                 , MaxExportConnections(Publishers::WebSocketOutput::DefaultMaxConnections)
                 , Remote()
+                , TelemetryConfig()
             {
                 Add(_T("console"), &Console);
                 Add(_T("syslog"), &SysLog);
@@ -108,6 +113,7 @@ namespace Plugin {
                 Add(_T("abbreviated"), &Abbreviated);
                 Add(_T("maxexportconnections"), &MaxExportConnections);
                 Add(_T("remote"), &Remote);
+                Add(_T("telemetryconfig"), &TelemetryConfig);
             }
             ~Config() = default;
 
@@ -120,6 +126,7 @@ namespace Plugin {
             Core::JSON::Boolean Abbreviated;
             Core::JSON::DecUInt16 MaxExportConnections;
             NetworkNode Remote;
+            Core::JSON::String TelemetryConfig;
         };
 
         class Observer
@@ -153,8 +160,8 @@ namespace Plugin {
             //
             // Exchange::IMessageControl::INotification
             // ----------------------------------------------------------
-            void Message(const Core::Messaging::MessageInfo& metadata, const string& message) override {
-                _parent.Message(metadata, message);
+            void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override {
+                _parent.Message(metadata, event);
             }
 
             //
@@ -190,7 +197,7 @@ namespace Plugin {
                 RPC::IMonitorableProcess* controlled (connection->QueryInterface<RPC::IMonitorableProcess>());
 
                 if (controlled != nullptr) {
-                    // This is a connection that is controleld by WPEFramework. For this we can wait till we
+                    // This is a connection that is controleld by Thunder. For this we can wait till we
                     // receive a terminated.
                     controlled->Release();
                 }
@@ -221,7 +228,7 @@ namespace Plugin {
                 // Seems the ID is already in here, thats odd, and impossible :-)
                 Observers::iterator index = _observing.find(id);
 
-                ASSERT(index != _observing.end());
+                // ASSERT(index != _observing.end());
 
                 if (index != _observing.end()) {
                     if (index->second == state::ATTACHING) {
@@ -239,41 +246,36 @@ namespace Plugin {
 
             void Dispatch()
             {
+                std::vector<uint32_t> attaching;
+                std::vector<uint32_t> detaching;
+				
                 _adminLock.Lock();
 
-                bool done = false;
+                Observers::iterator index = _observing.begin();
 
-                while (done == false) {
-                    Observers::iterator index = _observing.begin();
-
-                    while (done == false) {
-                        if (index->second == state::ATTACHING) {
-                            const uint32_t id = index->first;
-                            index->second = state::OBSERVING;
-                            _adminLock.Unlock();
-                            _parent.Attach(id);
-                            _adminLock.Lock();
-                            break;
-                        }
-                        else if (index->second == state::DETACHING) {
-                            const uint32_t id = index->first;
-                            _observing.erase(index);
-                            _adminLock.Unlock();
-                            _parent.Detach(id);
-                            _adminLock.Lock();
-                            break;
-                        }
-                        else {
-                            index++;
-
-                            if (index == _observing.end()) {
-                                done = true;
-                            }
-                        }
+                while (index != _observing.end()) {
+                    if (index->second == state::ATTACHING) {
+                        attaching.emplace_back(index->first);
+                        index->second = state::OBSERVING;
+                        index++;
+                    }
+                    else if (index->second == state::DETACHING) {
+                        detaching.emplace_back(index->first);
+                        index = _observing.erase(index);
+                    }
+                    else {
+                        index++;
                     }
                 }
 
                 _adminLock.Unlock();
+
+                for (const uint32_t& id : detaching) {
+                    _parent.Detach(id);
+                }
+                for (const uint32_t& id : attaching) {
+                    _parent.Attach(id);
+                }
             }
 
         private:
@@ -305,6 +307,8 @@ namespace Plugin {
         END_INTERFACE_MAP
 
     public:
+
+
         const string Initialize(PluginHost::IShell* service) override;
         void Deinitialize(PluginHost::IShell* service) override;
         string Information() const override;
@@ -326,16 +330,16 @@ namespace Plugin {
             _outputLock.Unlock();
         }
 
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& message)
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event)
         {
             // Time to start sending it to all interested parties...
             _outputLock.Lock();
 
             for (auto& entry : _outputDirector) {
-                entry->Message(metadata, message);
+                entry->Message(metadata, event);
             }
 
-            _webSocketExporter.Message(metadata, message);
+            _webSocketExporter.Message(metadata, event);
 
             _outputLock.Unlock();
         }
@@ -412,18 +416,30 @@ namespace Plugin {
             }
         }
 
-        uint32_t Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
+        Core::hresult Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
             _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
 
             return (Core::ERROR_NONE);
         }
 
-        uint32_t Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
+        Core::hresult Modules(Exchange::IMessageControl::IStringIterator*& modules) const override
+        {
+            std::vector<string> list;
+
+            _client.Modules(list);
+
+            using Implementation = RPC::IteratorType<RPC::IStringIterator>;
+            modules = Core::Service<Implementation>::Create<RPC::IStringIterator>(list);
+
+            return (Core::ERROR_NONE);
+        }
+
+        Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
         {
             std::list<Exchange::IMessageControl::Control> list;
             Messaging::MessageUnit::Iterator index;
-            _client.Controls(index);
+            _client.Controls(index, module);
 
             while (index.Next() == true) {
                 list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
@@ -441,8 +457,8 @@ namespace Plugin {
             _client.WaitForUpdates(Core::infinite);
 
             _client.PopMessagesAndCall([this](const Core::ProxyType<Core::Messaging::MessageInfo>& metadata, const Core::ProxyType<Core::Messaging::IEvent>& message) {
-                // Turn data into piecies to trasfer over the wire
-                Message(*metadata, message->Data());
+                // Forward the IEvent directly so typed telemetry data is preserved
+                Message(*metadata, *message);
             });
         }
 
@@ -453,16 +469,19 @@ namespace Plugin {
         OutputList _outputDirector;
         Publishers::WebSocketOutput _webSocketExporter;
         MessageControl::ICollect::ICallback* _callback;
+        Cleanups _cleaning;
         Core::Sink<Observer> _observer;
         PluginHost::IShell* _service;
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
         WorkerThread _worker;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Messaging::TextMessage> _tracingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Messaging::TextMessage> _loggingFactory;
-        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Messaging::TextMessage> _warningReportingFactory;
-        Cleanups _cleaning;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Core::Messaging::TextMessage> _tracingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Core::Messaging::TextMessage> _loggingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::OperationalStream, Core::Messaging::TextMessage> _operationalStreamFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Assert, Core::Messaging::TextMessage> _assertFactory;
+        Messaging::TraceFactoryType<Core::Messaging::IStore::Telemetry, Core::Messaging::TelemetryMessage> _telemetryFactory;
     };
 
 } // namespace Plugin

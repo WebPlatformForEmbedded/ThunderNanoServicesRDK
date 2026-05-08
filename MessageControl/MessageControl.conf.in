@@ -1,4 +1,4 @@
-autostart = "@PLUGIN_MESSAGECONTROL_AUTOSTART@"
+startmode = "@PLUGIN_MESSAGECONTROL_STARTMODE@"
 
 configuration = JSON()
 
@@ -20,4 +20,8 @@ if boolean("@PLUGIN_MESSAGECONTROL_REMOTE@"):
   remote = JSON()
   remote.add("port", "@PLUGIN_MESSAGECONTROL_PORT@")
   remote.add("binding", "@PLUGIN_MESSAGECONTROL_BINDING@")
+  remote.add("interface", "@PLUGIN_MESSAGECONTROL_INTERFACE@")
   configuration.add("remote", remote)
+
+if boolean("@PLUGIN_MESSAGECONTROL_TELEMETRY_T2@"):
+  configuration.add("telemetryconfig", "@PLUGIN_MESSAGECONTROL_TELEMETRY_CONFIG@")
