@@ -135,7 +135,7 @@ namespace Publishers {
 
     //UDPOutput
     UDPOutput::Channel::Channel(const Core::NodeId& nodeId)
-        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().DataSize(), 0)
+        : Core::SocketDatagram(false, nodeId.Origin(), nodeId, Messaging::MessageUnit::Instance().ConfiguredDataSize(), 0)
         , _queue()
     {
     }
