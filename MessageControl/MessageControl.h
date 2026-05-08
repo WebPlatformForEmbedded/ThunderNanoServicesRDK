@@ -449,6 +449,12 @@ namespace Plugin {
             return (Core::ERROR_NONE);
         }
 
+        Core::hresult Controls(Exchange::IMessageControl::IControlIterator*& controls) const override
+        {
+            // Backward compatibility: return all controls across all modules
+            return (Controls(string(), controls));
+        }
+
     private:
         void Dispatch()
         {
