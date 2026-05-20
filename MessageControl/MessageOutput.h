@@ -20,6 +20,10 @@
 #pragma once
 #include "Module.h"
 
+#if defined(HAS_TELEMETRY_BACKEND)
+#include "TelemetryOutput.h"
+#endif
+
 namespace WPEFramework {
 
 namespace Publishers {
@@ -27,7 +31,7 @@ namespace Publishers {
     struct IPublish {
         virtual ~IPublish() = default;
 
-        virtual void Message(const Core::Messaging::MessageInfo& metadata, const string& text) = 0;
+        virtual void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) = 0;
     };
 
     class Text {
@@ -43,7 +47,7 @@ namespace Publishers {
         ~Text() = default;
 
     public:
-        string Convert (const Core::Messaging::MessageInfo& metadata, const string& text);
+        string Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event);
 
     private:
         Core::Messaging::MessageInfo::abbreviate _abbreviated;
@@ -62,7 +66,7 @@ namespace Publishers {
         ~ConsoleOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -81,7 +85,7 @@ namespace Publishers {
         ~SyslogOutput() override = default;
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -111,7 +115,7 @@ namespace Publishers {
         }
 
     public:
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
         Text _convertor;
@@ -121,16 +125,18 @@ namespace Publishers {
     class JSON  {
     private:
         enum class ExtraOutputOptions {
-            ABREVIATED    = 0x00,
-            FILENAME      = 0x01,
-            LINENUMBER    = 0x03, // selecting LINENUMBER will automatically select FILENAME
-            CLASSNAME     = 0x04,
-            MODULE        = 0x08,
-            CATEGORY      = 0x10,
-            CALLSIGN      = 0x20,
-            INCLUDINGDATE = 0x40,
-            ALL           = 0x7F,
-            PAUSED        = 0x80
+            ABREVIATED    = 0x000,
+            FILENAME      = 0x001,
+            LINENUMBER    = 0x003, // selecting LINENUMBER will automatically select FILENAME
+            CLASSNAME     = 0x004,
+            MODULE        = 0x008,
+            CATEGORY      = 0x010,
+            CALLSIGN      = 0x020,
+            INCLUDINGDATE = 0x040,
+            PROCESSID     = 0x080,
+            PROCESSNAME   = 0x100,
+            ALL           = 0x7FF,
+            PAUSED        = 0x800
         };
 
     public:
@@ -148,6 +154,8 @@ namespace Publishers {
                 , Category()
                 , Module()
                 , Callsign()
+                , ProcessId()
+                , ProcessName()
                 , Message()
             {
                 Add(_T("time"), &Time);
@@ -157,6 +165,8 @@ namespace Publishers {
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
                 Add(_T("callsign"), &Callsign);
+                Add(_T("processid"), &ProcessId);
+                Add(_T("processname"), &ProcessName);
                 Add(_T("message"), &Message);
             }
             ~Data() override = default;
@@ -169,6 +179,8 @@ namespace Publishers {
             Core::JSON::String Category;
             Core::JSON::String Module;
             Core::JSON::String Callsign;
+            Core::JSON::DecUInt32 ProcessId;
+            Core::JSON::String ProcessName;
             Core::JSON::String Message;
         };
 
@@ -267,6 +279,34 @@ namespace Publishers {
             }
         }
 
+        bool ProcessId() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PROCESSID)) != 0);
+        }
+
+        void ProcessId(const bool enabled)
+        {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::PROCESSID));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::PROCESSID));
+            }
+        }
+
+        bool ProcessName() const {
+            return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::PROCESSNAME)) != 0);
+        }
+
+        void ProcessName(const bool enabled)
+        {
+            if (enabled == true) {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) | AsNumber(ExtraOutputOptions::PROCESSNAME));
+            }
+            else {
+                _outputOptions = static_cast<ExtraOutputOptions>(AsNumber<ExtraOutputOptions>(_outputOptions) & ~AsNumber(ExtraOutputOptions::PROCESSNAME));
+            }
+        }
+
         bool Date() const {
             return ((AsNumber<ExtraOutputOptions>(_outputOptions) & AsNumber(ExtraOutputOptions::INCLUDINGDATE)) != 0);
         }
@@ -295,7 +335,7 @@ namespace Publishers {
             }
         }
 
-        void Convert(const Core::Messaging::MessageInfo& metadata, const string& text, Data& info);
+        void Convert(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event, Data& info);
 
     private:
         template <typename E>
@@ -318,7 +358,7 @@ namespace Publishers {
             explicit Channel(const Core::NodeId& nodeId);
             ~Channel() override;
 
-            void Output(const Core::Messaging::Metadata& metadata, const Core::Messaging::IEvent* message);
+            void Output(string&& text);
 
         private:
             uint16_t SendData(uint8_t* dataFrame, const uint16_t maxSendSize) override;
@@ -326,9 +366,35 @@ namespace Publishers {
             uint16_t ReceiveData(uint8_t*, const uint16_t) override;
             void StateChange() override;
 
-            uint8_t _sendBuffer[Messaging::MessageUnit::DataSize];
-            uint16_t _loaded;
+            std::queue<string> _queue;
             Core::CriticalSection _adminLock;
+        };
+
+        class Notification : public PluginHost::ISubSystem::INotification {
+        public:
+            Notification() = delete;
+            Notification(const Notification&) = delete;
+            Notification(Notification&&) = delete;
+            Notification& operator=(const Notification&) = delete;
+            Notification& operator=(Notification&&) = delete;
+
+            explicit Notification(UDPOutput& parent)
+                : _parent(parent) {
+            }
+            ~Notification() = default;
+
+        public:
+            void Updated() override
+            {
+                _parent.UpdateChannel();
+            }
+
+        BEGIN_INTERFACE_MAP(Notification)
+            INTERFACE_ENTRY(PluginHost::ISubSystem::INotification)
+        END_INTERFACE_MAP
+
+        private:
+            UDPOutput& _parent;
         };
 
     public:
@@ -336,13 +402,26 @@ namespace Publishers {
         UDPOutput(const UDPOutput&) = delete;
         UDPOutput& operator=(const UDPOutput&) = delete;
 
-        explicit UDPOutput(const Core::NodeId& nodeId);
-        ~UDPOutput() = default;
+        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface);
 
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text);
+        ~UDPOutput() override
+        {
+            if (_subSystem != nullptr) {
+                _subSystem->Unregister(&_notification);
+                _subSystem->Release();
+                _subSystem = nullptr;
+            }
+        }
+
+        void UpdateChannel();
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override;
 
     private:
+        Text _convertor;
         Channel _output;
+        Core::Sink<Notification> _notification;
+        PluginHost::ISubSystem* _subSystem;
+        string _interface;
     };
 
     class WebSocketOutput : public IPublish {
@@ -359,6 +438,8 @@ namespace Publishers {
                 , Category()
                 , Module()
                 , Callsign()
+                , ProcessId()
+                , ProcessName()
                 , IncludingDate()
                 , Paused()
             {
@@ -368,6 +449,8 @@ namespace Publishers {
                 Add(_T("category"), &Category);
                 Add(_T("module"), &Module);
                 Add(_T("callsign"), &Callsign);
+                Add(_T("processid"), &ProcessId);
+                Add(_T("processname"), &ProcessName);
                 Add(_T("includingdate"), &IncludingDate);
                 Add(_T("paused"), &Paused);
             }
@@ -380,6 +463,8 @@ namespace Publishers {
             Core::JSON::Boolean Category;
             Core::JSON::Boolean Module;
             Core::JSON::Boolean Callsign;
+            Core::JSON::Boolean ProcessId;
+            Core::JSON::Boolean ProcessName;
             Core::JSON::Boolean IncludingDate;
             Core::JSON::Boolean Paused;
         };
@@ -502,6 +587,12 @@ namespace Publishers {
                     if (info->Callsign.IsSet() == true) {
                         index->second.Callsign(info->Callsign == true);
                     }
+                    if (info->ProcessId.IsSet() == true) {
+                        index->second.ProcessId(info->ProcessId == true);
+                    }
+                    if (info->ProcessName.IsSet() == true) {
+                        index->second.ProcessName(info->ProcessName == true);
+                    }
                     if (info->IncludingDate.IsSet() == true) {
                         index->second.Date(info->IncludingDate == true);
                     }
@@ -516,6 +607,8 @@ namespace Publishers {
                     info->Category = index->second.Category();
                     info->Module = index->second.Module();
                     info->Callsign = index->second.Callsign();
+                    info->ProcessId = index->second.ProcessId();
+                    info->ProcessName = index->second.ProcessName();
                     info->IncludingDate = index->second.Date();
                     info->Paused = index->second.Paused();
                 }
@@ -526,7 +619,7 @@ namespace Publishers {
             return (element);
         }
 
-        void Message(const Core::Messaging::MessageInfo& metadata, const string& text) override
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override
         {
             std::list<std::pair<uint32_t, Core::ProxyType<Core::JSON::IElement>>> cachedList;
             PluginHost::IShell* server = nullptr;
@@ -537,7 +630,7 @@ namespace Publishers {
                 for (auto& item : _channels) {
                     if (item.second.Paused() == false) {
                         Core::ProxyType<JSON::Data> data = _jsonExportDataFactory.Element();
-                        item.second.Convert(metadata, text, *data);
+                        item.second.Convert(metadata, event, *data);
                         cachedList.emplace_back(item.first, Core::ProxyType<Core::JSON::IElement>(data));
                     }
                 }
@@ -570,6 +663,37 @@ namespace Publishers {
         Core::ProxyPoolType<JSON::Data> _jsonExportDataFactory;
         Core::ProxyPoolType<ExportCommand> _jsonExportCommandFactory;
     };
+
+#if defined(HAS_TELEMETRY_BACKEND)
+    /**
+     * @brief Publisher that filters for TELEMETRY-type messages and forwards
+     *        them to the statically linked telemetry backend via C functions.
+     */
+    class TelemetryOutput : public IPublish {
+    public:
+        TelemetryOutput(const TelemetryOutput&) = delete;
+        TelemetryOutput& operator=(const TelemetryOutput&) = delete;
+
+        TelemetryOutput() = default;
+        ~TelemetryOutput() override = default;
+
+    public:
+        void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override
+        {
+            if (metadata.Type() == Core::Messaging::Metadata::type::TELEMETRY) {
+                const Core::Messaging::TelemetryMessage* telemetry = static_cast<const Core::Messaging::TelemetryMessage*>(&event);
+
+                TelemetryBackend_Send(
+                    metadata.Category().c_str(),
+                    metadata.Module().c_str(),
+                    metadata.TimeStamp(),
+                    static_cast<TelemetryBackend_ValueType>(telemetry->Type()),
+                    telemetry->RawValue()
+                );
+            }
+        }
+    };
+#endif
 
 } // namespace Publishers
 }

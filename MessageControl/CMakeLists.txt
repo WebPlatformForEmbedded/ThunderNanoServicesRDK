@@ -27,12 +27,21 @@ set(MODULE_NAME ${NAMESPACE}${PROJECT_NAME})
 
 message("Setup ${MODULE_NAME} v${PROJECT_VERSION}")
 
-set(PLUGIN_MESSAGECONTROL_AUTOSTART true CACHE STRING "Automatically start plugin")
+set(PLUGIN_MESSAGECONTROL_STARTMODE "Activated" CACHE STRING "Automatically start plugin")
 set(PLUGIN_MESSAGECONTROL_ABBREVIATED true CACHE STRING "Display abbreviated messages")
 set(PLUGIN_MESSAGECONTROL_MAX_EXPORTCONNECTIONS 5 CACHE STRING "Maximum allowed export connections")
 set(PLUGIN_MESSAGECONTROL_REMOTE "false" CACHE STRING "Remote binding details enabled")
 set(PLUGIN_MESSAGECONTROL_PORT "0" CACHE STRING "PORT address")
 set(PLUGIN_MESSAGECONTROL_BINDING "0.0.0.0" CACHE STRING "Binding IP Address")
+set(PLUGIN_MESSAGECONTROL_INTERFACE "eth0" CACHE STRING "Interface to bind to")
+option(PLUGIN_MESSAGECONTROL_TELEMETRY_T2 "Enable T2 telemetry backend (statically linked)" OFF)
+set(PLUGIN_MESSAGECONTROL_TELEMETRY_CONFIG "" CACHE STRING "JSON configuration string for the telemetry backend")
+
+add_subdirectory(BuffersFlush)
+
+if(BUILD_REFERENCE)
+    add_definitions(-DBUILD_REFERENCE=${BUILD_REFERENCE})
+endif()
 
 find_package(${NAMESPACE}Plugins REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
@@ -54,6 +63,18 @@ target_link_libraries(${MODULE_NAME}
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
         ${NAMESPACE}Messaging::${NAMESPACE}Messaging)
+
+if(PLUGIN_MESSAGECONTROL_TELEMETRY_T2)
+    add_subdirectory(TelemetryBackendT2)
+
+    target_link_libraries(${MODULE_NAME}
+        PRIVATE
+            ${NAMESPACE}TelemetryBackendT2)
+
+    target_compile_definitions(${MODULE_NAME}
+        PRIVATE
+            HAS_TELEMETRY_BACKEND=1)
+endif()
 
 install(TARGETS ${MODULE_NAME} 
     DESTINATION lib/${STORAGE_DIRECTORY}/plugins)
