@@ -43,6 +43,7 @@ if(BUILD_REFERENCE)
 endif()
 
 find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Common REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 find_package(BCM_HOST QUIET)
@@ -62,6 +63,7 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
 
 if (PLUGIN_DISPLAYINFO_BCM_VERSION_MAJOR)
@@ -78,6 +80,7 @@ if (USE_DEVICESETTINGS)
         ../helpers)
     target_link_libraries(${MODULE_NAME} PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
         ${IARMBUS_LIBRARIES}
         ${DS_LIBRARIES})
     target_sources(${MODULE_NAME}

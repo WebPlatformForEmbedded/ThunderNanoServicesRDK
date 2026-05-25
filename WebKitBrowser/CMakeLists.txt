@@ -226,6 +226,7 @@ set(PLUGIN_AMAZON_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_LIMIT ${PLUGIN_WEBKITBR
 set(PLUGIN_AMAZON_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL ${PLUGIN_WEBKITBROWSER_MEMORYPRESSURE_NETWORKPROCESS_SETTINGS_POLLINTERVAL} CACHE STRING "Amazon App Memory Pressure Networkprocess Poll Interval")
 
 find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Common REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(ClientCryptography REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
@@ -248,6 +249,7 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions)
 
 add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
@@ -259,6 +261,7 @@ add_library(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION} SHARED
 target_link_libraries(${PLUGIN_WEBKITBROWSER_IMPLEMENTATION}
     PRIVATE
         ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
 	ClientCryptography::ClientCryptography
         WPEBackend::WPEBackend

@@ -39,6 +39,7 @@ if(BUILD_REFERENCE)
 endif()
 
 find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Common REQUIRED)
 find_package(${NAMESPACE}Definitions REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
@@ -54,7 +55,8 @@ target_link_libraries(${MODULE_NAME}
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
         ${NAMESPACE}Definitions::${NAMESPACE}Definitions
-        ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
+        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common)
 
 find_package(GStreamer REQUIRED)
 if (GStreamer_FOUND)
@@ -72,6 +74,7 @@ if (GStreamer_FOUND)
             ../helpers)
         target_link_libraries(${MODULE_NAME} PRIVATE
             ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
             ${IARMBUS_LIBRARIES}
             ${DS_LIBRARIES})
         target_sources(${MODULE_NAME}

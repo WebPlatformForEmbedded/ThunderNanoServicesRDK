@@ -25,6 +25,7 @@
 
 #include <messaging/messaging.h>
 #include <plugins/plugins.h>
+#include <common/common.h>
 #include <definitions/definitions.h>
 
 #include <interfaces/IMessageControl.h>

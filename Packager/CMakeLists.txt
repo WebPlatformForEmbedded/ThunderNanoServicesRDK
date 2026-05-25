@@ -44,6 +44,7 @@ if(BUILD_REFERENCE)
 endif()
 
 find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Common REQUIRED)
 find_package(libprovision QUIET)
 find_package(LibOPKG REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
@@ -59,6 +60,7 @@ target_include_directories(${MODULE_NAME} PRIVATE
 target_link_libraries(${MODULE_NAME} PRIVATE
              CompileSettingsDebug::CompileSettingsDebug
              ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common
              LibOPKG::LibOPKG)
 
 if (libprovision_FOUND)

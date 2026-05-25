@@ -37,6 +37,7 @@ if(BUILD_REFERENCE)
 endif()
 
 find_package(${NAMESPACE}Plugins REQUIRED)
+find_package(${NAMESPACE}Common REQUIRED)
 find_package(CompileSettingsDebug CONFIG REQUIRED)
 
 find_library(SECAPI NAMES ${SECAPI_LIB})
@@ -62,7 +63,8 @@ set_target_properties(${MODULE_NAME} PROPERTIES
 target_link_libraries(${MODULE_NAME} 
     PRIVATE
         CompileSettingsDebug::CompileSettingsDebug
-        ${NAMESPACE}Plugins::${NAMESPACE}Plugins)
+        ${NAMESPACE}Plugins::${NAMESPACE}Plugins
+        ${NAMESPACE}Common::${NAMESPACE}Common)
 
 if (SECAPI)
     target_link_libraries(${MODULE_NAME} PRIVATE ${SECAPI_LIB})
