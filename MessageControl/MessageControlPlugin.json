@@ -55,6 +55,6 @@
       ]
     },
     "interface": {
-      "$ref": "{cppinterfacedir}/IMessageControl.h"
+      "$ref": "{cppinterfacedir}/IMessagingControl.h"
     }
   }
