@@ -417,7 +417,7 @@ namespace Plugin {
             }
         }
 
-        Core::hresult Enable(const messagingtype type, const string& category, const string& module, const bool enabled) override
+        Core::hresult Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
         {
             _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
 
@@ -443,7 +443,7 @@ namespace Plugin {
             _client.Controls(index, module);
 
             while (index.Next() == true) {
-                list.push_back( { static_cast<messagingtype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
+                list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
             using Implementation = RPC::IteratorType<Exchange::IMessagingControl::IControlIterator, std::vector<Exchange::IMessagingControl::Control>>;
