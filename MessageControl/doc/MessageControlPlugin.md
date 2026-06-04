@@ -91,7 +91,7 @@ The table below lists configuration options of the plugin.
 
 This plugin implements the following interfaces:
 
-- IMessageControl ([IMessageControl.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessageControl.h)) (version 1.0.0) (compliant format)
+- IMessagingControl ([IMessagingControl.h](https://github.com/rdkcentral/ThunderInterfaces/blob/master/interfaces/IMessagingControl.h)) (version 1.0.0) (compliant format)
 > This interface uses legacy ```lowercase``` naming convention. With the next major release the naming convention will change to ```camelCase```.
 
 <a id="head_Methods"></a>
@@ -140,7 +140,7 @@ This method takes no parameters.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "MessageControl.1.versions"
+  "method": "MessageControl.versions"
 }
 ```
 
@@ -191,9 +191,9 @@ This method will return *True* for the following methods/properties: *modules, c
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "MessageControl.1.exists",
+  "method": "MessageControl.exists",
   "params": {
-    "method": "modules"
+    "method": "methodName"
   }
 }
 ```
@@ -218,7 +218,7 @@ Enables/disables a message control.
 | Name | Type | M/O | Description |
 | :-------- | :-------- | :-------- | :-------- |
 | params | object | mandatory | *...* |
-| params.type | string | mandatory | Message type (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Tracing*) |
+| params.type | string | mandatory | Message type (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Telemetry, Tracing*) |
 | params.category | string | mandatory | Name of the message category |
 | params.module | string | mandatory | Name of the module the message is originating from |
 | params.enabled | boolean | mandatory | Denotes if control should be enabled (true) or disabled (false) |
@@ -237,7 +237,7 @@ Enables/disables a message control.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "MessageControl.1.enable",
+  "method": "MessageControl.enable",
   "params": {
     "type": "Tracing",
     "category": "Information",
@@ -291,7 +291,7 @@ Provides access to the retrieves a list of current message modules.
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "MessageControl.1.modules"
+  "method": "MessageControl.modules"
 }
 ```
 
@@ -328,7 +328,7 @@ Provides access to the retrieves a list of current message controls for a specif
 | :-------- | :-------- | :-------- | :-------- |
 | (property) | array | mandatory | Retrieves a list of current message controls for a specific module |
 | (property)[#] | object | mandatory | *...* |
-| (property)[#].type | string | mandatory | Type of message (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Tracing*) |
+| (property)[#].type | string | mandatory | Type of message (must be one of the following: *Assert, Invalid, Logging, OperationalStream, Reporting, Telemetry, Tracing*) |
 | (property)[#].category | string | mandatory | Name of the message category |
 | (property)[#].module | string | mandatory | Name of the module the message is originating from |
 | (property)[#].enabled | boolean | mandatory | Denotes if the control is enabled (true) or disabled (false) |
@@ -341,7 +341,7 @@ Provides access to the retrieves a list of current message controls for a specif
 {
   "jsonrpc": "2.0",
   "id": 42,
-  "method": "MessageControl.1.controls@xyz"
+  "method": "MessageControl.controls@xyz"
 }
 ```
 

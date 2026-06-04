@@ -30,7 +30,7 @@ namespace Thunder {
 
 namespace Plugin {
 
-    class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket, public Exchange::IMessageControl {
+    class MessageControl : public PluginHost::JSONRPC, public PluginHost::IPluginExtended, public PluginHost::IWebSocket, public Exchange::IMessagingControl {
     private:
         using Cleanups  = std::vector<uint32_t>;
 
@@ -158,7 +158,7 @@ namespace Plugin {
 
         public:
             //
-            // Exchange::IMessageControl::INotification
+            // Exchange::IMessagingControl::INotification
             // ----------------------------------------------------------
             void Message(const Core::Messaging::MessageInfo& metadata, const Core::Messaging::IEvent& event) override {
                 _parent.Message(metadata, event);
@@ -303,7 +303,7 @@ namespace Plugin {
             INTERFACE_ENTRY(PluginHost::IDispatcher)
             INTERFACE_ENTRY(PluginHost::IPluginExtended)
             INTERFACE_ENTRY(PluginHost::IWebSocket)
-            INTERFACE_ENTRY(Exchange::IMessageControl)
+            INTERFACE_ENTRY(Exchange::IMessagingControl)
         END_INTERFACE_MAP
 
     public:
@@ -417,14 +417,14 @@ namespace Plugin {
             }
         }
 
-        Core::hresult Enable(const messagetype type, const string& category, const string& module, const bool enabled) override
+        Core::hresult Enable(const messagingtype type, const string& category, const string& module, const bool enabled) override
         {
             _client.Enable({static_cast<Core::Messaging::Metadata::type>(type), category, module}, enabled);
 
             return (Core::ERROR_NONE);
         }
 
-        Core::hresult Modules(Exchange::IMessageControl::IStringIterator*& modules) const override
+        Core::hresult Modules(Exchange::IMessagingControl::IStringIterator*& modules) const override
         {
             std::vector<string> list;
 
@@ -436,18 +436,18 @@ namespace Plugin {
             return (Core::ERROR_NONE);
         }
 
-        Core::hresult Controls(const string& module, Exchange::IMessageControl::IControlIterator*& controls) const override
+        Core::hresult Controls(const string& module, Exchange::IMessagingControl::IControlIterator*& controls) const override
         {
-            std::vector<Exchange::IMessageControl::Control> list;
+            std::vector<Exchange::IMessagingControl::Control> list;
             Messaging::MessageUnit::Iterator index;
             _client.Controls(index, module);
 
             while (index.Next() == true) {
-                list.push_back( { static_cast<messagetype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
+                list.push_back( { static_cast<messagingtype>(index.Type()), index.Category(), index.Module(), index.Enabled() } );
             }
 
-            using Implementation = RPC::IteratorType<Exchange::IMessageControl::IControlIterator, std::vector<Exchange::IMessageControl::Control>>;
-            controls = Core::ServiceType<Implementation>::Create<Exchange::IMessageControl::IControlIterator>(std::move(list));
+            using Implementation = RPC::IteratorType<Exchange::IMessagingControl::IControlIterator, std::vector<Exchange::IMessagingControl::Control>>;
+            controls = Core::ServiceType<Implementation>::Create<Exchange::IMessagingControl::IControlIterator>(std::move(list));
 
             return (Core::ERROR_NONE);
         }
