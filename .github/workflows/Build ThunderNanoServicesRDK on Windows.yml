@@ -11,7 +11,6 @@ on:
     branches: ["master"]
 
 env:
-  devEnv: C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.com
   deviceInfo: ThunderNanoServicesRDK\DeviceInfo\DeviceInfo.vcxproj
   locationSync: ThunderNanoServicesRDK\LocationSync\LocationSync.vcxproj
   messageControl: ThunderNanoServicesRDK\MessageControl\MessageControl.vcxproj
@@ -81,15 +80,20 @@ jobs:
 
     - name: Build ThunderNanoServicesRDK
       shell: cmd
-      run: >
+      run: |
+        for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.CoreEditor -property productPath`) do set "VS_PATH=%%i"
+        if not defined VS_PATH (echo ERROR: Visual Studio not found && exit /b 1)
+        
+        set "devEnv=%VS_PATH:.exe=.com%"
         cd ThunderOnWindows
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%deviceInfo%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%locationSync%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messageControl%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%messenger%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%monitor%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%openCDMi%"  "%solution%"
-        && "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project "%securityAgent%"  "%solution%"
+        
+        for %%P in (
+          "%deviceInfo%" "%locationSync%" "%messageControl%"
+          "%messenger%" "%monitor%" "%openCDMi%" "%securityAgent%"
+        ) do (
+          "%devEnv%" /Build "${{matrix.type}}|x${{matrix.version}}" /Project %%P "%solution%"
+          if errorlevel 1 exit /b 1
+        )
 
     - name: Tar files
       run: tar -czvf ${{matrix.type}}${{matrix.version}}.tar.gz artifacts
