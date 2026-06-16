@@ -640,6 +640,34 @@ namespace Plugin {
                         source->Release();
                     }
                 }
+                void Register(IPlugin::INotificationExtended* sink, const Core::OptionalType<string>& callsign) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Register(sink, callsign);
+                        source->Release();
+                    }
+                }
+                void Unregister(IPlugin::INotificationExtended* sink, const Core::OptionalType<string>& callsign) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Unregister(sink, callsign);
+                        source->Release();
+                    }
+                }
+                void Register(IPlugin::INotificationExtended* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Register(sink, interface_id);
+                        source->Release();
+                    }
+                }
+                void Unregister(IPlugin::INotificationExtended* sink, const uint32_t interface_id) override {
+                    PluginHost::IShell* source = Source();
+                    if (source != nullptr) {
+                        source->Unregister(sink, interface_id);
+                        source->Release();
+                    }
+                }
                 IShell::state State() const override {
                     Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
                     return (_shell == nullptr ? IShell::state::DESTROYED : static_cast< IShell::state>(_state));
@@ -1241,4 +1269,3 @@ namespace Plugin {
 
 } // namespace Plugin
 } // namespace Thunder
-
