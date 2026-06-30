@@ -82,12 +82,6 @@ namespace Thunder {
         , _assertFactory()
         , _telemetryFactory()
     {
-        // In DirectOutput mode (-f) no data buffer is created, so there is nothing
-        // for the worker to drain. Only create the worker thread when a data buffer exists
-        if (Messaging::MessageUnit::Instance().DataSize() != 0) {
-            _worker = new WorkerThread(*this);
-        }
-
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);
@@ -150,8 +144,14 @@ namespace Thunder {
 
         _service->Register(&_observer);
         
-        if (Callback(&_observer) != Core::ERROR_NONE) {
-            message = _T("MessageControl plugin could not be _configured.");
+        // In DirectOutput mode (-f) no data buffer is created, so there is nothing
+        // for the worker to drain. Only create the worker thread when a data buffer exists.
+        if (Messaging::MessageUnit::Instance().DataSize() != 0) {
+            _worker = new WorkerThread(*this);
+
+            if (Callback(&_observer) != Core::ERROR_NONE) {
+                message = _T("MessageControl plugin could not be _configured.");
+            }
         }
 
         return (message);
@@ -164,7 +164,11 @@ namespace Thunder {
 
             Exchange::JMessagingControl::Unregister(*this);
 
-            Callback(nullptr);
+            if (_worker != nullptr) {
+                Callback(nullptr);
+                delete _worker;
+                _worker = nullptr;
+            }
 
             _service->Unregister(&_observer);
 
