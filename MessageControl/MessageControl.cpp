@@ -74,7 +74,7 @@ namespace Thunder {
         , _dispatcherIdentifier(Messaging::MessageUnit::Instance().Identifier())
         , _dispatcherBasePath(Messaging::MessageUnit::Instance().BasePath())
         , _client(_dispatcherIdentifier, _dispatcherBasePath, Messaging::MessageUnit::Instance().SocketPort())
-        , _worker(*this)
+        , _worker(nullptr)
         , _tracingFactory()
         , _loggingFactory()
         , _warningReportingFactory()
@@ -82,6 +82,12 @@ namespace Thunder {
         , _assertFactory()
         , _telemetryFactory()
     {
+        // In DirectOutput mode (-f) no data buffer is created, so there is nothing
+        // for the worker to drain. Only create the worker thread when a data buffer exists
+        if (Messaging::MessageUnit::Instance().DataSize() != 0) {
+            _worker = new WorkerThread(*this);
+        }
+
         _client.AddInstance(0);
         _client.AddFactory(Core::Messaging::Metadata::type::TRACING, &_tracingFactory);
         _client.AddFactory(Core::Messaging::Metadata::type::LOGGING, &_loggingFactory);

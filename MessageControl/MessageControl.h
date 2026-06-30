@@ -293,8 +293,11 @@ namespace Plugin {
 
         ~MessageControl() override
         {
-            _worker.Stop();
-            _worker.Wait(Core::Thread::STOPPED, Core::infinite);
+            if (_worker != nullptr) {
+                _worker->Stop();
+                _worker->Wait(Core::Thread::STOPPED, Core::infinite);
+                delete _worker;
+            }
             _client.ClearInstances();
         }
 
@@ -348,25 +351,27 @@ namespace Plugin {
     public:
         uint32_t Callback(Plugin::MessageControl::ICollect::ICallback* callback)
         {
-            _adminLock.Lock();
-
-            ASSERT((_callback != nullptr) ^ (callback != nullptr));
-
-            if (_callback != nullptr) {
-                _worker.Block();
-                _client.SkipWaiting();
-                _adminLock.Unlock();
-                _worker.Wait(Core::Thread::BLOCKED, Core::infinite);
+            if (_worker != nullptr) {
                 _adminLock.Lock();
+
+                ASSERT((_callback != nullptr) ^ (callback != nullptr));
+
+                if (_callback != nullptr) {
+                    _worker->Block();
+                    _client.SkipWaiting();
+                    _adminLock.Unlock();
+                    _worker->Wait(Core::Thread::BLOCKED, Core::infinite);
+                    _adminLock.Lock();
+                }
+
+                _callback = callback;
+
+                if (_callback != nullptr) {
+                    _worker->Run();
+                }
+
+                _adminLock.Unlock();
             }
-
-            _callback = callback;
-
-            if (_callback != nullptr) {
-                _worker.Run();
-            }
-
-            _adminLock.Unlock();
 
             return (Core::ERROR_NONE);
         }
@@ -476,7 +481,7 @@ namespace Plugin {
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
-        WorkerThread _worker;
+        WorkerThread* _worker;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Core::Messaging::TextMessage> _tracingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Core::Messaging::TextMessage> _loggingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
