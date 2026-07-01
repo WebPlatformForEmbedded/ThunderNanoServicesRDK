@@ -293,8 +293,6 @@ namespace Plugin {
 
         ~MessageControl() override
         {
-            _worker.Stop();
-            _worker.Wait(Core::Thread::STOPPED, Core::infinite);
             _client.ClearInstances();
         }
 
@@ -348,22 +346,24 @@ namespace Plugin {
     public:
         uint32_t Callback(Plugin::MessageControl::ICollect::ICallback* callback)
         {
+            ASSERT(_worker != nullptr);
+
             _adminLock.Lock();
 
             ASSERT((_callback != nullptr) ^ (callback != nullptr));
 
             if (_callback != nullptr) {
-                _worker.Block();
+                _worker->Block();
                 _client.SkipWaiting();
                 _adminLock.Unlock();
-                _worker.Wait(Core::Thread::BLOCKED, Core::infinite);
+                _worker->Wait(Core::Thread::BLOCKED, Core::infinite);
                 _adminLock.Lock();
             }
 
             _callback = callback;
 
             if (_callback != nullptr) {
-                _worker.Run();
+                _worker->Run();
             }
 
             _adminLock.Unlock();
@@ -476,7 +476,7 @@ namespace Plugin {
         const string _dispatcherIdentifier;
         const string _dispatcherBasePath;
         Messaging::MessageClient _client;
-        WorkerThread _worker;
+        WorkerThread* _worker;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Tracing, Core::Messaging::TextMessage> _tracingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::Logging, Core::Messaging::TextMessage> _loggingFactory;
         Messaging::TraceFactoryType<Core::Messaging::IStore::WarningReporting, Core::Messaging::TextMessage> _warningReportingFactory;
