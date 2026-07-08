@@ -76,7 +76,7 @@ jobs:
 
 # ----- Checkout & Options regex -----
     - name: Checkout ThunderNanoServicesRDK
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: ThunderNanoServicesRDK
         repository: WebPlatformForEmbedded/ThunderNanoServicesRDK
@@ -91,7 +91,7 @@ jobs:
         search_string: ${{github.event.pull_request.body}}
 
     - name: Checkout libopkg
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: opkg
         repository: oe-mirrors/opkg
