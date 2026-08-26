@@ -103,6 +103,7 @@ namespace Plugin {
                 , SysLog(false)
                 , FileName()
                 , Abbreviated(true)
+                , Time(true)
                 , MaxExportConnections(Publishers::WebSocketOutput::DefaultMaxConnections)
                 , Remote()
                 , TelemetryConfig()
@@ -111,6 +112,7 @@ namespace Plugin {
                 Add(_T("syslog"), &SysLog);
                 Add(_T("filepath"), &FileName);
                 Add(_T("abbreviated"), &Abbreviated);
+                Add(_T("time"), &Time);
                 Add(_T("maxexportconnections"), &MaxExportConnections);
                 Add(_T("remote"), &Remote);
                 Add(_T("telemetryconfig"), &TelemetryConfig);
@@ -124,6 +126,7 @@ namespace Plugin {
             Core::JSON::Boolean SysLog;
             Core::JSON::String FileName;
             Core::JSON::Boolean Abbreviated;
+            Core::JSON::Boolean Time;
             Core::JSON::DecUInt16 MaxExportConnections;
             NetworkNode Remote;
             Core::JSON::String TelemetryConfig;

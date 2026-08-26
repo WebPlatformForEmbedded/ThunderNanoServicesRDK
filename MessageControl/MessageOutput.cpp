@@ -28,7 +28,7 @@ namespace Publishers {
         ASSERT(metadata.Type() != Core::Messaging::Metadata::type::INVALID);
 
         const string& text = event.Data();
-        string output = metadata.ToString(_abbreviated);
+        string output = metadata.ToString(_abbreviated, _time);
 
         output.reserve(output.size() + text.size() + 1);
 
@@ -185,8 +185,8 @@ namespace Publishers {
         Trigger();
     }
 
-    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface)
-        : _convertor(abbreviate)
+    UDPOutput::UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface, const bool time)
+        : _convertor(abbreviate, time)
         , _output(nodeId)
         , _notification(*this)
         , _subSystem(service->SubSystems())

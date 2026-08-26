@@ -113,17 +113,17 @@ namespace Thunder {
         _service->AddRef();
 
         if ((service->Background() == false) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.Console.Value() == true))) {
-            Announce(new Publishers::ConsoleOutput(abbreviate));
+            Announce(new Publishers::ConsoleOutput(abbreviate, _config.Time.Value()));
         }
         if ((service->Background() == true) && (((_config.SysLog.IsSet() == false) && (_config.Console.IsSet() == false)) || (_config.SysLog.Value() == true))) {
-            Announce(new Publishers::SyslogOutput(abbreviate));
+            Announce(new Publishers::SyslogOutput(abbreviate, _config.Time.Value()));
         }
         if (_config.FileName.Value().empty() == false) {
             _config.FileName = service->VolatilePath() + _config.FileName.Value();
-            Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value()));
+            Announce(new Publishers::FileOutput(abbreviate, _config.FileName.Value(), _config.Time.Value()));
         }
         if ((_config.Remote.IsSet() == true) && (_config.Remote.Binding.Value().empty() == false) && (_config.Remote.Port.Value() != 0)  && (_config.Remote.Interface.Value().empty() == false)) {
-            Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service, _config.Remote.Interface.Value()));
+            Announce(new Publishers::UDPOutput(abbreviate, Core::NodeId(_config.Remote.NodeId()), _service, _config.Remote.Interface.Value(), _config.Time.Value()));
         }
 
 #if defined(HAS_TELEMETRY_BACKEND)

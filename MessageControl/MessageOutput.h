@@ -40,8 +40,9 @@ namespace Publishers {
         Text(const Text&) = delete;
         Text& operator=(const Text&) = delete;
 
-        explicit Text(const Core::Messaging::MessageInfo::abbreviate abbreviated)
+        explicit Text(const Core::Messaging::MessageInfo::abbreviate abbreviated, const bool time = true)
             : _abbreviated(abbreviated)
+            , _time(time)
         {
         }
         ~Text() = default;
@@ -51,6 +52,7 @@ namespace Publishers {
 
     private:
         Core::Messaging::MessageInfo::abbreviate _abbreviated;
+        bool _time;
     };
 
     class ConsoleOutput : public IPublish {
@@ -59,8 +61,8 @@ namespace Publishers {
         ConsoleOutput(const ConsoleOutput&) = delete;
         ConsoleOutput& operator=(const ConsoleOutput&) = delete;
 
-        explicit ConsoleOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
-            : _convertor(abbreviate)
+        explicit ConsoleOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const bool time = true)
+            : _convertor(abbreviate, time)
         {
         }
         ~ConsoleOutput() override = default;
@@ -78,8 +80,8 @@ namespace Publishers {
         SyslogOutput(const SyslogOutput&) = delete;
         SyslogOutput& operator=(const SyslogOutput&) = delete;
 
-        explicit SyslogOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate)
-            : _convertor(abbreviate)
+        explicit SyslogOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const bool time = true)
+            : _convertor(abbreviate, time)
         {
         }
         ~SyslogOutput() override = default;
@@ -97,8 +99,8 @@ namespace Publishers {
         FileOutput(const FileOutput&) = delete;
         FileOutput& operator=(const FileOutput&) = delete;
 
-        explicit FileOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const string& filepath)
-            : _convertor(abbreviate)
+        explicit FileOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const string& filepath, const bool time = true)
+            : _convertor(abbreviate, time)
             , _file(filepath)
         {
             _file.Create();
@@ -402,7 +404,7 @@ namespace Publishers {
         UDPOutput(const UDPOutput&) = delete;
         UDPOutput& operator=(const UDPOutput&) = delete;
 
-        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface);
+        explicit UDPOutput(const Core::Messaging::MessageInfo::abbreviate abbreviate, const Core::NodeId& nodeId, PluginHost::IShell* service, const string& interface, const bool time = true);
 
         ~UDPOutput() override
         {
