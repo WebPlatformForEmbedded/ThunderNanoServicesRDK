@@ -27,6 +27,10 @@
           "type": "boolean",
           "description": "Denotes if the messages should be abbreviated"
         },
+        "time": {
+          "type": "boolean",
+          "description": "Denotes if message timestamps should be included"
+        },
         "maxexportconnections": {
           "type": "number",
           "description": "Specifies to how many websockets can the messages be outputted"

@@ -80,6 +80,7 @@ The table below lists configuration options of the plugin.
 | syslog | boolean | optional | Enables message ouutput to syslog |
 | filepath | string | optional | Path to file (inside VolatilePath) where messages will be stored |
 | abbreviated | boolean | optional | Denotes if the messages should be abbreviated |
+| time | boolean | optional | Denotes if message timestamps should be included |
 | maxexportconnections | integer | optional | Specifies to how many websockets can the messages be outputted |
 | remote | object | optional | *...* |
 | remote.port | integer | mandatory | Port |
