@@ -17,7 +17,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-set(TARGET ${NAMESPACE}MessagingRDKLogger)
+set(TARGET ${NAMESPACE}MessagingExternalOutput)
 
 add_library(${TARGET} SHARED)
 
@@ -40,7 +40,7 @@ if(HUMAN_VERSIONED_BINARIES)
     set_target_properties(${TARGET} PROPERTIES VERSION ${VERSION})
 endif()
 
-if(MESSAGING_RDKLOGGER_USE_MOCK)
+if(MESSAGING_EXTERNAL_OUTPUT_USE_MOCK)
     target_sources(${TARGET} PRIVATE RDKLoggerOutputMock.cpp)
 else()
     find_path(RDKLOGGER_INCLUDE_DIR rdk_logger.h)

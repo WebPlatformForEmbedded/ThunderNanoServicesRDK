@@ -18,7 +18,7 @@
  */
 
 #include <messaging/ExternalOutput.h>
-#include "RDKLoggerOutputMock.h"
+#include "ExternalOutputMock.h"
 
 #include <messaging/Module.h>
 #include <core/Singleton.h>
