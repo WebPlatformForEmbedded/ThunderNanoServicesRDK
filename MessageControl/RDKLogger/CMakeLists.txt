@@ -21,6 +21,8 @@ set(TARGET ${NAMESPACE}MessagingExternalOutput)
 
 add_library(${TARGET} SHARED)
 
+target_compile_definitions(${TARGET} PRIVATE EXTERNAL_OUTPUT_EXPORTS)
+
 target_include_directories(${TARGET}
     PUBLIC
         $<BUILD_INTERFACE:${THUNDER_MESSAGING_SOURCE_DIR}>
