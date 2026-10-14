@@ -43,7 +43,7 @@ if(HUMAN_VERSIONED_BINARIES)
 endif()
 
 if(MESSAGING_EXTERNAL_OUTPUT_USE_MOCK)
-    target_sources(${TARGET} PRIVATE RDKLoggerOutputMock.cpp)
+    target_sources(${TARGET} PRIVATE mock/RDKLoggerOutputMock.cpp)
 else()
     find_path(RDKLOGGER_INCLUDE_DIR rdk_logger.h)
     find_library(RDKLOGGER_LIBRARY NAMES rdkloggers)
