@@ -18,7 +18,6 @@
  */
 
 #include <messaging/ExternalOutput.h>
-#include <core/Singleton.h>
 
 #include "rdk_logger.h"
 
@@ -80,13 +79,10 @@ namespace {
         return (std::string("LOG.RDK.THUNDER.") + module);
     }
 
-    struct BackendState {
-        std::map<std::string, bool> controls;
-    };
-
     std::map<std::string, bool>& Controls()
     {
-        return (Thunder::Core::SingletonType<BackendState>::InstanceWithoutWarning().controls);
+        static std::map<std::string, bool> controls;
+        return (controls);
     }
 }
 
