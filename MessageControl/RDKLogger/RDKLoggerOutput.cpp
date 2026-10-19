@@ -24,8 +24,12 @@
 #include <cstring>
 #include <map>
 #include <string>
+#include <utility>
 
 namespace {
+    using ControlKey = std::pair<std::string, rdk_LogLevel>;
+    using ControlMap = std::map<ControlKey, bool>;
+
     rdk_LogLevel RDKLevel(const ThunderMessageType type, const char* category)
     {
         rdk_LogLevel level = RDK_LOG_INFO;
@@ -79,9 +83,9 @@ namespace {
         return (std::string("LOG.RDK.THUNDER.") + module);
     }
 
-    std::map<std::string, bool>& Controls()
+    ControlMap& Controls()
     {
-        static std::map<std::string, bool> controls;
+        static ControlMap controls;
         return (controls);
     }
 }
@@ -97,7 +101,7 @@ extern "C" {
     {
         const std::string moduleName = Module(module);
         const rdk_LogLevel level = RDKLevel(type, category);
-        const std::string key = moduleName + '#' + std::to_string(static_cast<unsigned>(level));
+        const ControlKey key { moduleName, level };
         const auto entry = Controls().find(key);
         bool enabled = false;
 
