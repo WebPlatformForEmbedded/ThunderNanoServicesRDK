@@ -121,9 +121,8 @@ extern "C" {
         const std::string moduleName = Module(module);
         const rdk_LogLevel level = RDKLevel(type, category);
 
-        if (((((type == THUNDER_EXTERNAL_MESSAGE_LOGGING) && (level == RDK_LOG_INFO)) ||
-              ((type == THUNDER_EXTERNAL_MESSAGE_TRACING) && (level == RDK_LOG_TRACE))) &&
-             (category[0] != '\0'))) {
+        if (((type == THUNDER_EXTERNAL_MESSAGE_LOGGING) && (level == RDK_LOG_INFO)) ||
+            ((type == THUNDER_EXTERNAL_MESSAGE_TRACING) && (level == RDK_LOG_TRACE))) {
             RDK_LOG(level, moduleName.c_str(), "%s: %s", category, payload);
         }
         else {
