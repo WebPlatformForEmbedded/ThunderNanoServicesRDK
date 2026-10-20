@@ -35,18 +35,6 @@ namespace {
         rdk_LogLevel level = RDK_LOG_INFO;
 
         switch (type) {
-        case THUNDER_EXTERNAL_MESSAGE_ASSERT:
-            level = RDK_LOG_FATAL;
-            break;
-        case THUNDER_EXTERNAL_MESSAGE_REPORTING:
-            level = RDK_LOG_WARN;
-            break;
-        case THUNDER_EXTERNAL_MESSAGE_OPERATIONAL_STREAM:
-            level = RDK_LOG_TRACE;
-            break;
-        case THUNDER_EXTERNAL_MESSAGE_TELEMETRY:
-            level = RDK_LOG_NOTICE;
-            break;
         case THUNDER_EXTERNAL_MESSAGE_TRACING:
             if ((strcmp(category, "Fatal") == 0) || (strcmp(category, "Crash") == 0)) {
                 level = RDK_LOG_FATAL;
@@ -70,6 +58,18 @@ namespace {
             } else if (strcmp(category, "Notice") == 0) {
                 level = RDK_LOG_NOTICE;
             }
+            break;
+        case THUNDER_EXTERNAL_MESSAGE_OPERATIONAL_STREAM:
+            level = RDK_LOG_TRACE;
+            break;
+        case THUNDER_EXTERNAL_MESSAGE_TELEMETRY:
+            level = RDK_LOG_NOTICE;
+            break;
+        case THUNDER_EXTERNAL_MESSAGE_REPORTING:
+            level = RDK_LOG_WARN;
+            break;
+        case THUNDER_EXTERNAL_MESSAGE_ASSERT:
+            level = RDK_LOG_FATAL;
             break;
         default:
             break;
