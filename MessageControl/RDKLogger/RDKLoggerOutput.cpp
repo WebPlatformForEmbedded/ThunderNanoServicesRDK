@@ -94,7 +94,8 @@ extern "C" {
     bool ThunderExternalOutput_Initialize(void)
     {
         Controls().clear();
-        return (RDKLOGGER_INIT() == RDK_SUCCESS);
+        const rdk_Error result = RDK_LOGGER_INIT();
+        return (result == RDK_SUCCESS);
     }
 
     bool ThunderExternalOutput_IsEnabled(const char* module, const ThunderMessageType type, const char* category)

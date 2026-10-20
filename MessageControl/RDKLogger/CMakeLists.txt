@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.15)
 
 set(TARGET ${NAMESPACE}MessagingExternalOutput)
 
-add_library(${TARGET} SHARED)
+add_library(${TARGET} SHARED RDKLoggerOutput.cpp)
 
 target_compile_definitions(${TARGET} PRIVATE EXTERNAL_OUTPUT_EXPORTS)
 
@@ -43,16 +43,16 @@ if(HUMAN_VERSIONED_BINARIES)
 endif()
 
 if(MESSAGING_EXTERNAL_OUTPUT_USE_MOCK)
-    target_sources(${TARGET} PRIVATE mock/RDKLoggerOutputMock.cpp)
+    add_subdirectory(mock)
+    target_link_libraries(${TARGET} PRIVATE ${NAMESPACE}RDKLoggerMock)
 else()
     find_path(RDKLOGGER_INCLUDE_DIR rdk_logger.h)
     find_library(RDKLOGGER_LIBRARY NAMES rdkloggers)
 
     if(NOT RDKLOGGER_INCLUDE_DIR OR NOT RDKLOGGER_LIBRARY)
-        message(FATAL_ERROR "RDKLogger support requires rdk_logger.h and librdkloggers; set MESSAGING_RDKLOGGER_USE_MOCK=ON for SDK-independent builds")
+        message(FATAL_ERROR "RDKLogger support requires rdk_logger.h and librdkloggers; set MESSAGING_EXTERNAL_OUTPUT_USE_MOCK=ON for SDK-independent builds")
     endif()
 
-    target_sources(${TARGET} PRIVATE RDKLoggerOutput.cpp)
     target_include_directories(${TARGET} PRIVATE ${RDKLOGGER_INCLUDE_DIR})
     target_link_libraries(${TARGET} PRIVATE ${RDKLOGGER_LIBRARY})
 endif()
