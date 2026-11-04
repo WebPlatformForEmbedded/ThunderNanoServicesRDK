@@ -5,6 +5,12 @@ permissions:
 
 on:
   workflow_call:
+    inputs:
+      source-repository:
+        description: Repository containing the ThunderNanoServicesRDK source
+        required: false
+        type: string
+        default: WebPlatformForEmbedded/ThunderNanoServicesRDK
 
 jobs:
   ThunderNanoServicesRDK:
@@ -43,11 +49,31 @@ jobs:
         rm ${{matrix.build_type}}/${{matrix.build_type}}${{matrix.architecture == '32' && '_x86' || ''}}.tar.gz
 
 # ----- Checkout & Options regex -----
+    - name: Resolve release dependency branch
+      id: release
+      shell: bash
+      env:
+        BUILD_BRANCH: ${{ github.base_ref || github.ref_name }}
+        REF_TYPE: ${{ github.ref_type }}
+      run: |
+        release_ref=
+        if [[ "$REF_TYPE" == 'branch' && "$BUILD_BRANCH" == R* ]]; then
+          release_ref="refs/heads/$BUILD_BRANCH"
+        fi
+        echo "ref=$release_ref" >> "$GITHUB_OUTPUT"
+        echo "Dependency branch: ${release_ref:-repository default}"
+
     - name: Checkout ThunderNanoServicesRDK
       uses: actions/checkout@v5
       with:
         path: ThunderNanoServicesRDK
-        repository: WebPlatformForEmbedded/ThunderNanoServicesRDK
+        repository: ${{ inputs.source-repository }}
+        ref: ${{ github.repository != inputs.source-repository && steps.release.outputs.ref || '' }}
+
+    - name: Log source revisions
+      shell: bash
+      run: |
+        git -C ThunderNanoServicesRDK log -1 --format='ThunderNanoServicesRDK: %H'
 
     - name: Regex ThunderNanoServicesRDK
       if: contains(github.event.pull_request.body, '[Options:')
